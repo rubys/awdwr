@@ -2197,7 +2197,7 @@ end
 $x.target![/<style.*?>()/,1] = "\n#{$style.target!.strip.gsub(/^/,' '*6)}\n"
 $x.target!.sub! /<ul(.*?)\/>/,
   "<ul\\1>\n#{$toc.target!.gsub(/^/,' '*6)}    </ul>"
-open("#{$WORK}/makedepot.html",'w') do |file| 
+open("#{$BASE}/makedepot.html",'w') do |file| 
   file.write <<-EOF.unindent(4)
     <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
