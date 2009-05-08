@@ -1,0 +1,16 @@
+<div class="comment">
+  <p>
+    <strong>Comment last updated: <%= comment.updated_at %></strong>
+    <%= link_to "Edit", edit_article_comment_url(:id => comment,
+                                      :article_id => comment.article) %>
+
+    <%= link_to "Delete", article_comment_url(:id => comment,
+                                      :article_id => comment.article), 
+                                      :method => :delete %>
+  </p>
+  <blockquote>
+    <%=h comment.comment %>
+  </blockquote>
+
+
+</div>                                    

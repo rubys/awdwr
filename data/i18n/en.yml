@@ -1,0 +1,64 @@
+#START:layout
+#START:main
+#START:cart
+#START:currency
+#START:checkout
+#START:flash
+en:
+#END:cart
+
+#END:checkout
+#END:flash
+#END:main
+#END:layout
+  number:
+    currency:
+      format:
+        unit: "$"
+        precision: 2
+        separator: "."
+        delimiter: ","
+        format: "%u%n"
+#END:currency
+
+#START:layout
+#START:cart
+  layout:
+#END:cart
+    title:       "Pragmatic Bookshelf"
+    side:
+      home:      "Home"
+      questions: "Questions"
+      news:      "News"
+      contact:   "Contact"
+#END:layout
+#START:cart
+    cart:
+      title:      "Your Cart"
+      button:
+        empty:    "Empty cart"
+        checkout: "Checkout"
+#END:cart
+
+#START:main
+  main:
+    title:       "Your Pragmatic Catalog"
+    button:
+      add:       "Add to Cart"
+#END:main
+
+#START:checkout
+  checkout:
+    legend:      "Please Enter your Details"
+    name:        "Name"
+    address:     "Address"
+    email:       "E-mail"
+    pay_type:    "Pay with"
+    pay_prompt:  "Select a payment method"
+    submit:      "Place Order"
+#END:checkout
+
+#START:flash
+  flash:
+    thanks:      "Thank you for your order"
+#END:flash

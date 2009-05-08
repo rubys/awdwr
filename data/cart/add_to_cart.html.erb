@@ -1,0 +1,6 @@
+<h2>Your Pragmatic Cart</h2>
+<ul>
+  <% for item in @cart.items %>
+    <li><%=h item.title %></li>
+  <% end %>
+</ul>

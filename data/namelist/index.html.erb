@@ -1,0 +1,18 @@
+<table border="1">
+  <tr>
+    <th>Name</th><th>bytes</th><th>chars</th><th>reversed</th>
+  </tr>
+  <% for person in @people %>
+    <tr>  
+      <td><%=h person.name %></td>
+      <td><%= person.name.length %></td>
+      <td><%= person.name.chars.length %></td>
+      <td><%=h person.name.chars.reverse %></td>
+    </tr>
+  <% end %>
+</table>
+
+<% form_for :person do |form| %>
+  New name: <%= form.text_field :name %>
+  <%= submit_tag "Add" %>
+<% end %>

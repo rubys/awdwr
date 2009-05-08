@@ -1,0 +1,11 @@
+dave:
+  name: Dave Thomas
+  status: admin
+
+mike:
+  name: Mike Clark
+  status: admin
+
+fred:
+  name: Fred Smith
+  status: audit

@@ -1,0 +1,13 @@
+<% form_for [@article, @comment] do |form| %>
+<fieldset>
+  <legend>Add a Comment</legend>
+	
+  <%= render :partial => 'form', :object => form %>
+
+  <p>
+    <%= submit_tag "Create" %>
+  </p>
+</fieldset>
+<% end %>
+
+
