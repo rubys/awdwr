@@ -1,17 +1,24 @@
 Running this should only require Rails 2.2.2 or later, and the command line
-interfaces for sqlite3 and curl.
+interfaces for sqlite3 and curl.  Tested on Ubuntu Linux 9.04 ("Jaunty
+Jackalope") and Mac OSX 10.5.6 ("Leopard").
 
-Installation of dependencies from a fresh install of Ubuntu 9.04:
+Installation of all necessary dependencies from a fresh install of Ubuntu 9.04:
 
   sudo apt-get install rails git-core sqlite3 curl
   sudo gem install rubygems-update
   sudo /var/lib/gems/1.8/bin/update_rubygems
   sudo gem install rails
-  mkdir git
 
 Execution instructions:
 
   ruby makedepot.rb
   ruby checkdepot.rb
+
+Note: makedepot.rb accepts an optional argument specifying the version of
+Rails desired.  Examples:
+
+  ruby makedepot.rb edge
+  ruby makedepot.rb 2.2.2
+  ruby makedepot.rb ~/git
 
 Output will be produced as makedepot.html.

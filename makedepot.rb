@@ -336,23 +336,12 @@ def depot
         end
       #END:cart
     EOF
-    # if $RC and not !ARGV.include? 'git'
-    #   data[/()^class/,1] = <<-EOF.unindent(8)
-    #     require 'app/models/cart.rb'
-    #     require 'app/models/cart_item.rb'
-    #   EOF
-    # end
   end
 
   head '8.2 Iteration C1: Creating a Cart'
   edit 'app/models/cart.rb' do |data|
     data[/()/,1] = read('cart/cart.rb')
   end
-  # if $RC and not !ARGV.include? 'git'
-  #   edit 'app/models/cart_item.rb' do |data|
-  #     data[/()/,1] = read('cart/cart_item.rb')
-  #   end
-  # end
   edit 'app/views/store/index.html.erb', 'add_to_cart' do |data|
     data[/button_to "Add to Cart"()/,1] = 
       ", :action => 'add_to_cart', :id => product"
@@ -2019,15 +2008,37 @@ def snapshot_name name, app
   end
 end
 
-$rails = 'rails'
-$rails = "rails _#{ARGV.first}_" if ARGV.first =~ /^\d[.\d]+\d$/
+# select a version of Rails
+if ARGV.first =~ /^\d[.\d]+\d$/
+  $rails = "rails _#{ARGV.first}_"
+elsif File.directory?(ARGV.first.to_s)
+  $rails = ARGV.first
+  $rails = File.join($rails,'rails') if
+    File.directory?(File.join($rails,'rails'))
+else
+  $rails = 'rails'
+end
+
+def which_rails rails
+  railties = File.join(rails, 'railties', 'bin', 'rails')
+  rails = railties if File.exists?(railties)
+  if File.exists?(rails)
+    firstline = open(rails) {|file| file.readlines.first}
+    rails = "ruby " + rails unless firstline =~ /^#!/
+  end
+  rails
+end
 
 def rails name, app=nil
   Dir.chdir($WORK)
   FileUtils.rm_rf name
   log :rails, name
-  $x.pre "#{$rails} #{name}", :class=>'stdin'
-  popen3 "#{$rails} #{name}"
+
+  # determine how to invoke rails
+  rails = which_rails $rails
+
+  $x.pre "#{rails} #{name}", :class=>'stdin'
+  popen3 "#{rails} #{name}"
 
   # make paths seem Mac OSX'ish
   Dir["#{name}/public/dispatch.*"].each do |dispatch|
@@ -2049,12 +2060,15 @@ def rails name, app=nil
   FileUtils.rm_rf 'public/.htaccess'
 
   cmd 'rake rails:freeze:edge' if ARGV.include? 'edge'
-  cmd 'ln -s ~/git/rails vendor/rails' if ARGV.include? 'git'
+
+  if $rails != 'rails' and File.directory?($rails)
+    cmd "ln -s #{$rails} vendor/rails"
+  end
 end
 
 def publish_code_snapshot name, app=:depot
   return if $rails != 'rails'
-  return if $RC or ARGV.include? 'edge' or ARGV.include? 'git'
+  return if $RC or ARGV.include? 'edge'
   return if Dir['../../code/depot_*'].empty?
   dest = snapshot_name name, app
   FileUtils.cp 'db/development.sqlite3', "db/#{dest}.sqlite3" if app==:depot
@@ -2141,8 +2155,8 @@ $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
     $x.ul :class => 'toc'
 
     $x.h2 'Development Log'
-    cmd 'rails -v'
-    $RC = (`rails -v` =~ /2\.3/)
+    cmd which_rails($rails) + ' -v'
+    $RC = (`#{which_rails($rails)} -v` =~ /2\.3/)
     $APP = $RC ? 'application_controller' : 'application'
 
     cmd 'ruby -v'

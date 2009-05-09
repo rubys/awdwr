@@ -31,8 +31,10 @@ class DepotTest < ActiveSupport::TestCase
     end
 
     # report version
-    @@version = output.match(/rails -v<\/pre>\s+.*?>(.*)<\/pre>/).captures.first
+    output =~ /rails .*?-v<\/pre>\s+.*?>(.*)<\/pre>/
+    @@version = $1
     @@version += ' (git)' if output =~ /ln -s.*vendor.rails/
+    @@version += ' (edge)' if output =~ /rails:freeze:edge/
     STDERR.puts @@version
   end
 
