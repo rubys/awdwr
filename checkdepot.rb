@@ -191,6 +191,17 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', /, "title": "Pragmatic Version Control"/
   end
 
+  test "13 Internationalization" do
+    section 'i'
+    assert_select '#notice', 'es translation not available'
+    assert_select 'option[value=es]'
+    assert_select '.price', '28,50&nbsp;$US'
+    assert_select 'h1', 'Su Cat&aacute;logo de Pragmatic'
+    assert_select 'input[type=submit][value=A&ntilde;adir al Carrito]'
+    assert_select 'h2', '5 errores han impedido que este pedido se guarde'
+    assert_select '#notice', 'Gracias por su pedido'
+  end
+
   test "14.2 Unit Testing of Models" do
     section '14.2'
     assert_select '.stdout', /SQLite3::SQLException: no such table: users/
@@ -222,30 +233,6 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', 'Current version: 20080601000007'
   end
 
-  test "13 Task I: Internationalization" do
-    section 'i'
-    assert_select '#notice', 'es translation not available'
-    assert_select 'option[value=es]'
-    assert_select '.price', '28,50&nbsp;$US'
-    assert_select 'h1', 'Su Cat&aacute;logo de Pragmatic'
-    assert_select 'input[type=submit][value=A&ntilde;adir al Carrito]'
-    assert_select 'h2', '5 errores han impedido que este pedido se guarde'
-    assert_select '#notice', 'Gracias por su pedido'
-  end
-
-  test "26 Active Resources" do
-    section '26'
-    assert_select '.stdout', /Failed with 302/
-    assert_select '.stdout', '29.95'
-    assert_select '.stdout', '=&gt; true'
-    assert_select '.price', '$24.95'
-    assert_select '.stdout', '=&gt; "Dave Thomas"'
-    assert_select '.stdout', /NoMethodError: undefined method `line_items'/
-    assert_select '.stdout', /&lt;id type="integer"&gt;1&lt;\/id&gt;/
-    assert_select '.stdout', /"product_id"=&gt;3/
-    assert_select '.stdout', /=&gt; 22.8/
-  end
-
   test "17 Migration" do
     section '17'
     assert_select '.stderr', /near "auto_increment": syntax error/
@@ -275,5 +262,18 @@ class DepotTest < ActiveSupport::TestCase
       search = "==  #{name}: migrated"
       assert !stdout.grep(Regexp.new(search)).empty?, search
     end
+  end
+
+  test "26 Active Resources" do
+    section '26'
+    assert_select '.stdout', /Failed with 302/
+    assert_select '.stdout', '29.95'
+    assert_select '.stdout', '=&gt; true'
+    assert_select '.price', '$24.95'
+    assert_select '.stdout', '=&gt; "Dave Thomas"'
+    assert_select '.stdout', /NoMethodError: undefined method `line_items'/
+    assert_select '.stdout', /&lt;id type="integer"&gt;1&lt;\/id&gt;/
+    assert_select '.stdout', /"product_id"=&gt;3/
+    assert_select '.stdout', /=&gt; 22.8/
   end
 end
