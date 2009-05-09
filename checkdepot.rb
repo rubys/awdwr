@@ -191,8 +191,8 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', /, "title": "Pragmatic Version Control"/
   end
 
-  test "13.2 Unit Testing of Models" do
-    section '13.2'
+  test "14.2 Unit Testing of Models" do
+    section '14.2'
     assert_select '.stdout', /SQLite3::SQLException: no such table: users/
     assert_select '.stdout', '1 tests, 1 assertions, 0 failures, 0 errors'
     assert_select '.stdout', '4 tests, 4 assertions, 0 failures, 0 errors'
@@ -200,30 +200,30 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', '2 tests, 5 assertions, 0 failures, 0 errors'
   end
 
-  test "13.3 Functional Testing of Controllers" do
-    section '13.3'
+  test "14.3 Functional Testing of Controllers" do
+    section '14.3'
     assert_select '.stdout', '5 tests, 8 assertions, 0 failures, 0 errors'
   end
 
-  test "13.4 Integration Testing of Applications" do
-    section '13.4'
+  test "14.4 Integration Testing of Applications" do
+    section '14.4'
     assert_select '.stdout', '1 tests, 17 assertions, 0 failures, 0 errors'
     assert_select '.stdout', '2 tests, 49 assertions, 0 failures, 0 errors'
   end
 
-  test "13.5 Performance Testing" do
-    section '13.5'
+  test "14.5 Performance Testing" do
+    section '14.5'
     assert_select '.stderr', 'Using the standard Ruby profiler.'
     assert_select '.stderr', /Math.sin/
   end
 
-  test "14 Rails In Depth" do
-    section '14'
+  test "15 Rails In Depth" do
+    section '15'
     assert_select '.stdout', 'Current version: 20080601000007'
   end
 
-  test "11.9 I18N" do
-    section '11.9'
+  test "13 Task I: Internationalization" do
+    section 'i'
     assert_select '#notice', 'es translation not available'
     assert_select 'option[value=es]'
     assert_select '.price', '28,50&nbsp;$US'
@@ -233,8 +233,8 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '#notice', 'Gracias por su pedido'
   end
 
-  test "25 ActiveResource" do
-    section '25'
+  test "26 Active Resources" do
+    section '26'
     assert_select '.stdout', /Failed with 302/
     assert_select '.stdout', '29.95'
     assert_select '.stdout', '=&gt; true'
@@ -246,8 +246,8 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', /=&gt; 22.8/
   end
 
-  test "16 Migration" do
-    section '16'
+  test "17 Migration" do
+    section '17'
     assert_select '.stderr', /near "auto_increment": syntax error/
     assert_select '.stderr', 'uninitialized constant TestDiscounts::Sku'
 

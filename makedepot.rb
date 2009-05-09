@@ -170,7 +170,7 @@ def depot
 
   publish_code_snapshot :b
 
-  head '6.5 Iteration A4: Prettier Listings'
+  head '6.5 Iteration A4: Making Prettier Listings'
   # timestamp = Time.now.gmtime.strftime('%Y%m%d%H%M%S')
   edit "db/migrate/003_add_test_data.rb", 'vcc' do |data|
     data[/()/,1] = read('products/003_add_test_data.rb')
@@ -378,7 +378,7 @@ def depot
   post '/store/add_to_cart/3', {}
   publish_code_snapshot :f
 
-  head '8.3 Iteration C2: A Smarter Cart'
+  head '8.3 Iteration C2: Creating a Smarter Cart'
   edit 'app/models/cart_item.rb' do |data|
     data[/()/,1] = read('cart/cart_item.rb')
   end
@@ -594,7 +594,7 @@ def depot
   post '/store/add_to_cart/3', {}
   publish_code_snapshot :k
 
-  head '9.2 Iteration D2: An AJAX-Based Cart'
+  head '9.2 Iteration D2: Creating an AJAX-Based Cart'
   edit 'app/views/store/index.html.erb', 'form_remote_tag' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
     data.gsub!(':add_to_cart', ':form_remote_tag')
@@ -1043,7 +1043,7 @@ def depot
     'password' => 'secret'
   get '/products'
 
-  head '11.4 Iteration F4: A Sidebar, More Administration'
+  head '11.4 Iteration F4: Adding a Sidebar, More Administration'
   edit "app/controllers/#{$APP}.rb", 'layout' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
     data[/()class ApplicationController/,1] = "#START:layout\n"
@@ -1270,12 +1270,12 @@ def depot
   cmd 'rake doc:app'
   cmd 'rake stats'
 
-  head '13.1 Tests Baked Right In'
+  head '14.1 Tests Baked Right In'
   cmd 'ls -p test'
   cmd 'ls test/unit'
   cmd 'ls test/functional'
 
-  head '13.2 Unit Testing of Models'
+  head '14.2 Unit Testing of Models'
   cmd 'cat test/unit/product_test.rb'
   cmd 'ruby -Itest test/unit/product_test.rb'
   cmd 'rake db:test:prepare'
@@ -1297,7 +1297,7 @@ def depot
   end
   cmd 'ruby -I test test/unit/cart_test1.rb'
 
-  head '13.3 Functional Testing of Controllers'
+  head '14.3 Functional Testing of Controllers'
   edit "app/controllers/#{$APP}.rb", 'auth' do |data|
     data.gsub! /.*#START:.*\n/, ''
     data.gsub! /.*#END:.*\n/, ''
@@ -1315,7 +1315,7 @@ def depot
   end
   cmd 'ruby -I test test/functional/admin_controller_test.rb'
   
-  head '13.4 Integration Testing of Applications'
+  head '14.4 Integration Testing of Applications'
   cmd 'ruby script/generate integration_test user_stories'
   edit "test/integration/user_stories_test.rb" do |data|
     data[/(.*)/m,1] = read('test/user_stories_test.rb')
@@ -1326,7 +1326,7 @@ def depot
   end
   cmd 'ruby -I test test/integration/dsl_user_stories_test.rb'
 
-  head '13.5 Performance Testing'
+  head '14.5 Performance Testing'
   cmd 'mkdir test/fixtures/performance/'
   edit "test/fixtures/performance/products.yml" do |data|
     data[/(.*)/m,1] = read('test/performance_products.yml')
@@ -1347,7 +1347,7 @@ def depot
     data.gsub!(/^.*Math.sin.*\n/,'')
   end
 
-  head '14 Rails In Depth'
+  head '15 Rails In Depth'
   cmd 'rake db:version'
   edit 'lib/tasks/db_schema_migrations.rake' do |data|
     data << <<-EOF.unindent(6)
@@ -1367,7 +1367,7 @@ def depot
 
   publish_code_snapshot :r
 
-  head '11.9 I18N'
+  head '13 Task I: Internationalization'
   post '/store/empty_cart', {}
   cmd "cp #{$DATA}/i18n/initializer.rb config/initializers/i18n.rb"
   restart_server
@@ -1493,7 +1493,7 @@ def depot
   publish_code_snapshot :s
   get '/store?locale=en'
 
-  head '25 ActiveResource'
+  head '26 Active Resources'
   rails 'depot_client'
   edit 'app/models/product.rb' do |data|
     data << <<-EOF.unindent(6)
@@ -1581,7 +1581,7 @@ def depot
 end
 
 def framework
-  head '15 Active Support'
+  head '16 Active Support'
   rails 'namelist', :e1
   restart_server
   cmd 'ruby script/generate model person name:string'
@@ -1601,7 +1601,7 @@ def framework
   db "select name,length(name) from people where name like 'G%'"
   publish_code_snapshot :e1, :namelist
 
-  head '16 Migration'
+  head '17 Migration'
   Dir.chdir($WORK)
   Dir.chdir('depot')
   restart_server
@@ -1622,7 +1622,7 @@ def framework
     cmd 'cat app/models/line_item.rb'
   end
 
-  head '20 Action Controller: Routing and URLs'
+  head '21 Action Controller: Routing and URLs'
   rails 'restful'
   cmd 'ruby script/generate scaffold article title:string summary:text content:text'
   cmd 'rake db:migrate'
