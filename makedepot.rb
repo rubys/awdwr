@@ -187,8 +187,8 @@ def depot
   edit 'app/views/products/index.html.erb' do |data|
     data[/(.*)/m,1] = read('products/index.html.erb')
   end
-  cmd "cp -v #{$WORK}/data/images/* public/images/"
-  cmd "cp -v #{$WORK}/data/depot.css public/stylesheets"
+  cmd "cp -v #{$DATA}/images/* public/images/"
+  cmd "cp -v #{$DATA}/depot.css public/stylesheets"
   get '/products'
 
   publish_code_snapshot :c

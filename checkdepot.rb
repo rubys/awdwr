@@ -40,6 +40,9 @@ class DepotTest < ActiveSupport::TestCase
   def section name
     raise "Section #{name} not found" unless @@sections.has_key? name
     @selected = HTML::Document.new(@@sections[name]).root.children
+    assert @@sections[name] !~
+      /<pre class="traceback">\s+#&lt;IndexError: regexp not matched&gt;/,
+      "edit failed"
   end
 
   test "Iteration A1: Get Something Running" do
