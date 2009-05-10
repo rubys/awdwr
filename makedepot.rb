@@ -100,7 +100,6 @@ def depot
   post '/products/new', {}
 
   cmd 'rake test'
-  publish_code_snapshot :a
 
   edit 'app/views/products/show.html.erb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
@@ -168,8 +167,6 @@ def depot
     data[/'scaffold'.*()\n/,1] = ' <!-- <label id="code.scaffold1"/> -->'
   end
 
-  publish_code_snapshot :b
-
   head '6.5 Iteration A4: Making Prettier Listings'
   # timestamp = Time.now.gmtime.strftime('%Y%m%d%H%M%S')
   edit "db/migrate/003_add_test_data.rb", 'vcc' do |data|
@@ -190,8 +187,6 @@ def depot
   cmd "cp -v #{$DATA}/images/* public/images/"
   cmd "cp -v #{$DATA}/depot.css public/stylesheets"
   get '/products'
-
-  publish_code_snapshot :c
 
   head '7.1 Iteration B1: Create the Catalog Listing'
   cmd 'ruby script/generate controller store index'
@@ -216,7 +211,6 @@ def depot
     data[/(.*)/m,1] = read('store/index.html.erb')
   end
   get '/store'
-  publish_code_snapshot :d
 
   head '7.2 Iteration B2: Add a Page Layout'
   edit 'app/views/layouts/store.html.erb' do |data|
@@ -287,7 +281,6 @@ def depot
     EOF
   end
 
-  publish_code_snapshot :e
   edit 'public/stylesheets/depot.css', 'inline' do |data|
     data[/().*The error box/,1] = <<-EOF.unindent(6) + "\n"
       /* START:inline */
@@ -365,7 +358,6 @@ def depot
   end
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/3', {}
-  publish_code_snapshot :f
 
   head '8.3 Iteration C2: Creating a Smarter Cart'
   edit 'app/models/cart_item.rb' do |data|
@@ -396,7 +388,6 @@ def depot
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/3', {}
   post '/store/add_to_cart/wibble', {}
-  publish_code_snapshot :g
 
   head '8.4 Iteration C3: Handling Errors'
   edit 'app/controllers/store_controller.rb', 'add_to_cart' do |data|
@@ -462,7 +453,6 @@ def depot
     EOF
   end
   post '/store/empty_cart', {}
-  publish_code_snapshot :h
   edit 'app/controllers/store_controller.rb', 'rti' do |data|
     data.gsub!(/flash\[:notice\] = (".*?")\n.*/, 'redirect_to_index(\1)')
     data[/()  #START:add_to_cart/,1] = "  #START:rti\n"
@@ -512,7 +502,6 @@ def depot
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/3', {}
-  publish_code_snapshot :i
 
   head '9.1 Iteration D1: Moving the Cart'
   edit 'app/views/store/add_to_cart.html.erb' do |data|
@@ -566,7 +555,6 @@ def depot
       /* END:cartside */
     EOF
   end
-  publish_code_snapshot :j
   get '/store'
   edit 'app/controllers/store_controller.rb', 'add_to_cart' do |data|
     data[/@cart.add_product\(product\)\n()/,1] = <<-EOF.unindent(2)
@@ -581,7 +569,6 @@ def depot
   end
   cmd 'rm app/views/store/add_to_cart.html.erb'
   post '/store/add_to_cart/3', {}
-  publish_code_snapshot :k
 
   head '9.2 Iteration D2: Creating an AJAX-Based Cart'
   edit 'app/views/store/index.html.erb', 'form_remote_tag' do |data|
@@ -613,7 +600,6 @@ def depot
     data[/()/,1] = 
       'page.replace_html("cart", :partial => "cart", :object => @cart)'
   end
-  publish_code_snapshot :l
 
   head '9.3 Iteration D3: Highlighting Changes'
   edit 'app/models/cart.rb' do |data|
@@ -653,7 +639,6 @@ def depot
                                         :endcolor => "#114411"
     EOF
   end
-  publish_code_snapshot :m
 
   head '9.4 Iteration D4: Hide an Empty Cart'
   edit 'app/views/store/add_to_cart.js.rjs' do |data|
@@ -696,7 +681,6 @@ def depot
     data[/"Your cart is currently empty".*()/,1] = "\n#END_HIGHLIGHT"
     data[/(\("Your cart is currently empty"\))/,1] = ''
   end
-  publish_code_snapshot :n
 
   head '9.5 Iteration D5: Degrading If Javascript Is Disabled'
   edit 'app/controllers/store_controller.rb', 'add_to_cart' do |data|
@@ -710,7 +694,6 @@ def depot
   end
   post '/store/empty_cart', {}
   post '/store/add_to_cart/3', {}
-  publish_code_snapshot :o
 
   head '10.1 Iteration E1: Capturing an Order'
   cmd 'ruby script/generate scaffold order name:string address:text ' +
@@ -1002,7 +985,6 @@ def depot
       #END_HIGHLIGHT
     EOF
   end
-  publish_code_snapshot :p
   edit 'app/controllers/store_controller.rb' do |data|
     data.gsub!(/\s+# <label.*/, '')
   end
@@ -1158,7 +1140,6 @@ def depot
   cmd 'curl --silent http://localhost:3000/info/who_bought/3'
   restart_server
   cmd 'curl --silent http://localhost:3000/info/who_bought/3'
-  publish_code_snapshot :q
   db 'select * from products'
   db 'select * from line_items'
   cmd 'curl --silent http://localhost:3000/info/who_bought/3'
@@ -1258,103 +1239,6 @@ def depot
 
   cmd 'rake doc:app'
   cmd 'rake stats'
-
-  head '14.1 Tests Baked Right In'
-  cmd 'ls -p test'
-  cmd 'ls test/unit'
-  cmd 'ls test/functional'
-
-  head '14.2 Unit Testing of Models'
-  cmd 'cat test/unit/product_test.rb'
-  cmd 'ruby -Itest test/unit/product_test.rb'
-  cmd 'rake db:test:prepare'
-  cmd 'ruby -Itest test/unit/product_test.rb'
-  cmd 'rake test:units'
-  edit "test/unit/product_test.rb" do |data|
-    data[/(.*)/m,1] = read('test/product_test.rb')
-  end
-  edit "test/fixtures/products.yml" do |data|
-    data[/(.*)/m,1] = read('test/products.yml')
-  end
-  cmd 'rake test:units'
-  edit "test/unit/cart_test.rb" do |data|
-    data[/(.*)/m,1] = read('test/cart_test.rb')
-  end
-  cmd 'ruby -I test test/unit/cart_test.rb'
-  edit "test/unit/cart_test1.rb" do |data|
-    data[/(.*)/m,1] = read('test/cart_test1.rb')
-  end
-  cmd 'ruby -I test test/unit/cart_test1.rb'
-
-  head '14.3 Functional Testing of Controllers'
-  edit "app/controllers/#{$APP}.rb", 'auth' do |data|
-    data.gsub! /.*#START:.*\n/, ''
-    data.gsub! /.*#END:.*\n/, ''
-    data.gsub! /.*#\.\.\.*\n/, ''
-    data[/^()class ApplicationController/,1] = "#START:auth\n"
-    data[/^ +before_filter.*?\n()/,1] = "  #...\n\n#END:auth\n"
-    data[/\n(\s*)\n *protected/,1] = "#START:auth\n"
-    data[/^end\n()/,1] = "#END:auth\n"
-  end
-  edit "test/functional/admin_controller_test.rb" do |data|
-    data[/(.*)/m,1] = read('test/admin_controller_test.rb')
-  end
-  edit "test/fixtures/users.yml" do |data|
-    data[/(.*)/m,1] = read('test/users.yml')
-  end
-  cmd 'ruby -I test test/functional/admin_controller_test.rb'
-  
-  head '14.4 Integration Testing of Applications'
-  cmd 'ruby script/generate integration_test user_stories'
-  edit "test/integration/user_stories_test.rb" do |data|
-    data[/(.*)/m,1] = read('test/user_stories_test.rb')
-  end
-  cmd 'ruby -I test test/integration/user_stories_test.rb'
-  edit "test/integration/dsl_user_stories_test.rb" do |data|
-    data[/(.*)/m,1] = read('test/dsl_user_stories_test.rb')
-  end
-  cmd 'ruby -I test test/integration/dsl_user_stories_test.rb'
-
-  head '14.5 Performance Testing'
-  cmd 'mkdir test/fixtures/performance/'
-  edit "test/fixtures/performance/products.yml" do |data|
-    data[/(.*)/m,1] = read('test/performance_products.yml')
-  end
-  edit "test/performance/order_speed_test.rb" do |data|
-    data[/(.*)/m,1] = read('test/order_speed_test.rb')
-  end
-  cmd 'ruby -I test test/performance/order_speed_test.rb'
-  edit "app/models/user.rb" do |data|
-    data[/def self.encrypted_password.*?\n()/,1] = <<-EOF.unindent(2)
-      100000.times { Math.sin(1)}
-    EOF
-  end
-  encrypt = 'User.encrypted_password("secret", "salt")'
-  cmd "ruby script/performance/benchmarker #{encrypt.inspect}"
-  cmd "ruby script/performance/profiler #{encrypt.inspect}"
-  edit "app/models/user.rb", 'revert' do |data|
-    data.gsub!(/^.*Math.sin.*\n/,'')
-  end
-
-  head '15 Rails In Depth'
-  cmd 'rake db:version'
-  edit 'lib/tasks/db_schema_migrations.rake' do |data|
-    data << <<-EOF.unindent(6)
-      namespace :db do
-        desc "Prints the migrated versions"
-        task :schema_migrations => :environment do
-          puts ActiveRecord::Base.connection.select_values(
-            'select version from schema_migrations order by version' )
-        end
-      end
-    EOF
-  end
-  cmd 'rake db:schema_migrations'
-  cmd 'ls log'
-  cmd 'find script -type f'
-  cmd 'echo "puts $:" | ruby script/console'
-
-  publish_code_snapshot :r
 
   head '13 Task I: Internationalization'
   post '/store/empty_cart', {}
@@ -1479,94 +1363,102 @@ def depot
     'order[address]' => '123 Main St., Anytown USA',
     'order[email]' => 'juser@hotmail.com',
     'order[pay_type]' => 'check'
-  publish_code_snapshot :s
   get '/store?locale=en'
 
-  head '26 Active Resources'
-  rails 'depot_client'
-  edit 'app/models/product.rb' do |data|
-    data << <<-EOF.unindent(6)
-      class Product < ActiveResource::Base
-        self.site = 'http://dave:secret@localhost:3000/'
-      end
-    EOF
+  head '14.1 Tests Baked Right In'
+  cmd 'ls -p test'
+  cmd 'ls test/unit'
+  cmd 'ls test/functional'
+
+  head '14.2 Unit Testing of Models'
+  cmd 'cat test/unit/product_test.rb'
+  cmd 'ruby -Itest test/unit/product_test.rb'
+  cmd 'rake db:test:prepare'
+  cmd 'ruby -Itest test/unit/product_test.rb'
+  cmd 'rake test:units'
+  edit "test/unit/product_test.rb" do |data|
+    data[/(.*)/m,1] = read('test/product_test.rb')
   end
-  cmd 'echo "Product.find(2).title" | ruby script/console'
-  Dir.chdir($WORK)
-  Dir.chdir('depot')
+  edit "test/fixtures/products.yml" do |data|
+    data[/(.*)/m,1] = read('test/products.yml')
+  end
+  cmd 'rake test:units'
+  edit "test/unit/cart_test.rb" do |data|
+    data[/(.*)/m,1] = read('test/cart_test.rb')
+  end
+  cmd 'ruby -I test test/unit/cart_test.rb'
+  edit "test/unit/cart_test1.rb" do |data|
+    data[/(.*)/m,1] = read('test/cart_test1.rb')
+  end
+  cmd 'ruby -I test test/unit/cart_test1.rb'
+
+  head '14.3 Functional Testing of Controllers'
   edit "app/controllers/#{$APP}.rb", 'auth' do |data|
-    data[/unless.*?\)\n(.*?\n)\s+end/m,1] = <<-EOF
-      #START_HIGHLIGHT
-      if session[:user_id] != :logged_out
-        #START:basic
-        authenticate_or_request_with_http_basic('Depot') do |username, password|
-          user = User.authenticate(username, password)
-          session[:user_id] = user.id if user
+    data.gsub! /.*#START:.*\n/, ''
+    data.gsub! /.*#END:.*\n/, ''
+    data.gsub! /.*#\.\.\.*\n/, ''
+    data[/^()class ApplicationController/,1] = "#START:auth\n"
+    data[/^ +before_filter.*?\n()/,1] = "  #...\n\n#END:auth\n"
+    data[/\n(\s*)\n *protected/,1] = "#START:auth\n"
+    data[/^end\n()/,1] = "#END:auth\n"
+  end
+  edit "test/functional/admin_controller_test.rb" do |data|
+    data[/(.*)/m,1] = read('test/admin_controller_test.rb')
+  end
+  edit "test/fixtures/users.yml" do |data|
+    data[/(.*)/m,1] = read('test/users.yml')
+  end
+  cmd 'ruby -I test test/functional/admin_controller_test.rb'
+  
+  head '14.4 Integration Testing of Applications'
+  cmd 'ruby script/generate integration_test user_stories'
+  edit "test/integration/user_stories_test.rb" do |data|
+    data[/(.*)/m,1] = read('test/user_stories_test.rb')
+  end
+  cmd 'ruby -I test test/integration/user_stories_test.rb'
+  edit "test/integration/dsl_user_stories_test.rb" do |data|
+    data[/(.*)/m,1] = read('test/dsl_user_stories_test.rb')
+  end
+  cmd 'ruby -I test test/integration/dsl_user_stories_test.rb'
+
+  head '14.5 Performance Testing'
+  cmd 'mkdir test/fixtures/performance/'
+  edit "test/fixtures/performance/products.yml" do |data|
+    data[/(.*)/m,1] = read('test/performance_products.yml')
+  end
+  edit "test/performance/order_speed_test.rb" do |data|
+    data[/(.*)/m,1] = read('test/order_speed_test.rb')
+  end
+  cmd 'ruby -I test test/performance/order_speed_test.rb'
+  edit "app/models/user.rb" do |data|
+    data[/def self.encrypted_password.*?\n()/,1] = <<-EOF.unindent(2)
+      100000.times { Math.sin(1)}
+    EOF
+  end
+  encrypt = 'User.encrypted_password("secret", "salt")'
+  cmd "ruby script/performance/benchmarker #{encrypt.inspect}"
+  cmd "ruby script/performance/profiler #{encrypt.inspect}"
+  edit "app/models/user.rb", 'revert' do |data|
+    data.gsub!(/^.*Math.sin.*\n/,'')
+  end
+
+  head '15 Rails In Depth'
+  cmd 'rake db:version'
+  edit 'lib/tasks/db_schema_migrations.rake' do |data|
+    data << <<-EOF.unindent(6)
+      namespace :db do
+        desc "Prints the migrated versions"
+        task :schema_migrations => :environment do
+          puts ActiveRecord::Base.connection.select_values(
+            'select version from schema_migrations order by version' )
         end
-        #END:basic
-      else
-        flash[:notice] = "Please log in"
-        redirect_to :controller => 'admin', :action => 'login'
-      end
-      #END_HIGHLIGHT
-    EOF
-  end
-  edit 'app/controllers/admin_controller.rb' do |data|
-    data[/().*session\[:user_id\] = nil/,1] = "#START_HIGHLIGHT\n"
-    data[/session\[:user_id\] = nil.*()/,1] = "\n#END_HIGHLIGHT"
-    data[/session\[:user_id\] = (nil)/,1] = ':logged_out'
-  end
-  edit 'app/controllers/line_items_controller.rb', 'create' do |data|
-    data[/()  def create/,1] = "#START:create\n"
-    data[/def create.*?\n  end()/m,1] = "\n#END:create"
-    data[/def create\n()/,1] = <<-EOF.unindent(2)
-      #START_HIGHLIGHT
-      params[:line_item][:order_id] ||= params[:order_id]
-      #END_HIGHLIGHT
-    EOF
-    data[/:created,() :location/,1] = "\n" + (' ' * 28)
-    data[/@line_item.errors,() :status/,1] = "\n" + (' ' * 28)
-    data[/@line_item.errors,() :status/,1] = "\n" + (' ' * 28)
-  end
-  edit 'config/routes.rb' do |data|
-    data[/map.resources :orders()/,1] = ', :has_many => :line_items'
-  end
-  restart_server
-  # pagination?
-  edit "app/controllers/#{$APP}.rb" do |data|
-    data[/\n(\n)#END:auth\n  helper :all/,1] = ''
-  end
-  publish_code_snapshot :t
-  Dir.chdir($WORK)
-  Dir.chdir('depot_client')
-  cmd 'echo "Product.find(2).title" | ruby script/console'
-  cmd "echo 'p = Product.find(2)\nputs p.price\np.price-=5\np.save' | " +
-      "ruby script/console"
-  get '/store'
-  edit 'app/models/order.rb' do |data|
-    data << <<-EOF.unindent(6)
-      class Order < ActiveResource::Base
-        self.site = 'http://dave:secret@localhost:3000/'
       end
     EOF
   end
-  cmd "echo 'Order.find(1).name\nOrder.find(1).line_items\n' | " +
-      "ruby script/console"
-  edit 'app/models/line_item.rb' do |data|
-    data << <<-EOF.unindent(6)
-      class LineItem < ActiveResource::Base
-        self.site = 'http://dave:secret@localhost:3000/orders/:order_id'
-      end
-    EOF
-  end
-  get '/orders/1/line_items.xml'
-  cmd 'echo "LineItem.find(:all, :params => {:order_id=>1})" |' + 
-      'ruby script/console'
-  cmd "echo 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n" +
-       "puts li.total_price\nli.total_price*=0.8\nli.save\n" +
-       "li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, " +
-       ":total_price=>0.0)\nli2.save' | ruby script/console"
-  publish_code_snapshot nil, 'depot_client'
+  cmd 'rake db:schema_migrations'
+  cmd 'ls log'
+  cmd 'find script -type f'
+  cmd 'echo "puts $:" | ruby script/console'
 end
 
 def framework
@@ -1588,15 +1480,14 @@ def framework
   post '/people', 'person[name]' => 'Dave'
   post '/people', 'person[name]' => "G\xc3\xbcnter"
   db "select name,length(name) from people where name like 'G%'"
-  publish_code_snapshot :e1, :namelist
 
   head '17 Migration'
-  Dir.chdir($WORK)
-  Dir.chdir('depot')
+  rails 'migration'
   restart_server
+  cmd 'cp -v -r ../depot/db/* db/'
+  cmd 'cp -v -r ../depot/app/models/* app/models/'
   cmd 'ruby script/generate model discount'
   cmd 'ruby script/generate migration add_status_to_user status:string'
-  cmd 'rake db:migrate'
   20.upto(37) do |i|
     if i == 33
       cmd 'mkdir db/migrate/dev_data'
@@ -1608,7 +1499,7 @@ def framework
     cmd 'rake db:migrate'
     cmd "rm #{Dir['db/migrate/2*'].sort.last}" if [26,32].include?(i)
     # cmd 'rake annotate_models'
-    cmd 'cat app/models/line_item.rb'
+    # cmd 'cat app/models/line_item.rb'
   end
 
   head '21 Action Controller: Routing and URLs'
@@ -1637,7 +1528,6 @@ def framework
   edit 'app/views/articles/index.html.erb' do |data|
     data[/,() :method => :del/,1] = "\n" + (' ' * 39)
   end
-  publish_code_snapshot nil, 'restful'
   edit 'config/routes.rb' do |data|
     data[/map.resources :articles()/,1] = ', :collection => { :recent => :get }'
   end
@@ -1690,14 +1580,92 @@ def framework
   edit 'app/controllers/comments_controller.rb' do |data|
     data[/(.*)/m,1] = read("comment/comments_controller.rb")
   end
-  publish_code_snapshot nil, 'restful2'
   rails 'routing', :e1
   cmd 'ruby script/generate controller store index add_to_cart'
   cmd "cp -v #{$DATA}/routing/* config"
   cmd 'mv -v config/*_test.rb test/unit'
   cmd 'rake db:schema:dump'
   cmd 'rake test'
-  publish_code_snapshot :e1, :routing
+
+  head '26 Active Resources'
+  Dir.chdir(File.join($WORK,'depot'))
+  restart_server
+  rails 'depot_client'
+  edit 'app/models/product.rb' do |data|
+    data << <<-EOF.unindent(6)
+      class Product < ActiveResource::Base
+        self.site = 'http://dave:secret@localhost:3000/'
+      end
+    EOF
+  end
+  cmd 'echo "Product.find(2).title" | ruby script/console'
+  Dir.chdir(File.join($WORK,'depot'))
+  edit "app/controllers/#{$APP}.rb", 'auth' do |data|
+    data[/unless.*?\)\n(.*?\n)\s+end/m,1] = <<-EOF
+      #START_HIGHLIGHT
+      if session[:user_id] != :logged_out
+        #START:basic
+        authenticate_or_request_with_http_basic('Depot') do |username, password|
+          user = User.authenticate(username, password)
+          session[:user_id] = user.id if user
+        end
+        #END:basic
+      else
+        flash[:notice] = "Please log in"
+        redirect_to :controller => 'admin', :action => 'login'
+      end
+      #END_HIGHLIGHT
+    EOF
+  end
+  edit 'app/controllers/admin_controller.rb' do |data|
+    data[/().*session\[:user_id\] = nil/,1] = "#START_HIGHLIGHT\n"
+    data[/session\[:user_id\] = nil.*()/,1] = "\n#END_HIGHLIGHT"
+    data[/session\[:user_id\] = (nil)/,1] = ':logged_out'
+  end
+  edit 'app/controllers/line_items_controller.rb', 'create' do |data|
+    data[/()  def create/,1] = "#START:create\n"
+    data[/def create.*?\n  end()/m,1] = "\n#END:create"
+    data[/def create\n()/,1] = <<-EOF.unindent(2)
+      #START_HIGHLIGHT
+      params[:line_item][:order_id] ||= params[:order_id]
+      #END_HIGHLIGHT
+    EOF
+    data[/:created,() :location/,1] = "\n" + (' ' * 28)
+    data[/@line_item.errors,() :status/,1] = "\n" + (' ' * 28)
+    data[/@line_item.errors,() :status/,1] = "\n" + (' ' * 28)
+  end
+  edit 'config/routes.rb' do |data|
+    data[/map.resources :orders()/,1] = ', :has_many => :line_items'
+  end
+  restart_server
+  Dir.chdir(File.join($WORK,'depot_client'))
+  cmd 'echo "Product.find(2).title" | ruby script/console'
+  cmd "echo 'p = Product.find(2)\nputs p.price\np.price-=5\np.save' | " +
+      "ruby script/console"
+  get '/store'
+  edit 'app/models/order.rb' do |data|
+    data << <<-EOF.unindent(6)
+      class Order < ActiveResource::Base
+        self.site = 'http://dave:secret@localhost:3000/'
+      end
+    EOF
+  end
+  cmd "echo 'Order.find(1).name\nOrder.find(1).line_items\n' | " +
+      "ruby script/console"
+  edit 'app/models/line_item.rb' do |data|
+    data << <<-EOF.unindent(6)
+      class LineItem < ActiveResource::Base
+        self.site = 'http://dave:secret@localhost:3000/orders/:order_id'
+      end
+    EOF
+  end
+  get '/orders/1/line_items.xml'
+  cmd 'echo "LineItem.find(:all, :params => {:order_id=>1})" |' + 
+      'ruby script/console'
+  cmd "echo 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n" +
+       "puts li.total_price\nli.total_price*=0.8\nli.save\n" +
+       "li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, " +
+       ":total_price=>0.0)\nli2.save' | ruby script/console"
 end
 
 ##########################################################################
@@ -2063,32 +2031,6 @@ def rails name, app=nil
 
   if $rails != 'rails' and File.directory?($rails)
     cmd "ln -s #{$rails} vendor/rails"
-  end
-end
-
-def publish_code_snapshot name, app=:depot
-  return if $rails != 'rails'
-  return if $RC or ARGV.include? 'edge'
-  return if Dir['../../code/depot_*'].empty?
-  dest = snapshot_name name, app
-  FileUtils.cp 'db/development.sqlite3', "db/#{dest}.sqlite3" if app==:depot
-  log :pub, dest
-  $x.pre "pub #{dest}", :class=>'stdin'
-
-  popen3 "rsync -rt . --exclude '*.sqlite3' --exclude '.svn'" +
-    " --exclude log --exclude tmp --exclude vendor/plugins" +
-    " --exclude doc/app --delete --ignore-times ../../code/#{dest}"
-
-  if dest == 'depot_c'
-    File.open('../../code/depot_c/public/images/.htaccess', 'w') do |file|
-      file.puts 'Options +Indexes'
-    end
-  end
-
-  if dest == 'depot_f'
-    env = File.open('../../code/depot_f/config/environment.rb').read
-    env.sub!(/[a-z0-9]{127}/) {|s| "#{s[0..24]}...#{s[97..127]}"}
-    File.open('../../code/depot_f/config/environment.rb','w').write(env)
   end
 end
 
