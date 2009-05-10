@@ -1659,6 +1659,8 @@ def framework
       end
     EOF
   end
+  get '/admin/logout'
+  post '/admin/login', 'name' => 'dave', 'password' => 'secret'
   get '/orders/1/line_items.xml'
   cmd 'echo "LineItem.find(:all, :params => {:order_id=>1})" |' + 
       'ruby script/console'
