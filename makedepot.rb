@@ -1,5 +1,9 @@
-def depot
-  head '6.2 Iteration A1: Get Something Running'
+$sections = []
+def section number, title, &steps
+  $sections << [number, title, steps]
+end
+
+section 6.2, 'Iteration A1: Get Something Running' do
   cmd 'ls -p'
   cmd 'ruby script/generate scaffold product ' +
     'title:string description:text image_url:string'
@@ -32,8 +36,9 @@ def depot
   cmd 'sqlite3 db/development.sqlite3 .schema'
 
   cmd 'rake test'
+end
 
-  head '6.3 Iteration A2: Add a Missing Column'
+section 6.3, 'Iteration A2: Add a Missing Column' do
   cmd 'ruby script/generate migration add_price_to_product price:decimal'
 
   cmd 'cat ' + Dir['db/migrate/*add_price_to_product.rb'].first
@@ -108,8 +113,9 @@ def depot
     data[/<%= @product.description %>()/,1] = "\n<!-- END_HIGHLIGHT -->"
   end
   get '/products/1'
+end
 
-  head '6.4 Iteration A3: Validate!'
+section 6.4, 'Iteration A3: Validate!' do
 
   edit 'app/models/product.rb' do |data|
     data[/class Product.*()/,1] = "\n" + <<-'EOF'.unindent(4)
@@ -166,8 +172,9 @@ def depot
   edit 'app/views/layouts/products.html.erb', 'head' do |data|
     data[/'scaffold'.*()\n/,1] = ' <!-- <label id="code.scaffold1"/> -->'
   end
+end
 
-  head '6.5 Iteration A4: Making Prettier Listings'
+section 6.5, 'Iteration A4: Making Prettier Listings' do
   # timestamp = Time.now.gmtime.strftime('%Y%m%d%H%M%S')
   edit "db/migrate/003_add_test_data.rb", 'vcc' do |data|
     data[/()/,1] = read('products/003_add_test_data.rb')
@@ -187,8 +194,9 @@ def depot
   cmd "cp -v #{$DATA}/images/* public/images/"
   cmd "cp -v #{$DATA}/depot.css public/stylesheets"
   get '/products'
+end
 
-  head '7.1 Iteration B1: Create the Catalog Listing'
+section 7.1, 'Iteration B1: Create the Catalog Listing' do
   cmd 'ruby script/generate controller store index'
   restart_server
   get '/store'
@@ -211,8 +219,9 @@ def depot
     data[/(.*)/m,1] = read('store/index.html.erb')
   end
   get '/store'
+end
 
-  head '7.2 Iteration B2: Add a Page Layout'
+section 7.2, 'Iteration B2: Add a Page Layout' do
   edit 'app/views/layouts/store.html.erb' do |data|
     data[/()/,1] = read('store/store.html.erb')
   end
@@ -263,14 +272,16 @@ def depot
     EOF
   end
   get '/store'
+end
 
-  head '7.3 Iteration B3: Use a Helper to Format the Price'
+section 7.3, 'Iteration B3: Use a Helper to Format the Price' do
   edit 'app/views/store/index.html.erb' do |data|
     data[/<%= (product.price) %>/m,1] = "number_to_currency(product.price)"
   end
   get '/store'
+end
 
-  head '7.4 Iteration B4: Linking to the Cart'
+section 7.4, 'Iteration B4: Linking to the Cart' do
   edit 'app/views/store/index.html.erb', 'add_to_cart' do |data|
     data[/number_to_currency.*\n()/,1] =  <<-EOF.unindent(2)
       <!-- START_HIGHLIGHT -->
@@ -291,8 +302,9 @@ def depot
     EOF
   end
   get '/store'
+end
 
-  head '8.1 Sessions'
+section 8.1, 'Sessions' do
   cmd 'rake db:sessions:create'
   cmd 'rake db:migrate'
   cmd 'sqlite3 db/development.sqlite3 .schema'
@@ -330,8 +342,9 @@ def depot
       #END:cart
     EOF
   end
+end
 
-  head '8.2 Iteration C1: Creating a Cart'
+section 8.2, 'Iteration C1: Creating a Cart' do
   edit 'app/models/cart.rb' do |data|
     data[/()/,1] = read('cart/cart.rb')
   end
@@ -358,8 +371,9 @@ def depot
   end
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/3', {}
+end
 
-  head '8.3 Iteration C2: Creating a Smarter Cart'
+section 8.3, 'Iteration C2: Creating a Smarter Cart' do
   edit 'app/models/cart_item.rb' do |data|
     data[/()/,1] = read('cart/cart_item.rb')
   end
@@ -388,8 +402,9 @@ def depot
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/3', {}
   post '/store/add_to_cart/wibble', {}
+end
 
-  head '8.4 Iteration C3: Handling Errors'
+section 8.4, 'Iteration C3: Handling Errors' do
   edit 'app/controllers/store_controller.rb', 'add_to_cart' do |data|
     data[/def add_to_cart(.*?)  end/m,1] = "\n" + <<-'EOF'.unindent(4)
         product = Product.find(params[:id])
@@ -431,8 +446,9 @@ def depot
     EOF
   end
   post '/store/add_to_cart/wibble', {}
+end
 
-  head '8.5 Iteration C4: Finishing the Cart'
+section 8.5, 'Iteration C4: Finishing the Cart' do
   edit 'app/views/store/add_to_cart.html.erb' do |data|
     data[/.*()/m,1] = "\n" + <<-EOF.unindent(6)
       <!-- START_HIGHLIGHT -->
@@ -502,8 +518,9 @@ def depot
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/3', {}
+end
 
-  head '9.1 Iteration D1: Moving the Cart'
+section 9.1, 'Iteration D1: Moving the Cart' do
   edit 'app/views/store/add_to_cart.html.erb' do |data|
     data[/(<% for .* end %>)/m,1] =
       '<%= render(:partial => "cart_item", :collection => @cart.items) %>'
@@ -569,8 +586,9 @@ def depot
   end
   cmd 'rm app/views/store/add_to_cart.html.erb'
   post '/store/add_to_cart/3', {}
+end
 
-  head '9.2 Iteration D2: Creating an AJAX-Based Cart'
+section 9.2, 'Iteration D2: Creating an AJAX-Based Cart' do
   edit 'app/views/store/index.html.erb', 'form_remote_tag' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
     data.gsub!(':add_to_cart', ':form_remote_tag')
@@ -600,8 +618,9 @@ def depot
     data[/()/,1] = 
       'page.replace_html("cart", :partial => "cart", :object => @cart)'
   end
+end
 
-  head '9.3 Iteration D3: Highlighting Changes'
+section 9.3, 'Iteration D3: Highlighting Changes' do
   edit 'app/models/cart.rb' do |data|
     data[/\n(\s+@items << .*\n)/,1] = <<-EOF
       #START_HIGHLIGHT
@@ -639,8 +658,9 @@ def depot
                                         :endcolor => "#114411"
     EOF
   end
+end
 
-  head '9.4 Iteration D4: Hide an Empty Cart'
+section 9.4, 'Iteration D4: Hide an Empty Cart' do
   edit 'app/views/store/add_to_cart.js.rjs' do |data|
     data[/().*visual_effect/,1] = <<-EOF.unindent(6) + "\n"
       page[:cart].visual_effect :blind_down if @cart.total_items == 1
@@ -681,8 +701,9 @@ def depot
     data[/"Your cart is currently empty".*()/,1] = "\n#END_HIGHLIGHT"
     data[/(\("Your cart is currently empty"\))/,1] = ''
   end
+end
 
-  head '9.5 Iteration D5: Degrading If Javascript Is Disabled'
+section 9.5, 'Iteration D5: Degrading If Javascript Is Disabled' do
   edit 'app/controllers/store_controller.rb', 'add_to_cart' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
     data[/^(.*format.js\n)/,1] = <<-EOF
@@ -694,8 +715,9 @@ def depot
   end
   post '/store/empty_cart', {}
   post '/store/add_to_cart/3', {}
+end
 
-  head '10.1 Iteration E1: Capturing an Order'
+section 10.1, 'Iteration E1: Capturing an Order' do
   cmd 'ruby script/generate scaffold order name:string address:text ' +
     'email:string pay_type:string'
   cmd 'ruby script/generate scaffold line_item product_id:integer ' +
@@ -896,8 +918,9 @@ def depot
       #END_HIGHLIGHT
     EOF
   end
+end
 
-  head '11.1 Iteration F1: Adding Users'
+section 11.1, 'Iteration F1: Adding Users' do
   cmd 'ruby script/generate scaffold user name:string hashed_password:string salt:string'
   restart_server
   cmd 'cat ' + Dir['db/migrate/*_create_users.rb'].first
@@ -947,8 +970,9 @@ def depot
     'user[password]' => 'secret',
     'user[password_confirmation]' => 'secret'
   db 'select * from users'
+end
 
-  head '11.2 Iteration F2: Logging in'
+section 11.2, 'Iteration F2: Logging in' do
   cmd 'ruby script/generate controller admin login logout index'
   restart_server
   edit "app/controllers/admin_controller.rb" do |data|
@@ -963,8 +987,9 @@ def depot
   post '/admin/login',
     'name' => 'dave',
     'password' => 'secret'
+end
 
-  head '11.3 Iteration F3: Limiting Access'
+section 11.3, 'Iteration F3: Limiting Access' do
   edit "app/controllers/#{$APP}.rb" do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
     data[/class ApplicationController.*\n()/,1] = <<-EOF.unindent(4)
@@ -1013,8 +1038,9 @@ def depot
     'name' => 'dave',
     'password' => 'secret'
   get '/products'
+end
 
-  head '11.4 Iteration F4: Adding a Sidebar, More Administration'
+section 11.4, 'Iteration F4: Adding a Sidebar, More Administration' do
   edit "app/controllers/#{$APP}.rb", 'layout' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
     data[/()class ApplicationController/,1] = "#START:layout\n"
@@ -1098,8 +1124,9 @@ def depot
     EOF
   end
   cmd 'echo "Product.new" | ruby script/console'
+end
 
-  head '12.1 Generating the XML Feed'
+section 12.1, 'Generating the XML Feed' do
   edit 'app/models/product.rb', 'has_many' do |data|
     data[/class Product.*\n()/,1] = <<-EOF.unindent(4)
       #START_HIGHLIGHT
@@ -1239,8 +1266,9 @@ def depot
 
   cmd 'rake doc:app'
   cmd 'rake stats'
+end
 
-  head '13 Task I: Internationalization'
+section 13, 'Task I: Internationalization' do
   post '/store/empty_cart', {}
   cmd "cp #{$DATA}/i18n/initializer.rb config/initializers/i18n.rb"
   restart_server
@@ -1364,13 +1392,15 @@ def depot
     'order[email]' => 'juser@hotmail.com',
     'order[pay_type]' => 'check'
   get '/store?locale=en'
+end
 
-  head '14.1 Tests Baked Right In'
+section 14.1, 'Tests Baked Right In' do
   cmd 'ls -p test'
   cmd 'ls test/unit'
   cmd 'ls test/functional'
+end
 
-  head '14.2 Unit Testing of Models'
+section 14.2, 'Unit Testing of Models' do
   cmd 'cat test/unit/product_test.rb'
   cmd 'ruby -Itest test/unit/product_test.rb'
   cmd 'rake db:test:prepare'
@@ -1391,8 +1421,9 @@ def depot
     data[/(.*)/m,1] = read('test/cart_test1.rb')
   end
   cmd 'ruby -I test test/unit/cart_test1.rb'
+end
 
-  head '14.3 Functional Testing of Controllers'
+section 14.3, 'Functional Testing of Controllers' do
   edit "app/controllers/#{$APP}.rb", 'auth' do |data|
     data.gsub! /.*#START:.*\n/, ''
     data.gsub! /.*#END:.*\n/, ''
@@ -1409,8 +1440,9 @@ def depot
     data[/(.*)/m,1] = read('test/users.yml')
   end
   cmd 'ruby -I test test/functional/admin_controller_test.rb'
+end
   
-  head '14.4 Integration Testing of Applications'
+section 14.4, 'Integration Testing of Applications' do
   cmd 'ruby script/generate integration_test user_stories'
   edit "test/integration/user_stories_test.rb" do |data|
     data[/(.*)/m,1] = read('test/user_stories_test.rb')
@@ -1420,8 +1452,9 @@ def depot
     data[/(.*)/m,1] = read('test/dsl_user_stories_test.rb')
   end
   cmd 'ruby -I test test/integration/dsl_user_stories_test.rb'
+end
 
-  head '14.5 Performance Testing'
+section 14.5, 'Performance Testing' do
   cmd 'mkdir test/fixtures/performance/'
   edit "test/fixtures/performance/products.yml" do |data|
     data[/(.*)/m,1] = read('test/performance_products.yml')
@@ -1441,8 +1474,9 @@ def depot
   edit "app/models/user.rb", 'revert' do |data|
     data.gsub!(/^.*Math.sin.*\n/,'')
   end
+end
 
-  head '15 Rails In Depth'
+section 15, 'Rails In Depth' do
   cmd 'rake db:version'
   edit 'lib/tasks/db_schema_migrations.rake' do |data|
     data << <<-EOF.unindent(6)
@@ -1461,8 +1495,7 @@ def depot
   cmd 'echo "puts $:" | ruby script/console'
 end
 
-def framework
-  head '16 Active Support'
+section 16, 'Active Support' do
   rails 'namelist', :e1
   restart_server
   cmd 'ruby script/generate model person name:string'
@@ -1480,8 +1513,9 @@ def framework
   post '/people', 'person[name]' => 'Dave'
   post '/people', 'person[name]' => "G\xc3\xbcnter"
   db "select name,length(name) from people where name like 'G%'"
+end
 
-  head '17 Migration'
+section 17, 'Migration' do
   rails 'migration'
   restart_server
   cmd 'cp -v -r ../depot/db/* db/'
@@ -1501,8 +1535,9 @@ def framework
     # cmd 'rake annotate_models'
     # cmd 'cat app/models/line_item.rb'
   end
+end
 
-  head '21 Action Controller: Routing and URLs'
+section 21, 'Action Controller: Routing and URLs' do
   rails 'restful'
   cmd 'ruby script/generate scaffold article title:string summary:text content:text'
   cmd 'rake db:migrate'
@@ -1586,8 +1621,9 @@ def framework
   cmd 'mv -v config/*_test.rb test/unit'
   cmd 'rake db:schema:dump'
   cmd 'rake test'
+end
 
-  head '26 Active Resources'
+section 26, 'Active Resources' do
   Dir.chdir(File.join($WORK,'depot'))
   restart_server
   rails 'depot_client'
@@ -1979,8 +2015,8 @@ def snapshot_name name, app
 end
 
 # select a version of Rails
-if ARGV.first =~ /^\d[.\d]+\d$/
-  $rails = "rails _#{ARGV.first}_"
+if ARGV.first =~ /^_\d[.\d]*_$/
+  $rails = "rails #{ARGV.first}"
 elsif File.directory?(ARGV.first.to_s)
   $rails = ARGV.first
   $rails = File.join($rails,'rails') if
@@ -2117,12 +2153,23 @@ $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
       EOF
     end
 
+    ranges = ARGV.grep(/^\d[.\d]*(\.\.\d[.\d]*)?/).map do |arg|
+      if arg.include? '..'
+        Range.new(*arg.split('..').map {|n| n.to_f})
+      else
+        Range.new(arg.to_f, arg.to_f)
+      end
+    end
+
     $server = fork
     if $server
       sleep 10
       begin
-        depot unless ARGV.include? 'framework_only'
-        framework unless ARGV.include? 'depot_only'
+        $sections.each do |number, title, steps|
+          next unless ranges.empty? or ranges.any? {|r| r.include?(number)}
+          head "#{number} #{title}"
+          steps.call
+        end
       rescue Exception => e
         $x.pre :class => 'traceback' do
           STDERR.puts e.inspect

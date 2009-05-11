@@ -9,10 +9,18 @@ class DepotTest < ActiveSupport::TestCase
   require 'action_controller/assertions/selector_assertions'
   include ActionController::Assertions::SelectorAssertions
 
-  # read and pre-process makedepot.html (only needs to be done once)
-  def setup
-    return if defined? @@sections
+  # micro DSL allowing the definition of optional tests
+  def self.section name, title, &tests
+    @@sections ||= self.sections
+    return if ARGV.include? 'partial' and !@@sections.has_key? name
+    test title do
+      instance_eval {select name}
+      instance_eval &tests
+    end
+  end
 
+  # read and pre-process makedepot.html (only needs to be done once)
+  def self.sections
     # read makedepot output; remove front matter and footer
     output = open('makedepot.html').read
     output.sub! /.*<body>\s+/m, ''
@@ -36,10 +44,12 @@ class DepotTest < ActiveSupport::TestCase
     @@version += ' (git)' if output =~ /ln -s.*vendor.rails/
     @@version += ' (edge)' if output =~ /rails:freeze:edge/
     STDERR.puts @@version
+
+    @@sections
   end
 
-  # select and parse an individual section
-  def section name
+  # select an individual section from the HTML
+  def select name
     raise "Section #{name} not found" unless @@sections.has_key? name
     @selected = HTML::Document.new(@@sections[name]).root.children
     assert @@sections[name] !~
@@ -47,8 +57,7 @@ class DepotTest < ActiveSupport::TestCase
       "edit failed"
   end
 
-  test "Iteration A1: Get Something Running" do
-    section 'a1'
+  section 'a1', "Iteration A1: Get Something Running" do
     assert_select 'th', 'Image url'
     assert_select 'input#product_title[value=Pragmatic Version Control]'
     assert_select 'a[href=http://127.0.0.1:3000/products/1]', 'redirected'
@@ -56,8 +65,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', /7 tests, 10 assertions, 0 failures, 0 errors/
   end
 
-  test "Iteration A2: Add a Missing Column" do
-    section 'a2'
+  section 'a2', "Iteration A2: Add a Missing Column" do
     assert_select '.stdout', 
       /add_column\(:products, :price, :decimal, \{.*:precision=&gt;8.*\}\)/
     assert_select '.stdout', /"price" decimal\(8,2\) DEFAULT 0/
@@ -65,125 +73,106 @@ class DepotTest < ActiveSupport::TestCase
     assert_select 'input#product_price[value=0.0]'
   end
 
-  test "Iteration A3: Validate!" do
-    section 'a3'
+  section 'a3', "Iteration A3: Validate!" do
     assert_select 'h2', '3 errors prohibited this product from being saved'
     assert_select 'li', "Image url can't be blank"
     assert_select 'li', 'Price is not a number'
     assert_select '.fieldWithErrors input[id=product_price]'
   end
 
-  test "Iteration A4: Prettier Listings" do
-    section 'a4'
+  section 'a4', "Iteration A4: Prettier Listings" do
     assert_select '.list-line-even'
   end
 
-  test "Iteration B1: Create the Catalog Listing" do
-    section 'b1'
+  section 'b1', "Iteration B1: Create the Catalog Listing" do
     assert_select 'p', 'Find me in app/views/store/index.html.erb'
     assert_select 'h1', 'Your Pragmatic Catalog'
     assert_select 'span.price', '28.5'
   end
 
-  test "Iteration B2: Add a Page Layout" do
-    section 'b2'
+  section 'b2', "Iteration B2: Add a Page Layout" do
     assert_select '#banner', /Pragmatic Bookshelf/
   end
 
-  test "Iteration B3: Use a Helper to Format the Price" do
-    section 'b3'
+  section 'b3', "Iteration B3: Use a Helper to Format the Price" do
     assert_select 'span.price', '$28.50'
   end
 
-  test "Iteration B4: Linking to the Cart" do
-    section 'b4'
+  section 'b4', "Iteration B4: Linking to the Cart" do
     assert_select 'input[type=submit][value=Add to Cart]'
   end
 
-  test "Sessions" do
-    section '8.1'
+  section '8.1', "Sessions" do
     assert_select '.stdout', /CREATE TABLE "sessions"/
   end
 
-  test "Iteration C1: Creating a Cart" do
-    section 'c1'
+  section 'c1', "Iteration C1: Creating a Cart" do
     assert_select '.stdout', /Missing template store\/add_to_cart/
     assert_select 'h2', 'Your Pragmatic Cart'
     assert_select 'li', 'Pragmatic Project Automation'
   end
 
-  test "Iteration C2: A Smarter Cart" do
-    section 'c2'
+  section 'c2', "Iteration C2: A Smarter Cart" do
     assert_select '.stdout', /NoMethodError/
     assert_select '.stdout', /in StoreController#add_to_cart/
     assert_select 'li', '2 &times; Pragmatic Project Automation'
     assert_select 'pre', "Couldn't find Product with ID=wibble"
   end
 
-  test "Iteration C3: Handling Errors" do
-    section 'c3'
+  section 'c3', "Iteration C3: Handling Errors" do
     assert_select 'a[href=http://127.0.0.1:3000/store]', 'redirected'
     assert_select '.hilight', 'Attempt to access invalid product wibble'
     assert_select '#notice', 'Invalid product'
   end
 
-  test "Iteration C4: Finishing the Cart" do
-    section 'c4'
+  section 'c4', "Iteration C4: Finishing the Cart" do
     assert_select '#notice', 'Your cart is currently empty'
     assert_select '.total-cell', '$88.40'
     assert_select 'input[type=submit][value=Empty cart]'
   end
 
-  test "Iteration D1: Moving the Cart" do
-    section 'd1'
+  section 'd1', "Iteration D1: Moving the Cart" do
     assert_select '.cart-title', 'Your Cart'
     assert_select '.total-cell', '$88.40'
     assert_select 'input[type=submit][value=Empty cart]'
   end
 
-  test "Iteration D5: Degrading If Javascript Is Disabled" do
-    section 'd5'
+  section 'd5', "Iteration D5: Degrading If Javascript Is Disabled" do
     assert_select '#cart[style=display: none]'
     assert_select '.total-cell', '$28.50'
   end
 
-  test "Iteration E1: Capturing an Order" do
-    section 'e1'
+  section 'e1', "Iteration E1: Capturing an Order" do
     assert_select 'input[type=submit][value=Place Order]'
     assert_select 'p', /No action responded to save_order./
     assert_select 'h2', '5 errors prohibited this order from being saved'
     assert_select '#notice', 'Thank you for your order'
   end
 
-  test "Iteration F1: Adding Users" do
-    section 'f1'
+  section 'f1', "Iteration F1: Adding Users" do
     assert_select 'legend', 'Enter User Details'
     assert_select 'p[style=color: green]', 'User dave was successfully created.'
   end
 
-  test "Iteration F2: Logging in" do
-    section 'f2'
+  section 'f2', "Iteration F2: Logging in" do
     assert_select 'legend', 'Please Log In'
     assert_select 'input[type=submit][value=Login]'
     assert_select 'h1', 'Welcome'
   end
 
-  test "Iteration F3: Limiting Access" do
-    section 'f3'
+  section 'f3', "Iteration F3: Limiting Access" do
     assert_select 'a[href=http://127.0.0.1:3000/admin/login]', 'redirected'
     assert_select 'h1', 'Listing products'
   end
 
-  test "Iteration F4: A Sidebar, More Administration" do
-    section 'f4'
+  section 'f4', "Iteration F4: A Sidebar, More Administration" do
     assert_select '.stdout', /NoMethodError in/
     assert_select '.stdout', /Admin#index/
     assert_select '#main h1', 'Listing users'
     assert_select '.stdout', /=&gt; #&lt;Product id: nil/
   end
 
-  test "Generating the XML Feed" do
-    section '12.1'
+  section '12.1', "Generating the XML Feed" do
     assert_select '.stdout', /No route matches &amp;quot;\/info\/who_bought\//
     assert_select '.stdout', /&lt;email&gt;customer@pragprog.com&lt;\/email&gt;/
     assert_select '.stdout', /title = Pragmatic Project Automation/
@@ -193,8 +182,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', /, "title": "Pragmatic Version Control"/
   end
 
-  test "13 Internationalization" do
-    section 'i'
+  section 'i', "13 Internationalization" do
     assert_select '#notice', 'es translation not available'
     assert_select 'option[value=es]'
     assert_select '.price', '28,50&nbsp;$US'
@@ -204,8 +192,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '#notice', 'Gracias por su pedido'
   end
 
-  test "14.2 Unit Testing of Models" do
-    section '14.2'
+  section '14.2', "14.2 Unit Testing of Models" do
     assert_select '.stdout', /SQLite3::SQLException: no such table: users/
     assert_select '.stdout', '1 tests, 1 assertions, 0 failures, 0 errors'
     assert_select '.stdout', '4 tests, 4 assertions, 0 failures, 0 errors'
@@ -213,30 +200,25 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', '2 tests, 5 assertions, 0 failures, 0 errors'
   end
 
-  test "14.3 Functional Testing of Controllers" do
-    section '14.3'
+  section '14.3', "14.3 Functional Testing of Controllers" do
     assert_select '.stdout', '5 tests, 8 assertions, 0 failures, 0 errors'
   end
 
-  test "14.4 Integration Testing of Applications" do
-    section '14.4'
+  section '14.4', "14.4 Integration Testing of Applications" do
     assert_select '.stdout', '1 tests, 17 assertions, 0 failures, 0 errors'
     assert_select '.stdout', '2 tests, 49 assertions, 0 failures, 0 errors'
   end
 
-  test "14.5 Performance Testing" do
-    section '14.5'
+  section '14.5', "14.5 Performance Testing" do
     assert_select '.stderr', 'Using the standard Ruby profiler.'
     assert_select '.stderr', /Math.sin/
   end
 
-  test "15 Rails In Depth" do
-    section '15'
+  section '15', "15 Rails In Depth" do
     assert_select '.stdout', 'Current version: 20080601000007'
   end
 
-  test "17 Migration" do
-    section '17'
+  section '17', "17 Migration" do
     assert_select '.stderr', /near "auto_increment": syntax error/
     assert_select '.stderr', 'uninitialized constant TestDiscounts::Sku'
 
@@ -266,8 +248,7 @@ class DepotTest < ActiveSupport::TestCase
     end
   end
 
-  test "26 Active Resources" do
-    section '26'
+  section '26', "26 Active Resources" do
     assert_select '.stdout', /Failed with 302/
     assert_select '.stdout', '29.95'
     assert_select '.stdout', '=&gt; true'
