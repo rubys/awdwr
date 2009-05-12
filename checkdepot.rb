@@ -57,7 +57,7 @@ class DepotTest < ActiveSupport::TestCase
       "edit failed"
   end
 
-  section 'a1', "Iteration A1: Get Something Running" do
+  section '6.2', 'Creating the Products Model and Maintenance Application' do
     assert_select 'th', 'Image url'
     assert_select 'input#product_title[value=Pragmatic Version Control]'
     assert_select 'a[href=http://127.0.0.1:3000/products/1]', 'redirected'

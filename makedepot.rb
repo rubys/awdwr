@@ -1,15 +1,26 @@
+# Micro DSL for declaring an ordered set of book sections
 $sections = []
 def section number, title, &steps
   $sections << [number, title, steps]
 end
 
-section 6.2, 'Iteration A1: Get Something Running' do
+section 6.1, 'Iteration A1: Getting Something Running' do
+  rails 'depot', :a
+  cmd "cp -rpv #{$BASE}/plugins/* vendor/plugins/"
+  edit 'config/environments/development.rb' do |data|
+    data << "\n\n" + <<-EOF.unindent(6)
+      config.logger = Logger.new(config.log_path, 2, 10.kilobytes)
+    EOF
+  end
+end
+
+section 6.2, 'Creating the Products Model and Maintenance Application' do
   cmd 'ls -p'
   cmd 'ruby script/generate scaffold product ' +
     'title:string description:text image_url:string'
   cmd 'rake db:migrate'
   db 'select version from schema_migrations'
-
+  restart_server
   edit 'app/views/products/new.html.erb' do |data|
     data[/ f.text_area :description()/,1] = ', :rows => 6'
   end
@@ -2088,17 +2099,22 @@ end
 def restart_server
   log :server, 'restart'
   $x.h3 'restart'
-  Process.kill "INT", $server
-  Process.wait($server)
+  if $server
+    Process.kill "INT", $server
+    Process.wait($server)
+  end
 
   $server = fork
   if $server
     sleep 10
   else
-    $stdout = StringIO.open('','w')
-    require 'config/boot'
-    require 'commands/server'
-    exit 86
+    begin
+      $stdout = StringIO.open('','w')
+      require 'config/boot'
+      require 'commands/server'
+    ensure
+      Process.exit!
+    end
   end
 end
 
@@ -2141,67 +2157,77 @@ $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
 
     cmd 'ruby -v'
     cmd 'gem -v'
-    rails 'depot', :a
-    cmd "cp -rp #{$BASE}/plugins/* vendor/plugins/"
-    cmd 'ls vendor/plugins/'
   
     e = nil
 
-    edit 'config/environments/development.rb' do |data|
-      data << "\n\n" + <<-EOF.unindent(8)
-        config.logger = Logger.new(config.log_path, 2, 10.kilobytes)
-      EOF
+    # determine which range(s) of steps are to be executed
+    ranges = ARGV.grep(/^ \d+(.\d+)? ( (-|\.\.) \d+(.\d+)? )? /x).map do |arg|
+      bounds = arg.split(/-|\.\./)
+      Range.new(bounds.first.to_f, bounds.last.to_f)
     end
+    ARGV.push 'partial' if ranges
 
-    ranges = ARGV.grep(/^\d[.\d]*(\.\.\d[.\d]*)?/).map do |arg|
-      if arg.include? '..'
-        Range.new(*arg.split('..').map {|n| n.to_f})
-      else
-        Range.new(arg.to_f, arg.to_f)
+    # optionally save a snapshot
+    if ARGV.include? 'restore'
+      log :snap, 'restore'
+      Dir.chdir $BASE
+      FileUtils.rm_rf "work"
+      FileUtils.cp_r "snapshot", "work", :preserve => true
+      Dir.chdir $WORK
+      if File.directory? 'depot'
+        Dir.chdir 'depot'
+        restart_server
       end
     end
 
-    $server = fork
-    if $server
-      sleep 10
-      begin
-        $sections.each do |number, title, steps|
-          next unless ranges.empty? or ranges.any? {|r| r.include?(number)}
-          head "#{number} #{title}"
-          steps.call
-        end
-      rescue Exception => e
-        $x.pre :class => 'traceback' do
-          STDERR.puts e.inspect
-          $x.text! "#{e.inspect}\n"
-          e.backtrace.each {|line| $x.text! "  #{line}\n"}
-        end
-      ensure
-        if e.class != SystemExit
-          Dir.chdir($WORK)
-          Dir.chdir('depot')
-          restart_server unless ARGV.include? 'depot_only'
-          Net::HTTP.start('127.0.0.1', 3000) do |http|
-            $style.text! http.get('/stylesheets/scaffold.css').body
-            $style.text! http.get('/stylesheets/depot.css').body
-          end
+    # run steps
+    begin
+      $sections.each do |number, title, steps|
+	next unless ranges.empty? or ranges.any? {|r| r.include?(number)}
+	head "#{number} #{title}"
+	steps.call
+      end
+    rescue Exception => e
+      $x.pre :class => 'traceback' do
+	STDERR.puts e.inspect
+	$x.text! "#{e.inspect}\n"
+	e.backtrace.each {|line| $x.text! "  #{line}\n"}
+      end
+    ensure
+      if e.class != SystemExit
+	# switch back to depot (if necessary)
+	if Dir.pwd != File.join($WORK,'depot') or !$server
+	  Dir.chdir(File.join($WORK,'depot'))
+	  restart_server
+	end
 
-          Process.kill "INT", $server
-          Process.wait($server)
+	# fetch stylesheets
+	Net::HTTP.start('127.0.0.1', 3000) do |http|
+	  $style.text! http.get('/stylesheets/scaffold.css').body
+	  $style.text! http.get('/stylesheets/depot.css').body
+	end
+
+        # terminate server
+	Process.kill "INT", $server
+	Process.wait($server)
+
+        # optionally save a snapshot
+        if ARGV.include? 'save'
+          log :snap, 'save'
+          Dir.chdir $BASE
+          FileUtils.rm_rf "snapshot"
+          FileUtils.cp_r "work", "snapshot", :preserve => true
         end
       end
-    else
-      $stdout = StringIO.open('','w')
-      require 'config/boot'
-      require 'commands/server'
-      exit 86
     end
   end
 end
 
+# output results as HTML, after inserting style and toc information
 $x.target![/<style.*?>()/,1] = "\n#{$style.target!.strip.gsub(/^/,' '*6)}\n"
 $x.target!.sub! /<ul(.*?)\/>/,
   "<ul\\1>\n#{$toc.target!.gsub(/^/,' '*6)}    </ul>"
+log :WRITE, 'makedepot.html'
 open("#{$BASE}/makedepot.html",'w') do |file| 
   file.write <<-EOF.unindent(4)
     <!DOCTYPE html
@@ -2210,3 +2236,9 @@ open("#{$BASE}/makedepot.html",'w') do |file|
   EOF
   file.write $x.target!
 end
+
+# run tests
+log :CHECK, 'makedepot.html'
+Dir.chdir $BASE
+STDOUT.puts
+require 'checkdepot'

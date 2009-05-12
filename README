@@ -11,19 +11,27 @@ Installation of all necessary dependencies from a fresh install of Ubuntu 9.04:
 
 Execution instructions:
 
-  ruby makedepot.rb [VERSION] [RANGE]...
+  ruby makedepot.rb [VERSION] [restore] [RANGE]... [save]
+
+    "restore" - restore from snapshot before resuming execution
+
+    "VERSION" specifies the Rails version to test.  Examples:
+      edge
+      _2.2.2_
+      ~/git
+
+    "RANGE" specifies a set of sections to execute.  Examples:
+      6.2..6.5
+      7.1-9.5
+      16
+
+    "save" - save snapshot after execution completes
+
+  Output will be produced as makedepot.html.
+
+Tests against makedepot.html can also be run separately:
+
   ruby checkdepot.rb [partial]
-
-  VERSION specifies the Rails version to test.  Examples:
-    edge
-    _2.2.2_
-    ~/git
-
-  RANGE specifies a set of sections to execute.  Examples:
-    16
-    6.2..6.5
 
   "partial" means that tests which cover sections that are not included in
     makedepot.html are to be omitted.
-
-Output will be produced as makedepot.html.
