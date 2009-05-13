@@ -56,6 +56,34 @@ class DepotTest < ActiveSupport::TestCase
       "edit failed"
   end
 
+  section 4, 'Instant Gratification' do
+    stdout = css_select('.stdout').map do |tag|
+      tag.children.join.gsub('&lt;','<').gsub('&gt;','>')
+    end
+
+    assert_equal '<ul>', stdout.shift
+    assert_equal '  <li>Addition: 3 </li>', stdout.shift
+    assert_equal '  <li>Concatenation: cowboy </li>', stdout.shift
+    assert_match /^  <li>Time in one hour:  \w+ \w+ \d+ \d\d:\d\d:\d\d [+-]\d+ \d+ <\/li>/, stdout.shift
+    assert_equal '</ul>', stdout.shift
+
+    3.times do
+      assert_equal ' ', stdout.shift
+      assert_equal 'Ho!<br />', stdout.shift
+    end
+    assert_equal ' ', stdout.shift
+    assert_equal 'Merry Christmas!', stdout.shift
+
+    3.times { assert_equal 'Ho!<br />', stdout.shift }
+    assert_equal ' ', stdout.shift
+    assert_equal 'Merry Christmas!', stdout.shift
+
+    3.times { assert_equal 'Ho!<br />', stdout.shift }
+    assert_equal 'Merry Christmas!', stdout.shift
+
+    assert stdout.empty?
+  end
+
   section 6.2, 'Creating the Products Model and Maintenance Application' do
     assert_select 'th', 'Image url'
     assert_select 'input#product_title[value=Pragmatic Version Control]'

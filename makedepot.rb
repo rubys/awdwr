@@ -4,6 +4,18 @@ def section number, title, &steps
   $sections << [number, title, steps]
 end
 
+section 4, 'Instant Gratification' do
+  cmd "erb -r rubygems -r active_support -T - < #{$CODE}/erb/ex1.html.erb |  
+       sed 's/<!--.*-->//'"
+  cmd "erb -r rubygems -r active_support -T - < #{$CODE}/erb/ex2.html.erb | 
+       sed 's/<!--.*-->//'"
+  cmd "erb -r rubygems -r active_support -T - < #{$CODE}/erb/ex2a.html.erb | 
+       sed 's/<!--.*-->//'"
+  cmd "sed 's/-%>\\n/%>/' < #{$CODE}/erb/ex2b.html.erb |  
+       erb -r rubygems -r active_support -T - |
+       sed 's/<!--.*-->//'"
+end
+
 section 6.1, 'Iteration A1: Getting Something Running' do
   rails 'depot', :a
   cmd "cp -rpv #{$BASE}/plugins/* vendor/plugins/"
@@ -1741,6 +1753,7 @@ end
 $BASE = File.expand_path(File.dirname(__FILE__))
 $WORK = File.join($BASE,'work')
 $DATA = File.join($BASE,'data')
+$CODE = File.join($DATA,'code')
 $x = Builder::XmlMarkup.new(:indent => 2)
 $toc = Builder::XmlMarkup.new(:indent => 2)
 $style = Builder::XmlMarkup.new(:indent => 2)
