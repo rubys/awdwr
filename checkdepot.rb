@@ -224,28 +224,27 @@ class DepotTest < ActiveSupport::TestCase
 
     # for efficiency, collect the stdout children, and make a single pass
     stdout = css_select('.stdout').map {|tag| tag.children.join}
-    %w(
-      CreateDiscounts
-      AddStatusToUser
-      AddEmailToOrders
-      AddPlacedAtToOrders
-      AddColumnsToOrders
-      RenameEmailColumn
-      ChangeOrderTypeToString
-      CreateOrderHistories
-      RenameOrderHistories
-      CreateOrderHistories2
-      AddCustomerNameIndexToOrders
-      CreateAuthorBook
-      CreateTableTickets
-      LoadUserData
-      ChangePriceToInteger
-      TotalPriceToUnit
-      AddForeignKey
-    ).each do |name|
-      search = "==  #{name}: migrated"
-      assert !stdout.grep(Regexp.new(search)).empty?, search
-    end
+    stdout = stdout.select {|line| line =~ /^== / and line !~ /ing ===/}
+    assert_match /AddEmailToOrders: migrated/, stdout.shift
+    assert_match /CreateDiscounts: migrated/, stdout.shift
+    assert_match /AddStatusToUser: migrated/, stdout.shift
+    assert_match /AddPlacedAtToOrders: migrated/, stdout.shift
+    assert_match /AddColumnsToOrders: migrated/, stdout.shift
+    assert_match /RenameEmailColumn: migrated/, stdout.shift
+    assert_match /ChangeOrderTypeToString: migrated/, stdout.shift
+    assert_match /CreateOrderHistories: migrated/, stdout.shift
+    assert_match /RenameOrderHistories: migrated/, stdout.shift
+    assert_match /CreateOrderHistories2: migrated/, stdout.shift
+    assert_match /AddCustomerNameIndexToOrders: migrated/, stdout.shift
+    assert_match /CreateAuthorBook: migrated/, stdout.shift
+    assert_match /CreateTableTickets: migrated/, stdout.shift
+    assert_match /TestDiscounts: reverted/, stdout.shift
+    assert_match /LoadUserData: reverted/, stdout.shift
+    assert_match /LoadUserData: migrated/, stdout.shift
+    assert_match /ChangePriceToInteger: migrated/, stdout.shift
+    assert_match /TotalPriceToUnit: migrated/, stdout.shift
+    assert_match /AddForeignKey: migrated/, stdout.shift
+    assert stdout.empty?
   end
 
   section '26', "26 Active Resources" do
