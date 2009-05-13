@@ -1762,17 +1762,12 @@ def log type, message
   STDOUT.puts Time.now.strftime("[%Y-%m-%d %H:%M:%S] #{type} #{message}")
 end
 
-def head text
+def head number, title
+  text = "#{number} #{title}"
   log '====>', text
 
-  if text =~ /(\w+):/
-    anchor = $1.downcase
-  else
-    anchor = text.split.first.downcase
-  end
-
-  $x.a(:name => anchor, :class => 'toc') { $x.h2 text }
-  $toc.li { $toc.a text, :href => "##{anchor}"}
+  $x.a(:class => 'toc', :name => "section-#{number}") {$x.h2 text}
+  $toc.li {$toc.a text, :href => "#section-#{number}"}
 end
 
 def db statement, hilight=[]
@@ -2179,7 +2174,7 @@ $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
       bounds = arg.split(/-|\.\./)
       Range.new(bounds.first.to_f, bounds.last.to_f)
     end
-    ARGV.push 'partial' if ranges
+    ARGV.push 'partial' unless ranges.empty?
 
     # optionally save a snapshot
     if ARGV.include? 'restore'
@@ -2198,7 +2193,7 @@ $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
     begin
       $sections.each do |number, title, steps|
 	next unless ranges.empty? or ranges.any? {|r| r.include?(number)}
-	head "#{number} #{title}"
+	head number, title
 	steps.call
       end
     rescue Exception => e
