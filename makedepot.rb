@@ -1732,6 +1732,12 @@ require 'builder'
 require 'rexml/document'
 require 'stringio'
 
+# verify that port is available for testing
+if (Net::HTTP.get_response('localhost','/',3000).code == '200' rescue false)
+  STDERR.puts 'local server already running on port 3000'
+  exit
+end
+
 $BASE = File.expand_path(File.dirname(__FILE__))
 $WORK = File.join($BASE,'work')
 $DATA = File.join($BASE,'data')
@@ -2106,9 +2112,17 @@ def restart_server
 
   $server = fork
   if $server
-    sleep 10
+    # wait for server to start
+    60.times do
+      sleep 0.5
+      begin
+        break if Net::HTTP.get_response('localhost','/',3000).code == '200'
+      rescue Errno::ECONNREFUSED
+      end
+    end
   else
     begin
+      # start server, redirecting stdout to a string
       $stdout = StringIO.open('','w')
       require 'config/boot'
       require 'commands/server'
