@@ -452,7 +452,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<Proc:.*>$/, stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
     assert_equal "=> 0", stdout.shift
     assert_match /^=> #<Product id: 1, title: "Programming Ruby"/, stdout.shift
     assert_equal "=> #<LineItem id: nil, product_id: nil, order_id: nil, quantity: nil, unit_price: nil>", stdout.shift
@@ -525,7 +525,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> #<Proc:.*>/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>)/, stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<Customer id: 1, type: "Customer"/, stdout.shift
     assert_match /^=> #<Manager id: 2, type: "Manager"/, stdout.shift
@@ -564,10 +564,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "-- create_table(:images, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
+    4.times { assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift }
     assert_equal "\"Article One\"", stdout.shift
     assert_equal "#<Article id: 1, content: \"This is my new article\">", stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -584,10 +581,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
+    4.times { assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift }
     assert_equal "Article One:  Article", stdout.shift
     assert_equal "Image One:  Image", stdout.shift
     assert_equal "Sound One:  Sound", stdout.shift
@@ -718,8 +712,8 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "-- create_table(:orders, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
     assert_match /^=> #<Order id: 1, name: "Dave"/, stdout.shift
     assert_match /^=> #<Order id: 1, name: "Dave"/, stdout.shift
     assert_equal "nil", stdout.shift
@@ -748,7 +742,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<Proc:.*>$/, stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
     assert_equal "=> #<Product id: 1, title: \"Programming Ruby\", description: \" ... \", line_items_count: 0>", stdout.shift
     assert_equal "=> #<LineItem id: nil, product_id: nil, order_id: nil, quantity: nil, unit_price: nil>", stdout.shift
     assert_equal "=> #<Product id: 1, title: \"Programming Ruby\", description: \" ... \", line_items_count: 0>", stdout.shift
@@ -781,7 +775,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "=> Encrypter", stdout.shift
-    assert_equal "=> #<Proc:0x00000000@/home/rubys/git/awdwr/data/code/e1/ar/encrypt.rb:34>", stdout.shift
+    assert_match /^=> #<Proc:0x00000000@.*\/encrypt.rb:34>$/, stdout.shift
     assert_equal "=> #<Order id: nil, user_id: nil, name: nil, address: nil, email: nil>", stdout.shift
     assert_equal "=> \"Dave Thomas\"", stdout.shift
     assert_equal "=> \"123 The Street\"", stdout.shift
@@ -895,9 +889,9 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<Account id: 1, number: \"12345\", .*>$/, stdout.shift
     assert_match /^=> #<Account id: 2, number: \"54321\", .*>$/, stdout.shift
-    assert_equal "\tfrom /home/rubys/git/awdwr/data/code/e1/ar/transactions.rb:82", stdout.shift
-    assert_equal "\tfrom /home/rubys/git/awdwr/data/code/e1/ar/transactions.rb:80", stdout.shift
-    assert_equal "\tfrom :0", stdout.shift
+    assert_match /^\sfrom .*\/transactions.rb:82$/, stdout.shift
+    assert_match /^\sfrom .*\/transactions.rb:80$/, stdout.shift
+    stdout.shift if stdout.first == "\tfrom :0"
     assert_equal "     id = 1", stdout.shift
     assert_equal " number = 12345", stdout.shift
     assert_equal "balance = 100", stdout.shift
