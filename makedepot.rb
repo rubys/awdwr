@@ -18,7 +18,6 @@ end
 
 section 6.1, 'Iteration A1: Getting Something Running' do
   rails 'depot', :a
-  cmd "cp -rpv #{$BASE}/plugins/* vendor/plugins/"
   edit 'config/environments/development.rb' do |data|
     data << "\n\n" + <<-EOF.unindent(6)
       config.logger = Logger.new(config.log_path, 2, 10.kilobytes)
@@ -1540,6 +1539,7 @@ end
 
 section 17, 'Migration' do
   rails 'migration'
+  cmd "cp -rpv #{$BASE}/plugins/* vendor/plugins/"
   restart_server
   cmd 'cp -v -r ../depot/db/* db/'
   cmd 'cp -v -r ../depot/app/models/* app/models/'
@@ -1555,9 +1555,59 @@ section 17, 'Migration' do
     cmd "cp -v #{$DATA}/migrate/migration_helpers.rb lib" if i == 37
     cmd 'rake db:migrate'
     cmd "rm #{Dir['db/migrate/2*'].sort.last}" if [26,32].include?(i)
-    # cmd 'rake annotate_models'
-    # cmd 'cat app/models/line_item.rb'
+    cmd 'rake annotate_models'
+    cmd 'cat app/models/line_item.rb'
   end
+end
+
+section 18, 'Active Record: The Basics' do
+  Dir.chdir(File.join($WORK,'migration'))
+  cmd 'echo "Order.column_names" | ruby script/console'
+  cmd 'echo "Order.columns_hash[\"pay_type\"]" | ruby script/console'
+  db "select * from orders limit 1"
+  cmd 'echo "Product.find(:first).price_before_type_cast" | ruby script/console'
+  cmd 'echo "Product.find(:first).updated_at_before_type_cast" | ruby script/console'
+  irb 'e1/ar/new_examples.rb'
+  irb 'e1/ar/find_examples.rb'
+  irb 'e1/ar/dump_serialize_table.rb'
+  irb 'e1/ar/aggregation.rb'
+end
+
+section 19, 'ActiveRecord: Relationships Between Tables' do
+  Dir.chdir(File.join($WORK,'migration'))
+  irb 'e1/ar/associations.rb'
+  irb 'e1/ar/sti.rb'
+  irb 'e1/ar/polymorphic.rb 1'
+  db "select * from articles"
+  db "select * from catalog_entries"
+  db "delete from catalog_entries"
+  irb 'e1/ar/polymorphic.rb 2'
+  db "select * from articles"
+  db "select * from images"
+  db "select * from sounds"
+  db "select * from catalog_entries"
+  irb 'e1/ar/self_association.rb'
+  irb 'e1/ar/acts_as_list.rb'
+  irb 'e1/ar/acts_as_tree.rb'
+  irb 'e1/ar/one_to_one.rb'
+  irb 'e1/ar/counters.rb'
+end
+
+section 20, 'ActiveRecord: Object Life Cycle' do
+  Dir.chdir(File.join($WORK,'migration'))
+  irb 'e1/ar/encrypt.rb'
+  db "select * from orders"
+  irb 'e1/ar/observer.rb'
+  irb 'e1/ar/attributes.rb'
+  db "select id, quantity*unit_price from line_items"
+  irb 'e1/ar/transactions.rb 1'
+  db "select * from accounts"
+  irb 'e1/ar/transactions.rb 2'
+  db "select * from accounts"
+  irb 'e1/ar/transactions.rb 3'
+  irb 'e1/ar/transactions.rb 4'
+  irb 'e1/ar/transactions.rb 5'
+  irb 'e1/ar/optimistic.rb'
 end
 
 section 21, 'Action Controller: Routing and URLs' do
@@ -1829,7 +1879,7 @@ end
 def irb file
   $x.pre "irb #{file}", :class=>'stdin'
   log :irb, file
-  cmd = "irb -r rubygems --prompt-mode simple ../../code/#{file}"
+  cmd = "irb -r rubygems --prompt-mode simple #{$CODE}/#{file}"
   Open3.popen3(cmd) do |pin, pout, perr|
     terr = Thread.new do
       $x.pre perr.readline.chomp, :class=>'stderr' until perr.eof?
