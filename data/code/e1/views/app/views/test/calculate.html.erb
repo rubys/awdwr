@@ -1,0 +1,16 @@
+<% unless @errors.blank? %>
+  <ul>
+  <% for error in @errors %>
+    <li><p><%= h(error) %></p></li>
+  <% end %>
+  </ul>
+<% end %>
+
+<% form_tag(:action => :calculate) do %>
+  <%= text_field_tag(:arg1, params[:arg1], :size => 3) %>
+  <%= select_tag(:operator, 
+                 options_for_select(%w{ + - * / }, 
+                                    params[:operator])) %>
+  <%= text_field_tag(:arg2, params[:arg2], :size => 3) %>
+<% end %>
+<strong><%= @result %></strong>

@@ -1,0 +1,2 @@
+distance_of_time_in_words(Time.now, Time.local(2005, 12, 25))
+time_ago_in_words(Time.utc(2004, 12, 25))
