@@ -1702,6 +1702,98 @@ section 21.2, 'Routing Requests' do
   irb 'e1/routing/config/routes_for_blog.rb'
 end
 
+section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
+  rails 'view', :e1
+  cmd "cp -v #{$CODE}/e1/views/app/controllers/*.rb app/controllers"
+  cmd "cp -v #{$CODE}/e1/views/lib/*_template.rb lib"
+  cmd "cp -vr #{$CODE}/e1/views/app/views/pager app/views"
+  cmd 'ruby script/generate model user name:string'
+  restart_server
+  cmd 'rake db:migrate'
+  cmd 'echo "PagerController.new.populate" | ruby script/console'
+  get '/pager/user_list'
+  get '/pager/user_list?page=2'
+end
+
+section 23.5, 'Forms That Wrap Model Objects' do
+  cmd "cp -rpv #{$BASE}/plugins/country_select vendor/plugins/"
+  restart_server
+  cmd 'ruby script/generate model product title:string description:text ' + 
+       'image_url:string price:decimal'
+  cmd "cp -v #{$CODE}/e1/views/db/migrate/*products.rb db/migrate/*products.rb"
+  cmd "cp -v #{$CODE}/e1/views/app/models/shipping.rb app/models"
+  cmd 'ruby script/generate model detail product_id:integer sku:string ' + 
+       'manufacturer:string'
+  cmd "cp -v #{$CODE}/e1/views/db/migrate/*details.rb db/migrate/*details.rb"
+  cmd "cp -v #{$CODE}/e1/views/app/models/detail.rb app/models"
+  cmd 'rake db:migrate'
+  cmd "cp -vr #{$CODE}/e1/views/app/views/form_for app/views"
+  get '/form_for/new'
+  cmd "cp -vr #{$CODE}/e1/views/app/views/test app/views"
+  get '/test/select'
+  cmd "cp -vr #{$CODE}/e1/views/app/views/products app/views"
+  get '/products/new'
+end
+
+section 23.6, 'Custom Form Builders' do
+  cmd "cp -vr #{$CODE}/e1/views/app/helpers/tagged_builder.rb app/helpers"
+  cmd "cp -vr #{$CODE}/e1/views/app/views/builder app/views"
+  get '/builder/new'
+  cmd "cp -vr #{$CODE}/e1/views/app/helpers/builder_helper.rb app/helpers"
+  get '/builder/new_with_helper'
+  cmd "cp -vr #{$CODE}/e1/views/app/views/array app/views"
+  get '/array/edit'
+end
+
+section 23.7, 'Working with Nonmodel Fields' do
+  get '/test/calculate'
+end
+
+section 23.8, 'Uploading Files to Rails Applications' do
+  cmd 'ruby script/generate model picture comment:string name:string ' +
+       'content_type:string data:binary'
+  cmd "cp -v #{$CODE}/e1/views/db/migrate/*pictures.rb db/migrate/*pictures.rb"
+  cmd "cp -v #{$CODE}/e1/views/app/models/picture.rb app/models"
+  cmd 'rake db:migrate'
+  cmd "cp -vr #{$CODE}/e1/views/app/views/upload app/views"
+  get '/upload/get'
+  # get '/upload/show'
+end
+
+section 23.9, 'Layouts and Components' do
+  cmd "cp -vr #{$CODE}/e1/views/app/views/partial app/views"
+  get '/partial/list'
+end
+
+section 23.10, 'Caching, Part Two' do
+  cmd 'ruby script/generate model article body:text'
+  cmd "cp -v #{$CODE}/e1/views/app/models/article.rb app/models"
+  cmd "cp -vr #{$CODE}/e1/views/app/views/blog app/views"
+  get '/blog/list'
+  cmd "cp -vr #{$CODE}/e1/views/app/views/blog1 app/views"
+  get '/blog1/list'
+  cmd "cp -vr #{$CODE}/e1/views/app/views/blog2 app/views"
+  get '/blog2/list'
+end
+
+section 23.11, 'Adding New Templating Systems' do
+  if $RC
+    cmd "mv app/controllers/application.rb app/controllers/application_controller.rb"
+    restart_server
+    edit 'lib/rdoc_template.rb' do |data|
+      data[/\(template()\)/m,1] = ', local_assigns = {}'
+    end
+    edit 'lib/eval_template.rb' do |data|
+      data[/\(template()\)/m,1] = ', local_assigns = {}'
+      data[/()@view.send :eval/m,1] = '#'
+      data[/(template.locals)/m,1] = 'local_assigns'
+    end
+  end
+  get '/test/example'
+  get '/test/date_format'
+  get '/test/example1'
+end
+
 section 26, 'Active Resources' do
   Dir.chdir(File.join($WORK,'depot'))
   restart_server

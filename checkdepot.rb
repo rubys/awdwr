@@ -1028,6 +1028,46 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal '=> "http://www.example.com/blog/2002"', stdout.shift
   end
 
+  section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
+    assert_select '.stdout', /^==  CreateUsers: migrated/
+    assert_select '.stdout', '=&gt; 763'
+    assert_select 'a[href=http://localhost:3000/pager/user_list?page=27]', '27'
+  end
+
+  section 23.5, 'Forms That Wrap Model Objects' do
+    assert_select "input[name='product[price]'][value=0.0]"
+    assert_select 'option[selected=selected]', 'United States'
+    assert_select 'input[id=details_sku]'
+  end
+
+  section 23.6, 'Custom Form Builders' do
+    assert_select "textarea[id=product_description]"
+  end
+
+  section 23.7, 'Working with Nonmodel Fields' do
+    assert_select "input[id=arg1]"
+  end
+
+  section 23.8, 'Uploading Files to Rails Applications' do
+    assert_select "input[id=picture_uploaded_picture][type=file]"
+  end
+
+  section 23.9, 'Layouts and Components' do
+    assert_select "hr"
+  end
+
+  section 23.10, 'Caching, Part Two' do
+    # not exactly a good test of the function in question...
+    assert_select "p", 'There are a total of 4 articles.'
+  end
+
+  section 23.11, 'Adding New Templating Systems' do
+    assert_select "em", 'real'
+    assert_select ".body", /over \d+ years/
+    assert_select ".body", /request\.path => \/test\/example1/
+    assert_select ".body", /a \+ b => 3/
+  end
+
   section 26, "Active Resources" do
     assert_select '.stdout', /Failed with 302/
     assert_select '.stdout', '29.95'
