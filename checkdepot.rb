@@ -967,7 +967,7 @@ class DepotTest < ActiveSupport::TestCase
   end
 
   section 21, "Action Controller: Routing and URLs" do
-    assert_select '.stdout', /^ 
+    assert_select '.stdout', /^ \s*
       edit_article_comment \s GET \s+
       \/articles\/:article_id\/comments\/:id\/edit (\(.:format\))? \s+
       \{:controller=&gt;"comments", \s :action=&gt;"edit"\} $

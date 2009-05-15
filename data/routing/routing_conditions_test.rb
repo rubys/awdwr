@@ -1,6 +1,14 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
 class RoutingTest < ActionController::TestCase
+
+  # the following is needed for Rails 2.2.2, but entirely unnecessary for
+  # 2.3.2
+  tests StoreController
+  def setup
+    load "config/routes_with_conditions.rb"
+  end
+
   #START:recognizes
   def test_method_specific_routes
     assert_recognizes({"controller" => "store", "action" => "display_checkout_form"},
