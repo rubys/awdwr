@@ -1,0 +1,6 @@
+daves_order:
+  id:      1
+  name:    Dave Thomas
+  address: 123 Main St
+  email:   dave@pragprog.com
+

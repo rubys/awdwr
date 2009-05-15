@@ -1070,6 +1070,14 @@ class DepotTest < ActiveSupport::TestCase
     assert_select ".body", /a \+ b => 3/
   end
 
+  section 25.1, "Sending E-mail" do
+    assert_select 'pre', /Thank you for your recent order/
+    assert_select 'pre', /1 x Programming Ruby, 2nd Edition/
+    assert_select '.body', 'Thank you...'
+    assert_select '.stdout', '2 tests, 2 assertions, 0 failures, 0 errors'
+    assert_select '.stdout', '1 tests, 5 assertions, 0 failures, 0 errors'
+  end
+
   section 26, "Active Resources" do
     assert_select '.stdout', /Failed with 302/
     assert_select '.stdout', '29.95'

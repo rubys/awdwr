@@ -1794,6 +1794,26 @@ section 23.11, 'Adding New Templating Systems' do
   get '/test/example1'
 end
 
+section 25.1, 'Sending E-mail' do
+  rails 'mailer', :e1
+  cmd 'ruby script/generate mailer OrderMailer confirm sent'
+  code = "#{$CODE}/e1/mailer"
+  cmd "cp -vr #{code}/db/migrate db"
+  cmd "cp -v #{code}/app/controllers/* app/controllers"
+  cmd "cp -v #{code}/app/models/* app/models"
+  cmd "cp -vr #{code}/test ." unless $RC
+  cmd "cp -vr #{code}/test/fixtures/* test/fixtures/" if $RC
+  cmd "cp -vr #{$DATA}/mailer/* test/fixtures/order_mailer/" if $RC
+  cmd "mv -v test/fixtures/order_mailer/order_mailer_test.rb test/unit" if $RC
+  cmd "cp -vr #{code}/test/functional/order_controller_test.rb test/functional/" if $RC
+  cmd "cp -vr #{code}/app/views/order_mailer app/views"
+  restart_server
+  cmd 'rake db:migrate'
+  get '/test/create_order'
+  get '/test/ship_order'
+  cmd 'rake test'
+end
+
 section 26, 'Active Resources' do
   Dir.chdir(File.join($WORK,'depot'))
   restart_server
