@@ -2,6 +2,7 @@ require 'rubygems'
 require 'test/unit'
 require 'active_support'
 require 'active_support/test_case'
+require 'active_support/version'
 
 class DepotTest < ActiveSupport::TestCase
   # just enough infrastructure to get 'assert_select' to work
@@ -1062,6 +1063,7 @@ class DepotTest < ActiveSupport::TestCase
   end
 
   section 23.11, 'Adding New Templating Systems' do
+    next if ActiveSupport::VERSION::STRING == '2.2.2'
     assert_select "em", 'real'
     assert_select ".body", /over \d+ years/
     assert_select ".body", /request\.path => \/test\/example1/
