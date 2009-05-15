@@ -980,9 +980,7 @@ class DepotTest < ActiveSupport::TestCase
     stdout = collect_stdout.grep(/^=>/).map do |line|
       # sort hashes
       line.sub(/^=> \{.*\}$/) do |match|
-        result = "=> {#{match.scan(/:\w+=>".*?"(?=, |\})/).sort.join(', ')}}"
-        # puts "assert_equal '#{result}', stdout.shift"
-        result
+        "=> {#{match.scan(/:\w+=>".*?"(?=, |\})/).sort.join(', ')}}"
       end
     end
     assert_equal '=> true', stdout.shift
