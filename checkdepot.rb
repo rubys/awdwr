@@ -1002,7 +1002,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal '=> {:action=>"show", :controller=>"coupon", :id=>"1"}', stdout.shift
     assert_equal '=> "http://www.example.com/store/display/123"', stdout.shift
     assert_equal '=> true', stdout.shift
-    assert_equal '=> ["Mime", "HTML", "ActionController"]', stdout.shift
+    assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal '=> []', stdout.shift
     assert_equal '=> nil', stdout.shift
     assert_equal '=> ["article", "blog"]', stdout.shift
