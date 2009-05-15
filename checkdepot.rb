@@ -976,6 +976,53 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', '1 tests, 1 assertions, 0 failures, 0 errors'
   end
 
+  section 21.2, 'Routing Requests' do
+    stdout = collect_stdout.grep /^=>/
+    assert_equal '=> true', stdout.shift
+    assert_equal '=> ["Mime", "HTML", "ActionController"]', stdout.shift
+    assert_equal '=> []', stdout.shift
+    assert_equal '=> nil', stdout.shift
+    assert_equal '=> ["store", "admin", "coupon"]', stdout.shift
+    assert_equal '=> []', stdout.shift
+    assert_match /^=> #<ActionController::Routing::RouteSet:.*>/, stdout.shift
+    assert_match /^=> #<ActionController::Integration::Session:.*>/, stdout.shift
+    assert_equal '=> nil', stdout.shift
+    assert_equal '=> {:controller=>"store", :action=>"index"}', stdout.shift
+    assert_equal '=> {:controller=>"store", :action=>"add_to_cart", :id=>"1"}', stdout.shift
+    assert_equal '=> {:controller=>"store", :format=>"xml", :action=>"add_to_cart", :id=>"1"}', stdout.shift
+    assert_equal '=> "/store"', stdout.shift
+    assert_equal '=> "/store/index/123"', stdout.shift
+    assert_equal '=> {:controller=>"coupon", :action=>"show", :id=>"1"}', stdout.shift
+    assert_equal '=> []', stdout.shift
+    assert_equal '=> {:controller=>"coupon", :action=>"show", :id=>"1"}', stdout.shift
+    assert_equal '=> "http://www.example.com/store/display/123"', stdout.shift
+    assert_equal '=> true', stdout.shift
+    assert_equal '=> ["Mime", "HTML", "ActionController"]', stdout.shift
+    assert_equal '=> []', stdout.shift
+    assert_equal '=> nil', stdout.shift
+    assert_equal '=> ["article", "blog"]', stdout.shift
+    assert_match /^=> #<ActionController::Routing::RouteSet:.*>/, stdout.shift
+    assert_match /^=> #<ActionController::Integration::Session:.*>/, stdout.shift
+    assert_equal '=> [ActionController::Base, ActionView::Base]', stdout.shift
+    assert_equal '=> {:controller=>"blog", :action=>"index"}', stdout.shift
+    assert_equal '=> {:controller=>"blog", :action=>"show", :id=>"123"}', stdout.shift
+    assert_equal '=> {:year=>"2004", :controller=>"blog", :action=>"show_date"}', stdout.shift
+    assert_equal '=> {:month=>"12", :year=>"2004", :controller=>"blog", :action=>"show_date"}', stdout.shift
+    assert_equal '=> {:month=>"12", :year=>"2004", :controller=>"blog", :action=>"show_date", :day=>"25"}', stdout.shift
+    assert_equal '=> {:controller=>"article", :action=>"edit", :id=>"123"}', stdout.shift
+    assert_equal '=> {:controller=>"article", :action=>"show_stats"}', stdout.shift
+    assert_equal '=> {:controller=>"blog", :anything=>["blog", "wibble"], :action=>"unknown_request"}', stdout.shift
+    assert_equal '=> {:controller=>"blog", :anything=>["junk"], :action=>"unknown_request"}', stdout.shift
+    assert_equal '=> {:month=>"07", :year=>"2006", :controller=>"blog", :action=>"show_date", :day=>"28"}', stdout.shift
+    assert_equal '=> "/blog/2006/07/25"', stdout.shift
+    assert_equal '=> "/blog/2005"', stdout.shift
+    assert_equal '=> "/blog/show/123"', stdout.shift
+    assert_equal '=> "/blog/2006/07/28"', stdout.shift
+    assert_equal '=> "/blog/2006"', stdout.shift
+    assert_equal '=> "http://www.example.com/blog/2002"', stdout.shift
+    assert_equal '=> "http://www.example.com/blog/2002"', stdout.shift
+  end
+
   section 26, "Active Resources" do
     assert_select '.stdout', /Failed with 302/
     assert_select '.stdout', '29.95'
