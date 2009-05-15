@@ -1696,6 +1696,12 @@ section 21, 'Action Controller: Routing and URLs' do
   cmd 'rake test'
 end
 
+section 21.2, 'Routing Requests' do
+  Dir.chdir(File.join($WORK, 'depot'))
+  irb 'e1/routing/config/routes_for_depot.rb'
+  irb 'e1/routing/config/routes_for_blog.rb'
+end
+
 section 26, 'Active Resources' do
   Dir.chdir(File.join($WORK,'depot'))
   restart_server

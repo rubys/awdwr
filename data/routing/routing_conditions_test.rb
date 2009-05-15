@@ -1,11 +1,6 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
-class RoutingTest < Test::Unit::TestCase
-
-  def setup
-    load "config/routes_with_conditions.rb"
-  end
-  
+class RoutingTest < ActionController::TestCase
   #START:recognizes
   def test_method_specific_routes
     assert_recognizes({"controller" => "store", "action" => "display_checkout_form"},

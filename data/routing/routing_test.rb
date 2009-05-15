@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/../test_helper'
 require 'config/routes.rb'
 
-class RoutingTest < Test::Unit::TestCase
+class RoutingTest < ActionController::TestCase
 
   #START:recognizes
   def test_recognizes

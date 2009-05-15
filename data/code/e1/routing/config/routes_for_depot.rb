@@ -1,9 +1,10 @@
 require 'activesupport'
 require 'action_controller'
 require 'action_controller/integration'
-load "config/routes.rb"
 
+ActionController::Base.session_store = nil
 ActionController::Routing.use_controllers! ["store", "admin", "coupon"]
+load "config/routes.rb"
 rs = ActionController::Routing::Routes
 app = ActionController::Integration::Session.new
 

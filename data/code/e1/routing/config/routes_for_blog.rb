@@ -2,6 +2,7 @@ require 'activesupport'
 require 'action_controller'
 require 'action_controller/integration'
 
+ActionController::Base.session_store = nil
 ActionController::Routing.use_controllers! [ "article", "blog" ]
 rs = ActionController::Routing::Routes
 app = ActionController::Integration::Session.new

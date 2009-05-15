@@ -93,7 +93,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_select 'input#product_title[value=Pragmatic Version Control]'
     assert_select 'a[href=http://127.0.0.1:3000/products/1]', 'redirected'
     assert_select '.stdout', /"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL/
-    assert_select '.stdout', /7 tests, 10 assertions, 0 failures, 0 errors/
+    assert_select '.stdout', '7 tests, 10 assertions, 0 failures, 0 errors'
   end
 
   section 6.3, "Iteration A2: Add a Missing Column" do
@@ -964,6 +964,16 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> 4", stdout.shift
     assert_match /^\sfrom /, stdout.shift
     assert stdout.empty?
+  end
+
+  section 21, "Action Controller: Routing and URLs" do
+    assert_select '.stdout', /^ 
+      edit_article_comment \s GET \s+
+      \/articles\/:article_id\/comments\/:id\/edit (\(.:format\))? \s+
+      \{:controller=&gt;"comments", \s :action=&gt;"edit"\} $
+    /x
+    assert_select '.stdout', '5 tests, 29 assertions, 0 failures, 0 errors'
+    assert_select '.stdout', '1 tests, 1 assertions, 0 failures, 0 errors'
   end
 
   section 26, "Active Resources" do
