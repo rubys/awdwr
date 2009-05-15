@@ -1801,11 +1801,7 @@ section 25.1, 'Sending E-mail' do
   cmd "cp -vr #{code}/db/migrate db"
   cmd "cp -v #{code}/app/controllers/* app/controllers"
   cmd "cp -v #{code}/app/models/* app/models"
-  cmd "cp -vr #{code}/test ." unless $RC
-  cmd "cp -vr #{code}/test/fixtures/* test/fixtures/" if $RC
-  cmd "cp -vr #{$DATA}/mailer/* test/fixtures/order_mailer/" if $RC
-  cmd "mv -v test/fixtures/order_mailer/order_mailer_test.rb test/unit" if $RC
-  cmd "cp -vr #{code}/test/functional/order_controller_test.rb test/functional/" if $RC
+  cmd "cp -vr #{code}/test ."
   cmd "cp -vr #{code}/app/views/order_mailer app/views"
   restart_server
   cmd 'rake db:migrate'

@@ -1,3 +1,10 @@
-OrderMailer#sent
+<h3>Pragmatic Order Shipped</h3>
+<p>
+  This is just to let you know that we've shipped your recent order:
+</p>
 
-Find me in app/views/order_mailer/sent.rhtml
+<table>
+ <tr><th colspan="2">Qty</th><th>Description</th></tr>
+ 
+</table>
+
