@@ -1,0 +1,19 @@
+<%= error_messages_for 'product' %>
+
+<!--[form:product]-->
+<p><label for="product_title">Title</label><br/>
+<%= text_field 'product', 'title'  %></p>
+
+<p><label for="product_description">Description</label><br/>
+<%= text_area 'product', 'description'  %></p>
+
+<p><label for="product_image_url">Image url</label><br/>
+<%= text_field 'product', 'image_url'  %></p>
+
+<p><label for="product_price">Price</label><br/>
+<%= text_field 'product', 'price'  %></p>
+
+<p><label for="product_date_available">Date available</label><br/>
+<%= datetime_select 'product', 'date_available'  %></p>
+<!--[eoform:product]-->
+

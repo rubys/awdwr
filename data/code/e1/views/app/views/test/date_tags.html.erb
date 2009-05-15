@@ -1,0 +1,45 @@
+<%
+  @product = Product.new
+  def @product.created_on
+    Time.now
+  end
+
+%>
+
+<% form_for :product, :url => { :action=>:date_dump } do |form| %>
+
+<p style="font-size: smaller">
+form.date_select(:created_on, :order => [:day, :month, :year ])
+<br />
+<%=
+  form.date_select(:created_on, :order => [:day, :month, :year ])
+%>
+</p>
+
+<p style="font-size: smaller">
+form.datetime_select(:created_on, :discard_minute => true, :start_year => 1990)
+<br />
+<%=
+form.datetime_select(:created_on, :discard_minute => true, :start_year => 1990)
+%>
+</p>
+<p>
+
+<p style="font-size: smaller">
+select_datetime(Time.now, :include_blank => true, :add_month_numbers => 1) 
+<br/>
+<%= 
+  select_datetime(Time.now, :include_blank => true, :add_month_numbers => 1) 
+%>
+</p>
+
+<p style="font-size: smaller">
+select_year(2015, :prefix => "year", :discard_type => true) 
+<br/>
+<%= 
+select_year(2015, :prefix => "year", :discard_type => true) 
+%>
+</p>
+
+<%= submit_tag %>
+<% end %>

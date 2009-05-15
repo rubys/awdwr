@@ -1,0 +1,10 @@
+<table>
+  <tr><th>Name</th></tr>
+  <% for user in @users %>
+    <tr><td><%= user.name %></td></tr>
+  <% end %>
+</table>
+
+<hr/>
+<%= will_paginate @users  %>
+<hr/>

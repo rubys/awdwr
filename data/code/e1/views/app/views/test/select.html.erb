@@ -1,0 +1,126 @@
+<% @user = "cat"
+
+   def @user.id
+     4
+   end
+
+   def @user.name
+     "Dave"
+   end
+
+   def @user.country
+     "United States"
+   end  
+
+   def @user.time_zone
+    res = ActiveSupport::TimeZone[-6].name
+   end
+
+   @order = "dog"
+   def @order.shipping_option
+     101
+   end    
+  
+%>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+<center>
+<!-- START:select_simple -->
+<% form_for :user do |form| %>
+  <%= form.select(:name, %w{ Andy Bert Chas Dave Eric Fred }) %>
+<% end %>
+<!-- END:select_simple -->
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<% form_for :user do |form| %>
+<!-- START:select_nested -->
+<%= form.select(:id, [ ['Andy', 1],
+                       ['Bert', 2],
+                       ['Chas', 3],
+                       ['Dave', 4],
+                       ['Eric', 5],
+                       ['Fred', 6]]) 
+%>
+<!-- END:select_nested -->
+<% end %>
+
+<p>&nbsp;</p>
+
+<%= select(:user, :id, { 'Andy' => 1,
+    'Bert' => 2,
+    'Chas' => 3,
+   'Dave' => 4,
+   'Eric' => 5,
+   'Fred' => 6}) %>
+
+<p>&nbsp;</p>
+
+<% form_for :user do |form| %>
+<!-- START:select_with_find -->
+<%=
+ @users = User.find(:all, :order => "name").map {|u| [u.name, u.id] }
+ form.select(:name, @users)
+%>
+<!-- END:select_with_find -->
+<% end %>
+
+<b>xc</b>
+
+<% form_for :user do |form| %>
+<!-- START:select_with_collection -->
+<%=
+ @users = User.find(:all, :order => "name")
+ form.collection_select(:name, @users, :id, :name)
+%>
+<!-- END:select_with_collection -->
+<% end %>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+
+<%= country_select(:user, :country) %>
+<p>&nbsp;</p>
+
+<%= country_select(:user, :country, [ "United Kingom", "United States" ]) %>
+<p>&nbsp;</p>
+
+<%= time_zone_select(:user, :time_zone) %>
+<p>&nbsp;</p>
+
+<%= time_zone_select(:user, :time_zone, ActiveSupport::TimeZone.us_zones) %>
+<p>&nbsp;</p>
+
+
+<!-- START:select_group -->
+<label for="order_shipping_option">Shipping: </label>
+<select name="order[shipping_option]" id="order_shipping_option">
+<%= 
+  option_groups_from_collection_for_select(Shipping::OPTIONS, 
+  					   :options, :type_name, # <- groups
+					   :id,:name,            # <- items
+					   @order.shipping_option)
+ %>
+</select>
+<!-- END:select_group -->
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+</center>

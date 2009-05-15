@@ -1,0 +1,7 @@
+<% form_for :product, :url => { :action => :save },
+                      :builder => TaggedBuilder do |form| %>
+  <%= form.text_field 'title'  %>
+  <%= form.text_area  'description'  %>
+  <%= form.text_field 'image_url'  %>
+  <%= submit_tag %>
+<% end %>

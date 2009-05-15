@@ -1,0 +1,23 @@
+<% @user = "cat"
+   def @user.name
+   false
+   end
+@dave = "fred"
+%>
+
+<% form_tag({ :action => :save }, 
+            { :class  => "compact", :multipart => true }) do 
+%>
+
+<%= check_box(:user, :name, {}, "on", "off") %><br/>
+<%= file_field(:user, :name) %><br />				 %>
+<%= text_field(:user, :name) %><br/>
+<%= hidden_field(:user, :name) %><br/>
+<%= radio_button(:user, :name, "joe") %><br/>
+<%= radio_button(:user, :name, "fred") %><br/>
+<%= password_field(:user, :name) %>
+<p>
+<%= text_area(:user, :name) %>
+
+
+<% end %>

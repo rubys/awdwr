@@ -1,0 +1,9 @@
+<% @u = User.new
+    @u.errors.add(:name, "isn't wibble")
+%>
+
+<%= error_messages_for 'u' %>
+<p>
+<%=
+    text_field(:u, :name)
+%>
