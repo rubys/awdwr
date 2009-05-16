@@ -1,2 +1,0 @@
-class RhtmlController < ApplicationController
-end
