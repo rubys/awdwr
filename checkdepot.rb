@@ -225,7 +225,7 @@ class DepotTest < ActiveSupport::TestCase
   end
 
   section 14.2, "Unit Testing of Models" do
-    assert_select '.stdout', /SQLite3::SQLException: no such table: users/
+    assert_select '.stdout', /SQLite3::SQLException: no such table: \w+/
     assert_select '.stdout', '1 tests, 1 assertions, 0 failures, 0 errors'
     assert_select '.stdout', '4 tests, 4 assertions, 0 failures, 0 errors'
     assert_select '.stdout', '9 tests, 27 assertions, 0 failures, 0 errors'
@@ -971,7 +971,8 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', /^ \s*
       edit_article_comment \s GET \s+
       \/articles\/:article_id\/comments\/:id\/edit (\(.:format\))? \s+
-      \{:controller=&gt;"comments", \s :action=&gt;"edit"\} $
+      ( \{:controller=&gt;"comments", \s :action=&gt;"edit"\} |
+      \{:action=&gt;"edit", \s :controller=&gt;"comments"\} ) $
     /x
     assert_select '.stdout', '5 tests, 29 assertions, 0 failures, 0 errors'
     assert_select '.stdout', '1 tests, 1 assertions, 0 failures, 0 errors'
