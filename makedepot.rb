@@ -2413,6 +2413,7 @@ end
 $x.target![/<style.*?>()/,1] = "\n#{$style.target!.strip.gsub(/^/,' '*6)}\n"
 $x.target!.sub! /<ul(.*?)\/>/,
   "<ul\\1>\n#{$toc.target!.gsub(/^/,' '*6)}    </ul>"
+$x.target!.gsub! '<strong/>', '<strong></strong>'
 log :WRITE, 'makedepot.html'
 open("#{$BASE}/makedepot.html",'w') do |file| 
   file.write <<-EOF.unindent(4)
