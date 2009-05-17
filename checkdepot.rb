@@ -210,7 +210,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', /total_price = 28.5/
     assert_select '.stdout', /&lt;id type="integer"&gt;3&lt;\/id&gt;/
     assert_select '.stdout', /&lt;td&gt;Pragmatic Version Control&lt;\/td&gt;/
-    assert_select '.stdout', /, "title": "Pragmatic Version Control"/
+    assert_select '.stdout', /, ?"title": ?"Pragmatic Version Control"/
   end
 
   section 13, "Internationalization" do
