@@ -330,24 +330,24 @@ section 8.1, 'Sessions' do
   cmd 'rake db:sessions:create'
   cmd 'rake db:migrate'
   cmd 'sqlite3 db/development.sqlite3 .schema'
-  if $RC
-    edit 'config/initializers/session_store.rb' do |data|
-      data[/()# ActionController::Base.session_store =/,1] = "#START:session\n"
-      data[/ActionController::Base.session_store =.*()/,1] = "\n#END:session"
-      data[/(# )ActionController::Base.session_store/,1] = ''
-    end
-  else
+  if $R22
     edit 'config/environment.rb' do |data|
       data[/()  config.action_controller.session =/,1] = "  #START:session\n"
       data[/config.action_controller.session =.*?\}()/m,1] = "\n#END:session"
       data[/(# )config.action_controller.session_store/,1] = ''
+    end
+  else
+    edit 'config/initializers/session_store.rb' do |data|
+      data[/()# ActionController::Base.session_store =/,1] = "#START:session\n"
+      data[/ActionController::Base.session_store =.*()/,1] = "\n#END:session"
+      data[/(# )ActionController::Base.session_store/,1] = ''
     end
   end
   restart_server
   edit "app/controllers/#{$APP}.rb" do |data|
     data[/()class ApplicationController.*/,1] = "#START:main\n"
     data[/^end\n()/,1] = "#END:main\n"
-    unless $RC
+    if $R22
       data[/protect_from_forgery (# ):secret/,1] = ''
       data[/().*protect_from_forgery :secret/,1] = "  #START_HIGHLIGHT\n"
       data[/protect_from_forgery :secret.*()/,1] = "\n  #END_HIGHLIGHT"
@@ -418,7 +418,7 @@ section 8.3, 'Iteration C2: Creating a Smarter Cart' do
   post '/store/add_to_cart/2', {}
   # cmd 'sqlite3 db/development.sqlite3 ".dump sessions"'
   cmd 'rake db:sessions:clear'
-  restart_server if $RC
+  restart_server unless $R22
   # cmd 'sqlite3 db/development.sqlite3 ".dump sessions"'
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/2', {}
@@ -536,7 +536,7 @@ section 8.5, 'Iteration C4: Finishing the Cart' do
       #END:total_price
     EOF
   end
-  restart_server if $RC
+  restart_server unless $R22
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/3', {}
@@ -952,10 +952,10 @@ section 11.1, 'Iteration F1: Adding Users' do
   end
   edit 'app/controllers/users_controller.rb' do |data|
     data[/().*[.:]all/,1] = "#START_HIGHLIGHT\n"
-    if $RC
-      data[/\.all()/,1] = "(:order => :name)\n#END_HIGHLIGHT"
-    else
+    if $R22
       data[/:all(\))/,1] = ", :order => :name)\n#END_HIGHLIGHT"
+    else
+      data[/\.all()/,1] = "(:order => :name)\n#END_HIGHLIGHT"
     end
     data.gsub!(/'.*?'/) do |string|
       string.gsub("'",'"').gsub('User ', 'User #{@user.name} ')
@@ -1777,7 +1777,7 @@ section '23.10', 'Caching, Part Two' do
 end
 
 section 23.11, 'Adding New Templating Systems' do
-  if $RC
+  unless $R22
     cmd "mv app/controllers/application.rb app/controllers/application_controller.rb"
     restart_server
     edit 'lib/rdoc_template.rb' do |data|
@@ -2193,16 +2193,6 @@ def post path, form
   end
 end
 
-def snapshot_name name, app
-  if app.to_s == 'depot'
-    "depot_#{name}"
-  elsif app.nil?
-    name
-  else
-    "#{name}/#{app}"
-  end
-end
-
 # select a version of Rails
 if ARGV.first =~ /^_\d[.\d]*_$/
   $rails = "rails #{ARGV.first}"
@@ -2242,15 +2232,6 @@ def rails name, app=nil
     open(dispatch,'w') {|file| file.write code}
   end
 
-  dest = snapshot_name app, name
-  if !Dir["../code/#{dest}"].empty?
-    if !ARGV.include? 'edge' and !$RC and $rails == 'rails'
-      %W{app/controllers/#{$APP}.rb config/environment.rb}.each do |file|
-        p file
-        system "cp ../code/#{dest}/#{file} #{name}/#{file}"
-      end
-    end
-  end
   Dir.chdir(name)
   FileUtils.rm_rf 'public/.htaccess'
 
@@ -2338,8 +2319,8 @@ $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
 
     $x.h2 'Development Log'
     cmd which_rails($rails) + ' -v'
-    $RC = (`#{which_rails($rails)} -v` =~ /2\.3/)
-    $APP = $RC ? 'application_controller' : 'application'
+    $R22 = (`#{which_rails($rails)} -v` =~ /^Rails 2\.2/)
+    $APP = $R22 ? 'application' : 'application_controller'
 
     cmd 'ruby -v'
     cmd 'gem -v'
