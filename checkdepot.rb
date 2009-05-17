@@ -290,10 +290,10 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "       address = 123 Main St", stdout.shift
     assert_equal "         email = customer@pragprog.com", stdout.shift
     assert_equal "      pay_type = check", stdout.shift
-    assert_match /^    created_at = \d+-\d+-\d+ \d+:\d+:\d+$/, stdout.shift
-    assert_match /^    updated_at = \d+-\d+-\d+ \d+:\d+:\d+$/, stdout.shift
+    assert_match /^    created_at = \d+-\d+-\d+ \d+:\d+:\d+(\.\d+)?$/, stdout.shift
+    assert_match /^    updated_at = \d+-\d+-\d+ \d+:\d+:\d+(\.\d+)?$/, stdout.shift
     assert_equal "customer_email = ", stdout.shift
-    assert_match /^     placed_at = \d+-\d+-\d+ \d+:\d+:\d+$/, stdout.shift
+    assert_match /^     placed_at = \d+-\d+-\d+ \d+:\d+:\d+(\.\d+)?$/, stdout.shift
     assert_equal "          attn = ", stdout.shift
     assert_equal "    order_type = ", stdout.shift
     assert_equal "    ship_class = priority", stdout.shift
@@ -303,7 +303,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> \"29.95\"", stdout.shift
     assert_equal ">> ", stdout.shift
     assert_equal ">> Product.find(:first).updated_at_before_type_cast", stdout.shift
-    assert_match /^=> "\d+-\d+-\d+ \d+:\d+:\d+"$/, stdout.shift
+    assert_match /^=> "\d+-\d+-\d+ \d+:\d+:\d+(\.\d+)?"$/, stdout.shift
     assert_equal ">> ", stdout.shift
     assert_match /^=> \[.*\]/, stdout.shift
     assert_equal "=> true", stdout.shift
