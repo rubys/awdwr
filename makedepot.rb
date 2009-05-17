@@ -1765,7 +1765,7 @@ section 23.9, 'Layouts and Components' do
   get '/partial/list'
 end
 
-section 23.10, 'Caching, Part Two' do
+section '23.10', 'Caching, Part Two' do
   cmd 'ruby script/generate model article body:text'
   cmd "cp -v #{$CODE}/e1/views/app/models/article.rb app/models"
   cmd "cp -vr #{$CODE}/e1/views/app/views/blog app/views"

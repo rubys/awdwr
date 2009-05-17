@@ -12,7 +12,6 @@ class DepotTest < ActiveSupport::TestCase
 
   # micro DSL allowing the definition of optional tests
   def self.section number, title, &tests
-    @@sections ||= self.sections
     return if ARGV.include? 'partial' and !@@sections.has_key? number.to_s
     test "#{number} #{title}" do
       instance_eval {select number}
@@ -20,32 +19,32 @@ class DepotTest < ActiveSupport::TestCase
     end
   end
 
-  # read and pre-process makedepot.html (only needs to be done once)
-  def self.sections
+  # read and pre-process makedepot.html (only done once, and cached)
+  class << self
     # read makedepot output; remove front matter and footer
-    output = open('makedepot.html').read
-    output.sub! /.*<body>\s+/m, ''
-    output.sub! /\s+<\/body>.*/m, ''
+    makedepot = open('makedepot.html').read
+    head, body, tail = makedepot.split /<body>\s+|\s+<\/body>/m
 
     # split into sections
-    @@sections = output.split(/<a class="toc" name="section-(.*?)">/)
+    @@sections = body.split(/<a class="toc" name="section-(.*?)">/)
 
     # convert to a Hash
-    @@sections = Hash[*@@sections.unshift('head')]
+    @@sections = Hash[*@@sections.unshift(:contents)]
+    @@sections[:head] = head
+    @@sections[:tail] = tail
 
     # reattach anchors
     @@sections.each do |key,value|
-      @@sections[key] = "<a class='toc' name='#{key}'>#{value}"
+      next unless key =~ /^\d/
+      @@sections[key] = "<a class=\"toc\" name=\"section-#{key}\">#{value}"
     end
 
     # report version
-    output =~ /rails .*?-v<\/pre>\s+.*?>(.*)<\/pre>/
+    body =~ /rails .*?-v<\/pre>\s+.*?>(.*)<\/pre>/
     @@version = $1
-    @@version += ' (git)' if output =~ /ln -s.*vendor.rails/
-    @@version += ' (edge)' if output =~ /rails:freeze:edge/
+    @@version += ' (git)' if body =~ /ln -s.*vendor.rails/
+    @@version += ' (edge)' if body =~ /rails:freeze:edge/
     STDERR.puts @@version
-
-    @@sections
   end
 
   # select an individual section from the HTML
@@ -1058,7 +1057,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_select "hr"
   end
 
-  section 23.10, 'Caching, Part Two' do
+  section '23.10', 'Caching, Part Two' do
     # not exactly a good test of the function in question...
     assert_select "p", 'There are a total of 4 articles.'
   end
@@ -1090,4 +1089,57 @@ class DepotTest < ActiveSupport::TestCase
     assert_select '.stdout', /"product_id"=&gt;3/
     assert_select '.stdout', /=&gt; 22.8/
   end
+
+  def self.sections
+    @@sections
+  end
 end
+
+# insert failure indicators into checkdepot.html
+require 'test/unit/ui/console/testrunner'
+class HTMLRunner < Test::Unit::UI::Console::TestRunner
+  def attach_to_mediator
+    super
+    @html_tests = []
+    @mediator.add_listener(Test::Unit::TestResult::FAULT,
+      &method(:html_fault))
+    @mediator.add_listener(Test::Unit::UI::TestRunnerMediator::FINISHED,
+      &method(:html_summary))
+  end
+
+  def html_fault fault
+    if fault.test_name =~ /^test_([\d.]+)_.*\(\w+\)$/
+      name = $1
+      sections = DepotTest.sections
+      return unless sections.has_key? name
+
+      # indicate failure in the toc
+      sections[:contents][/<a href="#section-#{name}"()>/,1] = 
+        ' style="color:red; font-weight:bold"'
+
+      # provide details in the section itself
+      x = Builder::XmlMarkup.new(:indent => 2)
+      x.pre fault.message.sub(".\n<false> is not true",'') +
+        "\n\nTraceback:\n  " + fault.location.join("\n  "),
+        :class=>'traceback'
+      sections[name][/<\/a>()/,1] = x.target!
+    end
+  end
+
+  def html_summary elapsed
+    open('checkdepot.html','w') do |checkdepot|
+      sections = DepotTest.sections
+      checkdepot.write(sections.delete(:head))
+      checkdepot.write("<body>\n")
+      checkdepot.write(sections.delete(:contents))
+      tail = sections.delete(:tail)
+      sections.keys.sort_by {|key| key.split('.').map {|n| n.to_i}}.each do |n|
+        checkdepot.write(sections[n])
+      end
+      checkdepot.write("\n  </body>")
+      checkdepot.write(tail)
+    end
+  end
+end
+
+HTMLRunner.run(DepotTest)

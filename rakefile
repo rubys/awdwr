@@ -13,6 +13,7 @@ task :clean do
   rm_rf 'work'
   rm_rf 'snapshot'
   rm_rf 'makedepot.html'
+  rm_rf 'checkdepot.html'
 end
 
 def serialize(args)
