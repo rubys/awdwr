@@ -1130,7 +1130,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
     open('checkdepot.html','w') do |checkdepot|
       sections = DepotTest.sections
       checkdepot.write(sections.delete(:head))
-      checkdepot.write("<body>\n")
+      checkdepot.write("<body>\n    ")
       checkdepot.write(sections.delete(:contents))
       tail = sections.delete(:tail)
       sections.keys.sort_by {|key| key.split('.').map {|n| n.to_i}}.each do |n|
