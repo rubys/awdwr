@@ -775,7 +775,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "=> Encrypter", stdout.shift
-    assert_match /^=> #<Proc:0x00000000@.*\/encrypt.rb:34>$/, stdout.shift
+    assert_match /^=> #<Proc:0x0+@.*\/encrypt.rb:34>$/, stdout.shift
     assert_equal "=> #<Order id: nil, user_id: nil, name: nil, address: nil, email: nil>", stdout.shift
     assert_equal "=> \"Dave Thomas\"", stdout.shift
     assert_equal "=> \"123 The Street\"", stdout.shift
