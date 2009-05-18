@@ -1,6 +1,6 @@
-Running this should only require Rails 2.2.2 or later, and the command line
-interfaces for sqlite3 and curl.  Tested on Ubuntu Linux 9.04 ("Jaunty
-Jackalope") and Mac OSX 10.5.6 ("Leopard").
+Running this should only require Rails 2.2.2 or later, the command line
+interfaces for sqlite3 and curl and the mislav-will_paginate plugin.
+Tested on Ubuntu Linux 9.04 ("Jaunty Jackalope") and Mac OSX 10.5.6 ("Leopard").
 
 Installation of all necessary dependencies from a fresh install of Ubuntu 9.04:
 
@@ -8,6 +8,8 @@ Installation of all necessary dependencies from a fresh install of Ubuntu 9.04:
   sudo gem install rubygems-update
   sudo /var/lib/gems/1.8/bin/update_rubygems
   sudo gem install rails
+  sudo gem sources -a http://gems.github.com
+  sudo gem install mislav-will_paginate
 
 Execution instructions:
 
