@@ -2285,6 +2285,10 @@ def restart_server
   end
 end
 
+def secsplit section
+  section.to_s.split('.').map {|n| n.to_i}
+end
+
 $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
   $x.header do
     $x.title 'The Depot Application'
@@ -2330,7 +2334,7 @@ $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
     # determine which range(s) of steps are to be executed
     ranges = ARGV.grep(/^ \d+(.\d+)? ( (-|\.\.) \d+(.\d+)? )? /x).map do |arg|
       bounds = arg.split(/-|\.\./)
-      Range.new(bounds.first.to_f, bounds.last.to_f)
+      Range.new(secsplit(bounds.first), secsplit(bounds.last))
     end
     ARGV.push 'partial' unless ranges.empty?
 
@@ -2349,9 +2353,10 @@ $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
 
     # run steps
     begin
-      $sections.each do |number, title, steps|
-	next unless ranges.empty? or ranges.any? {|r| r.include?(number)}
-	head number, title
+      $sections.each do |section, title, steps|
+	next if !ranges.empty? and 
+                !ranges.any? {|range| range.include?(secsplit(section))}
+	head section, title
 	steps.call
       end
     rescue Exception => e
