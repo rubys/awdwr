@@ -1,13 +1,10 @@
 class EvalTemplate < ActionView::TemplateHandler
-  def render(template)
-    # Add in the instance variables from the view
-    @view.send :evaluate_assigns
-
+  def render(template, local_assigns = {})
     # create get a binding for @view
     bind = @view.send(:binding)
 
     # and local variables if we're a partial
-    template.locals.each do |key, value|
+    local_assigns.each do |key, value|
       eval("#{key} = #{value}", bind)
     end
 

@@ -1705,7 +1705,6 @@ end
 section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
   rails 'view', :e1
   cmd "cp -v #{$CODE}/e1/views/app/controllers/*.rb app/controllers"
-  cmd "cp -v #{$CODE}/e1/views/lib/*_template.rb lib"
   cmd "cp -vr #{$CODE}/e1/views/app/views/pager app/views"
   cmd 'ruby script/generate model user name:string'
   restart_server
@@ -1777,18 +1776,10 @@ section '23.10', 'Caching, Part Two' do
 end
 
 section 23.11, 'Adding New Templating Systems' do
-  unless $R22
-    cmd "mv app/controllers/application.rb app/controllers/application_controller.rb"
-    restart_server
-    edit 'lib/rdoc_template.rb' do |data|
-      data[/\(template()\)/m,1] = ', local_assigns = {}'
-    end
-    edit 'lib/eval_template.rb' do |data|
-      data[/\(template()\)/m,1] = ', local_assigns = {}'
-      data[/()@view.send :eval/m,1] = '#'
-      data[/(template.locals)/m,1] = 'local_assigns'
-    end
-  end
+  Dir.chdir(File.join($WORK,'view'))
+  cmd "cp -v #{$CODE}/e1/views/config/initializers/* config/initializers/"
+  cmd "cp -v #{$CODE}/e1/views/lib/*_template.rb lib"
+  restart_server
   get '/test/example'
   get '/test/date_format'
   get '/test/example1'
