@@ -22,7 +22,7 @@ class UserStoriesTest < ActionController::IntegrationTest
     #END:step1
     
     #START:step2
-    xml_http_request :put, "/store/add_to_cart", :id => ruby_book.id
+    xml_http_request :put, "/store/add_to_cart/#{ruby_book.id}"
     assert_response :success 
     
     cart = session[:cart]

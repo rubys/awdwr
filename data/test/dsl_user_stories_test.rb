@@ -73,7 +73,7 @@ class DslUserStoriesTest < ActionController::IntegrationTest
       end
     
       def user.buys_a(product)
-        xml_http_request :put, "/store/add_to_cart", :id => product.id
+        xml_http_request :put, "/store/add_to_cart/#{product.id}"
         assert_response :success 
       end
     
