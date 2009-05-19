@@ -2191,6 +2191,7 @@ elsif File.directory?(ARGV.first.to_s)
   $rails = ARGV.first
   $rails = File.join($rails,'rails') if
     File.directory?(File.join($rails,'rails'))
+  $rails = File.expand_path($rails)
 else
   $rails = 'rails'
 end
