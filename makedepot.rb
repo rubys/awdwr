@@ -1896,7 +1896,6 @@ require 'open3'
 require 'net/http'
 require 'rubygems'
 require 'builder'
-require 'rexml/document'
 require 'stringio'
 
 # verify that port is available for testing
@@ -2064,6 +2063,61 @@ def edit filename, tag=nil
   end
 end
 
+# pluggable XML parser support
+begin
+  raise LoadError if ARGV.include? 'rexml'
+  require 'nokogiri'
+  def xhtmlparse(text)
+    Nokogiri::HTML(text)
+  end
+  Comment=Nokogiri::XML::Comment
+rescue LoadError
+  require 'rexml/document'
+
+  def xhtmlparse(text)
+    REXML::Document.new(text)
+  end
+
+  class REXML::Element
+    def has_attribute? name
+      self.attributes.has_key? name
+    end
+
+    def at xpath
+      self.elements[xpath]
+    end
+
+    def search xpath
+      self.elements.to_a(xpath)
+    end
+
+    def content=(string)
+      self.text=string
+    end
+  end
+
+  module REXML::Node
+    def before(node)
+      self.parent.insert_before(self, node)
+    end
+  end
+
+  # monkey patch for Ruby 1.8.6
+  doc = REXML::Document.new '<doc xmlns="ns"><item name="foo"/></doc>'
+  if not doc.root.elements["item[@name='foo']"]
+    class REXML::Element
+      def attribute( name, namespace=nil )
+        prefix = nil
+        prefix = namespaces.index(namespace) if namespace
+        prefix = nil if prefix == 'xmlns'
+        attributes.get_attribute( "#{prefix ? prefix + ':' : ''}#{name}" )
+      end
+    end
+  end
+
+  Comment = REXML::Comment
+end
+
 def snap response, form={}
   if response.content_type == 'text/plain' or response.content_type =~ /xml/ or
      response.code == '500'
@@ -2082,54 +2136,54 @@ def snap response, form={}
   end
 
   begin
-    doc = REXML::Document.new(body)
+    doc = xhtmlparse(body)
   rescue
     body.split("\n").each {|line| $x.pre line.chomp, :class=>'hilight'}
     raise
   end
 
-  title = doc.elements['html/head/title'].text rescue ''
-  body = doc.elements['//body']
-  doc.elements.to_a('//link[@rel="stylesheet"]').each do |sheet|
-    body.insert_before(body.children.first, sheet)
+  title = doc.at('html/head/title').text rescue ''
+  body = doc.at('//body')
+  doc.search('//link[@rel="stylesheet"]').each do |sheet|
+    body.children.first.before(sheet)
   end
 
   if ! form.empty?
-    body.elements.each('//input[@name]') do |input|
-      input.attributes['value'] ||= form[input.attributes['name']].to_s
+    body.search('//input[@name]').each do |input|
+      input.attributes['value'] ||= form[input.attributes['name'].to_s].to_s
     end
-    body.elements.each('//textarea[@name]') do |textarea|
-      textarea.text ||= form[textarea.attributes['name']].to_s
+    body.search('//textarea[@name]').each do |textarea|
+      textarea.text ||= form[textarea.attributes['name'].to_s].to_s
     end
   end
 
   %w{ a[@href] form[@action] }.each do |xpath|
     name = xpath[/@(\w+)/,1]
-    body.each_element("//#{xpath}") do |element|
-      next if element.attributes[name] =~ /^http:\/\//
+    body.search("//#{xpath}").each do |element|
+      next if element.attributes[name].to_s =~ /^http:\/\//
       element.attributes[name] = 
-        URI.join('http://localhost:3000/', element.attributes[name]).to_s
+        URI.join('http://localhost:3000/', element.attributes[name].to_s).to_s
     end
   end
 
   %w{ img[@src] }.each do |xpath|
     name = xpath[/@(\w+)/,1]
-    body.each_element("//#{xpath}") do |element|
+    body.search("//#{xpath}").each do |element|
       if element.attributes[name][0] == ?/
         element.attributes[name] = 'data' + element.attributes[name]
       end
     end
   end
 
-  body.each_element('//textarea') do |element|
-    element.add_text('')
+  body.search('//textarea').each do |element|
+    element.content=''
   end
 
   attrs = {:class => 'body', :title => title}
-  attrs[:id] = body.attributes['id'] if body.attributes['id']
+  attrs[:id] = body.attributes['id'].to_s if body.attributes['id']
   $x.div(attrs) do
     body.children.each do |child|
-      $x << child.to_s unless child.instance_of?(REXML::Comment)
+      $x << child.to_s unless child.instance_of?(Comment)
     end
   end
   $x.div :style => "clear: both"
@@ -2149,11 +2203,12 @@ def post path, form
     $COOKIE = response.response['set-cookie'] if response.response['set-cookie']
 
     if ! form.empty?
-      body = REXML::Document.new(response.body).elements['//body']
-      body = REXML::Document.new(response.body).root unless body
-      xform = body.elements['//form[.//input[@name="commit"]]']
+      body = xhtmlparse(response.body).at('//body')
+      body = xhtmlparse(response.body).root unless body
+      xform = body.at('//form[.//input[@name="commit"]]')
       return unless xform
-      path = xform.attributes['action'] unless xform.attributes['action'].empty?
+      path = xform.attribute('action').to_s unless
+        xform.attribute('action').to_s.empty?
       $x.pre "post #{path}", :class=>'stdin'
 
       $x.ul do
@@ -2162,8 +2217,9 @@ def post path, form
         end
       end
 
-      body.each_element('//input[@type="hidden"]') do |element|
-        form[element.attributes['name']] ||= element.attributes['value']
+      body.search('//input[@type="hidden"]').each do |element|
+        form[element.attributes['name'].to_s] ||=
+          element.attributes['value'].to_s
       end
 
       post = Net::HTTP::Post.new(path)
@@ -2231,19 +2287,6 @@ def rails name, app=nil
 
   if $rails != 'rails' and File.directory?($rails)
     cmd "ln -s #{$rails} vendor/rails"
-  end
-end
-
-# monkey patch for Ruby 1.8.6
-doc = REXML::Document.new '<doc xmlns="ns"><item name="foo"/></doc>'
-if not doc.root.elements["item[@name='foo']"]
-  class REXML::Element
-    def attribute( name, namespace=nil )
-      prefix = nil
-      prefix = namespaces.index(namespace) if namespace
-      prefix = nil if prefix == 'xmlns'
-      attributes.get_attribute( "#{prefix ? prefix + ':' : ''}#{name}" )
-    end
   end
 end
 
