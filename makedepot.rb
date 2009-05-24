@@ -2094,6 +2094,22 @@ rescue LoadError
     def content=(string)
       self.text=string
     end
+
+    def [](index)
+      if index.instance_of? String
+        self.attributes[index]
+      else
+        super(index)
+      end
+    end
+
+    def []=(index, value)
+      if index.instance_of? String
+        self.attributes[index] = value
+      else
+        super(index, value)
+      end
+    end
   end
 
   module REXML::Node
@@ -2150,27 +2166,26 @@ def snap response, form={}
 
   if ! form.empty?
     body.search('//input[@name]').each do |input|
-      input.attributes['value'] ||= form[input.attributes['name'].to_s].to_s
+      input['value'] ||= form[input['name']]
     end
     body.search('//textarea[@name]').each do |textarea|
-      textarea.text ||= form[textarea.attributes['name'].to_s].to_s
+      textarea.text ||= form[textarea['name']].to_s
     end
   end
 
   %w{ a[@href] form[@action] }.each do |xpath|
     name = xpath[/@(\w+)/,1]
     body.search("//#{xpath}").each do |element|
-      next if element.attributes[name].to_s =~ /^http:\/\//
-      element.attributes[name] = 
-        URI.join('http://localhost:3000/', element.attributes[name].to_s).to_s
+      next if element[name] =~ /^http:\/\//
+      element[name] = URI.join('http://localhost:3000/', element[name]).to_s
     end
   end
 
   %w{ img[@src] }.each do |xpath|
     name = xpath[/@(\w+)/,1]
     body.search("//#{xpath}").each do |element|
-      if element.attributes[name][0] == ?/
-        element.attributes[name] = 'data' + element.attributes[name]
+      if element[name][0] == ?/
+        element[name] = 'data' + element[name]
       end
     end
   end
@@ -2180,7 +2195,7 @@ def snap response, form={}
   end
 
   attrs = {:class => 'body', :title => title}
-  attrs[:id] = body.attributes['id'].to_s if body.attributes['id']
+  attrs[:id] = body['id'] if body['id']
   $x.div(attrs) do
     body.children.each do |child|
       $x << child.to_s unless child.instance_of?(Comment)
@@ -2218,8 +2233,7 @@ def post path, form
       end
 
       body.search('//input[@type="hidden"]').each do |element|
-        form[element.attributes['name'].to_s] ||=
-          element.attributes['value'].to_s
+        form[element['name']] ||= element['value']
       end
 
       post = Net::HTTP::Post.new(path)
