@@ -2166,7 +2166,7 @@ def snap response, form={}
 
   if ! form.empty?
     body.search('//input[@name]').each do |input|
-      input['value'] ||= form[input['name']]
+      input['value'] ||= form[input['name']].to_s
     end
     body.search('//textarea[@name]').each do |textarea|
       textarea.text ||= form[textarea['name']].to_s
