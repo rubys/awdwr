@@ -2116,6 +2116,10 @@ rescue LoadError
     def before(node)
       self.parent.insert_before(self, node)
     end
+
+    def serialize
+      self.to_s
+    end
   end
 
   # monkey patch for Ruby 1.8.6
@@ -2198,7 +2202,7 @@ def snap response, form={}
   attrs[:id] = body['id'] if body['id']
   $x.div(attrs) do
     body.children.each do |child|
-      $x << child.to_s unless child.instance_of?(Comment)
+      $x << child.serialize unless child.instance_of?(Comment)
     end
   end
   $x.div :style => "clear: both"
