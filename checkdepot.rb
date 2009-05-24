@@ -146,7 +146,7 @@ class DepotTest < ActiveSupport::TestCase
   section 8.3, "Iteration C2: A Smarter Cart" do
     assert_select '.stdout', /NoMethodError/
     assert_select '.stdout', /in StoreController#add_to_cart/
-    assert_select 'li', '2 &times; Pragmatic Project Automation'
+    assert_select 'li', /2 (&times;|\303\227) Pragmatic Project Automation/
     assert_select 'pre', "Couldn't find Product with ID=wibble"
   end
 
@@ -216,9 +216,9 @@ class DepotTest < ActiveSupport::TestCase
   section 13, "Internationalization" do
     assert_select '#notice', 'es translation not available'
     assert_select 'option[value=es]'
-    assert_select '.price', '28,50&nbsp;$US'
-    assert_select 'h1', 'Su Cat&aacute;logo de Pragmatic'
-    assert_select 'input[type=submit][value=A&ntilde;adir al Carrito]'
+    assert_select '.price', /28,50(&nbsp;|\302\240)\$US/
+    assert_select 'h1', /Su Cat(&aacute;|\303\241)logo de Pragmatic/
+    assert_select 'input[type=submit][value$=dir al Carrito]'
     assert_select 'h2', '5 errores han impedido que este pedido se guarde'
     assert_select '#notice', 'Gracias por su pedido'
   end
