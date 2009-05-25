@@ -2,9 +2,9 @@ require 'test_helper'
 
 class OrderMailerTest < ActionMailer::TestCase
   def setup
-    @order = Order.new(:name => 'Dave Thomas', :email => 'dave@pragprog.com')
-    @expected.from    = 'orders@pragprog.com'
-    @expected.to      = 'dave@pragprog.com'
+    @order = Order.new(:name => 'Dave Thomas', :email => 'dave@example.com')
+    @expected.from    = 'orders@example.com'
+    @expected.to      = 'dave@example.com'
   end
 
   test "confirm" do

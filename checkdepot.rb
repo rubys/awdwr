@@ -211,7 +211,7 @@ class DepotTest < ActiveSupport::TestCase
 
   section 12.1, "Generating the XML Feed" do
     assert_select '.stdout', /No route matches &amp;quot;\/info\/who_bought\//
-    assert_select '.stdout', /&lt;email&gt;customer@pragprog.com&lt;\/email&gt;/
+    assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/
     assert_select '.stdout', /title = Pragmatic Project Automation/
     assert_select '.stdout', /total_price = 28.5/
     assert_select '.stdout', /&lt;id type="integer"&gt;3&lt;\/id&gt;/
@@ -294,7 +294,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "            id = 1", stdout.shift
     assert_equal "          name = Dave Thomas", stdout.shift
     assert_equal "       address = 123 Main St", stdout.shift
-    assert_equal "         email = customer@pragprog.com", stdout.shift
+    assert_equal "         email = customer@example.com", stdout.shift
     assert_equal "      pay_type = check", stdout.shift
     assert_match /^    created_at = \d+-\d+-\d+ \d+:\d+:\d+(\.\d+)?$/, stdout.shift
     assert_match /^    updated_at = \d+-\d+-\d+ \d+:\d+:\d+(\.\d+)?$/, stdout.shift
@@ -318,7 +318,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<Order id: nil, name: nil/, stdout.shift
     assert_equal "=> \"Dave Thomas\"", stdout.shift
-    assert_equal "=> \"dave@pragprog.com\"", stdout.shift
+    assert_equal "=> \"dave@example.com\"", stdout.shift
     assert_equal "=> \"123 Main St\"", stdout.shift
     assert_equal "=> \"check\"", stdout.shift
     assert_equal "=> true", stdout.shift
@@ -785,18 +785,18 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> #<Order id: nil, user_id: nil, name: nil, address: nil, email: nil>", stdout.shift
     assert_equal "=> \"Dave Thomas\"", stdout.shift
     assert_equal "=> \"123 The Street\"", stdout.shift
-    assert_equal "=> \"dave@pragprog.com\"", stdout.shift
+    assert_equal "=> \"dave@example.com\"", stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "Dave Thomas", stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_equal "=> #<Order id: 1, user_id: nil, name: \"Dave Thomas\", address: \"123 The Street\", email: \"dave@pragprog.com\">", stdout.shift
+    assert_equal "=> #<Order id: 1, user_id: nil, name: \"Dave Thomas\", address: \"123 The Street\", email: \"dave@example.com\">", stdout.shift
     assert_equal "Dave Thomas", stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "     id = 1", stdout.shift
     assert_equal "user_id = ", stdout.shift
     assert_equal "   name = Dbwf Tipnbt", stdout.shift
     assert_equal "address = 123 The Street", stdout.shift
-    assert_equal "  email = ebwf@qsbhqsph.dpn", stdout.shift
+    assert_equal "  email = ebwf@fybnqmf.dpn", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> false", stdout.shift
     assert_equal "=> true", stdout.shift

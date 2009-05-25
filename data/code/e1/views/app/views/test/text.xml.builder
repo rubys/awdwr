@@ -2,8 +2,8 @@ controller.headers["Content-Type"] = "text/plain"
 
 xml.dl do
   @text = %{
-     E-Mail dave@pragprog.com, or visit
-     http://pragprog.com/contact for 
+     E-Mail dave@example.com, or visit
+     http://example.com/contact for 
      phone numbers and other details.
   }
   show(xml, "auto_link(@text)")
@@ -37,7 +37,7 @@ Things to do:
   show(xml, %{pluralize(2, "person")})
 
 
-  @linked_text = %{See <a href="http://pragprog.com">our site</a>.}
+  @linked_text = %{See <a href="http://example.com">our site</a>.}
 show(xml, "strip_links(@linked_text)")
 
 @redtext = %{

@@ -5,7 +5,7 @@ class PopulateData < ActiveRecord::Migration
     p2 = Product.create(:title => "Pragmatic Project Automation", :price => 29.95,
                         :image_location => "images/auto.jpg");
 
-    o1 = Order.create(:name => "Dave Thomas", :email => "dave@pragprog.com");
+    o1 = Order.create(:name => "Dave Thomas", :email => "dave@example.com");
 
     LineItem.create(:product_id => p1.id, :order_id => o1.id, :quantity => 1, :unit_price => p1.price)
     LineItem.create(:product_id => p2.id, :order_id => o1.id, :quantity => 1, :unit_price => p1.price)

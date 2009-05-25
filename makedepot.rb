@@ -929,7 +929,7 @@ section 10.1, 'Iteration E1: Capturing an Order' do
   post '/store/checkout',
     'order[name]' => 'Dave Thomas',
     'order[address]' => '123 Main St',
-    'order[email]' => 'customer@pragprog.com',
+    'order[email]' => 'customer@example.com',
     'order[pay_type]' => 'check'
   db "select * from orders"
   db "select * from line_items"

@@ -8,7 +8,7 @@ class DslUserStoriesTest < ActionController::IntegrationTest
   DAVES_DETAILS = {
       :name     => "Dave Thomas",
       :address  => "123 The Street",
-      :email    => "dave@pragprog.com",
+      :email    => "dave@example.com",
       :pay_type => "check"
   }
   #END:daves_details

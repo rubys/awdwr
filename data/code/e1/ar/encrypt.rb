@@ -75,7 +75,7 @@ end
 o = Order.new
 o.name = "Dave Thomas"
 o.address = "123 The Street"
-o.email   = "dave@pragprog.com"
+o.email   = "dave@example.com"
 o.save
 puts o.name
 

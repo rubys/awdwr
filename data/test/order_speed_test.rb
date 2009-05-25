@@ -7,7 +7,7 @@ class OrderSpeedTest < ActionController::TestCase
   DAVES_DETAILS = {
       :name     => "Dave Thomas",
       :address  => "123 The Street",
-      :email    => "dave@pragprog.com",
+      :email    => "dave@example.com",
       :pay_type => "check"
   }
   

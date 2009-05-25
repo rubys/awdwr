@@ -40,7 +40,7 @@ class UserStoriesTest < ActionController::IntegrationTest
     post_via_redirect "/store/save_order",
                       :order => { :name     => "Dave Thomas",
                                  :address  => "123 The Street",
-                                 :email    => "dave@pragprog.com",
+                                 :email    => "dave@example.com",
                                  :pay_type => "check" }
     assert_response :success
     assert_template "index"
@@ -54,7 +54,7 @@ class UserStoriesTest < ActionController::IntegrationTest
     
     assert_equal "Dave Thomas",       order.name
     assert_equal "123 The Street",    order.address
-    assert_equal "dave@pragprog.com", order.email
+    assert_equal "dave@example.com", order.email
     assert_equal "check",             order.pay_type
     
     assert_equal 1, order.line_items.size

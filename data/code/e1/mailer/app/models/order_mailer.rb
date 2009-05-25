@@ -5,7 +5,7 @@ class OrderMailer < ActionMailer::Base
   def confirm(order)
     subject    'Pragmatic Store Order Confirmation'
     recipients order.email
-    from       'orders@pragprog.com'
+    from       'orders@example.com'
     sent_on    Time.now
     
     body       :order => order
@@ -16,7 +16,7 @@ class OrderMailer < ActionMailer::Base
   def sent(order)
     subject    'Pragmatic Order Shipped'
     recipients order.email
-    from       'orders@pragprog.com'
+    from       'orders@example.com'
     sent_on    Time.now
     
     body       :order => order
@@ -27,7 +27,7 @@ class OrderMailer < ActionMailer::Base
   def ship_with_images(order)
     subject    "Pragmatic Order Shipped"
     recipients order.email
-    from       'orders@pragprog.com'
+    from       'orders@example.com'
     sent_on    Time.now
     body       "order" => order
     
@@ -54,7 +54,7 @@ class OrderMailer < ActionMailer::Base
   def survey(order)
     subject    "Pragmatic Order: Give us your thoughts"
     recipients order.email
-    from       'orders@pragprog.com'
+    from       'orders@example.com'
     sent_on    Time.now
     body       "order" => order
   end
