@@ -62,6 +62,12 @@ class DepotTest < ActiveSupport::TestCase
     end
   end
 
+  def sort_hash line
+    line.sub(/^(=> )?\{.*\}$/) do |match|
+      "#{$1}{#{match.scan(/:?"?\w+"?=>[^\[].*?(?=, |\})/).sort.join(', ')}}"
+    end
+  end
+
   section 4, 'Instant Gratification' do
     stdout = collect_stdout
 
@@ -424,7 +430,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<ActiveRecord::Reflection::AggregateReflection/, stdout.shift
     assert_equal "=> 0", stdout.shift
-    assert_match /^=> #<Name:0x\w+ @last="Eisenhower"/, stdout.shift
+    assert_match /^=> #<Name:0x\w+ @.*?last="Eisenhower"/, stdout.shift
     assert_match /^=> #<Customer id: 1/, stdout.shift
     assert_match /^=> #<Customer id: 1/, stdout.shift
     assert_equal "Dwight", stdout.shift
@@ -433,7 +439,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "Dwight D Eisenhower", stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> #<Name:0x\w+ @last="Truman"/, stdout.shift
+    assert_match /^=> #<Name:0x\w+ @.*?last="Truman"/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert stdout.empty?
   end
@@ -835,7 +841,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "                                      quantity*unit_price as total_price \" +", stdout.shift
     assert_equal "=> [#<LineItem quantity: 1>, #<LineItem quantity: 2>, #<LineItem quantity: 1>]", stdout.shift
-    assert_equal "{\"quantity\"=>1, \"total_price\"=>\"29.95\"}", stdout.shift
+    assert_equal "{\"quantity\"=>1, \"total_price\"=>\"29.95\"}", sort_hash(stdout.shift)
     assert_equal "=> nil", stdout.shift
     assert_equal "\"29.95\"", stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -978,12 +984,7 @@ class DepotTest < ActiveSupport::TestCase
   end
 
   section 21.2, 'Routing Requests' do
-    stdout = collect_stdout.grep(/^=>/).map do |line|
-      # sort hashes
-      line.sub(/^=> \{.*\}$/) do |match|
-        "=> {#{match.scan(/:\w+=>".*?"(?=, |\})/).sort.join(', ')}}"
-      end
-    end
+    stdout = collect_stdout.grep(/^=>/).map {|line| sort_hash(line)}
     assert_equal '=> true', stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal '=> []', stdout.shift
