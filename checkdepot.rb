@@ -969,6 +969,7 @@ class DepotTest < ActiveSupport::TestCase
     assert_equal "=> true", stdout.shift
     assert_equal "=> 4", stdout.shift
     assert_match /^\sfrom /, stdout.shift
+    stdout.shift while stdout.first =~ /^\sfrom /
     assert stdout.empty?
   end
 
