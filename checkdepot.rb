@@ -181,7 +181,7 @@ class DepotTest < ActiveSupport::TestCase
 
   section 10.1, "Iteration E1: Capturing an Order" do
     assert_select 'input[type=submit][value=Place Order]'
-    assert_select 'p', /No action responded to save_order./
+    assert_select 'p', /No action responded to save_order.|The action 'save_order' could not be found/
     assert_select 'h2', '5 errors prohibited this order from being saved'
     assert_select '#notice', 'Thank you for your order'
   end
