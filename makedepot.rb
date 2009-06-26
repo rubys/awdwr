@@ -2332,6 +2332,9 @@ def restart_server
       $stdout = StringIO.open('','w')
       require 'config/boot'
       require 'commands/server'
+    rescue 
+      STDOUT.puts $!
+      STDOUT.puts "\tfrom " + $!.backtrace.join("\n\tfrom ")
     ensure
       Process.exit!
     end
