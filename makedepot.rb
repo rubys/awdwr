@@ -2333,8 +2333,8 @@ def restart_server
       require 'config/boot'
       require 'commands/server'
     rescue 
-      STDOUT.puts $!
-      STDOUT.puts "\tfrom " + $!.backtrace.join("\n\tfrom ")
+      STDERR.puts $!
+      $!.backtrace.each {|method| STDERR.puts "\tfrom " + method}
     ensure
       Process.exit!
     end
@@ -2430,10 +2430,13 @@ $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
 	end
 
 	# fetch stylesheets
-	Net::HTTP.start('127.0.0.1', 3000) do |http|
-	  $style.text! http.get('/stylesheets/scaffold.css').body
-	  $style.text! http.get('/stylesheets/depot.css').body
-	end
+	begin
+	  Net::HTTP.start('127.0.0.1', 3000) do |http|
+	    $style.text! http.get('/stylesheets/scaffold.css').body
+	    $style.text! http.get('/stylesheets/depot.css').body
+	  end
+        rescue
+        end
 
         # terminate server
 	Process.kill "INT", $server
