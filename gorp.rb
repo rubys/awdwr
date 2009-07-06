@@ -283,7 +283,7 @@ def snap response, form={}
   title = doc.at('html/head/title').text rescue ''
   body = doc.at('//body')
   doc.search('//link[@rel="stylesheet"]').each do |sheet|
-    body.children.first.before(sheet)
+    body.children.first.add_previous_sibling(sheet)
   end
 
   if ! form.empty?
