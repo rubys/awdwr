@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<products type="array">
+  <product>
+    <created-at type="datetime">2009-07-05T16:26:31Z</created-at>
+    <description>&lt;p&gt;
+       &lt;em&gt;Pragmatic Project Automation&lt;/em&gt; shows you how to improve the 
+       consistency and repeatability of your project's procedures using 
+       automation to reduce risk and errors.
+      &lt;/p&gt;
+      &lt;p&gt;
+        Simply put, we're going to put this thing called a computer to work 
+        for you doing the mundane (but important) project stuff. That means 
+        you'll have more time and energy to do the really 
+        exciting---and difficult---stuff, like writing quality code.
+      &lt;/p&gt;</description>
+    <id type="integer">2</id>
+    <image-url>/images/auto.jpg</image-url>
+    <price type="decimal">24.95</price>
+    <title>Pragmatic Project Automation</title>
+    <updated-at type="datetime">2009-07-05T16:32:09Z</updated-at>
+  </product>
+  <product>
+    <created-at type="datetime">2009-07-05T16:26:31Z</created-at>
+    <description>&lt;p&gt;
+         This book is a recipe-based approach to using Subversion that will 
+         get you up and running quickly---and correctly. All projects need
+         version control: it's a foundational piece of any project's 
+         infrastructure. Yet half of all project teams in the U.S. don't use
+         any version control at all. Many others don't use it well, and end 
+         up experiencing time-consuming problems.
+      &lt;/p&gt;</description>
+    <id type="integer">3</id>
+    <image-url>/images/svn.jpg</image-url>
+    <price type="decimal">28.5</price>
+    <title>Pragmatic Version Control</title>
+    <updated-at type="datetime">2009-07-05T16:26:31Z</updated-at>
+  </product>
+  <product>
+    <created-at type="datetime">2009-07-05T16:26:31Z</created-at>
+    <description>&lt;p&gt;
+        Pragmatic programmers use feedback to drive their development and 
+        personal processes. The most valuable feedback you can get while 
+        coding comes from unit testing.
+      &lt;/p&gt;
+      &lt;p&gt;
+        Without good tests in place, coding can become a frustrating game of 
+        "whack-a-mole." That's the carnival game where the player strikes at a 
+        mechanical mole; it retreats and another mole pops up on the opposite side 
+        of the field. The moles pop up and down so fast that you end up flailing 
+        your mallet helplessly as the moles continue to pop up where you least 
+        expect them.
+      &lt;/p&gt;</description>
+    <id type="integer">4</id>
+    <image-url>/images/utc.jpg</image-url>
+    <price type="decimal">27.75</price>
+    <title>Pragmatic Unit Testing (C#)</title>
+    <updated-at type="datetime">2009-07-05T16:26:31Z</updated-at>
+  </product>
+</products>

@@ -87,11 +87,15 @@ def popen3 args, hilight=[]
     until pout.eof?
       line = pout.readline
       if hilight.any? {|pattern| line.include? pattern}
-        $x.pre line.chomp, :class=>'hilight'
-      elsif line.strip.size == 0
-        $x.pre ' ', :class=>'stdout'
+        outclass='hilight'
       else
-        $x.pre line.chomp, :class=>'stdout'
+        outclass='stdout'
+      end
+
+      if line.strip.size == 0
+        $x.pre ' ', :class=>outclass
+      else
+        $x.pre line.chomp, :class=>outclass
       end
     end
     terr.join
@@ -170,11 +174,15 @@ def edit filename, tag=nil
         hilight = false
       elsif include
         if hilight or ! before.include?(line)
-          $x.pre line, :class=>'hilight'
-        elsif line.empty?
-          $x.pre ' ', :class=>'stdout'
+          outclass='hilight'
         else
-          $x.pre line, :class=>'stdout'
+          outclass='stdout'
+        end
+
+        if line.empty?
+          $x.pre ' ', :class=>outclass
+        else
+          $x.pre line, :class=>outclass
         end
       end
     end
@@ -446,10 +454,16 @@ def restart_server
     end
   else
     begin
-      # start server, redirecting stdout to a string
-      $stdout = StringIO.open('','w')
-      require 'config/boot'
-      require 'commands/server'
+      if File.exist?('config.ru')
+        require 'rack'
+        server = Rack::Builder.new {eval open('config.ru').read}
+        Rack::Handler::WEBrick.run(server, :Port => 3000)
+      else
+        # start server, redirecting stdout to a string
+        $stdout = StringIO.open('','w')
+        require 'config/boot'
+        require 'commands/server'
+      end
     rescue 
       STDERR.puts $!
       $!.backtrace.each {|method| STDERR.puts "\tfrom " + method}
@@ -543,8 +557,8 @@ at_exit do
 	  $cleanup.call if $cleanup
   
           # terminate server
-	  Process.kill "INT", $server
-	  Process.wait($server)
+	  Process.kill "INT", $server if $server
+	  Process.wait($server) if $server
   
           # optionally save a snapshot
           if ARGV.include? 'save'
@@ -577,5 +591,5 @@ at_exit do
   log :CHECK, "#{$output}.html"
   Dir.chdir $BASE
   STDOUT.puts
-  require $checker
+  require $checker if $checker
 end

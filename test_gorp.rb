@@ -84,6 +84,11 @@ end
 # insert failure indicators into #{output}.html
 require 'test/unit/ui/console/testrunner'
 class HTMLRunner < Test::Unit::UI::Console::TestRunner
+  def self.run suite
+    @@sections = suite.sections
+    super
+  end
+
   def attach_to_mediator
     super
     @html_tests = []
@@ -96,7 +101,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
   def html_fault fault
     if fault.test_name =~ /^test_([\d.]+)_.*\(\w+\)$/
       name = $1
-      sections = DepotTest.sections
+      sections = @@sections
       return unless sections.has_key? name
 
       # indicate failure in the toc
@@ -114,7 +119,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
 
   def html_summary elapsed
     open("#{$output}.html",'w') do |output|
-      sections = DepotTest.sections
+      sections = @@sections
       output.write(sections.delete(:head))
       output.write("<body>\n    ")
       output.write(sections.delete(:contents))
