@@ -2,7 +2,7 @@ require 'rexml/document'
 require 'rubygems'
 require 'active_record'
 
-input  = File.new('products.xml')
+input  = File.new('testdata.xml')
 
 ActiveRecord::Base.establish_connection(
   :adapter => 'sqlite3',

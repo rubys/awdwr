@@ -26,6 +26,8 @@ class InsideOutTest < Book::TestCase
     assert_select 'h1', 'Pragmatic Bookshelf'
     assert_select 'h2', 'Pragmatic Unit Testing (C#)'
     assert_select 'p', '27.75'
+    assert_select '.stdout', '&lt;products type="array"&gt;'
+    assert_select '.stdout', '3 tests, 12 assertions, 0 failures, 0 errors'
   end
 
   section 3.1, 'Capistrano' do
@@ -35,5 +37,13 @@ class InsideOutTest < Book::TestCase
     assert_select 'h1', 'Pragmatic Bookshelf'
     assert_select 'h2', 'Pragmatic Unit Testing (C#)'
     assert_select 'p', '27.75'
+    assert_select '.stdout', '&lt;products type="array"&gt;'
+  end
+
+  section 4.1, 'whenever' do
+    assert_select '.stdout', '3 tests, 12 assertions, 0 failures, 0 errors'
+    assert_select '.stdout', '[done] wheneverized!'
+    assert_select '.stdout', /15 4 \* \* \* cd .*; ruby load_products.rb/
+    assert_select '.stderr', /crontab file updated/
   end
 end

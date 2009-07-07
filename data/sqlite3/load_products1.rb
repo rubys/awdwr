@@ -1,7 +1,7 @@
 require 'rexml/document'
 require 'sqlite3'
 
-input  = File.new('products.xml')
+input  = File.new('testdata.xml')
 output = SQLite3::Database.new('products.db')
 
 output.execute_batch <<SQL

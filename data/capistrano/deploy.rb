@@ -21,8 +21,8 @@ role :db, domain, :primary => true
 # if (for example) you have locally installed gems or applications.  Note:
 # this needs to contain the full values for the variables set, not simply
 # the deltas.
-# default_environment['PATH']='<your paths>:/usr/local/bin:/usr/bin:/bin'
-# default_environment['GEM_PATH']='<your paths>:/usr/lib/ruby/gems/1.8'
+# default_environment['PATH']='<gempath>/bin:/usr/local/bin:/usr/bin:/bin'
+# default_environment['GEM_PATH']='<gempath>:/usr/lib/ruby/gems/1.8'
 
 # miscellaneous options
 set :deploy_via, :remote_cache
@@ -36,7 +36,6 @@ namespace :deploy do
   desc "Restarting Passenger"
   task :restart, :roles => :app do
     run "mkdir -p #{current_path}/tmp" 
-    run "mkdir -p #{current_path}/public" 
     run "touch #{current_path}/tmp/restart.txt" 
   end
 end
