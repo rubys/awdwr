@@ -6,6 +6,9 @@ $autorestart = nil
 $output = 'insideout'
 $checker = 'checkinout'
 
+USER = 'sa3ruby'
+HOST = 'depot.intertwingly.net'
+
 Dir.chdir $WORK
 
 section 1.1, 'XML to Raw SQLite3' do
@@ -29,6 +32,12 @@ section 1.1, 'XML to Raw SQLite3' do
   cmd 'ruby load_products.rb'
   cmd 'ruby test_products.rb'
   cmd 'ruby load_products.rb'
+
+  cmd 'cat ' + File.expand_path("~#{ENV['USER']}/.gitconfig")
+  cmd 'git repo-config --get-regexp user.*'
+  cmd 'git init'
+  cmd 'git add .'
+  cmd 'git commit -m "load via raw SQLite3"'
 end
 
 section 1.2, 'Update Using Raw SQLite3' do
@@ -42,6 +51,10 @@ section 1.2, 'Update Using Raw SQLite3' do
   cmd 'ruby test_products.rb'
   cmd 'ruby load_products.rb'
   cmd 'ruby test_products.rb'
+
+  cmd 'git status'
+  cmd 'git diff'
+  cmd 'git commit -a -m "update via raw SQLite3"'
 end
 
 section 1.3, 'Update Using ActiveRecord' do
@@ -51,6 +64,10 @@ section 1.3, 'Update Using ActiveRecord' do
 
   cmd 'ruby load_products.rb'
   cmd 'ruby test_products.rb'
+
+  cmd 'git status'
+  cmd 'git commit -a -m "update using ActiveRecord"'
+  cmd 'git log'
 end
 
 section 2.1, 'Rack' do
@@ -69,6 +86,38 @@ section 2.1, 'Rack' do
   end
 
   restart_server
-  get "/"
-  get "/favicon.ico"
+  get "/products"
+
+  cmd 'git status'
+  cmd 'git add *server.rb config.ru'
+  cmd 'git commit -m "rack server"'
+end
+
+section 3.1, 'Capistrano' do
+  require 'net/ssh'
+  Net::SSH.start(HOST, USER) do |ssh|
+    ssh.exec! 'rm -rf ~/git/depot.git'
+    ssh.exec! 'mkdir -p ~/git/depot.git'
+    ssh.exec! 'cd ~/git/depot.git; git --bare init'
+  end
+  cmd 'capify .'
+
+  cmd 'git status'
+  cmd 'git add config Capfile'
+  cmd 'git commit -m "capify"'
+
+  cmd "git remote add origin ssh://#{USER}@#{HOST}/~/git/depot.git"
+  cmd 'git push origin master'
+
+  edit 'config/deploy.rb' do |data|
+    data[/(.*)/m,1] = read('capistrano/deploy.rb')
+    data[/(rubys)/,1] = USER
+    data[/(depot.pragprog.com)/,1] = HOST
+  end
+
+  cmd 'cap deploy:setup'
+  cmd 'cap deploy:check'
+  cmd 'cap deploy'
+
+  get "http://#{HOST}/products"
 end

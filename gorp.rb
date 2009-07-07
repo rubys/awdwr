@@ -340,7 +340,14 @@ end
 
 def post path, form
   $x.pre "get #{path}", :class=>'stdin'
-  Net::HTTP.start('127.0.0.1', 3000) do |http|
+
+  if path.include? ':'
+    host, port, path = URI.parse(path).select(:host, :port, :path)
+  else
+    host, port = '127.0.0.1', 3000
+  end
+
+  Net::HTTP.start(host, port) do |http|
     get = Net::HTTP::Get.new(path)
     get['Cookie'] = $COOKIE if $COOKIE
     response = http.request(get)
@@ -448,7 +455,8 @@ def restart_server
     60.times do
       sleep 0.5
       begin
-        break if Net::HTTP.get_response('localhost','/',3000).code == '200'
+        status = Net::HTTP.get_response('localhost','/',3000).code
+        break if %(200 404).include? status
       rescue Errno::ECONNREFUSED
       end
     end
