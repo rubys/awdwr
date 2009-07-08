@@ -42,6 +42,14 @@ def read name
   open(File.join($DATA, name)) {|file| file.read}
 end
 
+def overview message
+  $x.p message.gsub(/(^|\n)\s+/, ' ').strip, :class=>'overview'
+end
+
+def desc message
+  $x.p message, :class=>'desc'
+end
+
 def log type, message
   type = type.to_s.ljust(5).upcase
   STDOUT.puts Time.now.strftime("[%Y-%m-%d %H:%M:%S] #{type} #{message}")
@@ -443,10 +451,12 @@ end
 
 def restart_server
   log :server, 'restart'
-  $x.h3 'restart'
   if $server
+    $x.h3 'Restart the server.'
     Process.kill "INT", $server
     Process.wait($server)
+  else
+    $x.h3 'Start the server.'
   end
 
   $server = fork
@@ -509,6 +519,11 @@ at_exit do
                       background-color: #F5F5DC}
           ul a:visited {color: #000}
 	  h2 {clear: both}
+          p.desc {font-style: italic}
+          p.overview {border-width: 2px; border-color: #000;
+            border-style: solid; border-radius: 4em;
+            background-color: #CCF; margin: 1.5em 1.5em; padding: 1em 2em; 
+            -webkit-border-radius: 4em; -moz-border-radius: 4em;}
         EOF
       end
     end

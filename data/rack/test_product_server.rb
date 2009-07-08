@@ -10,7 +10,7 @@ class ProductServerTest < Test::Unit::TestCase
   end
 
   def test_product_list
-    response = get('/')
+    response = get('/products')
     assert response.ok?
     assert 3, response.body.scan('<h2>').count
     assert_match /<h2>Pragmatic Project Automation<\/h2>/, response.body
