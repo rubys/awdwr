@@ -194,7 +194,7 @@ section 2.1, 'Rack' do
   cmd 'git commit -a -m "serve testdata"'
 end
 
-section 3.1, 'Capistrano' do
+section 2.2, 'Capistrano' do
   overview <<-EOF
     We've got the program working on our machine, let's deploy it to our
     server machine which is running Passenger (a.k.a. mod_rails a.k.a.
@@ -247,7 +247,7 @@ section 3.1, 'Capistrano' do
   get "http://#{HOST}/testdata.xml"
 end
 
-section 4.1, 'Whenever' do
+section 2.3, 'Whenever' do
   overview <<-EOF
     At this point, we are displaying a what amounts to be static data.
     Presumably the supplier will be making changes, so let's set things up
@@ -307,7 +307,7 @@ section 4.1, 'Whenever' do
   cmd 'cap deploy'
 end
 
-section 5.1, 'Rails' do
+section 3.1, 'Rails' do
   overview <<-EOF
     Taking a step back, we have done something real.  It doesn't do much,
     but it didn't really take much code either.  But the problems are starting
@@ -316,11 +316,100 @@ section 5.1, 'Rails' do
     connection, and we haven't even begun thinking about updates.
     Additionally, we have the database in the git repository and while that
     has proven to be convenient so far, that won't be such a hot idea once we
-    deploy.  Fred Brooks once recommended that we "plan to throw one away; you
+    deploy.  And synchronizing gems versions between the machines is a pain...
+    Fred Brooks once recommended that we "plan to throw one away; you
     will, anyhow."  As you will see, we are not exactly going to be throwing
     anything away, but we will be in a very real sense starting over.
   EOF
 
-  desc "Let Rails do its thing..."
+  desc "First, let Rails do its thing..."
   cmd 'cd ..; rails depot'
+
+  desc "Throw away the Rack bootstrap, it served us well."
+  cmd 'git rm config.ru'
+
+  desc "Define the product anew."
+  cmd 'ruby script/generate scaffold product base_id:integer ' +
+    'title:string description:text image_url:string price:decimal'
+
+  desc 'Tailor the definition to taste'
+  edit Dir['db/migrate/*create_products.rb'].first do |data|
+    data[/:price()/,1] = ', :precision => 8, :scale => 2, :default => 0'
+  end
+
+  desc 'Out with the old db.'
+  cmd 'git rm products.db'
+
+  desc 'In with the new.'
+  cmd 'rake db:migrate'
+
+  desc 'Write unit tests (this time using ActiveRecord!)'
+  edit 'test/unit/product_test.rb' do |data|
+    data[/(.*)/m,1] = read('rails/product_test.rb')
+  end
+
+  desc 'Run the tests and watch them fail.'
+  cmd 'rake test:units'
+
+  desc 'Put the load logic in the model (url or file: getting fancy!)'
+  edit 'app/models/product.rb' do |data|
+    data[/(.*)/m,1] = read('rails/product.rb')
+  end
+
+  desc 'Run the tests and watch them pass.'
+  cmd 'rake test:units'
+
+  desc 'Function tests are already provided and they pass!'
+  cmd 'rake test:functionals'
+
+  desc 'remove old tests and server'
+  cmd 'git rm test_*.rb product_server.rb'
+
+  restart_server
+
+  desc 'Load testdata.'
+  cmd %(ruby script/runner 'Product.import("public/testdata.xml")')
+
+  desc 'Explore.'
+  get '/products'
+  get '/products/1'
+  get '/products/1/edit'
+  get '/products/new'
+
+  desc 'Update whenever to use runner'
+  edit 'config/schedule.rb' do |data|
+    data[/(command.*)/,1] = "runner 'Product.import(\"http://#{HOST}/testdata.xml\")'"
+  end
+
+  desc 'Tell Rails about the gem path'
+  edit 'config/deploy.rb' do |data|
+    data << "\n" + <<-'EOF'.unindent(6)
+      load 'ext/rails-database-migrations.rb'
+
+      set :gemhome, "/home/sa3ruby/.gemlocal"
+      task :after_deploy do
+        run "cp #{current_release}/config/environment.rb " +
+            "#{current_release}/config/environment.rb-"
+        run "echo ENV[\\'GEM_HOME\\']=\\'#{gemhome}\\' > " +
+            "#{current_release}/config/environment.rb"
+        run "echo ENV[\\'GEM_PATH\\']=\\'#{gemhome}\\' >> " +
+            "#{current_release}/config/environment.rb"
+        run "cat #{current_release}/config/environment.rb- >> " +
+            "#{current_release}/config/environment.rb"
+        run "rm #{current_release}/config/environment.rb-"
+        deploy::cleanup
+      end
+    EOF
+  end
+  
+  desc 'Commit.  Push.  Deploy.'
+  cmd 'git st'
+  cmd 'git add .'
+  cmd 'git commit -m "convert to Rails!"'
+  cmd 'git push'
+  cmd 'cap deploy:migrations'
+  cmd 'cap deploy'
+
+  desc "See this live."
+  get "http://#{HOST}/products"
 end

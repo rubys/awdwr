@@ -30,7 +30,7 @@ class InsideOutTest < Book::TestCase
     assert_select '.stdout', '3 tests, 12 assertions, 0 failures, 0 errors'
   end
 
-  section 3.1, 'Capistrano' do
+  section 2.2, 'Capistrano' do
     assert_select '.stdout', '[done] capified!'
     assert_select '.stdout', 'You appear to have all necessary dependencies installed'
     assert_select '.stderr', ' ** transaction: commit'
@@ -40,10 +40,20 @@ class InsideOutTest < Book::TestCase
     assert_select '.stdout', '&lt;products type="array"&gt;'
   end
 
-  section 4.1, 'whenever' do
+  section 2.3, 'whenever' do
     assert_select '.stdout', '3 tests, 12 assertions, 0 failures, 0 errors'
     assert_select '.stdout', '[done] wheneverized!'
     assert_select '.stdout', /15 4 \* \* \* cd .*; ruby load_products.rb/
     assert_select '.stderr', /crontab file updated/
+  end
+
+  section 3.1, 'rails' do
+    assert_select '.stdout', /==  CreateProducts: migrated/
+    assert_select '.stdout', '3 tests, 0 assertions, 0 failures, 3 errors'
+    assert_select '.stdout', '3 tests, 12 assertions, 0 failures, 0 errors'
+    assert_select '.stdout', '7 tests, 10 assertions, 0 failures, 0 errors'
+    assert_select 'td', '24.95'
+    assert_select 'input[value=/images/auto.jpg]'
+    assert_select 'tr:only-child'
   end
 end
