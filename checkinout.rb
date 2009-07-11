@@ -47,13 +47,17 @@ class InsideOutTest < Book::TestCase
     assert_select '.stderr', /crontab file updated/
   end
 
-  section 3.1, 'rails' do
+  section 3.1, 'convert to rails' do
     assert_select '.stdout', /==  CreateProducts: migrated/
     assert_select '.stdout', '3 tests, 0 assertions, 0 failures, 3 errors'
     assert_select '.stdout', '3 tests, 12 assertions, 0 failures, 0 errors'
     assert_select '.stdout', '7 tests, 10 assertions, 0 failures, 0 errors'
     assert_select 'td', '24.95'
     assert_select 'input[value=/images/auto.jpg]'
+  end
+
+  section 3.2, 'deploy rails' do
+    assert_select '.stderr', :text => /failed:/, :count => 0
     assert_select 'tr:only-child'
   end
 end

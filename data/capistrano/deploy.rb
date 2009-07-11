@@ -31,13 +31,14 @@ set :branch, 'master'
 set :scm_verbose, true
 set :use_sudo, false
 
-# task which causes Passenger to initiate a restart
+# additional tasks
 namespace :deploy do
-  desc "Restarting Passenger"
+  desc 'Restarting Passenger'
   task :restart, :roles => :app do
     run "mkdir -p #{current_path}/tmp" 
     run "touch #{current_path}/tmp/restart.txt" 
   end
 end
 
+# insert tasks into the deployment sequence
 after "deploy:symlink", "deploy:restart"

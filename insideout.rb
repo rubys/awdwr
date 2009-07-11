@@ -135,7 +135,7 @@ section 2.1, 'Rack' do
     data[/()/,1] = read('rack/test_product_server.rb')
   end
 
-  desc 'Establish connection, use Builder, and send response.'
+  desc 'Code: Establish connection, use Builder, and send response.'
   edit 'product_server.rb' do |data|
     data[/()/,1] = read('rack/product_server.rb')
   end
@@ -285,15 +285,15 @@ section 2.3, 'Whenever' do
   cmd 'whenever'
 
   edit 'config/deploy.rb' do |data|
-    data << "\n" + <<-'EOF'.unindent(6)
-      namespace :deploy do
-        desc "Update the crontab file"
-          task :update_crontab, :roles => :db do
-          run "cd #{release_path} && whenever --update-crontab #{application}"
-        end
+    data[/namespace :deploy.*?^()end/m,1] = "\n" + <<-'EOF'.unindent(4)
+      desc 'Update the crontab file'
+        task :update_crontab, :roles => :db do
+        run "cd #{current_path} && whenever --update-crontab #{application}"
       end
+    EOF
 
-      after "deploy:symlink", "deploy:update_crontab"
+    data[/^after "deploy:symlink", "deploy:restart"\n()/,1] = <<-EOF.unindent(6)
+      after "deploy:restart", "deploy:update_crontab"
     EOF
   end
 
@@ -307,7 +307,7 @@ section 2.3, 'Whenever' do
   cmd 'cap deploy'
 end
 
-section 3.1, 'Rails' do
+section 3.1, 'Convert to Rails' do
   overview <<-EOF
     Taking a step back, we have done something real.  It doesn't do much,
     but it didn't really take much code either.  But the problems are starting
@@ -375,40 +375,71 @@ section 3.1, 'Rails' do
   get '/products/1'
   get '/products/1/edit'
   get '/products/new'
+end
 
-  desc 'Update whenever to use runner'
+section 3.2, 'Deploy Rails' do
+  overview <<-EOF
+    Capistrano is understands Rails, but there are a few things you need
+    to be aware of.
+  EOF
+  desc 'Update whenever to use runner.'
   edit 'config/schedule.rb' do |data|
-    data[/(command.*)/,1] = "runner 'Product.import(\"http://#{HOST}/testdata.xml\")'"
+    data[/^(root =.*\s+)/,1] = ''
+    data[/(command.*load_products.*)/,1] = 
+      "runner \"Product.import('http://#{HOST}/testdata.xml')\""
   end
 
-  desc 'Tell Rails about the gem path'
-  edit 'config/deploy.rb' do |data|
-    data << "\n" + <<-'EOF'.unindent(6)
-      load 'ext/rails-database-migrations.rb'
+  desc 'Peek at the results.'
+  cmd 'whenever'
 
-      set :gemhome, "/home/sa3ruby/.gemlocal"
-      task :after_deploy do
-        run "cp #{current_release}/config/environment.rb " +
-            "#{current_release}/config/environment.rb-"
-        run "echo ENV[\\'GEM_HOME\\']=\\'#{gemhome}\\' > " +
-            "#{current_release}/config/environment.rb"
-        run "echo ENV[\\'GEM_PATH\\']=\\'#{gemhome}\\' >> " +
-            "#{current_release}/config/environment.rb"
-        run "cat #{current_release}/config/environment.rb- >> " +
-            "#{current_release}/config/environment.rb"
-        run "rm #{current_release}/config/environment.rb-"
-        deploy::cleanup
+  desc 'Add GEM_HOME to environment.rb, migration tasks, and do cleanup.'
+  edit 'config/deploy.rb' do |data|
+    data[/set :deploy_to.*\n()/,1] = <<-'EOF'.unindent(6)
+      set :gemhome, "/home/#{user}/.gems"
+    EOF
+
+    data[/namespace :deploy.*?^()end/m,1] = "\n" + <<-'EOF'.unindent(4)
+      desc 'set db path outside of application directory'
+      task :set_db_path do
+        run "sed -i 's|db/production|#{deploy_to}/depot|' " +
+            "#{release_path}/config/database.yml"
       end
+
+      desc 'set GEM_HOME in the environment'
+      task :set_gem_home do
+        run "sed -i '1iENV[%(GEM_HOME)]=%(#{gemhome})\\n' " +
+            "#{release_path}/config/environment.rb"
+      end
+    EOF
+
+    data[/^(after "deploy:symlink", "deploy:restart"\n)/,1] = <<-EOF.unindent(6)
+      after "deploy:update_code", "deploy:set_db_path"
+      after "deploy:update_code", "deploy:set_gem_home"
+      after "deploy:symlink", "deploy:restart"
+      after "deploy:restart", "deploy:cleanup"
+    EOF
+
+    data << "\n" + <<-EOF.unindent(6)
+      # Rails migration tasks
+      load 'ext/rails-database-migrations.rb'
     EOF
   end
   
+  desc 'Tell git what file NOT to retain'
+  edit '.gitignore' do |data|
+    data << <<-EOF.unindent(6)
+      db/*.sqlite3
+      log/*.log
+      tmp/**/*
+    EOF
+  end
+ 
   desc 'Commit.  Push.  Deploy.'
   cmd 'git st'
   cmd 'git add .'
   cmd 'git commit -m "convert to Rails!"'
   cmd 'git push'
   cmd 'cap deploy:migrations'
-  cmd 'cap deploy'
 
   desc "See this live."
   get "http://#{HOST}/products"

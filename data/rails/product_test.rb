@@ -21,7 +21,7 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal 28.5, product.price
   end
 
-  def test_unit
+  test "Pragmatic Unit Testing" do
     product = Product.find_by_base_id(4)
     assert_equal 'Pragmatic Unit Testing (C#)', product.title
     assert_match /<p>\s+Pragmatic programmers use feedback/, product.description

@@ -2,9 +2,9 @@ class Product < ActiveRecord::Base
 
   def self.import(source)
     if source =~ /^http:/
-      input = Net::HTTP.get(URI.parse(uri))
+      input = Net::HTTP.get(URI.parse(source))
     else
-      input = File.open(source)
+      input = File.open(source) {|file| file.read}
     end
 
     REXML::Document.new(input).each_element('//product') do |xproduct|
