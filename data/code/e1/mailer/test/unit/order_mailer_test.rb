@@ -8,19 +8,27 @@ class OrderMailerTest < ActionMailer::TestCase
   end
 
   test "confirm" do
+    start = Time.now
+    mailing = OrderMailer.create_confirm(@order)
+
     @expected.subject = 'Pragmatic Store Order Confirmation'
     @expected.body    = read_fixture('confirm')
-    @expected.date    = Time.now
+    @expected.date    = mailing.date
 
-    assert_equal @expected.encoded, OrderMailer.create_confirm(@order).encoded
+    assert_operator mailing.date, :>=, start-1
+    assert_equal @expected.encoded, mailing.encoded
   end
 
   test "sent" do
+    start = Time.now
+    mailing = OrderMailer.create_sent(@order)
+
     @expected.subject = 'Pragmatic Order Shipped'
     @expected.body    = read_fixture('sent')
-    @expected.date    = Time.now
+    @expected.date    = mailing.date
 
-    assert_equal @expected.encoded, OrderMailer.create_sent(@order).encoded
+    assert_operator mailing.date, :>=, start-1
+    assert_equal @expected.encoded, mailing.encoded
   end
 
 end
