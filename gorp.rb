@@ -96,6 +96,9 @@ def popen3 args, hilight=[]
       line = pout.readline
       if hilight.any? {|pattern| line.include? pattern}
         outclass='hilight'
+      elsif line =~ /\x1b\[\d/
+        line.gsub! /\x1b\[1m\x1b\[3\dm(.*?)\x1b\[0m/, '\1'
+        outclass = 'logger'
       else
         outclass='stdout'
       end
