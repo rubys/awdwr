@@ -1,8 +1,12 @@
 require 'rubygems'
 require 'test/unit'
+
 require 'active_support'
 require 'active_support/test_case'
+
+$:.unshift 'work/depot/vendor/rails/activesupport/lib'
 require 'active_support/version'
+$:.shift
 
 module Book
 end
