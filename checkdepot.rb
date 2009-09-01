@@ -125,7 +125,7 @@ class DepotTest < Book::TestCase
 
   section 11.1, "Iteration F1: Adding Users" do
     assert_select 'legend', 'Enter User Details'
-    if ActiveSupport::VERSION::STRING =~ /^2\.2/
+    if ActiveSupport::VERSION::STRING =~ /^2\.[23]/
       assert_select 'p[style=color: green]', 'User dave was successfully created.'
     else
       assert_select 'p.notice', 'User dave was successfully created.'
