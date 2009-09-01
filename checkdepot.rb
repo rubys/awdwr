@@ -125,7 +125,11 @@ class DepotTest < Book::TestCase
 
   section 11.1, "Iteration F1: Adding Users" do
     assert_select 'legend', 'Enter User Details'
-    assert_select 'p[style=color: green]', 'User dave was successfully created.'
+    if ActiveSupport::VERSION::STRING =~ /^2\.2/
+      assert_select 'p[style=color: green]', 'User dave was successfully created.'
+    else
+      assert_select 'p.notice', 'User dave was successfully created.'
+    end
   end
 
   section 11.2, "Iteration F2: Logging in" do
@@ -834,7 +838,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> #<Account id: 2, number: \"54321\", .*>$/, stdout.shift
     assert_match /^\sfrom .*\/transactions.rb:82$/, stdout.shift
     assert_match /^\sfrom .*\/transactions.rb:80$/, stdout.shift
-    stdout.shift if stdout.first == "\tfrom :0"
+    stdout.shift if stdout.first =~ /^\tfrom /
     assert_equal "     id = 1", stdout.shift
     assert_equal " number = 12345", stdout.shift
     assert_equal "balance = 100", stdout.shift

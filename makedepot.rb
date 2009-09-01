@@ -5,6 +5,7 @@ $autorestart = 'depot'
 $output = 'makedepot'
 $checker = 'checkdepot'
 
+$R2 = (`#{which_rails($rails)} -v` =~ /^Rails 2/)
 $R22 = (`#{which_rails($rails)} -v` =~ /^Rails 2\.2/)
 $APP = $R22 ? 'application' : 'application_controller'
 
@@ -36,8 +37,14 @@ section 6.2, 'Creating the Products Model and Maintenance Application' do
   cmd 'rake db:migrate'
   db 'select version from schema_migrations'
   restart_server
-  edit 'app/views/products/new.html.erb' do |data|
-    data[/ f.text_area :description()/,1] = ', :rows => 6'
+  if $R2
+    edit 'app/views/products/new.html.erb' do |data|
+      data[/ f.text_area :description()/,1] = ', :rows => 6'
+    end
+  else
+    edit 'app/views/products/_form.html.erb' do |data|
+      data[/ f.text_area :description()/,1] = ', :rows => 6'
+    end
   end
 
   get '/products'
@@ -90,28 +97,42 @@ section 6.3, 'Iteration A2: Add a Missing Column' do
     data[/,() :method => :del/,1] = "\n" + (' ' * 39)
   end
 
-  edit 'app/views/products/new.html.erb' do |data|
-    data[/ <%= f.text_field :image_url %>.*\n.*\n+()/,1] =
-      <<-EOF.unindent(4) + "\n"
-      <!-- START_HIGHLIGHT -->
-      <p>
-        <%= f.label :price %><br />
-        <%= f.text_field :price %>
-      </p>
-      <!-- END_HIGHLIGHT -->
-    EOF
-  end
+  if $R2
+    edit 'app/views/products/new.html.erb' do |data|
+      data[/ <%= f.text_field :image_url %>.*\n.*\n+()/,1] =
+        <<-EOF.unindent(4) + "\n"
+        <!-- START_HIGHLIGHT -->
+        <p>
+          <%= f.label :price %><br />
+          <%= f.text_field :price %>
+        </p>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    end
 
-  edit 'app/views/products/edit.html.erb' do |data|
-    data[/ <%= f.text_field :image_url %>.*\n.*\n+()/,1] = 
-      <<-EOF.unindent(4) + "\n"
-      <!-- START_HIGHLIGHT -->
-      <p>
-        <%= f.label :price %><br />
-        <%= f.text_field :price %>
-      </p>
-      <!-- END_HIGHLIGHT -->
-    EOF
+    edit 'app/views/products/edit.html.erb' do |data|
+      data[/ <%= f.text_field :image_url %>.*\n.*\n+()/,1] = 
+        <<-EOF.unindent(4) + "\n"
+        <!-- START_HIGHLIGHT -->
+        <p>
+          <%= f.label :price %><br />
+          <%= f.text_field :price %>
+        </p>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    end
+  else
+    edit 'app/views/products/_form.html.erb' do |data|
+      data[/ <%= f.text_field :image_url %>.*?<\/div>\n()/m,1] = 
+        <<-EOF.unindent(6)
+        <!-- START_HIGHLIGHT -->
+        <div class="field">
+          <%= f.label :price %><br />
+          <%= f.text_field :price %>
+        </div>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    end
   end
 
   edit 'app/views/products/show.html.erb' do |data|
