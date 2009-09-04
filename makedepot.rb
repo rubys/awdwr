@@ -1916,8 +1916,10 @@ end
 $cleanup = Proc.new do
   # switch back to depot (if necessary)
   if Dir.pwd != File.join($WORK,'depot') or !$server
-    Dir.chdir(File.join($WORK,'depot'))
-    restart_server
+    if File.exist?(File.join($WORK,'depot'))
+      Dir.chdir(File.join($WORK,'depot'))
+      restart_server
+    end
   end
  
   # fetch stylesheets
