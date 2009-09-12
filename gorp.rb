@@ -276,8 +276,7 @@ rescue LoadError
 end
 
 def snap response, form={}
-  if response.content_type == 'text/plain' or response.content_type =~ /xml/ or
-     response.code == '500'
+  if response.content_type == 'text/plain' or response.content_type =~ /xml/
     $x.div :class => 'body' do
       response.body.split("\n").each do |line| 
         $x.pre line.chomp, :class=>'stdout'
@@ -336,6 +335,7 @@ def snap response, form={}
   end
 
   attrs = {:class => 'body', :title => title}
+  attrs[:class] = 'traceback' if response.code == '500'
   attrs[:id] = body['id'] if body['id']
   $x.div(attrs) do
     body.children.each do |child|
@@ -514,8 +514,8 @@ at_exit do
           pre.hilight {color: #000; background-color: #FF0; padding: 0}
           pre.stderr {color: #F00; padding: 0}
           div.body {border-style: solid; border-color: #800080; padding: 0.5em}
-          pre.traceback {background:#FDD; border: 4px solid #F00; 
-                         font-weight: bold; margin-top: 1em; padding: 0.5em}
+          .traceback {background:#FDD; border: 4px solid #F00; 
+                      font-weight: bold; margin-top: 1em; padding: 0.5em}
           ul.toc {list-style: none}
           ul a {text-decoration: none}
           ul a:hover {text-decoration: underline; color: #000;
