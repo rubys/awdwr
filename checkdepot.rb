@@ -81,14 +81,14 @@ class DepotTest < Book::TestCase
   end
 
   section 8.2, "Iteration C1: Creating a Cart" do
-    assert_select '.stdout', /Missing template store\/add_to_cart/
+    assert_select 'p', /Missing template store\/add_to_cart/
     assert_select 'h2', 'Your Pragmatic Cart'
     assert_select 'li', 'Pragmatic Project Automation'
   end
 
   section 8.3, "Iteration C2: A Smarter Cart" do
-    assert_select '.stdout', /NoMethodError/
-    assert_select '.stdout', /in StoreController#add_to_cart/
+    assert_select 'h1', /NoMethodError/
+    assert_select 'h1', /in StoreController#add_to_cart/
     assert_select 'li', /2 &#?\w+; Pragmatic Project Automation/
     assert_select 'pre', "Couldn't find Product with ID=wibble"
   end
@@ -144,8 +144,8 @@ class DepotTest < Book::TestCase
   end
 
   section 11.4, "Iteration F4: A Sidebar, More Administration" do
-    assert_select '.stdout', /NoMethodError in/
-    assert_select '.stdout', /Admin#index/
+    assert_select 'h1', /NoMethodError in/
+    assert_select 'h1', /Admin#index/
     assert_select '#main h1', 'Listing users'
     assert_select '.stdout', /=&gt; #&lt;Product id: nil/
   end
