@@ -8,6 +8,7 @@ $checker = 'checkdepot'
 $R2 = (`#{which_rails($rails)} -v` =~ /^Rails 2/)
 $R22 = (`#{which_rails($rails)} -v` =~ /^Rails 2\.2/)
 $APP = $R22 ? 'application' : 'application_controller'
+require 'tzinfo' if `#{which_rails($rails)} -v` =~ /^Rails 3/
 
 section 4, 'Instant Gratification' do
   cmd "erb -r rubygems -r active_support -T - < #{$CODE}/erb/ex1.html.erb |  
