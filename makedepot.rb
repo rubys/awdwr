@@ -13,7 +13,7 @@ require 'tzinfo' if `#{which_rails($rails)} -v` =~ /^Rails 3/
 if $rails == 'rails'
   required_gems = %w(rails)
 else
-  required_gems = %w(builder rack rack-test rake rvm sqlite3-ruby tzinfo)
+  required_gems = %w(builder rack rack-test rake sqlite3-ruby tzinfo)
 end
 
 missing = required_gems - `gem list`.scan(/(^[-\w]+) \(/).flatten
