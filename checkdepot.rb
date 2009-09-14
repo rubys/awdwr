@@ -203,8 +203,8 @@ class DepotTest < Book::TestCase
     stdout = css_select('.stdout').map {|tag| tag.children.join}
     stdout = stdout.select {|line| line =~ /^== / and line !~ /ing ===/}
     assert_match /AddEmailToOrders: migrated/, stdout.shift
-    assert_match /CreateDiscounts: migrated/, stdout.shift
-    assert_match /AddStatusToUser: migrated/, stdout.shift
+    assert_match /(CreateDiscounts|AddStatusToUser): migrated/, stdout.shift
+    assert_match /(CreateDiscounts|AddStatusToUser): migrated/, stdout.shift
     assert_match /AddPlacedAtToOrders: migrated/, stdout.shift
     assert_match /AddColumnsToOrders: migrated/, stdout.shift
     assert_match /RenameEmailColumn: migrated/, stdout.shift
