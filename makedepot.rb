@@ -10,6 +10,19 @@ $R22 = (`#{which_rails($rails)} -v` =~ /^Rails 2\.2/)
 $APP = $R22 ? 'application' : 'application_controller'
 require 'tzinfo' if `#{which_rails($rails)} -v` =~ /^Rails 3/
 
+if $rails == 'rails'
+  required_gems = %w(rails)
+else
+  required_gems = %w(builder rack rack-test rake rvm sqlite3-ruby tzinfo)
+end
+
+missing = required_gems - `gem list`.scan(/(^[-\w]+) \(/).flatten
+
+unless missing.empty?
+  missing.each {|gem| STDERR.puts "Missing gem: #{gem}"}
+  Process.exit!
+end
+
 section 4, 'Instant Gratification' do
   rubypath = ENV['RUBYPATH']
   begin
