@@ -10,6 +10,9 @@ require 'rubygems'
 require 'builder'
 require 'stringio'
 
+require 'rbconfig'
+$ruby = File.join(Config::CONFIG["bindir"], Config::CONFIG["RUBY_INSTALL_NAME"])
+
 # Micro DSL for declaring an ordered set of book sections
 $sections = []
 def section number, title, &steps
@@ -70,6 +73,14 @@ def db statement, hilight=[]
   popen3 cmd, hilight
 end
 
+def ruby args
+  cmd "ruby #{args}"
+end
+
+def console script
+  cmd "echo #{script.inspect} | ruby script/console '--irb=irb -f'"
+end
+
 def cmd args, hilight=[]
   log :cmd, args
   $x.pre args, :class=>'stdin'
@@ -116,7 +127,7 @@ end
 def irb file
   $x.pre "irb #{file}", :class=>'stdin'
   log :irb, file
-  cmd = "irb -r rubygems --prompt-mode simple #{$CODE}/#{file}"
+  cmd = "irb -f -rubygems -r config/boot --prompt-mode simple #{$CODE}/#{file}"
   Open3.popen3(cmd) do |pin, pout, perr|
     terr = Thread.new do
       $x.pre perr.readline.chomp, :class=>'stderr' until perr.eof?
@@ -419,7 +430,7 @@ def which_rails rails
   rails = railties if File.exists?(railties)
   if File.exists?(rails)
     firstline = open(rails) {|file| file.readlines.first}
-    rails = "ruby " + rails unless firstline =~ /^#!/
+    rails = 'ruby ' + rails unless firstline =~ /^#!/
   end
   rails
 end
@@ -539,7 +550,7 @@ at_exit do
       $x.h2 'Development Log'
       cmd which_rails($rails) + ' -v'
   
-      cmd 'ruby -v'
+      cmd "#{$ruby} -v"
       cmd 'gem -v'
     
       e = nil

@@ -6,7 +6,7 @@ require "pp"
 #ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 require "rubygems"
-require "activerecord"
+require "active_record"
 
 class LineItem < ActiveRecord::Base
 end

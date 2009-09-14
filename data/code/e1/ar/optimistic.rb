@@ -2,7 +2,7 @@ $: << File.dirname(__FILE__)
 require "connect"
 
 require "rubygems"
-require "activerecord"
+require "active_record"
 
 ActiveRecord::Schema.define do
   # START:migration

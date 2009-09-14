@@ -6,7 +6,7 @@ ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 # START:define
 require "rubygems"
-require "activerecord"
+require "active_record"
 require "pp"
 
 @params = {}

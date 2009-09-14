@@ -1,21 +1,41 @@
 require 'rubygems'
 require 'test/unit'
+require 'builder'
 
-require 'active_support'
+begin
+  # installed Rails (2.3.3 ish)
+  require 'active_support'
+  $:.unshift 'work/depot/vendor/rails/activesupport/lib'
+  require 'active_support/version'
+  $:.shift
+rescue LoadError
+  # testing Rails (3.0 ish)
+  $:.unshift 'work/depot/vendor/rails/activesupport/lib'
+  require 'active_support'
+  require 'active_support/version'
+end
+
 require 'active_support/test_case'
-
-$:.unshift 'work/depot/vendor/rails/activesupport/lib'
-require 'active_support/version'
-$:.shift
 
 module Book
 end
 
 class Book::TestCase < ActiveSupport::TestCase
   # just enough infrastructure to get 'assert_select' to work
-  require 'action_controller'
-  require 'action_controller/assertions/selector_assertions'
-  include ActionController::Assertions::SelectorAssertions
+  begin
+    # installed Rails (2.3.3 ish)
+    require 'action_controller'
+    require 'action_controller/assertions/selector_assertions'
+    include ActionController::Assertions::SelectorAssertions
+  rescue LoadError
+    # testing Rails (3.0 ish)
+    $:.unshift 'work/depot/vendor/rails/actionpack/lib'
+    require 'action_controller'
+    require 'action_dispatch/testing/assertions'
+    require 'action_dispatch/testing/assertions/selector'
+    include ActionDispatch::Assertions::SelectorAssertions
+    $:.shift
+  end
 
   # micro DSL allowing the definition of optional tests
   def self.section number, title, &tests
@@ -114,9 +134,13 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
 
       # provide details in the section itself
       x = Builder::XmlMarkup.new(:indent => 2)
-      x.pre fault.message.sub(".\n<false> is not true",'') +
-        "\n\nTraceback:\n  " + fault.location.join("\n  "),
-        :class=>'traceback'
+      if fault.respond_to? :location
+        x.pre fault.message.sub(".\n<false> is not true",'') +
+          "\n\nTraceback:\n  " + fault.location.join("\n  "),
+          :class=>'traceback'
+      else
+        x.pre fault.message, :class=>'traceback'
+      end
       sections[name][/<\/a>()/,1] = x.target!
     end
   end

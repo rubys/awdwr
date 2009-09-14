@@ -275,7 +275,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> \[#<Order id: 8, name: "Dave Thomas"/, stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -356,7 +356,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> [\"PP\"]", stdout.shift
     assert_equal "-- create_table(:customers, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
@@ -390,7 +390,7 @@ class DepotTest < Book::TestCase
     stdout.reject! {|line| line =~ /' -> `vendor\/plugins\//}
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "-- create_table(:products, {:force=>true})", stdout.shift
@@ -398,7 +398,7 @@ class DepotTest < Book::TestCase
     assert_equal "-- create_table(:line_items, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
     assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
     assert_equal "=> 0", stdout.shift
     assert_match /^=> #<Product id: 1, title: "Programming Ruby"/, stdout.shift
@@ -463,7 +463,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
     assert_equal "-- create_table(:people, {:force=>true})", stdout.shift
     assert_equal " FROM sqlite_master", stdout.shift
@@ -499,7 +499,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "-- create_table(:catalog_entries, {:force=>true})", stdout.shift
@@ -524,7 +524,7 @@ class DepotTest < Book::TestCase
     assert_equal "resource_type = Article", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -561,13 +561,13 @@ class DepotTest < Book::TestCase
     assert_equal "resource_type = Sound", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "-- create_table(:employees, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
     assert_equal "=> 0", stdout.shift
     assert_equal "=> #<Employee id: 1, name: \"Adam\", manager_id: nil, mentor_id: nil>", stdout.shift
     assert_equal "=> #<Employee id: 2, name: \"Beth\", manager_id: nil, mentor_id: nil>", stdout.shift
@@ -587,13 +587,13 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
-    assert_equal "=> false", stdout.shift
-    assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
-    assert_match /^=> \[#<ActiveSupport::Callbacks::Callback/, stdout.shift
+    assert_equal "=> []", stdout.shift
+    assert_equal "=> []", stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>)/, stdout.shift
+    assert_match /^=> (nil|\[.*?\])/, stdout.shift
     assert_equal "=> #<Parent id: 1>", stdout.shift
     assert_equal "=> [\"One\", \"Two\", \"Three\", \"Four\"]", stdout.shift
     assert_equal "=> true", stdout.shift
@@ -688,7 +688,7 @@ class DepotTest < Book::TestCase
     assert_equal "-- create_table(:line_items, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> #<Proc:.*>$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
     assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
     assert_equal "=> #<Product id: 1, title: \"Programming Ruby\", description: \" ... \", line_items_count: 0>", stdout.shift
     assert_equal "=> #<LineItem id: nil, product_id: nil, order_id: nil, quantity: nil, unit_price: nil>", stdout.shift
@@ -712,9 +712,9 @@ class DepotTest < Book::TestCase
   section 20, 'Active Record: Object Life Cycle' do
     stdout = collect_stdout
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> false", stdout.shift
-    assert_equal "=> true", stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|false)/, stdout.shift
+    assert_equal '=> []', stdout.shift
+    assert_equal '=> []', stdout.shift
     assert_equal "-- create_table(:orders, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "-- create_table(:users, {:force=>:true})", stdout.shift
@@ -722,7 +722,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "=> Encrypter", stdout.shift
-    assert_match /^=> #<Proc:0x0+@.*\/encrypt.rb:34>$/, stdout.shift
+    assert_match /^=> #<Proc:0x0+@.*\/encrypt.rb:\d+>$/, stdout.shift
     assert_equal "=> #<Order id: nil, user_id: nil, name: nil, address: nil, email: nil>", stdout.shift
     assert_equal "=> \"Dave Thomas\"", stdout.shift
     assert_equal "=> \"123 The Street\"", stdout.shift
@@ -741,7 +741,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> false", stdout.shift
     assert_equal "=> true", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
     assert_equal "-- create_table(:payments, {:force=>true})", stdout.shift
     assert_equal " FROM sqlite_master", stdout.shift
@@ -928,8 +928,6 @@ class DepotTest < Book::TestCase
   section 21.2, 'Routing Requests' do
     stdout = collect_stdout.grep(/^=>/).map {|line| sort_hash(line)}
     assert_equal '=> true', stdout.shift
-    assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal '=> []', stdout.shift
     assert_equal '=> nil', stdout.shift
     assert_equal '=> ["store", "admin", "coupon"]', stdout.shift
     assert_equal '=> []', stdout.shift
@@ -946,8 +944,6 @@ class DepotTest < Book::TestCase
     assert_equal '=> {:action=>"show", :controller=>"coupon", :id=>"1"}', stdout.shift
     assert_equal '=> "http://www.example.com/store/display/123"', stdout.shift
     assert_equal '=> true', stdout.shift
-    assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal '=> []', stdout.shift
     assert_equal '=> nil', stdout.shift
     assert_equal '=> ["article", "blog"]', stdout.shift
     assert_match /^=> #<ActionController::Routing::RouteSet:.*>/, stdout.shift

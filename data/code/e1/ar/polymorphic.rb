@@ -5,7 +5,7 @@ require "logger"
 #ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 require "rubygems"
-require "activerecord"
+require "active_record"
 
 if ARGV.empty? or ARGV.first == '1'
   ActiveRecord::Schema.define do

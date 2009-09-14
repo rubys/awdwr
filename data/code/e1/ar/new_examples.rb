@@ -3,7 +3,7 @@ require "connect"
 
 # START:define
 require "rubygems"
-require "activerecord"
+require "active_record"
 
 class Order < ActiveRecord::Base
 end

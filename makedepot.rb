@@ -11,15 +11,20 @@ $APP = $R22 ? 'application' : 'application_controller'
 require 'tzinfo' if `#{which_rails($rails)} -v` =~ /^Rails 3/
 
 section 4, 'Instant Gratification' do
-  cmd "erb -r rubygems -r active_support -T - < #{$CODE}/erb/ex1.html.erb |  
-       sed 's/<!--.*-->//'"
-  cmd "erb -r rubygems -r active_support -T - < #{$CODE}/erb/ex2.html.erb | 
-       sed 's/<!--.*-->//'"
-  cmd "erb -r rubygems -r active_support -T - < #{$CODE}/erb/ex2a.html.erb | 
-       sed 's/<!--.*-->//'"
-  cmd "sed 's/-%>\\n/%>/' < #{$CODE}/erb/ex2b.html.erb |  
-       erb -r rubygems -r active_support -T - |
-       sed 's/<!--.*-->//'"
+  rubypath = ENV['RUBYPATH']
+  begin
+    ENV['RUBYPATH'] = "#{$rails}/activesupport/lib/" unless $rails == 'rails'
+    cmd "erb -r erbshim -T - < #{$CODE}/erb/ex1.html.erb |  
+         sed 's/<!--.*-->//'"
+    cmd "erb -r erbshim -T - < #{$CODE}/erb/ex2.html.erb | 
+         sed 's/<!--.*-->//'"
+    cmd "erb -r erbshim -T - < #{$CODE}/erb/ex2a.html.erb | 
+         sed 's/<!--.*-->//'"
+    cmd "sed 's/-%>\\n/%>/' < #{$CODE}/erb/ex2b.html.erb |  
+         erb -r erbshim -T - | sed 's/<!--.*-->//'"
+  ensure
+    ENV['RUBYPATH'] = rubypath
+  end
 end
 
 section 6.1, 'Iteration A1: Getting Something Running' do
@@ -33,7 +38,7 @@ end
 
 section 6.2, 'Creating the Products Model and Maintenance Application' do
   cmd 'ls -p'
-  cmd 'ruby script/generate scaffold product ' +
+  ruby 'script/generate scaffold product ' +
     'title:string description:text image_url:string'
   cmd 'rake db:migrate'
   db 'select version from schema_migrations'
@@ -73,7 +78,7 @@ section 6.2, 'Creating the Products Model and Maintenance Application' do
 end
 
 section 6.3, 'Iteration A2: Add a Missing Column' do
-  cmd 'ruby script/generate migration add_price_to_product price:decimal'
+  ruby 'script/generate migration add_price_to_product price:decimal'
 
   cmd 'cat ' + Dir['db/migrate/*add_price_to_product.rb'].first
   edit Dir['db/migrate/*add_price_to_product.rb'].first do |data|
@@ -245,7 +250,7 @@ section 6.5, 'Iteration A4: Making Prettier Listings' do
 end
 
 section 7.1, 'Iteration B1: Create the Catalog Listing' do
-  cmd 'ruby script/generate controller store index'
+  ruby 'script/generate controller store index'
   restart_server
   get '/store'
   edit 'app/controllers/store_controller.rb' do |data|
@@ -766,9 +771,9 @@ section 9.5, 'Iteration D5: Degrading If Javascript Is Disabled' do
 end
 
 section 10.1, 'Iteration E1: Capturing an Order' do
-  cmd 'ruby script/generate scaffold order name:string address:text ' +
+  ruby 'script/generate scaffold order name:string address:text ' +
     'email:string pay_type:string'
-  cmd 'ruby script/generate scaffold line_item product_id:integer ' +
+  ruby 'script/generate scaffold line_item product_id:integer ' +
     'order_id:integer quantity:integer total_price:decimal'
   edit Dir['db/migrate/*_create_orders.rb'].first, 'up' do |data|
     data[/()  def self.up/,1] = "  #START:up\n"
@@ -969,7 +974,7 @@ section 10.1, 'Iteration E1: Capturing an Order' do
 end
 
 section 11.1, 'Iteration F1: Adding Users' do
-  cmd 'ruby script/generate scaffold user name:string hashed_password:string salt:string'
+  ruby 'script/generate scaffold user name:string hashed_password:string salt:string'
   restart_server
   cmd 'cat ' + Dir['db/migrate/*_create_users.rb'].first
   cmd 'rake db:migrate'
@@ -1021,7 +1026,7 @@ section 11.1, 'Iteration F1: Adding Users' do
 end
 
 section 11.2, 'Iteration F2: Logging in' do
-  cmd 'ruby script/generate controller admin login logout index'
+  ruby 'script/generate controller admin login logout index'
   restart_server
   edit "app/controllers/admin_controller.rb" do |data|
     data[/(.*)/m,1] = read('users/admin_controller.rb')
@@ -1182,7 +1187,7 @@ section 12.1, 'Generating the XML Feed' do
       #END_HIGHLIGHT
     EOF
   end
-  cmd 'ruby script/generate controller info who_bought'
+  ruby 'script/generate controller info who_bought'
   edit 'app/controllers/info_controller.rb' do |data|
     data[/\n().*def who_bought/,1] = "  #START:who_bought\n"
     data[/\n  end\n()/,1] = "  #END:who_bought\n"
@@ -1450,9 +1455,9 @@ end
 
 section 14.2, 'Unit Testing of Models' do
   cmd 'cat test/unit/product_test.rb'
-  cmd 'ruby -Itest test/unit/product_test.rb'
+  ruby '-Itest test/unit/product_test.rb'
   cmd 'rake db:test:prepare'
-  cmd 'ruby -Itest test/unit/product_test.rb'
+  ruby '-Itest test/unit/product_test.rb'
   cmd 'rake test:units'
   edit "test/unit/product_test.rb" do |data|
     data[/(.*)/m,1] = read('test/product_test.rb')
@@ -1464,11 +1469,11 @@ section 14.2, 'Unit Testing of Models' do
   edit "test/unit/cart_test.rb" do |data|
     data[/(.*)/m,1] = read('test/cart_test.rb')
   end
-  cmd 'ruby -I test test/unit/cart_test.rb'
+  ruby '-I test test/unit/cart_test.rb'
   edit "test/unit/cart_test1.rb" do |data|
     data[/(.*)/m,1] = read('test/cart_test1.rb')
   end
-  cmd 'ruby -I test test/unit/cart_test1.rb'
+  ruby '-I test test/unit/cart_test1.rb'
 end
 
 section 14.3, 'Functional Testing of Controllers' do
@@ -1487,19 +1492,19 @@ section 14.3, 'Functional Testing of Controllers' do
   edit "test/fixtures/users.yml" do |data|
     data[/(.*)/m,1] = read('test/users.yml')
   end
-  cmd 'ruby -I test test/functional/admin_controller_test.rb'
+  ruby '-I test test/functional/admin_controller_test.rb'
 end
   
 section 14.4, 'Integration Testing of Applications' do
-  cmd 'ruby script/generate integration_test user_stories'
+  ruby 'script/generate integration_test user_stories'
   edit "test/integration/user_stories_test.rb" do |data|
     data[/(.*)/m,1] = read('test/user_stories_test.rb')
   end
-  cmd 'ruby -I test test/integration/user_stories_test.rb'
+  ruby '-I test test/integration/user_stories_test.rb'
   edit "test/integration/dsl_user_stories_test.rb" do |data|
     data[/(.*)/m,1] = read('test/dsl_user_stories_test.rb')
   end
-  cmd 'ruby -I test test/integration/dsl_user_stories_test.rb'
+  ruby '-I test test/integration/dsl_user_stories_test.rb'
 end
 
 section 14.5, 'Performance Testing' do
@@ -1510,15 +1515,15 @@ section 14.5, 'Performance Testing' do
   edit "test/performance/order_speed_test.rb" do |data|
     data[/(.*)/m,1] = read('test/order_speed_test.rb')
   end
-  cmd 'ruby -I test test/performance/order_speed_test.rb'
+  ruby '-I test test/performance/order_speed_test.rb'
   edit "app/models/user.rb" do |data|
     data[/def self.encrypted_password.*?\n()/,1] = <<-EOF.unindent(2)
       100000.times { Math.sin(1)}
     EOF
   end
   encrypt = 'User.encrypted_password("secret", "salt")'
-  cmd "ruby script/performance/benchmarker #{encrypt.inspect}"
-  cmd "ruby script/performance/profiler #{encrypt.inspect}"
+  ruby "script/performance/benchmarker #{encrypt.inspect}"
+  ruby "script/performance/profiler #{encrypt.inspect}"
   edit "app/models/user.rb", 'revert' do |data|
     data.gsub!(/^.*Math.sin.*\n/,'')
   end
@@ -1546,7 +1551,7 @@ end
 section 16, 'Active Support' do
   rails 'namelist', :e1
   restart_server
-  cmd 'ruby script/generate model person name:string'
+  ruby 'script/generate model person name:string'
   cmd 'rake db:migrate'
   edit 'app/controllers/people_controller.rb' do |data|
     data[/()/,1] = read('namelist/people_controller.rb')
@@ -1569,8 +1574,8 @@ section 17, 'Migration' do
   restart_server
   cmd 'cp -v -r ../depot/db/* db/'
   cmd 'cp -v -r ../depot/app/models/* app/models/'
-  cmd 'ruby script/generate model discount'
-  cmd 'ruby script/generate migration add_status_to_user status:string'
+  ruby 'script/generate model discount'
+  ruby 'script/generate migration add_status_to_user status:string'
   20.upto(37) do |i|
     if i == 33
       cmd 'mkdir db/migrate/dev_data'
@@ -1588,11 +1593,11 @@ end
 
 section 18, 'Active Record: The Basics' do
   Dir.chdir(File.join($WORK,'migration'))
-  cmd 'echo "Order.column_names" | ruby script/console'
-  cmd 'echo "Order.columns_hash[\"pay_type\"]" | ruby script/console'
+  console 'Order.column_names'
+  console 'Order.columns_hash["pay_type"]'
   db "select * from orders limit 1"
-  cmd 'echo "Product.find(:first).price_before_type_cast" | ruby script/console'
-  cmd 'echo "Product.find(:first).updated_at_before_type_cast" | ruby script/console'
+  console 'Product.find(:first).price_before_type_cast'
+  console 'Product.find(:first).updated_at_before_type_cast'
   irb 'e1/ar/new_examples.rb'
   irb 'e1/ar/find_examples.rb'
   irb 'e1/ar/dump_serialize_table.rb'
@@ -1638,7 +1643,7 @@ end
 
 section 21, 'Action Controller: Routing and URLs' do
   rails 'restful'
-  cmd 'ruby script/generate scaffold article title:string summary:text content:text'
+  ruby 'script/generate scaffold article title:string summary:text content:text'
   cmd 'rake db:migrate'
   cmd 'rake routes'
   edit 'config/routes.rb', 'comments' do |data|
@@ -1683,8 +1688,8 @@ section 21, 'Action Controller: Routing and URLs' do
     EOF
   end
   cmd 'rake routes'
-  cmd 'ruby script/generate model comment comment:text article_id:integer'
-  cmd 'ruby script/generate controller comments new edit update destroy'
+  ruby 'script/generate model comment comment:text article_id:integer'
+  ruby 'script/generate controller comments new edit update destroy'
   cmd 'rm app/views/comments/destroy.html.erb'
   cmd 'rm app/views/comments/update.html.erb'
   edit 'app/models/article.rb' do |data|
@@ -1715,7 +1720,7 @@ section 21, 'Action Controller: Routing and URLs' do
     data[/(.*)/m,1] = read("comment/comments_controller.rb")
   end
   rails 'routing', :e1
-  cmd 'ruby script/generate controller store index add_to_cart'
+  ruby 'script/generate controller store index add_to_cart'
   cmd "cp -v #{$DATA}/routing/* config"
   cmd 'mv -v config/*_test.rb test/unit'
   cmd 'rake db:schema:dump'
@@ -1732,10 +1737,10 @@ section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
   rails 'view', :e1
   cmd "cp -v #{$CODE}/e1/views/app/controllers/*.rb app/controllers"
   cmd "cp -vr #{$CODE}/e1/views/app/views/pager app/views"
-  cmd 'ruby script/generate model user name:string'
+  ruby 'script/generate model user name:string'
   restart_server
   cmd 'rake db:migrate'
-  cmd 'echo "PagerController.new.populate" | ruby script/console'
+  console 'PagerController.new.populate'
   get '/pager/user_list'
   get '/pager/user_list?page=2'
 end
@@ -1743,11 +1748,11 @@ end
 section 23.5, 'Forms That Wrap Model Objects' do
   cmd "cp -rpv #{$BASE}/plugins/country_select vendor/plugins/"
   restart_server
-  cmd 'ruby script/generate model product title:string description:text ' + 
+  ruby 'script/generate model product title:string description:text ' + 
        'image_url:string price:decimal'
   cmd "cp -v #{$CODE}/e1/views/db/migrate/*products.rb db/migrate/*products.rb"
   cmd "cp -v #{$CODE}/e1/views/app/models/shipping.rb app/models"
-  cmd 'ruby script/generate model detail product_id:integer sku:string ' + 
+  ruby 'script/generate model detail product_id:integer sku:string ' + 
        'manufacturer:string'
   cmd "cp -v #{$CODE}/e1/views/db/migrate/*details.rb db/migrate/*details.rb"
   cmd "cp -v #{$CODE}/e1/views/app/models/detail.rb app/models"
@@ -1775,7 +1780,7 @@ section 23.7, 'Working with Nonmodel Fields' do
 end
 
 section 23.8, 'Uploading Files to Rails Applications' do
-  cmd 'ruby script/generate model picture comment:string name:string ' +
+  ruby 'script/generate model picture comment:string name:string ' +
        'content_type:string data:binary'
   cmd "cp -v #{$CODE}/e1/views/db/migrate/*pictures.rb db/migrate/*pictures.rb"
   cmd "cp -v #{$CODE}/e1/views/app/models/picture.rb app/models"
@@ -1791,7 +1796,7 @@ section 23.9, 'Layouts and Components' do
 end
 
 section '23.10', 'Caching, Part Two' do
-  cmd 'ruby script/generate model article body:text'
+  ruby 'script/generate model article body:text'
   cmd "cp -v #{$CODE}/e1/views/app/models/article.rb app/models"
   cmd "cp -vr #{$CODE}/e1/views/app/views/blog app/views"
   get '/blog/list'
@@ -1817,7 +1822,7 @@ end
 
 section 25.1, 'Sending E-mail' do
   rails 'mailer', :e1
-  cmd 'ruby script/generate mailer OrderMailer confirm sent'
+  ruby 'script/generate mailer OrderMailer confirm sent'
   code = "#{$CODE}/e1/mailer"
   cmd "cp -vr #{code}/db/migrate db"
   cmd "cp -v #{code}/app/controllers/* app/controllers"
@@ -1842,7 +1847,7 @@ section 26, 'Active Resources' do
       end
     EOF
   end
-  cmd 'echo "Product.find(2).title" | ruby script/console'
+  console 'Product.find(2).title'
   Dir.chdir(File.join($WORK,'depot'))
   edit "app/controllers/#{$APP}.rb", 'auth' do |data|
     data[/unless.*?\)\n(.*?\n)\s+end/m,1] = <<-EOF
@@ -1883,9 +1888,8 @@ section 26, 'Active Resources' do
   end
   restart_server
   Dir.chdir(File.join($WORK,'depot_client'))
-  cmd 'echo "Product.find(2).title" | ruby script/console'
-  cmd "echo 'p = Product.find(2)\nputs p.price\np.price-=5\np.save' | " +
-      "ruby script/console"
+  console 'Product.find(2).title'
+  console 'p = Product.find(2)\nputs p.price\np.price-=5\np.save'
   get '/store'
   edit 'app/models/order.rb' do |data|
     data << <<-EOF.unindent(6)
@@ -1894,8 +1898,7 @@ section 26, 'Active Resources' do
       end
     EOF
   end
-  cmd "echo 'Order.find(1).name\nOrder.find(1).line_items\n' | " +
-      "ruby script/console"
+  console 'Order.find(1).name\nOrder.find(1).line_items\n'
   edit 'app/models/line_item.rb' do |data|
     data << <<-EOF.unindent(6)
       class LineItem < ActiveResource::Base
@@ -1906,12 +1909,11 @@ section 26, 'Active Resources' do
   get '/admin/logout'
   post '/admin/login', 'name' => 'dave', 'password' => 'secret'
   get '/orders/1/line_items.xml'
-  cmd 'echo "LineItem.find(:all, :params => {:order_id=>1})" |' + 
-      'ruby script/console'
-  cmd "echo 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n" +
-       "puts li.total_price\nli.total_price*=0.8\nli.save\n" +
-       "li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, " +
-       ":total_price=>0.0)\nli2.save' | ruby script/console"
+  console 'LineItem.find(:all, :params => {:order_id=>1})'
+  console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
+       'puts li.total_price\nli.total_price*=0.8\nli.save\n' +
+       'li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, ' +
+       ':total_price=>0.0)\nli2.save'
 end
 
 $cleanup = Proc.new do

@@ -1,11 +1,11 @@
 $: << File.dirname(__FILE__)
+require "connect"
+
 require "logger"
 require "rubygems"
-require "activerecord"
+require "active_record"
 
 require "vendor/plugins/acts_as_list/init"
-
-require "connect"
 
 #ActiveRecord::Base.logger = Logger.new(STDOUT)
 

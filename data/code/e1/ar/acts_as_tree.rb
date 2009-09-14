@@ -2,7 +2,7 @@ $: << File.dirname(__FILE__)
 require "connect"
 require "logger"
 require "rubygems"
-require "activerecord"
+require "active_record"
 
 require "vendor/plugins/acts_as_tree/lib/active_record/acts/tree.rb"
 require "vendor/plugins/acts_as_tree/init"

@@ -1,6 +1,4 @@
-require 'activesupport'
-require 'action_controller'
-require 'action_controller/integration'
+require "config/environment.rb"
 
 ActionController::Base.session_store = nil
 ActionController::Routing.use_controllers! ["store", "admin", "coupon"]

@@ -1,9 +1,8 @@
 $: << File.dirname(__FILE__)
+require "connect"
 
 require "rubygems"
-gem "activerecord"
-
-require "connect"
+require "active_record"
 
 ActiveRecord::Schema.define do
   

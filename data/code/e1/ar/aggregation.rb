@@ -6,7 +6,7 @@ require "pp"
 #ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 #require "rubygems"
-#require_gem "activerecord"
+#require_gem "active_record"
 
 ActiveRecord::Schema.define do
   #START:migration
