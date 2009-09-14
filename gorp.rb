@@ -265,6 +265,10 @@ rescue LoadError
       self.parent.insert_before(self, node)
     end
 
+    def add_previous_sibling(node)
+      self.parent.insert_before(self, node)
+    end
+
     def serialize
       self.to_s
     end
