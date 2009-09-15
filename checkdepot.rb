@@ -943,6 +943,7 @@ class DepotTest < Book::TestCase
     assert_equal '=> []', stdout.shift
     assert_equal '=> {:action=>"show", :controller=>"coupon", :id=>"1"}', stdout.shift
     assert_equal '=> "http://www.example.com/store/display/123"', stdout.shift
+    assert_equal '=> false', stdout.shift
     assert_equal '=> true', stdout.shift
     assert_equal '=> nil', stdout.shift
     assert_equal '=> ["article", "blog"]', stdout.shift

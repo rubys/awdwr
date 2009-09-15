@@ -1,4 +1,5 @@
-require "config/environment.rb"
+require 'rubygems'
+require 'action_controller'
 
 ActionController::Base.session_store = nil
 ActionController::Routing.use_controllers! [ "article", "blog" ]
