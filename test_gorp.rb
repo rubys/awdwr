@@ -39,6 +39,7 @@ class Book::TestCase < ActiveSupport::TestCase
 
   # micro DSL allowing the definition of optional tests
   def self.section number, title, &tests
+    number = (sprintf "%f", number).sub(/0+$/,'') if number.kind_of? Float
     return if ARGV.include? 'partial' and !@@sections.has_key? number.to_s
     test "#{number} #{title}" do
       instance_eval {select number}

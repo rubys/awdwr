@@ -16,6 +16,7 @@ $ruby = File.join(Config::CONFIG["bindir"], Config::CONFIG["RUBY_INSTALL_NAME"])
 # Micro DSL for declaring an ordered set of book sections
 $sections = []
 def section number, title, &steps
+  number = (sprintf "%f", number).sub(/0+$/,'') if number.kind_of? Float
   $sections << [number, title, steps]
 end
 
@@ -497,7 +498,7 @@ def restart_server
       else
         # start server, redirecting stdout to a string
         $stdout = StringIO.open('','w')
-        require 'config/boot'
+        require './config/boot'
         require 'commands/server'
       end
     rescue 
@@ -632,5 +633,6 @@ at_exit do
   log :CHECK, "#{$output}.html"
   Dir.chdir $BASE
   STDOUT.puts
+  $checker = "./#{$checker}" if $checker =~ /^\w+/
   require $checker if $checker
 end

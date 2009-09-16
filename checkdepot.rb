@@ -1,4 +1,4 @@
-require 'test_gorp'
+require './test_gorp'
 
 class DepotTest < Book::TestCase
 
