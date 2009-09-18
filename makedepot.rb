@@ -1912,15 +1912,21 @@ section 26, 'Active Resources' do
        ':total_price=>0.0)\nli2.save'
 end
 
+# what version of Rails are we running?
 $R2 = (`#{which_rails($rails)} -v` =~ /^Rails 2/)
 $R22 = (`#{which_rails($rails)} -v` =~ /^Rails 2\.2/)
 $APP = $R22 ? 'application' : 'application_controller'
 
-%w(mislav-will_paginate).each do |gem|
-  unless `gem list`.scan(/(^[-_\w]+)\s\(/).flatten.include?(gem)
+# what gems are we missing?
+missing = %w(mislav-will_paginate rdoc)
+missing.push 'test-unit' if RUBY_VERSION =~ /^1\.9/
+missing -= `gem list`.scan(/(^[-_\w]+)\s\(/).flatten
+
+unless missing.empty?
+  missing.each do |gem|
     STDERR.puts "Missing gem: #{gem}"
-    Process.exit!
   end
+  Process.exit!
 end
 
 $cleanup = Proc.new do

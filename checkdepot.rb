@@ -12,7 +12,11 @@ class DepotTest < Book::TestCase
     assert_equal '<ul>', stdout.shift
     assert_equal '  <li>Addition: 3 </li>', stdout.shift
     assert_equal '  <li>Concatenation: cowboy </li>', stdout.shift
-    assert_match /^  <li>Time in one hour:  \w+ \w+ \d+ \d\d:\d\d:\d\d [+-]\d+ \d+ <\/li>/, stdout.shift
+    if RUBY_VERSION =~ /^1.8/
+      assert_match /^  <li>Time in one hour:  \w+ \w+ \d\d \d\d:\d\d:\d\d [+-]\d+ \d+ <\/li>/, stdout.shift
+    else
+      assert_match /^  <li>Time in one hour:  \d+-\d\d-\d\d \d\d:\d\d:\d\d [+-]\d+ <\/li>/, stdout.shift
+    end
     assert_equal '</ul>', stdout.shift
 
     3.times do
@@ -37,7 +41,7 @@ class DepotTest < Book::TestCase
     assert_select 'input#product_title[value=Pragmatic Version Control]'
     assert_select 'a[href=http://127.0.0.1:3000/products/1]', 'redirected'
     assert_select '.stdout', /"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL/
-    assert_select '.stdout', '7 tests, 10 assertions, 0 failures, 0 errors'
+    assert_select '.stdout', /^7 tests, 10 assertions, 0 failures, 0 errors/
   end
 
   section 6.3, "Iteration A2: Add a Missing Column" do
