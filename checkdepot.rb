@@ -177,19 +177,19 @@ class DepotTest < Book::TestCase
 
   section 14.2, "Unit Testing of Models" do
     assert_select '.stdout', /SQLite3::SQLException: no such table: \w+/
-    assert_select '.stdout', '1 tests, 1 assertions, 0 failures, 0 errors'
-    assert_select '.stdout', '4 tests, 4 assertions, 0 failures, 0 errors'
-    assert_select '.stdout', '9 tests, 27 assertions, 0 failures, 0 errors'
-    assert_select '.stdout', '2 tests, 5 assertions, 0 failures, 0 errors'
+    assert_select '.stdout', /1 tests, 1 assertions, 0 failures, 0 errors/
+    assert_select '.stdout', /4 tests, 4 assertions, 0 failures, 0 errors/
+    assert_select '.stdout', /9 tests, 27 assertions, 0 failures, 0 errors/
+    assert_select '.stdout', /2 tests, 5 assertions, 0 failures, 0 errors/
   end
 
   section 14.3, "Functional Testing of Controllers" do
-    assert_select '.stdout', '5 tests, 8 assertions, 0 failures, 0 errors'
+    assert_select '.stdout', /5 tests, 8 assertions, 0 failures, 0 errors/
   end
 
   section 14.4, "Integration Testing of Applications" do
-    assert_select '.stdout', '1 tests, 17 assertions, 0 failures, 0 errors'
-    assert_select '.stdout', '2 tests, 49 assertions, 0 failures, 0 errors'
+    assert_select '.stdout', /1 tests, 17 assertions, 0 failures, 0 errors/
+    assert_select '.stdout', /2 tests, 49 assertions, 0 failures, 0 errors/
   end
 
   section 14.5, "Performance Testing" do
@@ -231,9 +231,11 @@ class DepotTest < Book::TestCase
 
   section 18, 'Active Record: The Basics' do
     stdout = collect_stdout
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_equal ">> Order.column_names", stdout.shift
     assert_equal "=> [\"id\", \"name\", \"address\", \"email\", \"pay_type\", \"created_at\", \"updated_at\", \"customer_email\", \"placed_at\", \"attn\", \"order_type\", \"ship_class\", \"amount\", \"state\"]", stdout.shift
     assert_equal ">> ", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_equal ">> Order.columns_hash[\"pay_type\"]", stdout.shift
     assert_match /ActiveRecord::ConnectionAdapters::SQLiteColumn/, stdout.shift
     assert_equal ">> ", stdout.shift
@@ -251,12 +253,15 @@ class DepotTest < Book::TestCase
     assert_equal "    ship_class = priority", stdout.shift
     assert_equal "        amount = ", stdout.shift
     assert_equal "         state = ", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_equal ">> Product.find(:first).price_before_type_cast", stdout.shift
     assert_equal "=> \"29.95\"", stdout.shift
     assert_equal ">> ", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_equal ">> Product.find(:first).updated_at_before_type_cast", stdout.shift
     assert_match /^=> "\d+-\d+-\d+ \d+:\d+:\d+(\.\d+)?"$/, stdout.shift
     assert_equal ">> ", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -393,6 +398,7 @@ class DepotTest < Book::TestCase
   section 19, 'Active Record: Relationships Between Tables' do
     stdout = collect_stdout
     stdout.reject! {|line| line =~ /' -> `vendor\/plugins\//}
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -716,6 +722,7 @@ class DepotTest < Book::TestCase
 
   section 20, 'Active Record: Object Life Cycle' do
     stdout = collect_stdout
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|false)/, stdout.shift
     assert_equal '=> []', stdout.shift
@@ -727,7 +734,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "=> Encrypter", stdout.shift
-    assert_match /^=> #<Proc:0x0+@.*\/encrypt.rb:\d+>$/, stdout.shift
+    assert_match /^=> #<Proc:0x0\w+@.*\/encrypt.rb:\d+.*>$/, stdout.shift
     assert_equal "=> #<Order id: nil, user_id: nil, name: nil, address: nil, email: nil>", stdout.shift
     assert_equal "=> \"Dave Thomas\"", stdout.shift
     assert_equal "=> \"123 The Street\"", stdout.shift
@@ -743,6 +750,7 @@ class DepotTest < Book::TestCase
     assert_equal "   name = Dbwf Tipnbt", stdout.shift
     assert_equal "address = 123 The Street", stdout.shift
     assert_equal "  email = ebwf@fybnqmf.dpn", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> false", stdout.shift
     assert_equal "=> true", stdout.shift
@@ -926,8 +934,8 @@ class DepotTest < Book::TestCase
       ( \{:controller=&gt;"comments", \s :action=&gt;"edit"\} |
       \{:action=&gt;"edit", \s :controller=&gt;"comments"\} ) $
     /x
-    assert_select '.stdout', '5 tests, 29 assertions, 0 failures, 0 errors'
-    assert_select '.stdout', '1 tests, 1 assertions, 0 failures, 0 errors'
+    assert_select '.stdout', /5 tests, 29 assertions, 0 failures, 0 errors/
+    assert_select '.stdout', /1 tests, 1 assertions, 0 failures, 0 errors/
   end
 
   section 21.2, 'Routing Requests' do
@@ -1019,8 +1027,8 @@ class DepotTest < Book::TestCase
     assert_select 'pre', /Thank you for your recent order/
     assert_select 'pre', /1 x Programming Ruby, 2nd Edition/
     assert_select '.body', 'Thank you...'
-    assert_select '.stdout', '2 tests, 4 assertions, 0 failures, 0 errors'
-    assert_select '.stdout', '1 tests, 5 assertions, 0 failures, 0 errors'
+    assert_select '.stdout', /2 tests, 4 assertions, 0 failures, 0 errors/
+    assert_select '.stdout', /1 tests, 5 assertions, 0 failures, 0 errors/
   end
 
   section 26, "Active Resources" do

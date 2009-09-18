@@ -1,4 +1,4 @@
-require 'config/routes_with_conditions'
+require './config/routes_with_conditions'
 
 ActionController::Routing::Routes.draw do |map|
   # The priority is based upon order of creation: first created -> highest priority.
