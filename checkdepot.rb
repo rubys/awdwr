@@ -1,4 +1,5 @@
-require './test_gorp'
+require 'rubygems'
+require 'gorp/test'
 
 class DepotTest < Book::TestCase
 
