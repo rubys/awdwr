@@ -94,7 +94,7 @@ class DepotTest < Book::TestCase
   section 8.3, "Iteration C2: A Smarter Cart" do
     assert_select 'h1', /NoMethodError/
     assert_select 'h1', /in StoreController#add_to_cart/
-    assert_select 'li', /2 &#?\w+; Pragmatic Project Automation/
+    assert_select 'li', /2 (.|&#?\w+;) Pragmatic Project Automation/u
     assert_select 'pre', "Couldn't find Product with ID=wibble"
   end
 
@@ -168,8 +168,8 @@ class DepotTest < Book::TestCase
   section 13, "Internationalization" do
     assert_select '#notice', 'es translation not available'
     assert_select 'option[value=es]'
-    assert_select '.price', /28,50&#?\w+;\$US/
-    assert_select 'h1', /Su Cat&#?\w+;logo de Pragmatic/
+    assert_select '.price', /28,50(.|&#?\w+;)\$US/u
+    assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
     assert_select 'input[type=submit][value$=dir al Carrito]'
     assert_select 'h2', '5 errores han impedido que este pedido se guarde'
     assert_select '#notice', 'Gracias por su pedido'
@@ -1018,9 +1018,9 @@ class DepotTest < Book::TestCase
   section 23.11, 'Adding New Templating Systems' do
     next if ActiveSupport::VERSION::STRING == '2.2.2'
     assert_select "em", 'real'
-    assert_select ".body", /over \d+ years/
-    assert_select ".body", /request\.path =(>|&gt;) \/test\/example1/
-    assert_select ".body", /a \+ b =(>|&gt;) 3/
+    assert_select ".body", /over \d+ years/u
+    assert_select ".body", /request\.path =(>|&gt;) \/test\/example1/u
+    assert_select ".body", /a \+ b =(>|&gt;) 3/u
   end
 
   section 25.1, "Sending E-mail" do

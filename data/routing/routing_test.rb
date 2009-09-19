@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require 'test_helper'
 require 'config/routes.rb'
 
 class RoutingTest < ActionController::TestCase
