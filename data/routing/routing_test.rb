@@ -1,12 +1,12 @@
 require 'test_helper'
-require 'config/routes.rb'
+require './config/routes.rb'
 
 class RoutingTest < ActionController::TestCase
 
   #START:recognizes
   def test_recognizes
     ActionController::Routing.use_controllers! ["store"]
-    load "config/routes.rb"
+    load "./config/routes.rb"
 
     # Check the default index action gets generated
     assert_recognizes({"controller" => "store", "action" => "index"}, "/store")

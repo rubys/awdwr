@@ -466,12 +466,13 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^#<Product id: 4, title: "Advanced Rails"/, stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|#<Product id: 4)/, stdout.shift
     assert_equal "=============", stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<Product id: 4, title: "Advanced Rails"/, stdout.shift
     assert_equal "1", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|1)/, stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -507,7 +508,8 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "=> #<Employee id: 4, type: \"Employee\", name: \"Barney Rub\", email: \"barney@here.com\", balance: nil, reports_to: 2, dept: 23>", stdout.shift
     assert_equal "#<Manager id: 2, type: \"Manager\", name: \"Wilma Flint\", email: \"wilma@here.com\", balance: nil, reports_to: nil, dept: 23>", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|#<Manager)/, stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -525,7 +527,7 @@ class DepotTest < Book::TestCase
     4.times { assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift }
     assert_equal "\"Article One\"", stdout.shift
     assert_equal "#<Article id: 1, content: \"This is my new article\">", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|#<Article)/, stdout.shift
     assert_equal "     id = 1", stdout.shift
     assert_equal "content = This is my new article", stdout.shift
     assert_equal "           id = 1", stdout.shift
@@ -533,6 +535,7 @@ class DepotTest < Book::TestCase
     assert_match /^  acquired_at = \d+-\d+-\d+ \d+:\d+:\d+/, stdout.shift
     assert_equal "  resource_id = 1", stdout.shift
     assert_equal "resource_type = Article", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -570,6 +573,7 @@ class DepotTest < Book::TestCase
     assert_match /^  acquired_at = \d+-\d+-\d+ \d+:\d+:\d+/, stdout.shift
     assert_equal "  resource_id = 1", stdout.shift
     assert_equal "resource_type = Sound", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -591,11 +595,12 @@ class DepotTest < Book::TestCase
     assert_equal "=> #<Employee id: 3, name: \"Clem\", manager_id: 1, mentor_id: 2>", stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "[\"Clem\", \"Dawn\"]", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\["Clem", "Dawn"\])/, stdout.shift
     assert_equal "[]", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\[\])/, stdout.shift
     assert_equal "\"Clem\"", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|"Clem")/, stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -627,6 +632,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> #<Child id: 1, parent_id: 1, name: \"One\", position: nil>", stdout.shift
     assert_equal "Three, Two, Four", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -660,6 +666,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "Books", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -679,7 +686,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> #<Invoice id: nil, order_id: nil>", stdout.shift
     assert_equal "=> #<Invoice id: 1, order_id: 1>", stdout.shift
     assert_equal "#<Invoice id: 1, order_id: 1>", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|#<Invoice)/, stdout.shift
     assert_equal "=> #<Order id: nil, name: nil, email: nil, address: nil, pay_type: nil, shipped_at: nil>", stdout.shift
     assert_equal "nil", stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -688,7 +695,8 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "2", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|2)/, stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -774,6 +782,7 @@ class DepotTest < Book::TestCase
     assert_equal "[Audit] Payment 1 created", stdout.shift
     assert_equal "=> #<Payment id: 1>", stdout.shift
     assert_equal "?> >> ", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -787,27 +796,27 @@ class DepotTest < Book::TestCase
     assert_match /^=> #<LineItem id: 5, product_id: nil/, stdout.shift
     assert_match /^=> #<LineItem id: 3, product_id: 27/, stdout.shift
     assert_equal "1", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|1)/, stdout.shift
     assert_match /^#<BigDecimal:.*>/, stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|#<BigDecimal)/, stdout.shift
     assert_equal "=> [#<LineItem quantity: 1>, #<LineItem quantity: 2>, #<LineItem quantity: 1>]", stdout.shift
-    assert_equal "{\"quantity*unit_price\"=>\"29.95\", \"quantity\"=>1}", stdout.shift
+    assert_equal "{\"quantity\"=>1, unit_price\"=>\"29.95\"}", sort_hash(stdout.shift)
     assert_equal "=> nil", stdout.shift
     assert_equal "                                      quantity*unit_price as total_price \" +", stdout.shift
     assert_equal "=> [#<LineItem quantity: 1>, #<LineItem quantity: 2>, #<LineItem quantity: 1>]", stdout.shift
     assert_equal "{\"quantity\"=>1, \"total_price\"=>\"29.95\"}", sort_hash(stdout.shift)
     assert_equal "=> nil", stdout.shift
     assert_equal "\"29.95\"", stdout.shift
-    assert_equal "=> nil", stdout.shift
-    assert_equal "=> 0.07", stdout.shift
+    assert_match /^=> (nil|"29.95")/, stdout.shift
+    assert_match /^=> 0.07/, stdout.shift
     assert_equal "\"\"", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|"")/, stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "2.54", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|2.54)/, stdout.shift
     assert_equal "=> 500", stdout.shift
     assert_equal "true", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|true)/, stdout.shift
     assert_equal "?> >> ", stdout.shift
     assert_equal "                 id = 3", stdout.shift
     assert_equal "quantity*unit_price = 29.95", stdout.shift
@@ -817,6 +826,7 @@ class DepotTest < Book::TestCase
     assert_equal " ", stdout.shift
     assert_equal "                 id = 5", stdout.shift
     assert_equal "quantity*unit_price = 44.95", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -837,6 +847,7 @@ class DepotTest < Book::TestCase
     assert_equal "     id = 2", stdout.shift
     assert_equal " number = 54321", stdout.shift
     assert_equal "balance = 210", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift

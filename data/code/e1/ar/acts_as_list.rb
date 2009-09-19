@@ -5,7 +5,7 @@ require "logger"
 require "rubygems"
 require "active_record"
 
-require "vendor/plugins/acts_as_list/init"
+require "./vendor/plugins/acts_as_list/init"
 
 #ActiveRecord::Base.logger = Logger.new(STDOUT)
 
