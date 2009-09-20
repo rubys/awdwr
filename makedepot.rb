@@ -25,11 +25,6 @@ end
 
 section 6.1, 'Iteration A1: Getting Something Running' do
   rails 'depot', :a
-  edit 'config/environments/development.rb' do |data|
-    data << "\n\n" + <<-EOF.unindent(6)
-      config.logger = Logger.new(config.log_path, 2, 10.kilobytes)
-    EOF
-  end
 end
 
 section 6.2, 'Creating the Products Model and Maintenance Application' do
@@ -113,7 +108,7 @@ section 6.3, 'Iteration A2: Add a Missing Column' do
     end
 
     edit 'app/views/products/edit.html.erb' do |data|
-      data[/ <%= f.text_field :image_url %>.*\n.*\n+()/,1] = 
+      data[/ <%= f.text_field :image_url %>.*\n.*\n+()/,1] =
         <<-EOF.unindent(4) + "\n"
         <!-- START_HIGHLIGHT -->
         <p>
@@ -125,7 +120,7 @@ section 6.3, 'Iteration A2: Add a Missing Column' do
     end
   else
     edit 'app/views/products/_form.html.erb' do |data|
-      data[/ <%= f.text_field :image_url %>.*?<\/div>\n()/m,1] = 
+      data[/ <%= f.text_field :image_url %>.*?<\/div>\n()/m,1] =
         <<-EOF.unindent(6)
         <!-- START_HIGHLIGHT -->
         <div class="field">
@@ -335,7 +330,7 @@ section 7.4, 'Iteration B4: Linking to the Cart' do
     data[/number_to_currency.*\n()/,1] =  <<-EOF.unindent(2)
       <!-- START_HIGHLIGHT -->
       <!-- START:add_to_cart -->
-      <%= button_to "Add to Cart" %>
+      <%= button_to 'Add to Cart' %>
       <!-- END:add_to_cart -->
       <!-- END_HIGHLIGHT -->
     EOF
@@ -398,7 +393,7 @@ section 8.2, 'Iteration C1: Creating a Cart' do
     data[/()/,1] = read('cart/cart.rb')
   end
   edit 'app/views/store/index.html.erb', 'add_to_cart' do |data|
-    data[/button_to "Add to Cart"()/,1] = 
+    data[/button_to 'Add to Cart'()/,1] = 
       ", :action => 'add_to_cart', :id => product"
   end
 
@@ -1172,7 +1167,7 @@ section 11.4, 'Iteration F4: Adding a Sidebar, More Administration' do
       #END:before_filter
     EOF
   end
-  cmd 'echo "Product.new" | ruby script/console'
+  console 'Product.new'
 end
 
 section 12.1, 'Generating the XML Feed' do
@@ -1547,7 +1542,7 @@ section 15, 'Rails In Depth' do
   cmd 'rake db:schema_migrations'
   cmd 'ls log'
   cmd 'find script -type f'
-  cmd 'echo "puts $:" | ruby script/console'
+  console 'puts $:'
 end
 
 section 16, 'Active Support' do
@@ -1748,6 +1743,7 @@ section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
 end
 
 section 23.5, 'Forms That Wrap Model Objects' do
+  Dir.chdir(File.join($WORK, 'view'))
   cmd "cp -rpv #{$BASE}/plugins/country_select vendor/plugins/"
   restart_server
   ruby 'script/generate model product title:string description:text ' + 
@@ -1768,6 +1764,7 @@ section 23.5, 'Forms That Wrap Model Objects' do
 end
 
 section 23.6, 'Custom Form Builders' do
+  Dir.chdir(File.join($WORK, 'view'))
   cmd "cp -vr #{$CODE}/e1/views/app/helpers/tagged_builder.rb app/helpers"
   cmd "cp -vr #{$CODE}/e1/views/app/views/builder app/views"
   get '/builder/new'
@@ -1778,10 +1775,12 @@ section 23.6, 'Custom Form Builders' do
 end
 
 section 23.7, 'Working with Nonmodel Fields' do
+  Dir.chdir(File.join($WORK, 'view'))
   get '/test/calculate'
 end
 
 section 23.8, 'Uploading Files to Rails Applications' do
+  Dir.chdir(File.join($WORK, 'view'))
   ruby 'script/generate model picture comment:string name:string ' +
        'content_type:string data:binary'
   cmd "cp -v #{$CODE}/e1/views/db/migrate/*pictures.rb db/migrate/*pictures.rb"
@@ -1793,11 +1792,13 @@ section 23.8, 'Uploading Files to Rails Applications' do
 end
 
 section 23.9, 'Layouts and Components' do
+  Dir.chdir(File.join($WORK, 'view'))
   cmd "cp -vr #{$CODE}/e1/views/app/views/partial app/views"
   get '/partial/list'
 end
 
 section '23.10', 'Caching, Part Two' do
+  Dir.chdir(File.join($WORK, 'view'))
   ruby 'script/generate model article body:text'
   cmd "cp -v #{$CODE}/e1/views/app/models/article.rb app/models"
   cmd "cp -vr #{$CODE}/e1/views/app/views/blog app/views"
