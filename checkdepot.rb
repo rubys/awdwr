@@ -283,6 +283,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<Order id: 7, name: "Dave Thomas"/, stdout.shift
     assert_match /^=> \[#<Order id: 8, name: "Dave Thomas"/, stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -303,23 +304,23 @@ class DepotTest < Book::TestCase
     assert_match /^=> \[#<Order name: "Dave Thomas",.*\]$/, stdout.shift
     assert_equal "=> #<Order name: \"Dave Thomas\", pay_type: \"check\">", stdout.shift
     assert_equal "{\"name\"=>\"Dave Thomas\", \"pay_type\"=>\"check\"}", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\{"name")/, stdout.shift
     assert_equal "[\"name\", \"pay_type\"]", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\["name")/, stdout.shift
     assert_equal "false", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|false)/, stdout.shift
     assert_match /^\[.*#<Order id: 9, name: "Andy Hunt".*>\]/, stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\[#<Order)/, stdout.shift
     assert_match /^#<Order id: 1, name: "Dave Thomas"/, stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\#<Order)/, stdout.shift
     assert_equal "1", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|1)/, stdout.shift
     assert_match /^#<Order id: 1, name: "Dave Thomas"/, stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\#<Order)/, stdout.shift
     assert_match /^\[#<Order id: 9, name: "Andy Hunt"/, stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\[#<Order)/, stdout.shift
     assert_match /^\[#<Order id: 9, name: "Andy Hunt"/, stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\[#<Order)/, stdout.shift
     assert_equal "=> 2", stdout.shift
     assert_equal "=> 3", stdout.shift
     assert_match /^=> #<Product id: 5, title: "Programming Ruby"/, stdout.shift
@@ -338,14 +339,15 @@ class DepotTest < Book::TestCase
     assert_match /^=> \[#<Order id: 4, name: "Dave Thomas"/, stdout.shift
     assert_match /^=> \[#<LineItem id: 3, product_id: 5/, stdout.shift
     assert_equal "1", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|1)/, stdout.shift
     assert_equal "=> 1", stdout.shift
     assert_equal "=> 9", stdout.shift
     assert_equal "9", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|9)/, stdout.shift
     assert_equal "=> 9", stdout.shift
     assert_equal "9", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|9)/, stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -364,6 +366,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "\"ski mask\"", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift

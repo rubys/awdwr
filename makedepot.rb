@@ -1335,6 +1335,12 @@ section 13, 'Task I: Internationalization' do
       <!-- END:i18n -->
     EOF
   end
+  if RUBY_VERSION =~ /^1\.9/
+    edit 'app/views/layouts/store.html.erb' do |data|
+      data.gsub! /yield :layout/, "yield(:layout).force_encoding('utf-8')"
+    end
+  end
+
   get '/store?locale=en'
   edit "app/controllers/#{$APP}.rb" do |data|
     # data.gsub! /.*#START:.*\n/, ''
