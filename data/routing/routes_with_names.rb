@@ -5,6 +5,7 @@ ActionController::Routing::Routes.draw do |map|
             :controller => "blog", 
             :action => "index" 
 
+  #START:example
   # Return articles for a year, year/month, or year/month/day 
   map.date "blog/:year/:month/:day", 
            :controller => "blog", 
@@ -27,6 +28,7 @@ ActionController::Routing::Routes.draw do |map|
   #START:admin
   map.blog_admin "blog/:controller/:action/:id" 
   #END:admin
+  #END:example
 
   # Catchall so we can gracefully handle badly formed requests 
   map.catch_all "*anything", 
