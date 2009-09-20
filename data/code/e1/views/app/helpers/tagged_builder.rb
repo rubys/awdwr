@@ -13,7 +13,7 @@ class TaggedBuilder < ActionView::Helpers::FormBuilder
                               label.to_s.humanize, 
                               :for => "#{@object_name}_#{label}") + 
         "<br/>" +
-        super)
+        super(label, *args))
     end
   end
   #END:create

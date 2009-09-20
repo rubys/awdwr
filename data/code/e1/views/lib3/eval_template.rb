@@ -7,8 +7,9 @@ class EvalTemplate < ActionView::TemplateHandler
     compiled << template.source.split(/\n/).map do |line|
       <<-ruby_eval
         line = #{line.inspect}
+        @eval_template_scope ||= binding
         begin
-          output << line + " => " + eval(line).to_s + "\n"
+          output << line + " => " + eval(line,@eval_template_scope).to_s + "\n"
         rescue Exception => err
           output << line + " => " + err.inspect + "\n"
         end

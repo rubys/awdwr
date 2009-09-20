@@ -1324,7 +1324,7 @@ section 13, 'Task I: Internationalization' do
   edit 'app/views/layouts/store.html.erb', 'i18n' do |data|
     data.gsub! /^\s*<!-- START_HIGHLIGHT -->\n/, ''
     data.gsub! /^\s*<!-- END_HIGHLIGHT -->\s*\n/, ''
-    data[/\n()\s+<%= image_tag/,1] = <<-EOF.unindent(4)
+    data[/\n()\s+<%= image_tag/,1] = <<-EOF.unindent(2)
       <!-- START:i18n -->
       <% form_tag '', :method => 'GET', :class => 'locale' do %>
         <%= select_tag 'locale', options_for_select(LANGUAGES, I18n.locale),
