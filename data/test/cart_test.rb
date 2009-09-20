@@ -7,7 +7,7 @@ class CartTest < ActiveSupport::TestCase
   #END:fixtures
   #END:initial
   #START:unique_products
-  def test_add_unique_products
+  test "add unique products" do
     cart = Cart.new
     rails_book = products(:rails_book)
     ruby_book  = products(:ruby_book)
@@ -19,7 +19,7 @@ class CartTest < ActiveSupport::TestCase
   #END:unique_products
   
   #START:duplicate_product
-  def test_add_duplicate_product
+  test "add_duplicate_product" do
     cart = Cart.new
     rails_book = products(:rails_book)
     cart.add_product rails_book

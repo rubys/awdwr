@@ -2,7 +2,7 @@
   <h1>Listing products</h1>
 
   <table>
-  <% for product in @products %>
+  <% @products.each do |product| %>
     <tr class="<%= cycle('list-line-odd', 'list-line-even') %>">
 
       <td>

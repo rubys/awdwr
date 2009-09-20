@@ -9,14 +9,14 @@ class CartTest < ActiveSupport::TestCase
     @ruby  = products(:ruby_book)
   end
   
-  def test_add_unique_products
+  test "add unique products" do
     @cart.add_product @rails
     @cart.add_product @ruby
     assert_equal 2, @cart.items.size
     assert_equal @rails.price + @ruby.price, @cart.total_price
   end
 
-  def test_add_duplicate_product
+  test "add duplicate product" do
     @cart.add_product @rails
     @cart.add_product @rails
     assert_equal 2*@rails.price, @cart.total_price
