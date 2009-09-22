@@ -440,7 +440,7 @@ section 8.3, 'Iteration C2: Creating a Smarter Cart' do
   post '/store/add_to_cart/2', {}
   # cmd 'sqlite3 db/development.sqlite3 ".dump sessions"'
   cmd 'rake db:sessions:clear'
-  restart_server unless $R22
+  restart_server if $R2
   # cmd 'sqlite3 db/development.sqlite3 ".dump sessions"'
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/2', {}
@@ -558,7 +558,7 @@ section 8.5, 'Iteration C4: Finishing the Cart' do
       #END:total_price
     EOF
   end
-  restart_server unless $R22
+  restart_server if $R2
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/2', {}
   post '/store/add_to_cart/3', {}
@@ -966,7 +966,7 @@ end
 
 section 11.1, 'Iteration F1: Adding Users' do
   ruby 'script/generate scaffold user name:string hashed_password:string salt:string'
-  restart_server
+  restart_server if $R2
   cmd 'cat ' + Dir['db/migrate/*_create_users.rb'].first
   cmd 'rake db:migrate'
   edit "app/models/user.rb" do |data|
