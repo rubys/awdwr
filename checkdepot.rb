@@ -975,7 +975,7 @@ class DepotTest < Book::TestCase
     assert_equal '=> nil', stdout.shift
     assert_equal '=> ["article", "blog"]', stdout.shift
     assert_match /^=> #<ActionController::Routing::RouteSet:.*>/, stdout.shift
-    assert_match /^=> #<ActionController::Integration::Session:.*>/, stdout.shift
+    assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
     assert_equal '=> [ActionController::Base, ActionView::Base]', stdout.shift
     assert_equal '=> {:action=>"index", :controller=>"blog"}', stdout.shift
     assert_equal '=> {:action=>"show", :controller=>"blog", :id=>"123"}', stdout.shift
