@@ -959,7 +959,7 @@ class DepotTest < Book::TestCase
     assert_equal '=> ["store", "admin", "coupon"]', stdout.shift
     assert_equal '=> []', stdout.shift
     assert_match /^=> #<ActionController::Routing::RouteSet:.*>/, stdout.shift
-    assert_match /^=> #<ActionController::Integration::Session:.*>/, stdout.shift
+    assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
     assert_equal '=> nil', stdout.shift
     assert_equal '=> {:action=>"index", :controller=>"store"}', stdout.shift
     assert_equal '=> {:action=>"add_to_cart", :controller=>"store", :id=>"1"}', stdout.shift
