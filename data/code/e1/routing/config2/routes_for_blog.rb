@@ -4,7 +4,7 @@ require 'action_controller'
 ActionController::Base.session_store = nil
 ActionController::Routing.use_controllers! [ "article", "blog" ]
 rs = ActionController::Routing::Routes
-app = ActionDispatch::Integration::Session.new(nil)
+app = ActionController::Integration::Session.new
 
 #START:draw
 ActionController::Routing::Routes.draw do |map| 

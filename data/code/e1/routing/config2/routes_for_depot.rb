@@ -4,7 +4,7 @@ ActionController::Base.session_store = nil
 ActionController::Routing.use_controllers! ["store", "admin", "coupon"]
 load "config/routes.rb"
 rs = ActionController::Routing::Routes
-app = ActionDispatch::Integration::Session.new(nil)
+app = ActionController::Integration::Session.new
 
 puts rs.routes
 rs.recognize_path "/store"

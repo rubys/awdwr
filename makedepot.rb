@@ -1726,8 +1726,13 @@ end
 
 section 21.2, 'Routing Requests' do
   Dir.chdir(File.join($WORK, 'depot'))
-  irb 'e1/routing/config/routes_for_depot.rb'
-  irb 'e1/routing/config/routes_for_blog.rb'
+  if $R2
+    irb 'e1/routing/config2/routes_for_depot.rb'
+    irb 'e1/routing/config2/routes_for_blog.rb'
+  else
+    irb 'e1/routing/config/routes_for_depot.rb'
+    irb 'e1/routing/config/routes_for_blog.rb'
+  end
 end
 
 section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
