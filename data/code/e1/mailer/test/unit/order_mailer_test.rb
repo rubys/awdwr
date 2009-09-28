@@ -1,3 +1,4 @@
+#START:test
 require 'test_helper'
 
 class OrderMailerTest < ActionMailer::TestCase
@@ -18,6 +19,7 @@ class OrderMailerTest < ActionMailer::TestCase
     assert_operator mailing.date, :>=, start-1
     assert_equal @expected.encoded, mailing.encoded
   end
+#END:test
 
   test "sent" do
     start = Time.now
@@ -31,4 +33,6 @@ class OrderMailerTest < ActionMailer::TestCase
     assert_equal @expected.encoded, mailing.encoded
   end
 
+#START:test
 end
+#END:test

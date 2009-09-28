@@ -207,9 +207,9 @@ class DepotTest < Book::TestCase
 
     stdout = css_select('.stdout').map {|tag| tag.children.join}
     stdout = stdout.select {|line| line =~ /^== / and line !~ /ing ===/}
+    assert_match /CreateDiscounts: migrated/, stdout.shift
+    assert_match /AddStatusToUser: migrated/, stdout.shift
     assert_match /AddEmailToOrders: migrated/, stdout.shift
-    assert_match /(CreateDiscounts|AddStatusToUser): migrated/, stdout.shift
-    assert_match /(CreateDiscounts|AddStatusToUser): migrated/, stdout.shift
     assert_match /AddPlacedAtToOrders: migrated/, stdout.shift
     assert_match /AddColumnsToOrders: migrated/, stdout.shift
     assert_match /RenameEmailColumn: migrated/, stdout.shift
@@ -955,9 +955,9 @@ class DepotTest < Book::TestCase
   section 21.2, 'Routing Requests' do
     stdout = collect_stdout.grep(/^=>/).map {|line| sort_hash(line)}
     assert_equal '=> true', stdout.shift
-    assert_equal '=> nil', stdout.shift
-    assert_equal '=> ["store", "admin", "coupon"]', stdout.shift
-    assert_equal '=> []', stdout.shift
+    assert_match /^=> (nil|\[.*?\])/, stdout.shift
+    assert_match /^=> (nil|\[.*?\])/, stdout.shift
+    assert_match /^=> (nil|\[.*?\])/, stdout.shift
     assert_match /^=> #<ActionController::Routing::RouteSet:.*>/, stdout.shift
     assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
     assert_equal '=> nil', stdout.shift
@@ -972,7 +972,7 @@ class DepotTest < Book::TestCase
     assert_equal '=> "http://www.example.com/store/display/123"', stdout.shift
     assert_equal '=> false', stdout.shift
     assert_equal '=> true', stdout.shift
-    assert_equal '=> nil', stdout.shift
+    assert_match /^=> (nil|\[.*?\])/, stdout.shift
     assert_equal '=> ["article", "blog"]', stdout.shift
     assert_match /^=> #<ActionController::Routing::RouteSet:.*>/, stdout.shift
     assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
@@ -1032,7 +1032,7 @@ class DepotTest < Book::TestCase
   section 23.11, 'Adding New Templating Systems' do
     next if ActiveSupport::VERSION::STRING == '2.2.2'
     assert_select "em", 'real'
-    assert_select ".body", /over \d+ years/u
+    assert_select ".body", /(over|almost) \d+ years/u
     assert_select ".body", /request\.path =(>|&gt;) \/test\/example1/u
     assert_select ".body", /a \+ b =(>|&gt;) 3/u
   end

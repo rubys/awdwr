@@ -34,6 +34,7 @@ section 6.2, 'Creating the Products Model and Maintenance Application' do
   cmd 'rake db:migrate'
   db 'select version from schema_migrations'
   restart_server
+
   if $R2
     edit 'app/views/products/new.html.erb' do |data|
       data[/ f.text_area :description()/,1] = ', :rows => 6'
@@ -1573,6 +1574,7 @@ section 17, 'Migration' do
   cmd 'cp -v -r ../depot/app/models/* app/models/'
   ruby 'script/generate model discount'
   ruby 'script/generate migration add_status_to_user status:string'
+  cmd 'rake db:migrate'
   20.upto(37) do |i|
     if i == 33
       cmd 'mkdir db/migrate/dev_data'
@@ -1748,7 +1750,7 @@ section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
 end
 
 section 23.5, 'Forms That Wrap Model Objects' do
-  Dir.chdir(File.join($WORK, 'view'))
+  Dir.chdir(File.join($WORK,'view'))
   cmd "cp -rpv #{$BASE}/plugins/country_select vendor/plugins/"
   restart_server
   ruby 'script/generate model product title:string description:text ' + 
@@ -1769,7 +1771,7 @@ section 23.5, 'Forms That Wrap Model Objects' do
 end
 
 section 23.6, 'Custom Form Builders' do
-  Dir.chdir(File.join($WORK, 'view'))
+  Dir.chdir(File.join($WORK,'view'))
   cmd "cp -vr #{$CODE}/e1/views/app/helpers/tagged_builder.rb app/helpers"
   cmd "cp -vr #{$CODE}/e1/views/app/views/builder app/views"
   get '/builder/new'
@@ -1780,12 +1782,12 @@ section 23.6, 'Custom Form Builders' do
 end
 
 section 23.7, 'Working with Nonmodel Fields' do
-  Dir.chdir(File.join($WORK, 'view'))
+  Dir.chdir(File.join($WORK,'view'))
   get '/test/calculate'
 end
 
 section 23.8, 'Uploading Files to Rails Applications' do
-  Dir.chdir(File.join($WORK, 'view'))
+  Dir.chdir(File.join($WORK,'view'))
   ruby 'script/generate model picture comment:string name:string ' +
        'content_type:string data:binary'
   cmd "cp -v #{$CODE}/e1/views/db/migrate/*pictures.rb db/migrate/*pictures.rb"
@@ -1797,13 +1799,13 @@ section 23.8, 'Uploading Files to Rails Applications' do
 end
 
 section 23.9, 'Layouts and Components' do
-  Dir.chdir(File.join($WORK, 'view'))
+  Dir.chdir(File.join($WORK,'view'))
   cmd "cp -vr #{$CODE}/e1/views/app/views/partial app/views"
   get '/partial/list'
 end
 
 section '23.10', 'Caching, Part Two' do
-  Dir.chdir(File.join($WORK, 'view'))
+  Dir.chdir(File.join($WORK,'view'))
   ruby 'script/generate model article body:text'
   cmd "cp -v #{$CODE}/e1/views/app/models/article.rb app/models"
   cmd "cp -vr #{$CODE}/e1/views/app/views/blog app/views"
