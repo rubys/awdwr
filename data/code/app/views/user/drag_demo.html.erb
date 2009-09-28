@@ -1,0 +1,47 @@
+
+
+<!-- START: styles -->
+<style>
+.hover {
+  background-color: #888888;
+}
+#pending_todos ul li, #completed_todos ul li {
+  list-style: none;
+  cursor: -moz-grab;
+}
+#pending_todos, #completed_todos {
+  border: 1px solid gray;
+}
+</style>
+<!-- END: styles -->
+<h1>Todo list for <%= @user.username %></h1>
+
+<!-- START: standard -->
+<h2>Pending</h2>
+<div id="pending_todos">
+  <%= render :partial=>"pending_todos" %>
+</div>
+
+<h2>Completed</h2>
+<div id="completed_todos">
+  <%= render :partial=>"completed_todos" %>
+</div>
+<!-- END: standard -->
+
+<!-- START: define targets -->
+<%= drop_receiving_element('pending_todos', 
+      :accept     => 'completed_todo', 
+      :complete   => "$('spinner').hide();",
+      :before     => "$('spinner').show();",
+      :hoverclass => 'hover',
+      :with       => "'todo=' + encodeURIComponent(element.id.split('_').last())",
+      :url        => {:action=>:todo_pending, :id=>@user})%>
+
+<%= drop_receiving_element('completed_todos',
+      :accept     => 'pending_todo', 
+      :complete   => "$('spinner').hide();",
+      :before     => "$('spinner').show();",
+      :hoverclass => 'hover',
+      :with       => "'todo=' + encodeURIComponent(element.id.split('_').last())",
+      :url        => {:action=>:todo_completed, :id=>@user})%>
+<!-- END: define targets>

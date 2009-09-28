@@ -1,0 +1,26 @@
+<table>
+  <tr>
+    <th>Username</th>
+    <th>Favorite Language</th>
+  </tr>
+  
+<% for user in @users %>
+  <tr>
+    <td><%=h user.username %></td>
+    <td><%=h user.favorite_language %></td>
+    <td><%= link_to 'Show', :action => 'show', :id => user %></td>
+    <td><%= link_to 'Edit', :action => 'edit', :id => user %></td>
+    <td><%= link_to 'Destroy', { :action => 'destroy', :id => user }, 
+               :confirm => 'Are you sure?', :method => :post %></td>
+  </tr>
+<% end %>
+</table>
+
+<%= link_to 'Previous page', 
+     { :page => @users.previous_page } if @users.previous_page %>
+<%= link_to 'Next page', 
+     { :page => @users.next_page } if @users.next_page %> 
+
+<br />
+
+<%= link_to 'New user', :action => 'new' %>

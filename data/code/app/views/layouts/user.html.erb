@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <title>User: <%= controller.action_name %></title>
+    <%= stylesheet_link_tag 'scaffold' %>
+    <%= javascript_include_tag :defaults %>
+  </head>
+  <body>
+    <p style="color: green"><%= flash[:notice] %></p>
+    <%= image_tag 'loading.gif', :id=>'spinner',
+                                 :style=>"display:none; float:right;" %>
+    <%= yield :layout %>
+  </body>
+</html>

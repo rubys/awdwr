@@ -1,0 +1,7 @@
+<ul id='pending_todo_list'>
+  <% @pending_todos.each do |item| %>
+    <% domid = "todo_#{item.id}" %>
+    <li class="pending_todo" id='<%= domid %>'><%= item.name %></li>
+    <%= draggable_element(domid, :ghosting=>true, :revert=>true) %>
+  <% end %> 
+</ul>
