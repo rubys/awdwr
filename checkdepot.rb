@@ -363,9 +363,9 @@ class DepotTest < Book::TestCase
     assert_equal "=> true", stdout.shift
     assert_equal "=> #<Purchase id: 1, name: \"Dave Thomas\", last_five: [\"shoes\", \"shirt\", \"socks\", \"ski mask\", \"shorts\"]>", stdout.shift
     assert_equal "[\"shoes\", \"shirt\", \"socks\", \"ski mask\", \"shorts\"]", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\[.*\])/, stdout.shift
     assert_equal "\"ski mask\"", stdout.shift
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|"ski mask")/, stdout.shift
     stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
@@ -745,7 +745,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "=> Encrypter", stdout.shift
-    assert_match /^=> #<Proc:0x0\w+@.*\/encrypt.rb:\d+.*>$/, stdout.shift
+    assert_match /^=> #<Proc:0x\w+@.*\/encrypt.rb:\d+.*>$/, stdout.shift
     assert_equal "=> #<Order id: nil, user_id: nil, name: nil, address: nil, email: nil>", stdout.shift
     assert_equal "=> \"Dave Thomas\"", stdout.shift
     assert_equal "=> \"123 The Street\"", stdout.shift
@@ -804,11 +804,11 @@ class DepotTest < Book::TestCase
     assert_match /^=> (nil|#<BigDecimal)/, stdout.shift
     assert_equal "=> [#<LineItem quantity: 1>, #<LineItem quantity: 2>, #<LineItem quantity: 1>]", stdout.shift
     assert_equal "{\"quantity\"=>1, unit_price\"=>\"29.95\"}", sort_hash(stdout.shift)
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\{"quantity"=>)/, stdout.shift
     assert_equal "                                      quantity*unit_price as total_price \" +", stdout.shift
     assert_equal "=> [#<LineItem quantity: 1>, #<LineItem quantity: 2>, #<LineItem quantity: 1>]", stdout.shift
     assert_equal "{\"quantity\"=>1, \"total_price\"=>\"29.95\"}", sort_hash(stdout.shift)
-    assert_equal "=> nil", stdout.shift
+    assert_match /^=> (nil|\{"quantity"=>)/, stdout.shift
     assert_equal "\"29.95\"", stdout.shift
     assert_match /^=> (nil|"29.95")/, stdout.shift
     assert_match /^=> 0.07/, stdout.shift
