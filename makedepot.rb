@@ -1128,7 +1128,9 @@ section 11.4, 'Iteration F4: Adding a Sidebar, More Administration' do
   edit "app/models/user.rb" do |data|
     data[/() *private/,1] = <<-EOF.unindent(4)
       #START:after_destroy
-      def after_destroy
+      after_destroy :ensure_an_admin_remains
+
+      def ensure_an_admin_remains
         if User.count.zero?
           raise "Can't delete last user"
         end
@@ -1331,11 +1333,6 @@ section 13, 'Task I: Internationalization' do
       <!-- END:i18n -->
     EOF
   end
-  if RUBY_VERSION =~ /^1\.9/
-    edit 'app/views/layouts/store.html.erb' do |data|
-      data.gsub! /yield :layout/, "yield(:layout).force_encoding('utf-8')"
-    end
-  end
 
   get '/store?locale=en'
   edit "app/controllers/#{$APP}.rb" do |data|
@@ -1391,6 +1388,11 @@ section 13, 'Task I: Internationalization' do
     data.gsub! 'Contact', "<%= I18n.t 'layout.side.contact' %>"
     data.gsub! /(.*I18n\.t)/, "<!-- START_HIGHLIGHT -->\n\\1"
     data.gsub! /(I18n\.t.*)/, "\\1\n<!-- END_HIGHLIGHT -->"
+    if RUBY_VERSION =~ /^1\.9/
+      data[/()\n +<%= yield :layout/, 1] = "\n<!-- START_HIGHLIGHT -->"
+      data[/yield :layout %>()/, 1] = "\n<!-- END_HIGHLIGHT -->"
+      data.gsub! /yield :layout/, "yield(:layout).force_encoding('utf-8')"
+    end
   end
   cmd "cp -r #{$DATA}/i18n/*.yml config/locales"
   get '/store?locale=es'
@@ -1458,7 +1460,11 @@ section 14.2, 'Unit Testing of Models' do
   ruby '-Itest test/unit/product_test.rb'
   cmd 'rake test:units'
   edit "test/unit/product_test.rb" do |data|
-    data[/(.*)/m,1] = read('test/product_test.rb')
+    if $R2
+      data[/(.*)/m,1] = read('test/product_test2.rb')
+    else
+      data[/(.*)/m,1] = read('test/product_test.rb')
+    end
   end
   edit "test/fixtures/products.yml" do |data|
     data[/(.*)/m,1] = read('test/products.yml')

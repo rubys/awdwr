@@ -19,10 +19,10 @@ class ProductTest < ActiveSupport::TestCase
   test "invalid with empty attributes" do
     product = Product.new
     assert !product.valid?
-    assert product.errors[:title].any?
-    assert product.errors[:description].any?
-    assert product.errors[:price].any?
-    assert product.errors[:image_url].any?
+    assert product.errors.invalid?(:title)
+    assert product.errors.invalid?(:description)
+    assert product.errors.invalid?(:price)
+    assert product.errors.invalid?(:image_url)
   end
   #END:test_empty_attributes
 
@@ -33,11 +33,11 @@ class ProductTest < ActiveSupport::TestCase
                           :image_url   => "zzz.jpg")
     product.price = -1
     assert !product.valid?
-    assert_equal "should be at least 0.01", product.errors[:price].join
+    assert_equal "should be at least 0.01", product.errors.on(:price)
 
     product.price = 0
     assert !product.valid?
-    assert_equal "should be at least 0.01", product.errors[:price].join
+    assert_equal "should be at least 0.01", product.errors.on(:price)
 
     product.price = 1
     assert product.valid?
@@ -76,7 +76,7 @@ class ProductTest < ActiveSupport::TestCase
                           :image_url   => "fred.gif")
 
     assert !product.save
-    assert_equal "has already been taken", product.errors[:title].join
+    assert_equal "has already been taken", product.errors.on(:title)
   end
   #END:test_unique_title
 
@@ -89,7 +89,7 @@ class ProductTest < ActiveSupport::TestCase
 
     assert !product.save
     assert_equal I18n.translate('activerecord.errors.messages.taken'),
-                 product.errors[:title].join
+                 product.errors.on(:title)
   end
   #END:test_unique_title1
   
