@@ -21,7 +21,9 @@ end
 #START:class_account
 #START:transfer
 class Account < ActiveRecord::Base
+  validate :price_must_be_at_least_a_cent
 #END:class_account
+
   def self.transfer(from, to, amount)
     transaction(from, to) do
       from.withdraw(amount)
@@ -46,7 +48,7 @@ class Account < ActiveRecord::Base
     save!
   end
 
-  def validate    # validation is called by Active Record
+  def price_must_be_at_least_a_cent
     errors.add(:balance, "is negative") if balance < 0
   end
 #START:transfer

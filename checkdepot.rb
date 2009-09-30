@@ -863,9 +863,8 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<Account id: 1, number: \"12345\", .*>$/, stdout.shift
     assert_match /^=> #<Account id: 2, number: \"54321\", .*>$/, stdout.shift
-    assert_match /^\sfrom .*\/transactions.rb:82$/, stdout.shift
-    assert_match /^\sfrom .*\/transactions.rb:80$/, stdout.shift
-    stdout.shift if stdout.first =~ /^\tfrom /
+    assert_match /^\sfrom .*\/transactions.rb:\d+$/, stdout.shift
+    stdout.shift while stdout.first =~ /^\tfrom /
     assert_equal "     id = 1", stdout.shift
     assert_equal " number = 12345", stdout.shift
     assert_equal "balance = 100", stdout.shift
@@ -873,6 +872,7 @@ class DepotTest < Book::TestCase
     assert_equal "     id = 2", stdout.shift
     assert_equal " number = 54321", stdout.shift
     assert_equal "balance = 200", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -889,6 +889,7 @@ class DepotTest < Book::TestCase
     assert_equal "Paul has 550.0", stdout.shift
     assert_equal "Peter has -250.0", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -905,6 +906,7 @@ class DepotTest < Book::TestCase
     assert_equal "Paul has 200.0", stdout.shift
     assert_equal "Peter has 100.0", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -921,6 +923,7 @@ class DepotTest < Book::TestCase
     assert_equal "Paul has 200.0", stdout.shift
     assert_equal "Peter has 100.0", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == "Switch to inspect mode."
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
