@@ -87,11 +87,19 @@ section 6.3, 'Iteration A2: Add a Missing Column' do
       <th>Price</th>
       <!-- END_HIGHLIGHT -->
     EOF
-    data[/<td><%=h product.image_url %>.*\n()/,1] = <<-EOF.unindent(2)
-      <!-- START_HIGHLIGHT -->
-      <td><%=h product.price %></td>
-      <!-- END_HIGHLIGHT -->
-    EOF
+    if $R2
+      data[/<td><%=h product.image_url %>.*\n()/,1] = <<-EOF.unindent(4)
+        <!-- START_HIGHLIGHT -->
+        <td><%=h product.price %></td>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    else
+      data[/<td><%= product.image_url %>.*\n()/,1] = <<-EOF.unindent(4)
+        <!-- START_HIGHLIGHT -->
+        <td><%= product.price %></td>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    end
     data[/,() :method => :del/,1] = "\n" + (' ' * 39)
   end
 
@@ -134,15 +142,27 @@ section 6.3, 'Iteration A2: Add a Missing Column' do
   end
 
   edit 'app/views/products/show.html.erb' do |data|
-    data[/ <%=h @product.image_url %>.*\n.*\n+(\n)/,1] =
-      <<-EOF.unindent(6) + "\n"
-      <!-- START_HIGHLIGHT -->
-      <p>
-        <b>Price:</b>
-        <%=h @product.price %>
-      </p>
-      <!-- END_HIGHLIGHT -->
-    EOF
+    if $R2
+      data[/ <%=h @product.image_url %>.*\n.*\n+(\n)/,1] =
+        <<-EOF.unindent(8) + "\n"
+        <!-- START_HIGHLIGHT -->
+        <p>
+          <b>Price:</b>
+          <%=h @product.price %>
+        </p>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    else
+      data[/ <%= @product.image_url %>.*\n.*\n+(\n)/,1] =
+        <<-EOF.unindent(8) + "\n"
+        <!-- START_HIGHLIGHT -->
+        <p>
+          <b>Price:</b>
+          <%= @product.price %>
+        </p>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    end
   end
 
   get '/products'
@@ -153,7 +173,7 @@ section 6.3, 'Iteration A2: Add a Missing Column' do
 
   edit 'app/views/products/show.html.erb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
-    data[/<%=(h) @product.description %>/,1] = ''
+    data[/<%=(h?) @product.description %>/,1] = ''
     data[/()\s+<%= @product.description %>/,1] = "\n<!-- START_HIGHLIGHT -->"
     data[/<%= @product.description %>()/,1] = "\n<!-- END_HIGHLIGHT -->"
   end
@@ -438,8 +458,13 @@ section 8.3, 'Iteration C2: Creating a Smarter Cart' do
     EOF
   end
   edit 'app/views/store/add_to_cart.html.erb' do |data|
-    data[/<li>(.*?)<\/li>/,1] = 
-      '<%= item.quantity %> &times; <%=h item.title %>'
+    if $R2
+      data[/<li>(.*?)<\/li>/,1] = 
+        '<%= item.quantity %> &times; <%=h item.title %>'
+    else
+      data[/<li>(.*?)<\/li>/,1] = 
+        '<%= item.quantity %> &times; <%= item.title %>'
+    end
   end
   post '/store/add_to_cart/2', {}
   # cmd 'sqlite3 db/development.sqlite3 ".dump sessions"'
@@ -575,13 +600,23 @@ section 9.1, 'Iteration D1: Moving the Cart' do
   end
   edit 'app/views/store/_cart_item.html.erb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
-    data[/()/,1] = <<-EOF.unindent(6)
-      <tr>
-        <td><%= cart_item.quantity %>&times;</td>
-        <td><%=h cart_item.title %></td>
-        <td class="item-price"><%= number_to_currency(cart_item.price) %></td>
-      </tr>
-    EOF
+    if $R2
+      data[/()/,1] = <<-EOF.unindent(8)
+        <tr>
+          <td><%= cart_item.quantity %>&times;</td>
+          <td><%=h cart_item.title %></td>
+          <td class="item-price"><%= number_to_currency(cart_item.price) %></td>
+        </tr>
+      EOF
+    else
+      data[/()/,1] = <<-EOF.unindent(8)
+        <tr>
+          <td><%= cart_item.quantity %>&times;</td>
+          <td><%= cart_item.title %></td>
+          <td class="item-price"><%= number_to_currency(cart_item.price) %></td>
+        </tr>
+      EOF
+    end
   end
   cmd 'cp app/views/store/add_to_cart.html.erb app/views/store/_cart.html.erb'
   edit 'app/views/store/_cart.html.erb' do |data|
