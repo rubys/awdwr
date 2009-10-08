@@ -1436,12 +1436,33 @@ section 13, 'Task I: Internationalization' do
   get '/store?locale=es'
   edit 'app/views/store/index.html.erb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
-    data.gsub! 'Your Pragmatic Catalog', "<%= I18n.t 'main.title' %>"
-    data.gsub! '"Add to Cart"', "I18n.t('main.button.add')"
+    if $R2
+      data.gsub! 'Your Pragmatic Catalog', "<%= I18n.t 'main.title' %>"
+    else
+      data.gsub! 'Your Pragmatic Catalog', "<%=raw I18n.t('main.title') %>"
+      data[/<%=() number_to_currency/,1] = 'raw'
+      data.gsub! /(.*number_to_currency)/, "<!-- START_HIGHLIGHT -->\n\\1"
+      data.gsub! /(number_to_currency.*)/, "\\1\n<!-- END_HIGHLIGHT -->"
+    end
+    data.gsub! '"Add to Cart"', "I18n.t('main.button.add')" # XSS???
     data.gsub! /(.*I18n\.t)/, "<!-- START_HIGHLIGHT -->\n\\1"
     data.gsub! /(I18n\.t.*)/, "\\1\n<!-- END_HIGHLIGHT -->"
     data.gsub! /\{ :action/, '{:action'
     data.gsub! /product \}/, 'product}'
+  end
+  unless $R2
+    edit 'app/views/store/_cart.html.erb' do |data|
+      data.gsub! /.*_HIGHLIGHT.*\n/, ''
+      data.gsub! /(.*I18n\.t)/, "<!-- START_HIGHLIGHT -->\n\\1"
+      data.gsub! /(I18n\.t.*)/, "\\1\n<!-- END_HIGHLIGHT -->"
+      data[/<%=() number_to_currency/,1] = 'raw'
+    end
+    edit 'app/views/store/_cart_item.html.erb' do |data|
+      data.gsub! /.*_HIGHLIGHT.*\n/, ''
+      data.gsub! /(.*I18n\.t)/, "<!-- START_HIGHLIGHT -->\n\\1"
+      data.gsub! /(I18n\.t.*)/, "\\1\n<!-- END_HIGHLIGHT -->"
+      data[/<%=() number_to_currency/,1] = 'raw'
+    end
   end
   get '/store?locale=es'
   edit 'app/views/store/_cart.html.erb' do |data|
