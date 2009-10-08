@@ -412,8 +412,8 @@ class DepotTest < Book::TestCase
     assert_equal "-- create_table(:line_items, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
-    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
     assert_equal "=> 0", stdout.shift
     assert_match /^=> #<Product id: 1, title: "Programming Ruby"/, stdout.shift
     assert_equal "=> #<LineItem id: nil, product_id: nil, order_id: nil, quantity: nil, unit_price: nil>", stdout.shift
@@ -585,7 +585,7 @@ class DepotTest < Book::TestCase
     assert_equal "-- create_table(:employees, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
     assert_equal "=> 0", stdout.shift
     assert_equal "=> #<Employee id: 1, name: \"Adam\", manager_id: nil, mentor_id: nil>", stdout.shift
     assert_equal "=> #<Employee id: 2, name: \"Beth\", manager_id: nil, mentor_id: nil>", stdout.shift
@@ -611,7 +611,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
-    assert_match /^=> (nil|#<Proc:.*>)/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
     assert_match /^=> (nil|\[.*?\])/, stdout.shift
     assert_equal "=> #<Parent id: 1>", stdout.shift
     assert_equal "=> [\"One\", \"Two\", \"Three\", \"Four\"]", stdout.shift
@@ -710,8 +710,8 @@ class DepotTest < Book::TestCase
     assert_equal "-- create_table(:line_items, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
-    assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
     assert_equal "=> #<Product id: 1, title: \"Programming Ruby\", description: \" ... \", line_items_count: 0>", stdout.shift
     assert_equal "=> #<LineItem id: nil, product_id: nil, order_id: nil, quantity: nil, unit_price: nil>", stdout.shift
     assert_equal "=> #<Product id: 1, title: \"Programming Ruby\", description: \" ... \", line_items_count: 0>", stdout.shift
