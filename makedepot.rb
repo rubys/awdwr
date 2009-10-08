@@ -262,6 +262,9 @@ section 7.1, 'Iteration B1: Create the Catalog Listing' do
   end
   edit 'app/views/store/index.html.erb' do |data|
     data[/(.*)/m,1] = read('store/index.html.erb')
+    unless $R2
+      data[/<%=() product.description %>/,1] = 'raw'
+    end
   end
   get '/store'
 end
