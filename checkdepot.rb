@@ -1049,7 +1049,7 @@ class DepotTest < Book::TestCase
   end
 
   section 26, "Active Resources" do
-    assert_select '.stdout', /Failed with 302/
+    assert_select '.stdout', /ActiveResource::Redirection: Failed.* 302/
     assert_select '.stdout', '29.95'
     assert_select '.stdout', '=&gt; true'
     assert_select '.price', '$24.95'
