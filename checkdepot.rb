@@ -198,7 +198,7 @@ class DepotTest < Book::TestCase
   end
 
   section 15, "Rails In Depth" do
-    assert_select '.stdout', 'Current version: 20080601000007'
+    assert_select '.stdout', 'Current version: 20100301000007'
   end
 
   section 17, "Migration" do
