@@ -412,7 +412,7 @@ class DepotTest < Book::TestCase
     assert_equal "-- create_table(:line_items, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
+    assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\]|Product\(id:.*)$/, stdout.shift
     assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
     assert_equal "=> 0", stdout.shift
     assert_match /^=> #<Product id: 1, title: "Programming Ruby"/, stdout.shift
@@ -481,14 +481,16 @@ class DepotTest < Book::TestCase
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
     assert_equal "-- create_table(:people, {:force=>true})", stdout.shift
+    stdout.shift if stdout.first =~ /\s+-> \d\.\d+s$/
+    stdout.shift if stdout.first =~ /=> nil/
     assert_equal " FROM sqlite_master", stdout.shift
     assert_equal " WHERE type = 'table' AND NOT name = 'sqlite_sequence'", stdout.shift
-    assert_match /^   -> \d+\.\d+s$/, stdout.shift
+    stdout.shift if stdout.first =~ /\s+-> \d\.\d+s$/
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_match /^=> (nil|#<Proc:.*>)/, stdout.shift
-    assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first =~ /=> nil/
     assert_match /^=> #<Customer id: 1, type: "Customer"/, stdout.shift
     assert_match /^=> #<Manager id: 2, type: "Manager"/, stdout.shift
     assert_match /^=> #<Customer id: 3, type: "Customer"/, stdout.shift
