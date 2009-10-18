@@ -7,7 +7,7 @@ require "active_record"
 require "./vendor/plugins/acts_as_tree/lib/active_record/acts/tree.rb"
 require "./vendor/plugins/acts_as_tree/init"
 
-#ActiveRecord::Base.logger = Logger.new(STDOUT)
+#ActiveRecord::Base.logger = Logger.new(STDERR)
 
 ActiveRecord::Schema.define do
 

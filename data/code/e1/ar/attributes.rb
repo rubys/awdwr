@@ -3,7 +3,7 @@ require "connect"
 require "logger"
 require "pp"
 
-#ActiveRecord::Base.logger = Logger.new(STDOUT)
+#ActiveRecord::Base.logger = Logger.new(STDERR)
 
 require "rubygems"
 require "active_record"

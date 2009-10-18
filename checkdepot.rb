@@ -309,7 +309,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> (nil|\["name")/, stdout.shift
     assert_equal "false", stdout.shift
     assert_match /^=> (nil|false)/, stdout.shift
-    assert_match /^\[.*#<Order id: 9, name: "Andy Hunt".*>\]/, stdout.shift
+    assert_match /^#<ActiveRecord::Relation:|\[.*#<Order id: 9, name: "Andy Hunt".*>\]/, stdout.shift
     assert_match /^=> (nil|\[#<Order)/, stdout.shift
     assert_match /^#<Order id: 1, name: "Dave Thomas"/, stdout.shift
     assert_match /^=> (nil|\#<Order)/, stdout.shift
@@ -483,9 +483,6 @@ class DepotTest < Book::TestCase
     assert_equal "-- create_table(:people, {:force=>true})", stdout.shift
     stdout.shift if stdout.first =~ /\s+-> \d\.\d+s$/
     stdout.shift if stdout.first =~ /=> nil/
-    assert_equal " FROM sqlite_master", stdout.shift
-    assert_equal " WHERE type = 'table' AND NOT name = 'sqlite_sequence'", stdout.shift
-    stdout.shift if stdout.first =~ /\s+-> \d\.\d+s$/
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -587,7 +584,7 @@ class DepotTest < Book::TestCase
     assert_equal "-- create_table(:employees, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
+    assert_match /^=> (Employee\(.*\)|nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
     assert_equal "=> 0", stdout.shift
     assert_equal "=> #<Employee id: 1, name: \"Adam\", manager_id: nil, mentor_id: nil>", stdout.shift
     assert_equal "=> #<Employee id: 2, name: \"Beth\", manager_id: nil, mentor_id: nil>", stdout.shift
@@ -613,8 +610,8 @@ class DepotTest < Book::TestCase
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
-    assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
-    assert_match /^=> (nil|\[.*?\])/, stdout.shift
+    assert_match /^=> (Parent\(.*\)|nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
+    assert_match /^=> (Child\(.*\)|nil|\[.*?\])/, stdout.shift
     assert_equal "=> #<Parent id: 1>", stdout.shift
     assert_equal "=> [\"One\", \"Two\", \"Three\", \"Four\"]", stdout.shift
     assert_equal "=> true", stdout.shift
@@ -712,7 +709,7 @@ class DepotTest < Book::TestCase
     assert_equal "-- create_table(:line_items, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
+    assert_match /^=> (Product\(.*\)|nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
     assert_match /^=> (nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
     assert_equal "=> #<Product id: 1, title: \"Programming Ruby\", description: \" ... \", line_items_count: 0>", stdout.shift
     assert_equal "=> #<LineItem id: nil, product_id: nil, order_id: nil, quantity: nil, unit_price: nil>", stdout.shift
@@ -770,8 +767,6 @@ class DepotTest < Book::TestCase
     assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
     assert_equal "-- create_table(:payments, {:force=>true})", stdout.shift
-    assert_equal " FROM sqlite_master", stdout.shift
-    assert_equal " WHERE type = 'table' AND NOT name = 'sqlite_sequence'", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -781,10 +776,10 @@ class DepotTest < Book::TestCase
     assert_match /^=> #<OrderObserver:.*>$/, stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<AuditObserver:.*>$/, stdout.shift
-    assert_equal "Order 2 created", stdout.shift
-    assert_equal "[Audit] Order 2 created", stdout.shift
+    assert_select '.stderr', "Order 2 created"
+    assert_select '.stderr', "[Audit] Order 2 created"
     assert_equal "=> #<Order id: 2, user_id: nil, name: nil, address: nil, email: nil>", stdout.shift
-    assert_equal "[Audit] Payment 1 created", stdout.shift
+    assert_select '.stderr', "[Audit] Payment 1 created"
     assert_equal "=> #<Payment id: 1>", stdout.shift
     assert_equal "?> >> ", stdout.shift
     stdout.shift if stdout.first == "Switch to inspect mode."

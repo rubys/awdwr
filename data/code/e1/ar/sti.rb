@@ -2,7 +2,7 @@ $: << File.dirname(__FILE__)
 require "connect"
 require "logger"
 
-ActiveRecord::Base.logger = Logger.new(STDOUT)
+ActiveRecord::Base.logger = Logger.new(STDERR)
 
 ActiveRecord::Schema.define do
 

@@ -5,7 +5,7 @@ require "active_record"
 
 require 'connect'
 
-ActiveRecord::Base.logger = Logger.new(STDOUT)
+ActiveRecord::Base.logger = Logger.new(STDERR)
 
 ActiveRecord::Schema.define do 
   create_table :payments, :force => true do |t|
