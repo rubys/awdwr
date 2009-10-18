@@ -1355,7 +1355,10 @@ end
 
 section 13, 'Task I: Internationalization' do
   post '/store/empty_cart', {}
-  cmd "cp #{$DATA}/i18n/initializer.rb config/initializers/i18n.rb"
+  edit 'config/initializers/i18n.rb' do |data|
+    data[/()/,1] = read('i18n/initializer.rb')
+    data.gsub! 'RAILS_ROOT', 'Rails.root' unless $R2
+  end
   restart_server
   edit 'app/views/layouts/store.html.erb', 'i18n' do |data|
     data.gsub! /^\s*<!-- START_HIGHLIGHT -->\n/, ''
