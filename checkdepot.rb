@@ -310,7 +310,7 @@ class DepotTest < Book::TestCase
     assert_equal "false", stdout.shift
     assert_match /^=> (nil|false)/, stdout.shift
     assert_match /^#<ActiveRecord::Relation:|\[.*#<Order id: 9, name: "Andy Hunt".*>\]/, stdout.shift
-    assert_match /^=> (nil|\[#<Order)/, stdout.shift
+    assert_match /^=> (nil|#<ActiveRecord::Relation|\[#<Order)/, stdout.shift
     assert_match /^#<Order id: 1, name: "Dave Thomas"/, stdout.shift
     assert_match /^=> (nil|\#<Order)/, stdout.shift
     assert_equal "1", stdout.shift
