@@ -40,14 +40,16 @@ es:
 #END:model
 #START:errors
     errors:
+      messages:
+        inclusion: "no est&aacute; incluido en la lista"
+        blank:     "no puede quedar en blanco"
+  activemodel:
+    errors:
       template:
         body: "Hay problemas con los siguientes campos:"
         header:
           one:   "1 error ha impedido que este {{model}} se guarde"
           other: "{{count}} errores han impedido que este {{model}} se guarde"
-      messages:
-        inclusion: "no est&aacute; incluido en la lista"
-        blank:     "no puede quedar en blanco"
 #END:errors
 
 #START:layout

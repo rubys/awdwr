@@ -1436,6 +1436,11 @@ section 13, 'Task I: Internationalization' do
     end
   end
   cmd "cp -r #{$DATA}/i18n/*.yml config/locales"
+  if $R2
+    edit 'config/locales/es.yml' do |data|
+      data.gsub! 'activemodel', 'activerecord'
+    end
+  end
   get '/store?locale=es'
   edit 'app/views/store/index.html.erb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
