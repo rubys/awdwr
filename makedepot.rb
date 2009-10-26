@@ -490,7 +490,7 @@ section 8.4, 'Iteration C3: Handling Errors' do
     EOF
   end
   post '/store/add_to_cart/wibble', {}
-  cmd 'tail -17 log/development.log', ['Attempt to access']
+  cmd 'tail -25 log/development.log', ['Attempt to access']
   edit 'app/views/layouts/store.html.erb' do |data|
     data[/<div id="main">()/,1] = "\n" + <<-'EOF'
       <!-- START_HIGHLIGHT -->

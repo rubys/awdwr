@@ -72,10 +72,10 @@ class RoutingTest < ActionController::TestCase
     with_routing do |set|
       set.draw do |map|
         map.connect "shop/:action/:id", :controller => "store"
+      end
       
       assert_generates("/shop", :controller => "store")
       assert_recognizes({:controller => "store", :action => "index"}, "/shop")
-      end
     end
     
     assert_generates("/store", :controller => "store")

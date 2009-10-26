@@ -384,7 +384,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<ActiveRecord::Reflection::AggregateReflection/, stdout.shift
     assert_equal "=> 0", stdout.shift
-    assert_match /^=> #<Name:0x\w+ @.*?last="Eisenhower"/, stdout.shift
+    assert_match /^=> .*Eisenhower/, stdout.shift
     assert_match /^=> #<Customer id: 1/, stdout.shift
     assert_match /^=> #<Customer id: 1/, stdout.shift
     assert_equal "Dwight", stdout.shift
