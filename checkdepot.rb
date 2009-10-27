@@ -393,7 +393,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "Dwight D Eisenhower", stdout.shift
     assert_equal "=> nil", stdout.shift
-    assert_match /^=> #<Name:0x\w+ @.*?last="Truman"/, stdout.shift
+    assert_match /^=> .*Truman/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert stdout.empty?
   end
