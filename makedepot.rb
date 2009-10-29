@@ -2004,16 +2004,29 @@ $R2 = (`#{which_rails($rails)} -v` =~ /^Rails 2/)
 $R22 = (`#{which_rails($rails)} -v` =~ /^Rails 2\.2/)
 $APP = $R22 ? 'application' : 'application_controller'
 
-# what gems are we missing?
-missing = %w(mislav-will_paginate rdoc)
-missing.push 'test-unit' if RUBY_VERSION =~ /^1\.9/
-missing -= `gem list`.scan(/(^[-_\w]+)\s\(/).flatten
+# what gems are required?
+required = %w(mislav-will_paginate rdoc)
+required.push 'rails' if $rails == 'rails'
+required.push 'test-unit' if RUBY_VERSION =~ /^1\.9/
+required -= `gem list`.scan(/(^[-_\w]+)\s\(/).flatten
 
-unless missing.empty?
-  missing.each do |gem|
+unless required.empty?
+  required.each do |gem|
     STDERR.puts "Missing gem: #{gem}"
   end
   Process.exit!
+end
+
+unless $R2
+  # what libraries are required?
+  fail = false
+  %w(arel rack/mount).each do |lib|
+    unless $:.any? {|path| File.exist? File.join(path,lib)}
+      STDERR.puts "Missing library: #{lib}"
+      fail = true
+    end
+  end
+  Process.exit! if fail
 end
 
 $cleanup = Proc.new do
