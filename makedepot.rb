@@ -1912,6 +1912,12 @@ section 25.1, 'Sending E-mail' do
   cmd "cp -v #{code}/app/models/* app/models"
   cmd "cp -vr #{code}/test ."
   cmd "cp -vr #{code}/app/views/order_mailer app/views"
+  unless $R2
+    edit 'app/models/order_mailer.rb' do |data|
+      data.gsub! /body\s+:(\w+)\s*=>/, '@\1 ='
+      data.gsub! /body\s+"(\w+)"\s*=>/, '@\1 ='
+    end
+  end
   restart_server
   cmd 'rake db:migrate'
   get '/test/create_order'
