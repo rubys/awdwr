@@ -2005,13 +2005,14 @@ $R22 = (`#{which_rails($rails)} -v` =~ /^Rails 2\.2/)
 $APP = $R22 ? 'application' : 'application_controller'
 
 # what gems are required?
-required = %w(mislav-will_paginate rdoc nokogiri htmlentities)
+required = %w(will_paginate mislav-will_paginate rdoc nokogiri htmlentities)
 required.push 'rails' if $rails == 'rails'
 required.push 'test-unit' if RUBY_VERSION =~ /^1\.9/
 required -= `gem list`.scan(/(^[-_\w]+)\s\(/).flatten
 
 # only one of nokogiri and htmlentities are required
 required.delete('nokogiri') or required.delete('htmlentities')
+required.delete('will_paginate') or required.delete('mislav-will_paginate')
 
 unless required.empty?
   required.each do |gem|
