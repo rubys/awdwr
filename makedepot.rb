@@ -2030,7 +2030,7 @@ end
 unless $R2
   # what libraries are required?
   fail = false
-  %w(arel rack/mount).each do |lib|
+  %w(arel).each do |lib|
     unless $:.any? {|path| File.exist? File.join(path,lib)}
       STDERR.puts "Missing library: #{lib}"
       fail = true
