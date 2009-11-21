@@ -1438,7 +1438,7 @@ section 13, 'Task I: Internationalization' do
   cmd "cp -r #{$DATA}/i18n/*.yml config/locales"
   if $R2
     edit 'config/locales/es.yml' do |data|
-      data.gsub! 'activemodel', 'activerecord'
+      data.gsub! /\s+activemodel:\s+errors:/, ''
     end
   end
   get '/store?locale=es'
