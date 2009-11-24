@@ -2048,6 +2048,9 @@ $cleanup = Proc.new do
     end
   end
  
+  # Link static files
+  system 'ln -s $DATA $WORK/data'
+ 
   # fetch stylesheets
   begin
     Net::HTTP.start('127.0.0.1', 3000) do |http|
