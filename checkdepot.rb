@@ -953,11 +953,12 @@ class DepotTest < Book::TestCase
   end
 
   section 21.2, 'Routing Requests' do
+    # routes_for_depot.rb
     stdout = collect_stdout.grep(/^=>/).map {|line| sort_hash(line)}
     assert_equal '=> true', stdout.shift
     assert_match /^=> (nil|\[.*?\])/, stdout.shift
     assert_match /^=> (nil|\[.*?\])/, stdout.shift
-    assert_match /^=> (nil|\[.*?\])/, stdout.shift
+    sdtout.shift if stdout.first =~ /^=> (nil|\[.*?\])/
     assert_match /^=> #<Action\w+::Routing::RouteSet:.*>/, stdout.shift
     assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
     assert_equal '=> nil', stdout.shift
@@ -966,14 +967,19 @@ class DepotTest < Book::TestCase
     assert_equal '=> {:action=>"add_to_cart", :controller=>"store", :format=>"xml", :id=>"1"}', stdout.shift
     assert_equal '=> "/store"', stdout.shift
     assert_equal '=> "/store/index/123"', stdout.shift
-    assert_equal '=> {:action=>"show", :controller=>"coupon", :id=>"1"}', stdout.shift
-    assert_equal '=> []', stdout.shift
-    assert_equal '=> {:action=>"show", :controller=>"coupon", :id=>"1"}', stdout.shift
+    if stdout.first =~ /coupon/ # Rails 2.x
+      # Demo ActionController::Routing.use_controllers!
+      assert_equal '=> {:action=>"show", :controller=>"coupon", :id=>"1"}', stdout.shift
+      assert_equal '=> []', stdout.shift
+      assert_equal '=> {:action=>"show", :controller=>"coupon", :id=>"1"}', stdout.shift
+    end
     assert_equal '=> "http://www.example.com/store/display/123"', stdout.shift
+
+    # routes_for_blog.rb
     assert_equal '=> false', stdout.shift
     assert_equal '=> true', stdout.shift
     assert_match /^=> (nil|\[.*?\])/, stdout.shift
-    assert_equal '=> ["article", "blog"]', stdout.shift
+    stdout.shift if stdout.first == '=> ["article", "blog"]'
     assert_match /^=> #<Action\w+::Routing::RouteSet:.*>/, stdout.shift
     assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
     assert_match /^=> \[ActionController::Base, ActionView::Base\]|#<Rack::Mount::RouteSet.*>/, stdout.shift

@@ -2,7 +2,6 @@ require 'rubygems'
 require 'action_controller'
 
 ActionController::Base.session_store = nil
-ActionController::Routing.use_controllers! [ "article", "blog" ]
 rs = ActionController::Routing::Routes
 app = ActionDispatch::Integration::Session.new(nil)
 
@@ -32,7 +31,8 @@ ActionController::Routing::Routes.draw do |map|
               :id => /\d+/ 
               
   # Regular Rails routing for admin stuff 
-  map.connect "blog/:controller/:action/:id" 
+  map.connect "blog/article/:action/:id",
+              :controller => "article" 
   #END:example              
 
   # Catchall so we can gracefully handle badly formed requests 
