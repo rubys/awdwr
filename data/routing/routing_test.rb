@@ -5,8 +5,10 @@ class RoutingTest < ActionController::TestCase
 
   #START:recognizes
   def test_recognizes
-    ActionController::Routing.use_controllers! ["store"]
-    load "./config/routes.rb"
+    if ActionController::Routing.respond_to? :use_controllers!
+      ActionController::Routing.use_controllers! ["store"]
+      load "./config/routes.rb"
+    end
 
     # Check the default index action gets generated
     assert_recognizes({"controller" => "store", "action" => "index"}, "/store")
@@ -39,8 +41,10 @@ class RoutingTest < ActionController::TestCase
   
   #START:generates
   def test_generates
-    ActionController::Routing.use_controllers! ["store"]
-    load "config/routes.rb"
+    if ActionController::Routing.respond_to? :use_controllers!
+      ActionController::Routing.use_controllers! ["store"]
+      load "./config/routes.rb"
+    end
 
     assert_generates("/store", :controller => "store", :action => "index")
     assert_generates("/store/list", :controller => "store", :action => "list")
@@ -53,8 +57,10 @@ class RoutingTest < ActionController::TestCase
   
   #START:routing
   def test_routing
-    ActionController::Routing.use_controllers! ["store"]
-    load "config/routes.rb"
+    if ActionController::Routing.respond_to? :use_controllers!
+      ActionController::Routing.use_controllers! ["store"]
+      load "./config/routes.rb"
+    end
 
     assert_routing("/store", :controller => "store", :action => "index")
     assert_routing("/store/list", :controller => "store", :action => "list")
@@ -64,8 +70,10 @@ class RoutingTest < ActionController::TestCase
   #END:routing
   
   def test_alternate_routing
-    ActionController::Routing.use_controllers! ["store"]
-    load "config/routes.rb"
+    if ActionController::Routing.respond_to? :use_controllers!
+      ActionController::Routing.use_controllers! ["store"]
+      load "./config/routes.rb"
+    end
 
     assert_generates("/store", :controller => "store")
     
@@ -82,4 +90,3 @@ class RoutingTest < ActionController::TestCase
   end    
     
 end
-
