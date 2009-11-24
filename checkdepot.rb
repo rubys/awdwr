@@ -39,7 +39,7 @@ class DepotTest < Book::TestCase
   section 6.2, 'Creating the Products Model and Maintenance Application' do
     assert_select 'th', 'Image url'
     assert_select 'input#product_title[value=Pragmatic Version Control]'
-    assert_select 'a[href=http://127.0.0.1:3000/products/1]', 'redirected'
+    assert_select "a[href=http://127.0.0.1:#{$PORT}/products/1]", 'redirected'
     assert_select '.stdout', /"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL/
     assert_select '.stdout', /^7 tests, 10 assertions, 0 failures, 0 errors/
   end
@@ -99,7 +99,7 @@ class DepotTest < Book::TestCase
   end
 
   section 8.4, "Iteration C3: Handling Errors" do
-    assert_select 'a[href=http://127.0.0.1:3000/store]', 'redirected'
+    assert_select "a[href=http://127.0.0.1:#{$PORT}/store]", 'redirected'
     assert_select '.hilight', 'Attempt to access invalid product wibble'
     assert_select '#notice', 'Invalid product'
   end
@@ -144,7 +144,7 @@ class DepotTest < Book::TestCase
   end
 
   section 11.3, "Iteration F3: Limiting Access" do
-    assert_select 'a[href=http://127.0.0.1:3000/admin/login]', 'redirected'
+    assert_select "a[href=http://127.0.0.1:#{$PORT}/admin/login]", 'redirected'
     assert_select 'h1', 'Listing products'
   end
 
@@ -999,7 +999,7 @@ class DepotTest < Book::TestCase
   section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
     assert_select '.stdout', /^==  CreateUsers: migrated/
     assert_select '.stdout', '=&gt; 763'
-    assert_select 'a[href=http://localhost:3000/pager/user_list?page=27]', '27'
+    assert_select "a[href=http://localhost:#{$PORT}/pager/user_list?page=27]", '27'
   end
 
   section 23.5, 'Forms That Wrap Model Objects' do
