@@ -401,7 +401,7 @@ class DepotTest < Book::TestCase
   section 19, 'Active Record: Relationships Between Tables' do
     stdout = collect_stdout
     stdout.reject! {|line| line =~ /' -> `vendor\/plugins\//}
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -475,7 +475,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> #<Product id: 4, title: "Advanced Rails"/, stdout.shift
     assert_equal "1", stdout.shift
     assert_match /^=> (nil|1)/, stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -511,7 +511,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> #<Employee id: 4, type: \"Employee\", name: \"Barney Rub\", email: \"barney@here.com\", balance: nil, reports_to: 2, dept: 23>", stdout.shift
     assert_equal "#<Manager id: 2, type: \"Manager\", name: \"Wilma Flint\", email: \"wilma@here.com\", balance: nil, reports_to: nil, dept: 23>", stdout.shift
     assert_match /^=> (nil|#<Manager)/, stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -537,7 +537,7 @@ class DepotTest < Book::TestCase
     assert_match /^  acquired_at = \d+-\d+-\d+ \d+:\d+:\d+/, stdout.shift
     assert_equal "  resource_id = 1", stdout.shift
     assert_equal "resource_type = Article", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -575,7 +575,7 @@ class DepotTest < Book::TestCase
     assert_match /^  acquired_at = \d+-\d+-\d+ \d+:\d+:\d+/, stdout.shift
     assert_equal "  resource_id = 1", stdout.shift
     assert_equal "resource_type = Sound", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -602,7 +602,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> (nil|\[\])/, stdout.shift
     assert_equal "\"Clem\"", stdout.shift
     assert_match /^=> (nil|"Clem")/, stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -634,7 +634,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> #<Child id: 1, parent_id: 1, name: \"One\", position: nil>", stdout.shift
     assert_equal "Three, Two, Four", stdout.shift
     assert_equal "=> nil", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -668,7 +668,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "Books", stdout.shift
     assert_equal "=> nil", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -698,7 +698,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> true", stdout.shift
     assert_equal "2", stdout.shift
     assert_match /^=> (nil|2)/, stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -732,7 +732,7 @@ class DepotTest < Book::TestCase
 
   section 20, 'Active Record: Object Life Cycle' do
     stdout = collect_stdout
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|false)/, stdout.shift
     assert_equal '=> []', stdout.shift
@@ -760,7 +760,7 @@ class DepotTest < Book::TestCase
     assert_equal "   name = Dbwf Tipnbt", stdout.shift
     assert_equal "address = 123 The Street", stdout.shift
     assert_equal "  email = ebwf@fybnqmf.dpn", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> false", stdout.shift
     assert_equal "=> true", stdout.shift
@@ -782,7 +782,7 @@ class DepotTest < Book::TestCase
     assert_select '.stderr', "[Audit] Payment 1 created"
     assert_equal "=> #<Payment id: 1>", stdout.shift
     assert_equal "?> >> ", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -826,7 +826,7 @@ class DepotTest < Book::TestCase
     assert_equal " ", stdout.shift
     assert_equal "                 id = 5", stdout.shift
     assert_equal "quantity*unit_price = 44.95", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -847,7 +847,7 @@ class DepotTest < Book::TestCase
     assert_equal "     id = 2", stdout.shift
     assert_equal " number = 54321", stdout.shift
     assert_equal "balance = 210", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -869,7 +869,7 @@ class DepotTest < Book::TestCase
     assert_equal "     id = 2", stdout.shift
     assert_equal " number = 54321", stdout.shift
     assert_equal "balance = 200", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -886,7 +886,7 @@ class DepotTest < Book::TestCase
     assert_equal "Paul has 550.0", stdout.shift
     assert_equal "Peter has -250.0", stdout.shift
     assert_equal "=> nil", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -903,7 +903,7 @@ class DepotTest < Book::TestCase
     assert_equal "Paul has 200.0", stdout.shift
     assert_equal "Peter has 100.0", stdout.shift
     assert_equal "=> nil", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -920,7 +920,7 @@ class DepotTest < Book::TestCase
     assert_equal "Paul has 200.0", stdout.shift
     assert_equal "Peter has 100.0", stdout.shift
     assert_equal "=> nil", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
