@@ -7,8 +7,8 @@ class RoutingTest < ActionController::TestCase
   def test_recognizes
     if ActionController::Routing.respond_to? :use_controllers!
       ActionController::Routing.use_controllers! ["store"]
-      load "./config/routes.rb"
     end
+    load "./config/routes.rb"
 
     # Check the default index action gets generated
     assert_recognizes({"controller" => "store", "action" => "index"}, "/store")
@@ -43,8 +43,8 @@ class RoutingTest < ActionController::TestCase
   def test_generates
     if ActionController::Routing.respond_to? :use_controllers!
       ActionController::Routing.use_controllers! ["store"]
-      load "./config/routes.rb"
     end
+    load "./config/routes.rb"
 
     assert_generates("/store", :controller => "store", :action => "index")
     assert_generates("/store/list", :controller => "store", :action => "list")
@@ -59,8 +59,8 @@ class RoutingTest < ActionController::TestCase
   def test_routing
     if ActionController::Routing.respond_to? :use_controllers!
       ActionController::Routing.use_controllers! ["store"]
-      load "./config/routes.rb"
     end
+    load "./config/routes.rb"
 
     assert_routing("/store", :controller => "store", :action => "index")
     assert_routing("/store/list", :controller => "store", :action => "list")
@@ -72,8 +72,8 @@ class RoutingTest < ActionController::TestCase
   def test_alternate_routing
     if ActionController::Routing.respond_to? :use_controllers!
       ActionController::Routing.use_controllers! ["store"]
-      load "./config/routes.rb"
     end
+    load "./config/routes.rb"
 
     assert_generates("/store", :controller => "store")
     
