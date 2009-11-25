@@ -958,7 +958,7 @@ class DepotTest < Book::TestCase
     assert_equal '=> true', stdout.shift
     assert_match /^=> (nil|\[.*?\])/, stdout.shift
     assert_match /^=> (nil|\[.*?\])/, stdout.shift
-    sdtout.shift if stdout.first =~ /^=> (nil|\[.*?\])/
+    stdout.shift if stdout.first =~ /^=> (nil|\[.*?\])/
     assert_match /^=> #<Action\w+::Routing::RouteSet:.*>/, stdout.shift
     assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
     assert_equal '=> nil', stdout.shift
