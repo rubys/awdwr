@@ -2049,7 +2049,7 @@ $cleanup = Proc.new do
   end
  
   # Link static files
-  system 'ln -s $DATA $WORK/data'
+  system "ln -f -s #{$DATA} #{$WORK}/data"
  
   # fetch stylesheets
   begin
