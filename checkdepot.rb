@@ -12,22 +12,18 @@ class DepotTest < Book::TestCase
     assert_equal '<ul>', stdout.shift
     assert_equal '  <li>Addition: 3 </li>', stdout.shift
     assert_equal '  <li>Concatenation: cowboy </li>', stdout.shift
-    if RUBY_VERSION =~ /^1.8/
-      assert_match /^  <li>Time in one hour:  \w+ \w+ \d\d \d\d:\d\d:\d\d [+-]\d+ \d+ <\/li>/, stdout.shift
-    else
-      assert_match /^  <li>Time in one hour:  \d+-\d\d-\d\d \d\d:\d\d:\d\d [+-]\d+ <\/li>/, stdout.shift
-    end
+    assert_match /^  <li>Time in one hour:  (\w+ \w+ \d\d \d\d:\d\d:\d\d [+-]\d+ \d+|\d+-\d\d-\d\d \d\d:\d\d:\d\d [+-]\d+) <\/li>/, stdout.shift
     assert_equal '</ul>', stdout.shift
 
     3.times do
       assert_equal ' ', stdout.shift
       assert_equal 'Ho!<br />', stdout.shift
     end
-    assert_equal ' ', stdout.shift
+    stdout.shift if stdout.first == ' '
     assert_equal 'Merry Christmas!', stdout.shift
 
     3.times { assert_equal 'Ho!<br />', stdout.shift }
-    assert_equal ' ', stdout.shift
+    stdout.shift if stdout.first == ' '
     assert_equal 'Merry Christmas!', stdout.shift
 
     3.times { assert_equal 'Ho!<br />', stdout.shift }

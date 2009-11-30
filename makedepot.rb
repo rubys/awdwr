@@ -9,15 +9,13 @@ $checker = 'checkdepot'
 section 4, 'Instant Gratification' do
   rubypath = ENV['RUBYPATH']
   begin
+    erb = ($R2 ? 'erb' : 'erubis') + ' -r ./erbshim -T -'
     ENV['RUBYPATH'] = "#{$rails}/activesupport/lib/" unless $rails == 'rails'
-    cmd "erb -r ./erbshim -T - < #{$CODE}/erb/ex1.html.erb |  
-         sed 's/<!--.*-->//'"
-    cmd "erb -r ./erbshim -T - < #{$CODE}/erb/ex2.html.erb | 
-         sed 's/<!--.*-->//'"
-    cmd "erb -r ./erbshim -T - < #{$CODE}/erb/ex2a.html.erb | 
-         sed 's/<!--.*-->//'"
+    cmd "#{erb} < #{$CODE}/erb/ex1.html.erb | sed 's/<!--.*-->//'"
+    cmd "#{erb} < #{$CODE}/erb/ex2.html.erb | sed 's/<!--.*-->//'"
+    cmd "#{erb} < #{$CODE}/erb/ex2a.html.erb | sed 's/<!--.*-->//'"
     cmd "sed 's/-%>\\n/%>/' < #{$CODE}/erb/ex2b.html.erb |  
-         erb -r ./erbshim -T - | sed 's/<!--.*-->//'"
+         #{erb} | sed 's/<!--.*-->//'"
   ensure
     ENV['RUBYPATH'] = rubypath
   end
