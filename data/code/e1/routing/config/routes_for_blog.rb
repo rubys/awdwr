@@ -1,7 +1,8 @@
-require 'rubygems'
-require 'action_controller'
+require "./config/environment.rb"
 
 ActionController::Base.session_store = nil
+load "config/routes.rb"
+
 rs = ActionController::Routing::Routes
 app = ActionDispatch::Integration::Session.new(nil)
 

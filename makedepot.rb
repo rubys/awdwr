@@ -1799,18 +1799,18 @@ end
 
 section 21.2, 'Routing Requests' do
   Dir.chdir(File.join($WORK, 'depot'))
-  if $R2
-    irb 'e1/routing/config2/routes_for_depot.rb'
-    irb 'e1/routing/config2/routes_for_blog.rb'
-  else
-    irb 'e1/routing/config/routes_for_depot.rb'
-    irb 'e1/routing/config/routes_for_blog.rb'
-  end
+  config = ($R2 ? 'config2' : 'config')
+
+  cmd 'ls app/controllers/*_controller.rb'
+  irb "e1/routing/#{config}/routes_for_depot.rb"
+
+  rails 'view', :e1
+  cmd "cp -v #{$CODE}/e1/views/app/controllers/*.rb app/controllers"
+  irb "e1/routing/#{config}/routes_for_blog.rb"
 end
 
 section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
-  rails 'view', :e1
-  cmd "cp -v #{$CODE}/e1/views/app/controllers/*.rb app/controllers"
+  Dir.chdir(File.join($WORK, 'view'))
   cmd "cp -vr #{$CODE}/e1/views/app/views/pager app/views"
   unless $R2
     edit 'config/initializers/pagination.rb' do |data|
@@ -1818,7 +1818,7 @@ section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
     end
   end
   ruby 'script/generate model user name:string'
-  restart_server if $R2
+  restart_server
   cmd 'rake db:migrate'
   console 'PagerController.new.populate'
   get '/pager/user_list'

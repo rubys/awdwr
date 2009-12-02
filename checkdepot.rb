@@ -973,10 +973,10 @@ class DepotTest < Book::TestCase
     assert_equal '=> "http://www.example.com/store/display/123"', stdout.shift
 
     # routes_for_blog.rb
-    assert_equal '=> false', stdout.shift
+    stdout.shift if stdout.first == '=> false'
     assert_equal '=> true', stdout.shift
-    assert_match /^=> (nil|\[.*?\])/, stdout.shift
-    stdout.shift if stdout.first == '=> ["article", "blog"]'
+    assert_equal '=> nil', stdout.shift
+    assert_match /^=> \[("article", "blog")?\]/, stdout.shift
     assert_match /^=> #<Action\w+::Routing::RouteSet:.*>/, stdout.shift
     assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
     assert_match /^=> \[ActionController::Base, ActionView::Base\]|#<Rack::Mount::RouteSet.*>/, stdout.shift
