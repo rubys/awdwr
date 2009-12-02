@@ -1812,6 +1812,11 @@ section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
   rails 'view', :e1
   cmd "cp -v #{$CODE}/e1/views/app/controllers/*.rb app/controllers"
   cmd "cp -vr #{$CODE}/e1/views/app/views/pager app/views"
+  unless $R2
+    edit 'config/initializers/pagination.rb' do |data|
+      data << "require 'will_paginate'\n"
+    end
+  end
   ruby 'script/generate model user name:string'
   restart_server
   cmd 'rake db:migrate'
