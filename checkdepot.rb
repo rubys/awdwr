@@ -152,7 +152,7 @@ class DepotTest < Book::TestCase
   end
 
   section 12.1, "Generating the XML Feed" do
-    assert_select '.stdout', /No route matches &amp;quot;\/info\/who_bought\//
+    # assert_select '.stdout', /No route matches &amp;quot;\/info\/who_bought\//
     assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/
     assert_select '.stdout', /title = Pragmatic Project Automation/
     assert_select '.stdout', /total_price = 28.5/

@@ -261,7 +261,7 @@ end
 
 section 7.1, 'Iteration B1: Create the Catalog Listing' do
   ruby 'script/generate controller store index'
-  restart_server
+  restart_server if $R2
   get '/store'
   edit 'app/controllers/store_controller.rb' do |data|
     data[/def index.*()/,1] = "\n    @products = Product.find_products_for_sale"
@@ -1055,7 +1055,7 @@ end
 
 section 11.2, 'Iteration F2: Logging in' do
   ruby 'script/generate controller admin login logout index'
-  restart_server
+  restart_server if $R2
   edit "app/controllers/admin_controller.rb" do |data|
     data[/(.*)/m,1] = read('users/admin_controller.rb')
   end
@@ -1248,7 +1248,7 @@ section 12.1, 'Generating the XML Feed' do
     EOF
   end
   cmd 'curl --silent http://localhost:3000/info/who_bought/3'
-  restart_server
+  restart_server if $R2
   cmd 'curl --silent http://localhost:3000/info/who_bought/3'
   db 'select * from products'
   db 'select * from line_items'
@@ -1416,7 +1416,7 @@ section 13, 'Task I: Internationalization' do
       /* END:i18n */
     EOF
   end
-  restart_server
+  restart_server if $R2
   get '/store?locale=es'
   edit 'app/views/layouts/store.html.erb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
@@ -1818,7 +1818,7 @@ section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
     end
   end
   ruby 'script/generate model user name:string'
-  restart_server
+  restart_server if $R2
   cmd 'rake db:migrate'
   console 'PagerController.new.populate'
   get '/pager/user_list'
