@@ -8,7 +8,7 @@ class EvalTemplate < ActionView::TemplateHandler
       eval("#{key} = #{value}", bind)
     end
 
-    @view.controller.headers["Content-Type"] ||= 'text/plain'
+    @view.controller.headers["Content-Type"] = 'text/plain'
 
     # evaluate each line and show the original alongside
     # its value
