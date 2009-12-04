@@ -1895,11 +1895,7 @@ end
 section 23.11, 'Adding New Templating Systems' do
   Dir.chdir(File.join($WORK,'view'))
   cmd "cp -v #{$CODE}/e1/views/config/initializers/* config/initializers/"
-  if $R2
-    cmd "cp -v #{$CODE}/e1/views/lib/*_template.rb lib"
-  else
-    cmd "cp -v #{$CODE}/e1/views/lib3/*_template.rb lib"
-  end
+  cmd "cp -v #{$CODE}/e1/views/lib/*_template.rb lib"
   restart_server
   get '/test/example'
   get '/test/date_format'
