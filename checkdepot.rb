@@ -227,12 +227,13 @@ class DepotTest < Book::TestCase
   end
 
   section 18, 'Active Record: The Basics' do
+    prelude = /Loading development environment|Switch to inspect mode/
     stdout = collect_stdout
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first =~ prelude
     assert_equal ">> Order.column_names", stdout.shift
     assert_equal "=> [\"id\", \"name\", \"address\", \"email\", \"pay_type\", \"created_at\", \"updated_at\", \"customer_email\", \"placed_at\", \"attn\", \"order_type\", \"ship_class\", \"amount\", \"state\"]", stdout.shift
     assert_equal ">> ", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first =~ prelude
     assert_equal ">> Order.columns_hash[\"pay_type\"]", stdout.shift
     assert_match /ActiveRecord::ConnectionAdapters::SQLiteColumn/, stdout.shift
     assert_equal ">> ", stdout.shift
@@ -250,15 +251,15 @@ class DepotTest < Book::TestCase
     assert_equal "    ship_class = priority", stdout.shift
     assert_equal "        amount = ", stdout.shift
     assert_equal "         state = ", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first =~ prelude
     assert_equal ">> Product.find(:first).price_before_type_cast", stdout.shift
     assert_equal "=> \"29.95\"", stdout.shift
     assert_equal ">> ", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first =~ prelude
     assert_equal ">> Product.find(:first).updated_at_before_type_cast", stdout.shift
     assert_match /^=> "\d+-\d+-\d+ \d+:\d+:\d+(\.\d+)?"$/, stdout.shift
     assert_equal ">> ", stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first =~ prelude
     assert_match /^=> \[.*\]/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -280,7 +281,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<Order id: 7, name: "Dave Thomas"/, stdout.shift
     assert_match /^=> \[#<Order id: 8, name: "Dave Thomas"/, stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -344,7 +345,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> 9", stdout.shift
     assert_equal "9", stdout.shift
     assert_match /^=> (nil|9)/, stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -363,7 +364,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> (nil|\[.*\])/, stdout.shift
     assert_equal "\"ski mask\"", stdout.shift
     assert_match /^=> (nil|"ski mask")/, stdout.shift
-    stdout.shift if stdout.first =~ /Loading .* environment/
+    stdout.shift if stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> true", stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
