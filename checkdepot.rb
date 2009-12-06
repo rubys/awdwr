@@ -976,6 +976,7 @@ class DepotTest < Book::TestCase
     # routes_for_blog.rb
     stdout.shift if stdout.first == '=> false'
     assert_equal '=> true', stdout.shift
+    stdout.shift if stdout.first == '=> []'
     assert_equal '=> nil', stdout.shift
     assert_match /^=> \[("article", "blog")?\]/, stdout.shift
     assert_match /^=> #<Action\w+::Routing::RouteSet:.*>/, stdout.shift

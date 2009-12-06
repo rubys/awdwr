@@ -1,4 +1,5 @@
 require "./config/environment.rb"
+require 'action_dispatch/test_case'
 
 ActionController::Base.session_store = nil
 load "config/routes.rb"
