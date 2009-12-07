@@ -57,9 +57,6 @@ rs.recognize_path "/junk"
 last_request = rs.recognize_path "/blog/2006/07/28"
 rs.generate({:day => 25}, last_request)
 rs.generate({:year => 2005}, last_request)
-rs.generate({:action => "show" , :id => 123}, last_request)
-rs.generate({:year => 2006}, last_request)
-rs.generate({:year => 2006, :month => nil}, last_request)
 
 app.url_for :controller => 'blog', :action => 'show_date', :year => 2002
 app.url_for :controller => 'blog', :action => 'show_date', :overwrite_params => {:year => "2002" }

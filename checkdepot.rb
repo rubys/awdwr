@@ -994,9 +994,6 @@ class DepotTest < Book::TestCase
     assert_equal '=> {:action=>"show_date", :controller=>"blog", :day=>"28", :month=>"07", :year=>"2006"}', stdout.shift
     assert_equal '=> "/blog/2006/07/25"', stdout.shift
     assert_equal '=> "/blog/2005"', stdout.shift
-    assert_equal '=> "/blog/show/123"', stdout.shift
-    assert_equal '=> "/blog/2006/07/28"', stdout.shift
-    assert_equal '=> "/blog/2006"', stdout.shift
     assert_equal '=> "http://www.example.com/blog/2002"', stdout.shift
     assert_equal '=> "http://www.example.com/blog/2002"', stdout.shift
   end
