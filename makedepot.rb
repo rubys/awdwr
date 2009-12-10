@@ -2011,7 +2011,11 @@ section 26, 'Active Resources' do
     data[/@line_item.errors,() :status/,1] = "\n" + (' ' * 28)
   end
   edit 'config/routes.rb' do |data|
-    data[/resources :orders()/,1] = ', :has_many => :line_items'
+    if $R2
+      data[/resources :orders()/,1] = ', :has_many => :line_items'
+    else
+      data[/resources :orders()/,1] = ' { resources :line_items }'
+    end
   end
   restart_server
   Dir.chdir(File.join($WORK,'depot_client'))
