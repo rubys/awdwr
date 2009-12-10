@@ -2014,7 +2014,7 @@ section 26, 'Active Resources' do
     if $R2
       data[/resources :orders()/,1] = ', :has_many => :line_items'
     else
-      data[/resources :orders()/,1] = ' { resources :line_items }'
+      data[/resources( :orders)/,1] = '(:orders) { resources :line_items }'
     end
   end
   restart_server
