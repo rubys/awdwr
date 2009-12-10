@@ -2082,23 +2082,11 @@ unless $R2
 end
 
 $cleanup = Proc.new do
-  # switch back to depot (if necessary)
-  if Dir.pwd != File.join($WORK,'depot') or !$server
-    if File.exist?(File.join($WORK,'depot'))
-      Dir.chdir(File.join($WORK,'depot'))
-      restart_server
-    end
+  # fetch stylesheets
+  Dir[File.join($WORK,'depot/public/stylesheets/*.css')].each do |css|
+    File.open(css) {|file| $style.text! file.read}
   end
  
   # Link static files
   system "ln -f -s #{$DATA} #{$WORK}"
- 
-  # fetch stylesheets
-  begin
-    Net::HTTP.start('127.0.0.1', 3000) do |http|
-      $style.text! http.get('/stylesheets/scaffold.css').body
-      $style.text! http.get('/stylesheets/depot.css').body
-    end
-  rescue
-  end
 end
