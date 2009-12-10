@@ -1716,18 +1716,35 @@ section 21, 'Action Controller: Routing and URLs' do
   ruby 'script/generate scaffold article title:string summary:text content:text'
   cmd 'rake db:migrate'
   cmd 'rake routes'
-  edit 'config/routes.rb', 'comments' do |data|
-    data[/()^ActionController::Routing::Routes/,1] = "#START:comments\n"
-    data[/()  map.resources :articles/,1] = "  #START_HIGHLIGHT\n"
-    data[/map.resources :articles.*\n()/,1] = <<-EOF.unindent(4)
-      #END_HIGHLIGHT
 
-      # ...
+  if $R2
+    edit 'config/routes.rb', 'comments' do |data|
+      data[/()^ActionController::Routing::Routes/,1] = "#START:comments\n"
+      data[/()  map.resources :articles/,1] = "  #START_HIGHLIGHT\n"
+      data[/map.resources :articles.*\n()/,1] = <<-EOF.unindent(2)
+        #END_HIGHLIGHT
 
-      #END:comments
-    EOF
-    data[/()^\s+map.connect/,1] = "#START:comments\n"
-    data[/^end()/,1] = "\n#END:comments"
+        # ...
+
+        #END:comments
+      EOF
+      data[/()^\s+map.connect/,1] = "#START:comments\n"
+      data[/^end()/,1] = "\n#END:comments"
+    end
+  else
+    edit 'config/routes.rb', 'comments' do |data|
+      data[/()^ActionController::Routing::Routes/,1] = "#START:comments\n"
+      data[/()  resources :articles/,1] = "  #START_HIGHLIGHT\n"
+      data[/resources :articles.*\n()/,1] = <<-EOF.unindent(2)
+        #END_HIGHLIGHT
+
+        # ...
+
+        #END:comments
+      EOF
+      data[/()^\s+match/,1] = "#START:comments\n"
+      data[/^end()/,1] = "\n#END:comments"
+    end
   end
   edit 'app/controllers/articles_controller.rb' do |data|
     data[/:created,() :location/,1] = "\n" + (' ' * 28)
@@ -1738,24 +1755,46 @@ section 21, 'Action Controller: Routing and URLs' do
     data[/,() :method => :del/,1] = "\n" + (' ' * 39)
   end
   edit 'config/routes.rb' do |data|
-    data[/map.resources :articles()/,1] = ', :collection => { :recent => :get }'
+    if $R2
+      data[/map.resources :articles()/,1] = ', :collection => { :recent => :get }'
+    else
+      data[/resources :articles(\n)/,1] = " do\n"+<<-EOF.unindent(4)+"  end\n"
+        collection do
+          get :recent
+        end
+      EOF
+    end
   end
   cmd 'rake routes'
   edit 'config/routes.rb' do |data|
-    data[/map.resources :articles, (.*)/,1] =
-      ':member => { :embargo => :put, :release => :put }'
+    if $R2
+      data[/map.resources :articles, (.*)/,1] =
+        ':member => { :embargo => :put, :release => :put }'
+    else
+      data[/(collection) do/,1] = 'member'
+      data[/(get :recent)/,1] = "post :embargo, :release"
+    end
   end
   cmd 'rake routes'
   edit 'config/routes.rb' do |data|
-    data[/map.resources :articles, (.*)/,1] = ':new => { :shortform => :post }'
+    if $R2
+      data[/map.resources :articles, (.*)/,1]=':new => { :shortform => :post }'
+    else
+      data[/(member) do/,1] = 'collection'
+      data[/(post.*)/,1] = "namespace('new') { post :shortform }"
+    end
   end
   cmd 'rake routes'
   edit 'config/routes.rb', 'comments' do |data|
-    data[/map.resources :articles(, .*\n)/,1] = <<-EOF.unindent(4)
-      do |article|
-        article.resources :comments
-      end
-    EOF
+    if $R2
+      data[/map.resources :articles(, .*\n)/,1] = <<-EOF.unindent(2)
+        do |article|
+          article.resources :comments
+        end
+      EOF
+    else
+      data[/(collection do.*?)\n  end/m,1] = 'resources :comments'
+    end
   end
   cmd 'rake routes'
   ruby 'script/generate model comment comment:text article_id:integer'
@@ -1972,7 +2011,7 @@ section 26, 'Active Resources' do
     data[/@line_item.errors,() :status/,1] = "\n" + (' ' * 28)
   end
   edit 'config/routes.rb' do |data|
-    data[/map.resources :orders()/,1] = ', :has_many => :line_items'
+    data[/resources :orders()/,1] = ', :has_many => :line_items'
   end
   restart_server
   Dir.chdir(File.join($WORK,'depot_client'))
