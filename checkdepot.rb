@@ -152,6 +152,10 @@ class DepotTest < Book::TestCase
   end
 
   section 12.1, "Generating the XML Feed" do
+    if @@sections['12.1'] =~ /undefined method `orders' for #&amp;lt;Product/
+      fail "undefined method `orders' for #<Product>"
+    end
+
     # assert_select '.stdout', /No route matches &amp;quot;\/info\/who_bought\//
     assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/
     assert_select '.stdout', /title = Pragmatic Project Automation/
