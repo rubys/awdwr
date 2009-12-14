@@ -95,6 +95,10 @@ class DepotTest < Book::TestCase
   end
 
   section 8.4, "Iteration C3: Handling Errors" do
+    if @@sections['8.4'].scan(/>[a-zA-Z0-9+\/]{60}</).length > 5
+      fail "log entry is base64 encoded"
+    end
+
     assert_select "a[href=http://127.0.0.1:#{$PORT}/store]", 'redirected'
     assert_select '.hilight', 'Attempt to access invalid product wibble'
     assert_select '#notice', 'Invalid product'
