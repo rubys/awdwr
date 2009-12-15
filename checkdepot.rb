@@ -962,9 +962,7 @@ class DepotTest < Book::TestCase
     # routes_for_depot.rb
     stdout = collect_stdout.grep(/^=>/).map {|line| sort_hash(line)}
     assert_equal '=> true', stdout.shift
-    assert_match /^=> (nil|\[.*?\])/, stdout.shift
-    assert_match /^=> (nil|\[.*?\])/, stdout.shift
-    stdout.shift if stdout.first =~ /^=> (nil|\[.*?\])/
+    stdout.shift while stdout.first =~ /^=> (nil|\[.*?\])/
     assert_match /^=> #<Action\w+::Routing::RouteSet:.*>/, stdout.shift
     assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
     assert_equal '=> nil', stdout.shift
@@ -989,7 +987,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> \[("article", "blog")?\]/, stdout.shift
     assert_match /^=> #<Action\w+::Routing::RouteSet:.*>/, stdout.shift
     assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
-    assert_match /^=> \[ActionController::Base, ActionView::Base\]|#<Rack::Mount::RouteSet.*>/, stdout.shift
+    assert_match /^=> (\[ActionController::Base, ActionView::Base\]|#<Rack::Mount::RouteSet.*>|nil)/, stdout.shift
     assert_equal '=> {:action=>"index", :controller=>"blog"}', stdout.shift
     assert_equal '=> {:action=>"show", :controller=>"blog", :id=>"123"}', stdout.shift
     assert_equal '=> {:action=>"show_date", :controller=>"blog", :year=>"2004"}', stdout.shift
