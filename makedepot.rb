@@ -2053,14 +2053,13 @@ $R22 = (`#{which_rails($rails)} -v` =~ /^Rails 2\.2/)
 $APP = $R22 ? 'application' : 'application_controller'
 
 # what gems are required?
-required = %w(will_paginate mislav-will_paginate rdoc nokogiri htmlentities)
+required = %w(will_paginate rdoc nokogiri htmlentities)
 required.push 'rails' if $rails == 'rails'
 required.push 'test-unit' if RUBY_VERSION =~ /^1\.9/
 required -= `gem list`.scan(/(^[-_\w]+)\s\(/).flatten
 
 # only one of nokogiri and htmlentities are required
 required.delete('nokogiri') or required.delete('htmlentities')
-required.delete('will_paginate') or required.delete('mislav-will_paginate')
 
 unless required.empty?
   required.each do |gem|
@@ -2069,17 +2068,27 @@ unless required.empty?
   Process.exit!
 end
 
+fail = false
+
 unless $R2
   # what libraries are required?
-  fail = false
   %w(arel).each do |lib|
     unless $:.any? {|path| File.exist? File.join(path,lib)}
       STDERR.puts "Missing library: #{lib}"
       fail = true
     end
   end
-  Process.exit! if fail
 end
+
+# what commands are required?
+%w(sqlite3 curl).each do |cmd|
+  if `which #{cmd}`.empty?
+    STDERR.puts "Missing command: #{cmd}"
+    fail = true
+  end
+end
+
+Process.exit! if fail
 
 $cleanup = Proc.new do
   # fetch stylesheets
