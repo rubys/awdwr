@@ -32,6 +32,10 @@ class DepotTest < Book::TestCase
     assert stdout.empty?
   end
 
+  section 6.1, 'Iteration A1: Getting Something Running' do
+    assert_select '.stderr', 0
+  end
+
   section 6.2, 'Creating the Products Model and Maintenance Application' do
     assert_select 'th', 'Image url'
     assert_select 'input#product_title[value=Pragmatic Version Control]'
