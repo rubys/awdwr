@@ -1019,7 +1019,7 @@ section 11.1, 'Iteration F1: Adding Users' do
     data.gsub!(/'.*?'/) do |string|
       string.gsub("'",'"').gsub('User ', 'User #{@user.name} ')
     end
-    data.gsub!('redirect_to(@user', "redirect_to(:action=>'index'")
+    data.gsub!('redirect_to(@user', "redirect_to(users_url")
     data[/().*successfully created/,1] = "#START_HIGHLIGHT\n"
     data[/().*successfully updated/,1] = "#START_HIGHLIGHT\n"
     if data =~ /redirect_to.*:notice/
