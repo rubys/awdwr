@@ -1019,11 +1019,17 @@ section 11.1, 'Iteration F1: Adding Users' do
     data.gsub!(/'.*?'/) do |string|
       string.gsub("'",'"').gsub('User ', 'User #{@user.name} ')
     end
-    data.gsub!('redirect_to(@user)', "redirect_to(:action=>'index')")
+    data.gsub!('redirect_to(@user', "redirect_to(:action=>'index'")
     data[/().*successfully created/,1] = "#START_HIGHLIGHT\n"
     data[/().*successfully updated/,1] = "#START_HIGHLIGHT\n"
-    data[/successfully created.*?'index.*?\n()/m,1] = "#END_HIGHLIGHT\n"
-    data[/successfully updated.*?'index.*?\n()/m,1] = "#END_HIGHLIGHT\n"
+    if data =~ /redirect_to.*:notice/
+      data[/index.*?successfully created.*?\n()/m,1] = "#END_HIGHLIGHT\n"
+      data[/index.*?successfully updated.*?\n()/m,1] = "#END_HIGHLIGHT\n"
+      data.gsub!(', :notice', ",\n" + (' '*20) + ':notice')
+    else
+      data[/successfully created.*?'index.*?\n()/m,1] = "#END_HIGHLIGHT\n"
+      data[/successfully updated.*?'index.*?\n()/m,1] = "#END_HIGHLIGHT\n"
+    end
     data[/:created,() :location/,1] = "\n" + (' ' * 28)
     data[/@user.errors,() :status/,1] = "\n" + (' ' * 28)
     data[/@user.errors,() :status/,1] = "\n" + (' ' * 28)
