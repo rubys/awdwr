@@ -2064,6 +2064,22 @@ required.push 'rails' if $rails == 'rails'
 required.push 'test-unit' if RUBY_VERSION =~ /^1\.9/
 required -= `gem list`.scan(/(^[-_\w]+)\s\(/).flatten
 
+# Re-enable "wild" controller for Edition 3 testing
+unless $R2
+  alias :gorp_rails :rails
+  def rails name, app=nil
+    gorp_rails name, app
+    edit 'config/routes.rb', 'wild' do |data|
+      data[/()^/,1] = "# START:wild\n"
+      data[/ActionController.*\n()/,1] = "  # ...\n# END:wild\n"
+      data[/()\s+#.+legacy wild controller/,1] = "\n# START:wild"
+      data[/(  #) match ':controller/,1] = "# START_HIGHLIGHT\n  "
+      data[/^()end\s+/,1] = "# END_HIGHLIGHT\n"
+      data[/^end\s+()/,1] = "# END:wild\n"
+    end
+  end
+end
+
 # only one of nokogiri and htmlentities are required
 required.delete('nokogiri') or required.delete('htmlentities')
 
