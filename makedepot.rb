@@ -1741,7 +1741,7 @@ section 21, 'Action Controller: Routing and URLs' do
     edit 'config/routes.rb', 'comments' do |data|
       data[/()^ActionController::Routing::Routes/,1] = "#START:comments\n"
       data[/()  resources :articles/,1] = "  #START_HIGHLIGHT\n"
-      data[/resources :articles.*\n()/,1] = <<-EOF.unindent(2)
+      data[/resources :articles.*\n()/,1] = <<-EOF.unindent(6)
         #END_HIGHLIGHT
 
         # ...
