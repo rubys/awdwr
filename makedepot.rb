@@ -1739,7 +1739,7 @@ section 21, 'Action Controller: Routing and URLs' do
     end
   else
     edit 'config/routes.rb', 'comments' do |data|
-      data[/()^ActionController::Routing::Routes/,1] = "#START:comments\n"
+      data[/()^.*routes.draw/,1] = "#START:comments\n"
       data[/()  resources :articles/,1] = "  #START_HIGHLIGHT\n"
       data[/resources :articles.*\n()/,1] = <<-EOF.unindent(6)
         #END_HIGHLIGHT
@@ -2071,7 +2071,7 @@ unless $R2
     gorp_rails name, app
     edit 'config/routes.rb', 'wild' do |data|
       data[/()^/,1] = "# START:wild\n"
-      data[/ActionController.*\n()/,1] = "  # ...\n# END:wild\n"
+      data[/routes.draw.*\n()/,1] = "  # ...\n# END:wild\n"
       data[/()\s+#.+legacy wild controller/,1] = "\n# START:wild"
       data[/(  #) match ':controller/,1] = "# START_HIGHLIGHT\n  "
       data[/^()end\s+/,1] = "# END_HIGHLIGHT\n"
