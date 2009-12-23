@@ -165,7 +165,7 @@ section 6.3, 'Iteration A2: Add a Missing Column' do
 
   get '/products'
   get '/products/1'
-  post '/products/new', {}
+  post '/products/new', nil
 
   cmd 'rake test'
 
@@ -430,13 +430,13 @@ section 8.2, 'Iteration C1: Creating a Cart' do
       #END:add_to_cart
     EOF
   end
-  post '/store/add_to_cart/2', {}
+  post '/store/add_to_cart/2', nil
   edit 'app/views/store/add_to_cart.html.erb' do |data|
     data.gsub!(/\s+# <label.*/, '')
     data[/()/,1] = read('cart/add_to_cart.html.erb')
   end
-  post '/store/add_to_cart/2', {}
-  post '/store/add_to_cart/3', {}
+  post '/store/add_to_cart/2', nil
+  post '/store/add_to_cart/3', nil
 end
 
 section 8.3, 'Iteration C2: Creating a Smarter Cart' do
@@ -464,15 +464,15 @@ section 8.3, 'Iteration C2: Creating a Smarter Cart' do
         '<%= item.quantity %> &times; <%= item.title %>'
     end
   end
-  post '/store/add_to_cart/2', {}
+  post '/store/add_to_cart/2', nil
   # cmd 'sqlite3 db/development.sqlite3 ".dump sessions"'
   cmd 'rake db:sessions:clear'
   restart_server if $R2
   # cmd 'sqlite3 db/development.sqlite3 ".dump sessions"'
-  post '/store/add_to_cart/2', {}
-  post '/store/add_to_cart/2', {}
-  post '/store/add_to_cart/3', {}
-  post '/store/add_to_cart/wibble', {}
+  post '/store/add_to_cart/2', nil
+  post '/store/add_to_cart/2', nil
+  post '/store/add_to_cart/3', nil
+  post '/store/add_to_cart/wibble', nil
 end
 
 section 8.4, 'Iteration C3: Handling Errors' do
@@ -487,7 +487,7 @@ section 8.4, 'Iteration C3: Handling Errors' do
         redirect_to :action => 'index'
     EOF
   end
-  post '/store/add_to_cart/wibble', {}
+  post '/store/add_to_cart/wibble', nil
   cmd 'tail -25 log/development.log', ['Attempt to access']
   edit 'app/views/layouts/store.html.erb' do |data|
     data[/<div id="main">()/,1] = "\n" + <<-'EOF'
@@ -516,7 +516,7 @@ section 8.4, 'Iteration C3: Handling Errors' do
       /* END:notice */
     EOF
   end
-  post '/store/add_to_cart/wibble', {}
+  post '/store/add_to_cart/wibble', nil
 end
 
 section 8.5, 'Iteration C4: Finishing the Cart' do
@@ -539,7 +539,7 @@ section 8.5, 'Iteration C4: Finishing the Cart' do
 
     EOF
   end
-  post '/store/empty_cart', {}
+  post '/store/empty_cart', nil
   edit 'app/controllers/store_controller.rb', 'rti' do |data|
     data.gsub!(/flash\[:notice\] = (".*?")\n.*/, 'redirect_to_index(\1)')
     data[/()  #START:add_to_cart/,1] = "  #START:rti\n"
@@ -586,9 +586,9 @@ section 8.5, 'Iteration C4: Finishing the Cart' do
     EOF
   end
   restart_server if $R2
-  post '/store/add_to_cart/2', {}
-  post '/store/add_to_cart/2', {}
-  post '/store/add_to_cart/3', {}
+  post '/store/add_to_cart/2', nil
+  post '/store/add_to_cart/2', nil
+  post '/store/add_to_cart/3', nil
 end
 
 section 9.1, 'Iteration D1: Moving the Cart' do
@@ -666,7 +666,7 @@ section 9.1, 'Iteration D1: Moving the Cart' do
     data[/flash\[:notice\] = msg()/,1] = " if msg"
   end
   cmd 'rm app/views/store/add_to_cart.html.erb'
-  post '/store/add_to_cart/3', {}
+  post '/store/add_to_cart/3', nil
 end
 
 section 9.2, 'Iteration D2: Creating an AJAX-Based Cart' do
@@ -794,8 +794,8 @@ section 9.5, 'Iteration D5: Degrading If Javascript Is Disabled' do
       #END_HIGHLIGHT
     EOF
   end
-  post '/store/empty_cart', {}
-  post '/store/add_to_cart/3', {}
+  post '/store/empty_cart', nil
+  post '/store/add_to_cart/3', nil
 end
 
 section 10.1, 'Iteration E1: Capturing an Order' do
@@ -927,8 +927,8 @@ section 10.1, 'Iteration E1: Capturing an Order' do
       /* END:form */
     EOF
   end
-  post '/store/checkout', {}
-  post '/store/save_order', {}
+  post '/store/checkout', nil
+  post '/store/save_order', nil
   edit 'app/models/order.rb', 'validate' do |data|
     data[/()class Order/,1] = "#START:validate\n"
     data[/() *# \.\.\./,1] = "#END:validate\n"
@@ -984,7 +984,7 @@ section 10.1, 'Iteration E1: Capturing an Order' do
   end
   db "select * from orders"
   db "select * from line_items"
-  post '/store/save_order', {}
+  post '/store/save_order', nil
   post '/store/checkout',
     'order[name]' => 'Dave Thomas',
     'order[address]' => '123 Main St',
@@ -1358,7 +1358,7 @@ section 12.1, 'Generating the XML Feed' do
 end
 
 section 13, 'Task I: Internationalization' do
-  post '/store/empty_cart', {}
+  post '/store/empty_cart', nil
   edit 'config/initializers/i18n.rb' do |data|
     data[/()/,1] = read('i18n/initializer.rb')
     data.gsub! 'RAILS_ROOT', 'Rails.root' unless $R2
@@ -1485,7 +1485,7 @@ section 13, 'Task I: Internationalization' do
     data.gsub! /(.*I18n\.t)/, "<!-- START_HIGHLIGHT -->\n\\1"
     data.gsub! /(I18n\.t.*)/, "\\1\n<!-- END_HIGHLIGHT -->"
   end
-  post '/store/add_to_cart/2', {}
+  post '/store/add_to_cart/2', nil
   edit 'app/views/store/checkout.html.erb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
     data.gsub! 'Please Enter Your Details', "<%= I18n.t 'checkout.legend' %>"
@@ -1507,9 +1507,9 @@ section 13, 'Task I: Internationalization' do
     data.gsub! /(I18n\.t.*)/, "\\1\n# END_HIGHLIGHT"
   end
   get '/store?locale=es'
-  post '/store/add_to_cart/2', {}
-  post '/store/checkout', {}
-  post '/store/save_order', {}
+  post '/store/add_to_cart/2', nil
+  post '/store/checkout', nil
+  post '/store/save_order', nil
   post '/store/save_order', 
     'order[name]' => 'Joe User',
     'order[address]' => '123 Main St., Anytown USA',
