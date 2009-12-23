@@ -1,19 +1,15 @@
 Running this should only require Rails 2.2.2 or later, the command line
-interfaces for sqlite3 and curl and the mislav-will_paginate plugin.
-Tested on Ubuntu Linux 9.04 ("Jaunty Jackalope") and Mac OSX 10.5.6 ("Leopard").
+interfaces for sqlite3 and curl and the will_paginate plugin.
+Tested on Ubuntu Linux 9.10 ("Karmic Koala") and Mac OSX 10.5.6 ("Leopard").
 
-Installation of all necessary dependencies from a fresh install of Ubuntu 9.04:
+Installation of all necessary dependencies from a fresh install of Ubuntu 9.10:
 
-  sudo apt-get install rails git-core sqlite3 curl
-  sudo gem install rubygems-update
-  sudo /var/lib/gems/1.8/bin/update_rubygems
-  sudo gem install rails
-  sudo gem sources -a http://gems.github.com
-  sudo gem install mislav-will_paginate
+  sudo apt-get install rails git-core sqlite3 curl erubis
+  sudo gem install gorp will_paginate rdoc test-unit htmlentities
 
 Execution instructions:
 
-  ruby makedepot.rb [VERSION] [restore] [RANGE]... [save]
+  ruby makedepot.rb [VERSION] [restore] [RANGE]... [save] --work=dir --port=n
 
     "restore" - restore from snapshot before resuming execution
 
@@ -29,11 +25,19 @@ Execution instructions:
 
     "save" - save snapshot after execution completes
 
+    --work=dir: name of work directory to use (default: "work")
+
+    --port=n: port number to use for the test (default: 3000)
+
   Output will be produced as makedepot.html.
 
 Tests against makedepot.html can also be run separately:
 
-  ruby checkdepot.rb [partial]
+  ruby checkdepot.rb
 
-  "partial" means that tests which cover sections that are not included in
-    makedepot.html are to be omitted.
+  Output will be produced as checkdepot.html.
+
+Automation tools (still fairly rough):
+
+  dashboard.rb: cgi to monitor status / start jobs
+  runtests.rb:  script to set up rvms and to log output
