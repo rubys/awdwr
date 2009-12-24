@@ -273,7 +273,7 @@ class DepotTest < Book::TestCase
     assert_equal ">> ", stdout.shift
     stdout.shift while stdout.first =~ prelude
     assert_match /^=> \[.*\]/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -295,7 +295,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> \[#<Order id: 8, name: "Dave Thomas"/, stdout.shift
     stdout.shift while stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
     assert_equal "=> []", stdout.shift
@@ -359,7 +359,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> (nil|9)/, stdout.shift
     stdout.shift while stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> [\"PP\"]", stdout.shift
@@ -378,7 +378,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> (nil|"ski mask")/, stdout.shift
     stdout.shift while stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> [\"PP\"]", stdout.shift
     assert_equal "-- create_table(:customers, {:force=>true})", stdout.shift
@@ -413,7 +413,7 @@ class DepotTest < Book::TestCase
     stdout.reject! {|line| line =~ /' -> `vendor\/plugins\//}
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -487,7 +487,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> (nil|1)/, stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
     assert_equal "-- create_table(:people, {:force=>true})", stdout.shift
@@ -523,7 +523,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> (nil|#<Manager)/, stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -549,7 +549,7 @@ class DepotTest < Book::TestCase
     assert_equal "resource_type = Article", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -587,7 +587,7 @@ class DepotTest < Book::TestCase
     assert_equal "resource_type = Sound", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -614,7 +614,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> (nil|"Clem")/, stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -646,7 +646,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -680,7 +680,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -710,7 +710,7 @@ class DepotTest < Book::TestCase
     assert_match /^=> (nil|2)/, stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -744,7 +744,7 @@ class DepotTest < Book::TestCase
     stdout = collect_stdout
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_match /^=> (true|false)/, stdout.shift
+    assert_match /^=> (true|false|\[\])/, stdout.shift
     assert_equal '=> []', stdout.shift
     assert_equal '=> []', stdout.shift
     assert_equal "-- create_table(:orders, {:force=>true})", stdout.shift
@@ -772,8 +772,8 @@ class DepotTest < Book::TestCase
     assert_equal "  email = ebwf@fybnqmf.dpn", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> false", stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (false|\[\])/, stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
     assert_equal "-- create_table(:payments, {:force=>true})", stdout.shift
@@ -794,7 +794,7 @@ class DepotTest < Book::TestCase
     assert_equal "?> >> ", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> [\"PP\"]", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -838,7 +838,7 @@ class DepotTest < Book::TestCase
     assert_equal "quantity*unit_price = 44.95", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -859,7 +859,7 @@ class DepotTest < Book::TestCase
     assert_equal "balance = 210", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -881,7 +881,7 @@ class DepotTest < Book::TestCase
     assert_equal "balance = 200", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -898,7 +898,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -915,7 +915,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
@@ -932,7 +932,7 @@ class DepotTest < Book::TestCase
     assert_equal "=> nil", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> true", stdout.shift
+    assert_match /^=> (true|\[\])/, stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "=> []", stdout.shift
     assert_equal "-- create_table(:counters, {:force=>true})", stdout.shift
@@ -965,7 +965,7 @@ class DepotTest < Book::TestCase
   section 21.2, 'Routing Requests' do
     # routes_for_depot.rb
     stdout = collect_stdout.grep(/^=>/).map {|line| sort_hash(line)}
-    assert_equal '=> true', stdout.shift
+    assert_match /^=> (true|\[.*\])/, stdout.shift
     stdout.shift while stdout.first =~ /^=> (nil|\[.*?\])/
     assert_match /^=> #<Action\w+::Routing::RouteSet:.*>/, stdout.shift
     assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
@@ -985,7 +985,7 @@ class DepotTest < Book::TestCase
 
     # routes_for_blog.rb
     stdout.shift if stdout.first == '=> false'
-    assert_equal '=> true', stdout.shift
+    assert_match /^=> (true|\[.*\])/, stdout.shift
     stdout.shift if stdout.first == '=> []'
     assert_equal '=> nil', stdout.shift
     assert_match /^=> \[("article", "blog")?\]/, stdout.shift
