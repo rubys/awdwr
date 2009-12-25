@@ -29,7 +29,7 @@ log=config.find_all {|k,v| ARGV.include? k.to_s}.map {|k,v| k}.join('-')
 LOG = "#{HOME}/logs/makedepot#{log}.log"
 system "mkdir -p #{File.dirname(LOG)}"
 
-OUTPUT = PROFILE.output.map {|token| '-'+token.gsub('.','')}.join
+OUTPUT = PROFILE.output.map {|token| '-'+token.gsub('.','')}.sort.join
 OUTMIN = OUTPUT.gsub('.','')
 WORK   = 'work' + OUTMIN
 Dir.chdir PROFILE.source do

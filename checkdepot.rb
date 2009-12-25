@@ -1044,7 +1044,7 @@ class DepotTest < Book::TestCase
   section 23.11, 'Adding New Templating Systems' do
     next if ActiveSupport::VERSION::STRING == '2.2.2'
     assert_select "em", 'real'
-    assert_select ".body", /(over|almost) \d+ years/u
+    assert_select ".body", /(over|almost|about) \d+ years/u
     assert_select ".body", /request\.path =(>|&gt;) \/test\/example1/u
     assert_select ".body", /a \+ b =(>|&gt;) 3/u
   end
