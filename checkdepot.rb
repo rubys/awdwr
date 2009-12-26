@@ -99,8 +99,8 @@ class DepotTest < Book::TestCase
   end
 
   section 8.4, "Iteration C3: Handling Errors" do
-    if @@sections['8.4'].scan(/>[a-zA-Z0-9+\/]{60}</).length > 5
-      fail "log entry is base64 encoded"
+    ticket 3400, :title => 'Log entries are encoded in base64' do |raw|
+      raw.scan(/>[a-zA-Z0-9+\/]{60}</).length > 5
     end
 
     assert_select "a[href=http://127.0.0.1:#{$PORT}/store]", 'redirected'
@@ -160,9 +160,9 @@ class DepotTest < Book::TestCase
   end
 
   section 12.1, "Generating the XML Feed" do
-    if @@sections['12.1'] =~ /undefined method `orders' for #&amp;lt;Product/
-      fail "undefined method `orders' for #<Product>"
-    end
+    ticket 3570,
+      :title =>  "Intermittent reloading issue: model",
+      :match => /undefined method `orders' for #&amp;lt;Product/
 
     # assert_select '.stdout', /No route matches &amp;quot;\/info\/who_bought\//
     assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/
@@ -196,6 +196,10 @@ class DepotTest < Book::TestCase
   end
 
   section 14.4, "Integration Testing of Applications" do
+    ticket 3617,
+      :title => 'integration_test#post returns 422 response',
+      :match => /Expected response to be a \&lt;:success\&gt;, but was \&lt;422\&gt;/
+
     assert_select '.stdout', /1 tests, 17 assertions, 0 failures, 0 errors/
     assert_select '.stdout', /2 tests, 49 assertions, 0 failures, 0 errors/
   end
