@@ -33,6 +33,10 @@ class DepotTest < Book::TestCase
   end
 
   section 6.1, 'Iteration A1: Getting Something Running' do
+    ticket 3618,
+      :title => "Can't produce a Rails app using only system installed gems",
+      :match => /no such file to load -- i18n/
+
     assert_select '.stderr', 0
   end
 
