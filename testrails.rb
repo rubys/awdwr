@@ -142,7 +142,11 @@ bash %{
   ruby #{PROFILE.script} /home/rubys/git/rails #{args.join(' ')} > #{LOG} 2>&1
 }
 
+status = $?
+
 # restore rails to master
 Dir.chdir File.join(HOME,'git','rails') do
   system 'git checkout master' unless BRANCH=='master'
 end
+
+exit status.exitstatus
