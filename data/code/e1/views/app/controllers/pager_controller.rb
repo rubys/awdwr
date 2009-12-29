@@ -1,9 +1,11 @@
+if Rails::VERSION::MAJOR < 3
 #START:gem
 Rails::Initializer.run do |config|
   config.gem 'will_paginate', :version => '~> 2.3.11',
     :source => 'http://gemcutter.org'
 end
 #END:gem
+end
     
 class PagerController < ApplicationController
 
