@@ -1,11 +1,13 @@
 #START:sent
 #START:create
+require 'cgi'
+
 class TestController < ApplicationController
 #END:sent
   def create_order
     order = Order.find_by_name("Dave Thomas")
     email = OrderMailer.create_confirm(order)
-    render(:text => "<pre>" + email.encoded + "</pre>")
+    render(:text => "<pre>" + CGI.escapeHTML(email.encoded) + "</pre>")
   end
 #END:create
 
