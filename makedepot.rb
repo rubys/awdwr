@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'gorp'
+include Gorp::Commands
 
 $title = 'The Depot Application'
 $autorestart = 'depot'
@@ -2054,8 +2055,8 @@ section 26, 'Active Resources' do
 end
 
 # what version of Rails are we running?
-$R2 = (`#{which_rails($rails)} -v` =~ /^Rails 2/)
-$R22 = (`#{which_rails($rails)} -v` =~ /^Rails 2\.2/)
+$R2 = (`#{Gorp.which_rails($rails)} -v` =~ /^Rails 2/)
+$R22 = (`#{Gorp.which_rails($rails)} -v` =~ /^Rails 2\.2/)
 $APP = $R22 ? 'application' : 'application_controller'
 
 # what gems are required?
@@ -2066,16 +2067,20 @@ required -= `gem list`.scan(/(^[-_\w]+)\s\(/).flatten
 
 # Re-enable "wild" controller for Edition 3 testing
 unless $R2
-  alias :gorp_rails :rails
-  def rails name, app=nil
-    gorp_rails name, app
-    edit 'config/routes.rb', 'wild' do |data|
-      data[/()^/,1] = "# START:wild\n"
-      data[/routes.draw.*\n()/,1] = "  # ...\n# END:wild\n"
-      data[/()\s+#.+legacy wild controller/,1] = "\n# START:wild"
-      data[/(  #) match ':controller/,1] = "# START_HIGHLIGHT\n  "
-      data[/^()end\s+/,1] = "# END_HIGHLIGHT\n"
-      data[/^end\s+()/,1] = "# END:wild\n"
+  module Gorp
+    module Commands
+      alias :gorp_rails :rails
+      def rails name, app=nil
+        gorp_rails name, app
+        edit 'config/routes.rb', 'wild' do |data|
+          data[/()^/,1] = "# START:wild\n"
+          data[/routes.draw.*\n()/,1] = "  # ...\n# END:wild\n"
+          data[/()\s+#.+legacy wild controller/,1] = "\n# START:wild"
+          data[/(  #) match ':controller/,1] = "# START_HIGHLIGHT\n  "
+          data[/^()end\s+/,1] = "# END_HIGHLIGHT\n"
+          data[/^end\s+()/,1] = "# END:wild\n"
+        end
+      end
     end
   end
 end

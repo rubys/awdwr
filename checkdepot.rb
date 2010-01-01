@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'gorp/test'
 
-class DepotTest < Book::TestCase
+class DepotTest < Gorp::TestCase
 
   input 'makedepot'
   output 'checkdepot'
