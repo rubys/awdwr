@@ -10,8 +10,20 @@ $checker = 'checkdepot'
 section 4, 'Instant Gratification' do
   rubypath = ENV['RUBYPATH']
   begin
-    erb = ($R2 ? 'erb' : 'erubis') + ' -r ./erbshim -T -'
-    ENV['RUBYPATH'] = "#{$rails}/activesupport/lib/" unless $rails == 'rails'
+    erb = ($R2 ? 'erb' : 'erubis') + " -r #{$WORK}/erbshim -T -"
+
+    open("#{$WORK}/erbshim.rb", 'w') do |file|
+      if File.exist? "#{$WORK}/vendor/gems/environment.rb"
+        file.puts "require '#{$WORK}/vendor/gems/environment.rb'"
+      end
+
+      if $R2
+        file.puts "require 'active_support'"
+      else
+        file.puts "require 'active_support/time'"
+      end
+    end
+
     cmd "#{erb} < #{$CODE}/erb/ex1.html.erb | sed 's/<!--.*-->//'"
     cmd "#{erb} < #{$CODE}/erb/ex2.html.erb | sed 's/<!--.*-->//'"
     cmd "#{erb} < #{$CODE}/erb/ex2a.html.erb | sed 's/<!--.*-->//'"
