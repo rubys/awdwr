@@ -15,6 +15,7 @@ class OrderMailerTest < ActionMailer::TestCase
     @expected.subject = 'Pragmatic Store Order Confirmation'
     @expected.body    = read_fixture('confirm').join
     @expected.date    = mailing.date
+    @expected.message_id = mailing.message_id = '<test@test>'
 
     assert_operator mailing.date, :>=, start-1
     assert_equal @expected.encoded, mailing.encoded
@@ -28,6 +29,7 @@ class OrderMailerTest < ActionMailer::TestCase
     @expected.subject = 'Pragmatic Order Shipped'
     @expected.body    = read_fixture('sent').join
     @expected.date    = mailing.date
+    @expected.message_id = mailing.message_id = '<test@test>'
 
     assert_operator mailing.date, :>=, start-1
     assert_equal @expected.encoded, mailing.encoded

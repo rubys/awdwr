@@ -21,7 +21,7 @@ class OrderControllerTest < ActionController::TestCase
     assert_equal(1, @emails.size)
     email = @emails.first
     assert_equal("Pragmatic Store Order Confirmation", email.subject)
-    assert_equal("dave@example.com", email.to[0])
+    assert_equal("dave@example.com", email.to_addrs.join)
     assert_match(/Dear Dave Thomas/,  email.body)
   end
 end
