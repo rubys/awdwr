@@ -1,7 +1,7 @@
 require "./config/environment.rb"
 
 ActionController::Base.session_store = nil
-load "config/routes.rb"
+require "active_support/test_case"
 rs = ActionController::Routing::Routes
 app = ActionDispatch::Integration::Session.new(nil)
 
