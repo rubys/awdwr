@@ -63,7 +63,7 @@ if !updated
   if ARGV.delete('next') and ARGV.empty?
     require 'nokogiri'
 
-    dashboard=`ruby /var/www/awdwr.cgi static=1`.sub(/.*?</m,'<')
+    dashboard=`ruby /var/www/dashboard.cgi static`.sub(/.*?</m,'<')
     rows = Nokogiri::XML(dashboard).search('tr').to_a
     rows.reject! {|row| !row.at('td')}
     rows.reject! {|row| row.at('td:nth-child(4).hilite')}
