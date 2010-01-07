@@ -1452,10 +1452,15 @@ section 13, 'Task I: Internationalization' do
       data.gsub! /yield :layout/, "yield(:layout).force_encoding('utf-8')"
     end
   end
-  cmd "cp -r #{$DATA}/i18n/*.yml config/locales"
-  if $R2
-    edit 'config/locales/es.yml' do |data|
-      data.gsub! /\s+activemodel:\s+errors:/, ''
+  edit 'config/locales/en.yml' do |data|
+    data.all = read('i18n/en.yml')
+  end
+  edit 'config/locales/es.yml' do |data|
+    data.all = read('i18n/es.yml')
+    unless $R2
+      data.edit /#START:errors\s+errors:.*?#END:errors/m do |errors|
+        errors.gsub! /^  /, ''
+      end
     end
   end
   get '/store?locale=es'

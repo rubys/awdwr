@@ -88,7 +88,7 @@ class ProductTest < ActiveSupport::TestCase
                           :image_url   => "fred.gif")
 
     assert !product.save
-    assert_equal I18n.translate('activerecord.errors.messages.taken'),
+    assert_equal I18n.translate('errors.messages.taken'),
                  product.errors[:title].join
   end
   #END:test_unique_title1
