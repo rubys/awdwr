@@ -33,10 +33,6 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.1, 'Iteration A1: Getting Something Running' do
-    ticket 3618,
-      :title => "Can't produce a Rails app using only system installed gems",
-      :match => /no such file to load -- i18n/
-
     assert_select '.stderr', 0
   end
 
@@ -164,6 +160,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.1, "Generating the XML Feed" do
+    ticket 2468,
+      :list  => :ruby,
+      :title =>  "Array expansion inside case/when gives unexpected results",
+      :match => /&gt;\*{99,}&lt;/
     ticket 3570,
       :title =>  "Intermittent reloading issue: model",
       :match => /undefined method `orders' for #&amp;lt;Product/
@@ -200,10 +200,6 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.4, "Integration Testing of Applications" do
-    ticket 3617,
-      :title => 'integration_test#post returns 422 response',
-      :match => /Expected response to be a \&lt;:success\&gt;, but was \&lt;422\&gt;/
-
     assert_select '.stdout', /1 tests, 17 assertions, 0 failures, 0 errors/
     assert_select '.stdout', /2 tests, 49 assertions, 0 failures, 0 errors/
   end
@@ -1066,6 +1062,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 26, "Active Resources" do
+    ticket 2468,
+      :list  => :ruby,
+      :title =>  "Array expansion inside case/when gives unexpected results",
+      :match => /Bad encoding name \*/
     assert_select '.stdout', /ActiveResource::Redirection: Failed.* 302/
     assert_select '.stdout', '29.95'
     assert_select '.stdout', '=&gt; true'
