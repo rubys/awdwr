@@ -99,9 +99,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 8.4, "Iteration C3: Handling Errors" do
-    ticket 3400, :title => 'Log entries are encoded in base64' do |raw|
-      raw.scan(/>[a-zA-Z0-9+\/]{60}</).length > 5
-    end
+    # ticket 3400, :title => 'Log entries are encoded in base64' do |raw|
+    #   raw.scan(/>[a-zA-Z0-9+\/]{60}</).length > 5
+    # end
 
     assert_select "a[href=http://localhost:#{$PORT}/store]", 'redirected'
     assert_select '.hilight', 'Attempt to access invalid product wibble'
