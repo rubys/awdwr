@@ -75,8 +75,8 @@ p Order.check.find_by_name('Dave Thomas')
 #END:pay_scopes
 
 #START:ranges
-p Order.po.recent(:order => :created_at)
-p Order.po.since(1.week.ago)
+p Order.po.recent(:order => :created_at).to_a
+p Order.po.since(1.week.ago).to_a
 #END:ranges
 
 LineItem.delete_all
