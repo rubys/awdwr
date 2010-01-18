@@ -1016,7 +1016,7 @@ class DepotTest < Gorp::TestCase
     ticket 25,
       :list  => :will_paginate,
       :title =>  "Will Paginate is broken on Rails 3",
-      :match => /Cannot define named_scope :find because User.find method already exists./
+      :match => /Cannot define scope :find because User.find method already exists./
     assert_select '.stdout', /^==  CreateUsers: migrated/
     assert_select '.stdout', '=&gt; 763'
     assert_select "a[href=http://localhost:#{$PORT}/pager/user_list?page=27]", '27'
