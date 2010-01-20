@@ -99,9 +99,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 8.4, "Iteration C3: Handling Errors" do
-    # ticket 3400, :title => 'Log entries are encoded in base64' do |raw|
-    #   raw.scan(/>[a-zA-Z0-9+\/]{60}</).length > 5
-    # end
+    ticket 3400, :title => 'Log entries are encoded in base64' do |raw|
+      raw.scan(/>[a-zA-Z0-9+\/]{60}</).length > 5
+    end
 
     assert_select "a[href=http://localhost:#{$PORT}/store]", 'redirected'
     assert_select '.hilight', 'Attempt to access invalid product wibble'
@@ -1016,6 +1016,10 @@ class DepotTest < Gorp::TestCase
     ticket 25,
       :list  => :will_paginate,
       :title =>  "Will Paginate is broken on Rails 3",
+      :match => /can't convert nil into Array/
+    ticket 25,
+      :list  => :will_paginate,
+      :title =>  "Will Paginate is broken on Rails 3",
       :match => /Cannot define scope :find because User.find method already exists./
     assert_select '.stdout', /^==  CreateUsers: migrated/
     assert_select '.stdout', '=&gt; 763'
@@ -1058,6 +1062,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 25.1, "Sending E-mail" do
+    ticket 3757,
+      :list  => :rails,
+      :title =>  " undefined method `ascii_only?' running mailer generated tests",
+      :match => /undefined method `ascii_only\?'/
     assert_select 'pre', /Thank you for your recent order/
     assert_select 'pre', /1 x Programming Ruby, 2nd Edition/
     assert_select '.body', 'Thank you...'
