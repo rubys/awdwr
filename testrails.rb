@@ -125,6 +125,20 @@ if source
       gem env path | xargs chmod -R 0755
       gem install --no-ri --no-rdoc #{cache}/*
     }
+
+    # keep the last three, and anything built in a week; remove the rest
+    horizon = Time.now - 7 * 86400
+    keep    = 3
+
+    Dir.chdir("#{HOME}/.rvm") do
+      vms = Dir["ruby-#{release}-r*"].sort
+      vms.slice! -keep..-1
+      vms.delete_if {|vm| File.stat(vm).mtime >= horizon}
+
+      vms.each do |vm|
+        system "find . -name #{vm} -exec rm -rfv {} \\;"
+      end
+    end
   end
 end
 
