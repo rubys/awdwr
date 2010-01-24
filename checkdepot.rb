@@ -1062,15 +1062,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 25.1, "Sending E-mail" do
-    ticket 3757,
-      :list  => :rails,
-      :title =>  " undefined method `ascii_only?' running mailer generated tests",
-      :match => /undefined method `ascii_only\?'/
     assert_select 'pre', /Thank you for your recent order/
     assert_select 'pre', /1 x Programming Ruby, 2nd Edition/
     assert_select '.body', 'Thank you...'
-    assert_select '.stdout', /2 tests, 4 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /1 tests, 5 assertions, 0 failures, 0 errors/
+    assert_select '.stdout', /3 tests, 9 assertions, 0 failures, 0 errors/
   end
 
   section 26, "Active Resources" do

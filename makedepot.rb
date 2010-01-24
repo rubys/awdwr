@@ -1968,6 +1968,7 @@ end
 section 25.1, 'Sending E-mail' do
   rails 'mailer', :e1
   ruby 'script/generate mailer OrderMailer confirm sent'
+  cmd 'mv test/unit/order_mailer_test.rb test/functional' if $R2
   code = "#{$CODE}/e1/mailer"
   cmd "cp -vr #{code}/db/migrate db"
   cmd "cp -v #{code}/app/controllers/* app/controllers"
