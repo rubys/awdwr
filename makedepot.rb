@@ -1976,11 +1976,16 @@ section 25.1, 'Sending E-mail' do
   cmd "cp -vr #{code}/test ."
   cmd "cp -vr #{code}/app/views/order_mailer app/views"
   unless $R2
-    cmd 'mv app/models/order_mailer.rb app/mailers/'
-    # edit 'app/models/order_mailer.rb' do |data|
-    #   data.gsub! /body\s+:(\w+)\s*=>/, '@\1 ='
-    #   data.gsub! /body\s+"(\w+)"\s*=>/, '@\1 ='
-    # end
+    Dir.chdir('app/views/order_mailer') do
+      cmd "mv confirm.erb confirm.text.erb"
+      cmd "mv _line_item.erb _line_item.text.erb"
+      cmd "mv sent.erb sent.html.erb"
+      edit 'sent.html.erb' do
+        msub /(html_)line_item/, ''
+      end
+      cmd "mv _html_line_item.erb _line_item.htlm.erb"
+      cmd "rm sent.text.erb"
+    end
   end
   restart_server
   cmd 'rake db:migrate'
