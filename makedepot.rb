@@ -1976,6 +1976,7 @@ section 25.1, 'Sending E-mail' do
   cmd "cp -vr #{code}/test ."
   cmd "cp -vr #{code}/app/views/order_mailer app/views"
   unless $R2
+    cmd 'mv app/models/order_mailer.rb app/mailers/'
     Dir.chdir('app/views/order_mailer') do
       cmd "mv confirm.erb confirm.text.erb"
       cmd "mv _line_item.erb _line_item.text.erb"
