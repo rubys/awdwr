@@ -1455,11 +1455,12 @@ section 13, 'Task I: Internationalization' do
   edit 'config/locales/en.yml' do |data|
     data.all = read('i18n/en.yml')
   end
-  edit 'config/locales/es.yml' do |data|
-    data.all = read('i18n/es.yml')
+  edit 'config/locales/es.yml' do
+    self.all = read('i18n/es.yml')
     unless $R2
-      data.edit /#START:errors\s+errors:.*?#END:errors/m do |errors|
-        errors.gsub! /^  /, ''
+      edit /\s+template:.*?#END:errors/m do
+        gsub! /^  /, ''
+        msub /\n()/, "  errors:\n"
       end
     end
   end
