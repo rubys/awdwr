@@ -686,11 +686,19 @@ section 9.2, 'Iteration D2: Creating an AJAX-Based Cart' do
   edit 'app/views/store/index.html.erb', 'form_remote_tag' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
     data.gsub!(':add_to_cart', ':form_remote_tag')
-    data[/\n(\s+<%= button_to.*\n)/,1] = <<-EOF.unindent(2)
-      <% form_tag :remote=>true, :url=>{:action=>'add_to_cart', :id=>product} do %>
-        <%= submit_tag "Add to Cart" %>
-      <% end %>
-    EOF
+    if $R2
+      data[/\n(\s+<%= button_to.*\n)/,1] = <<-EOF.unindent(4)
+        <% form_remote_tag :url=>{:action=>'add_to_cart', :id=>product} do %>
+          <%= submit_tag "Add to Cart" %>
+        <% end %>
+      EOF
+    else
+      data[/\n(\s+<%= button_to.*\n)/,1] = <<-EOF.unindent(4)
+        <% form_tag({:action=>'add_to_cart', :id=>product}, :remote=>true) do %>
+          <%= submit_tag "Add to Cart" %>
+        <% end %>
+      EOF
+    end
   end
   edit 'app/views/layouts/store.html.erb', 'jit' do |data|
     data[/()<html>/,1] = "<!-- START:jit -->\n"
