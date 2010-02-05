@@ -1885,8 +1885,9 @@ section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
   Dir.chdir(File.join($WORK, 'view'))
   cmd "cp -vr #{$CODE}/e1/views/app/views/pager app/views"
   unless $R2
-    edit 'config/initializers/pagination.rb' do |data|
-      data << "require 'will_paginate'\n"
+    issue 'Should edit Gemfile instead'
+    edit 'config/application.rb' do
+      msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n"
     end
   end
   ruby 'script/generate model user name:string'
