@@ -1975,7 +1975,7 @@ section 23.11, 'Adding New Templating Systems' do
   Dir.chdir(File.join($WORK,'view'))
   cmd "cp -v #{$CODE}/e1/views/config/initializers/* config/initializers/"
   cmd "cp -v #{$CODE}/e1/views/lib/*_template.rb lib"
-  if $bundle
+  if $bundle and File.exist?('Gemfile')
     edit 'Gemfile' do
       msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'rdoc'\n"
     end
