@@ -7,6 +7,7 @@ HOME = ENV['HOME']
 ENV['LANG']='en_US.UTF-8'
 ENV['USER'] ||= HOME.split(File::Separator).last
 File.umask(0022)
+$rails = "#{HOME}/git/rails"
 
 # parse ARGV based on configuration
 config = YAML.load(open('testrails.yml'))
@@ -48,7 +49,7 @@ def bash cmd
 end
 
 # update Rails
-updated = Dir.chdir File.join(HOME,'git','rails') do
+updated = Dir.chdir($rails) do
   system 'git checkout -q origin/master'
   system "git checkout #{BRANCH}"
   system "git checkout #{COMMIT.split('/').last}" if COMMIT
@@ -71,6 +72,23 @@ if !updated
       stale = rows.min {|a,b| a.at('td:last').text <=> b.at('td:last').text}
       stale = stale.search('td').to_a[0..2]
       exec "#{$0} #{stale.map {|td| td.text.gsub(/\D/,'')}.join(' ')}"
+    end
+  end
+end
+
+# update gems
+Dir.chdir File.join(PROFILE.source,WORK) do
+  open('Gemfile','w') do |gemfile|
+    gemfile.puts "source 'http://gemcutter.org'"
+    gemfile.puts "gem 'rails', :path => #{$rails.inspect}"
+    gemfile.puts "gem 'sqlite3-ruby', :require => 'sqlite3'"
+    gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
+    gemfile.puts "gem 'test-unit'"
+    gemfile.puts "gem 'rdoc'"
+    begin
+      require 'nokogiri'
+    rescue LoadError
+      gemfile.puts "gem 'htmlentities'"
     end
   end
 end
@@ -153,13 +171,17 @@ end
 bash %{
   source #{HOME}/.rvm/scripts/rvm
   rvm #{rvm.gsub(/.*\/ruby-/,'')}
-  ruby #{PROFILE.script} /home/rubys/git/rails #{args.join(' ')} > #{LOG} 2>&1
+  eval export BUNDLE_PATH='$'GEM_PATH
+  cd #{WORK}
+  bundle install
+  cd ..
+  ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1
 }
 
 status = $?
 
 # restore rails to master
-Dir.chdir File.join(HOME,'git','rails') do
+Dir.chdir($rails) do
   system 'git checkout master' unless BRANCH=='master'
 end
 

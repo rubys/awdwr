@@ -1885,10 +1885,16 @@ section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
   Dir.chdir(File.join($WORK, 'view'))
   cmd "cp -vr #{$CODE}/e1/views/app/views/pager app/views"
   unless $R2
-    issue 'Should edit Gemfile instead'
-    edit 'config/application.rb' do
-      msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n"
+    if $bundle
+      edit 'Gemfile' do
+        msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'will_paginate', '>= 3.0.pre'\n"
+      end
+    else
+      edit 'config/application.rb' do
+        msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n"
+      end
     end
+    cmd 'bundle show'
   end
   ruby 'script/generate model user name:string'
   restart_server
@@ -1969,6 +1975,11 @@ section 23.11, 'Adding New Templating Systems' do
   Dir.chdir(File.join($WORK,'view'))
   cmd "cp -v #{$CODE}/e1/views/config/initializers/* config/initializers/"
   cmd "cp -v #{$CODE}/e1/views/lib/*_template.rb lib"
+  if $bundle
+    edit 'Gemfile' do
+      msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'rdoc'\n"
+    end
+  end
   restart_server
   get '/test/example'
   get '/test/date_format'
