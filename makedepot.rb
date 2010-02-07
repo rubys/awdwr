@@ -1889,12 +1889,12 @@ section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
       edit 'Gemfile' do
         msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'will_paginate', '>= 3.0.pre'\n"
       end
+      cmd 'bundle show'
     else
       edit 'config/application.rb' do
         msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n"
       end
     end
-    cmd 'bundle show'
   end
   ruby 'script/generate model user name:string'
   restart_server
