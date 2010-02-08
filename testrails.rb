@@ -225,6 +225,7 @@ if File.exist?("#{WORK}/checkdepot.html")
   end
 
   # output the files
+  system "rm -rf #{WORK}/checkdepot"
   system "mkdir -p #{WORK}/checkdepot"
   Dir.chdir "#{WORK}/checkdepot" do
     open('depot.css','w') {|file| file.write(style)}

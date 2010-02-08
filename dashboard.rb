@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+
 require 'rubygems'
 require 'cgi-spa'
 require 'time'
@@ -206,6 +207,8 @@ $cgi.html do |x|
           else
             link =  "#{job['work']}/checkdepot.html"
           end
+
+          link.sub! ".html", '/' if File.directory? "#{job['path']}/checkdepot/"
 
           if File.exist?(statfile+'.run')
             color = 'hilite'
