@@ -180,6 +180,65 @@ bash %{
 
 status = $?
 
+if File.exist?("#{WORK}/checkdepot.html")
+  # disect checkdepot output 
+  body = open("#{WORK}/checkdepot.html").read
+  body.gsub! "src='data", "src='../data"
+  sections = body.split(/^\s+<a class="toc" id="section-(.*?)">/)
+  head=sections.shift
+  toc = head.slice!(/^\s*<h2>Table of Contents<\/h2>.*/m)
+  sections[-1], env = sections.last.split(/<a class="toc" id="env">/)
+  style = head.slice(/<style.*?style>/m)
+  head.sub!(/<style.*?style>/m, '<link rel="stylesheet" href="depot.css"/>')
+  env = '<a class="toc" id="env">'+env
+  tail = env.slice!(/^\s+<\/body>\s*<\/html>/)
+
+  # split out the style, append style information for links
+  style.sub! /<style.*\n/, ''
+  style.sub! /\s*<\/style>/, ''
+  unindent = style.gsub(/\n\s*\n/,"\n").scan(/^ */).map {|str| str.length}.min
+  style.gsub! Regexp.new('^'.ljust(unindent+1)), ''
+  style+="\n\n"
+  style+=".prev_link:before {content: '#{[171].pack('U')} '}\n"
+  style+=".next_link:after {content: ' #{[187].pack('U')}'}\n"
+  style+=".next_link .prev_link {text-decoration: none}\n"
+  style+=".next_link {float: right}\n"
+
+  def page(section)
+    "section-#{section}.html"
+  end
+
+  # determine the value for previous / next links
+  forward=[nil] + sections.map {|data| data.slice(/\A\s*<h2>.*/)}[0..-2]
+  forward2=[nil,nil] + sections[0..-3]
+  next_link = {sections[-2] => 
+    '<a href="index.html" class="next_link">Table of Contents</a>'}
+  prev_link = {sections[0] => 
+    '<a href="index.html" class="prev_link">Table of Contents</a>'}
+  sections.zip(forward,forward2).each do |before, header, after|
+    next unless header
+    header.sub!('</h2', '</a').strip!
+    next_link[after] = header.sub('h2>', 
+      "a href=#{page(before).inspect} class='next_link'>")
+    prev_link[before] = header.sub('h2>', 
+      "a href=#{page(after).inspect} class='prev_link'>")
+  end
+
+  # output the files
+  system "mkdir -p #{WORK}/checkdepot"
+  Dir.chdir "#{WORK}/checkdepot" do
+    open('depot.css','w') {|file| file.write(style)}
+    toc.gsub! /<a href="#(section-[\d\.]+)"/, '<a href="\1.html"'
+    open('index.html','w') {|file| file.write(head+toc+env+tail)}
+    head.sub! /(<h1.*h1>)/, '<a href="index.html">\1</a>'
+    Hash[*sections].each do |section, body|
+      links = "    #{next_link[section]}\n    #{prev_link[section]}\n"
+      body = links + '    <a class="toc">'+body
+      open(page(section),'w') {|file| file.write(head+body+tail)}
+    end
+  end
+end
+
 # restore rails to master
 Dir.chdir($rails) do
   system 'git checkout master' unless BRANCH=='master'
