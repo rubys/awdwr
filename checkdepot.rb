@@ -200,8 +200,8 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.4, "Integration Testing of Applications" do
-    assert_select '.stdout', /1 tests, 17 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /2 tests, 49 assertions, 0 failures, 0 errors/
+    assert_select '.stdout', /1 tests, \d+ assertions, 0 failures, 0 errors/
+    assert_select '.stdout', /2 tests, \d+ assertions, 0 failures, 0 errors/
   end
 
   section 14.5, "Performance Testing" do
@@ -776,7 +776,7 @@ class DepotTest < Gorp::TestCase
     assert_equal "  email = ebwf@fybnqmf.dpn", stdout.shift
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
-    assert_match /^=> (false|\[\])/, stdout.shift
+    assert_match /^=> (true|false|\[\])/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
@@ -1065,7 +1065,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'pre', /Thank you for your recent order/
     assert_select 'pre', /1 x Programming Ruby, 2nd Edition/
     assert_select '.body', 'Thank you...'
-    assert_select '.stdout', /3 tests, 9 assertions, 0 failures, 0 errors/
+    assert_select '.stdout', /3 tests, \d+ assertions, 0 failures, 0 errors/
   end
 
   section 26, "Active Resources" do
