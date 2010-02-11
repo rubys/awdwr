@@ -85,11 +85,11 @@ Dir.chdir File.join(PROFILE.source,WORK) do
     gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
     gemfile.puts "gem 'test-unit'"
     gemfile.puts "gem 'rdoc'"
-    begin
-      require 'nokogiri'
-    rescue LoadError
+    # begin
+    #   require 'nokogiri'
+    # rescue LoadError
       gemfile.puts "gem 'htmlentities'"
-    end
+    # end
   end
 end
 
