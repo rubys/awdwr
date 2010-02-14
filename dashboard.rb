@@ -97,6 +97,8 @@ $cgi.html do |x|
 
       EOF
       x.indented_text! <<-'EOF' unless $param.static
+        .headerlink {float: right; margin-top: -4em; margin-right: 1em}
+        .headerlink {color: #282; text-decoration: none}
         #executing pre {margin-left: 5em}
         form {width: 16.2em; margin: 1em auto}
       EOF
@@ -180,6 +182,7 @@ $cgi.html do |x|
 
   x.body do
     x.h1 'The Depot Dashboard'
+    x.a 'logs', :href => 'logs', :class => 'headerlink' unless $param.static
 
     x.table do
       x.thead do
