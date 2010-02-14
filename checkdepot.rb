@@ -278,8 +278,8 @@ class DepotTest < Gorp::TestCase
     stdout.shift while stdout.first =~ prelude
     assert_match /^=> \[.*\]/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[\]|nil)/, stdout.shift
+    assert_match /^=> (\[\]|nil)/, stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<Order id: nil, name: nil/, stdout.shift
     assert_equal "=> \"Dave Thomas\"", stdout.shift
@@ -300,10 +300,10 @@ class DepotTest < Gorp::TestCase
     stdout.shift while stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_match /^=> \[.*\]$/, stdout.shift
+    assert_match /^=> (\[\]|nil)/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[\]|nil)/, stdout.shift
+    assert_match /^=> (\[\]|nil)/, stdout.shift
     assert_equal '=> ["PP"]', stdout.shift
     assert_equal "=> {}", stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -364,8 +364,8 @@ class DepotTest < Gorp::TestCase
     stdout.shift while stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[\]|nil)/, stdout.shift
+    assert_match /^=> (\[\]|nil)/, stdout.shift
     assert_equal "=> [\"PP\"]", stdout.shift
     assert_equal "-- create_table(:purchases, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
@@ -383,7 +383,7 @@ class DepotTest < Gorp::TestCase
     stdout.shift while stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_match /^=> \[.*\]$/, stdout.shift
+    assert_match /^=> (\[\]|nil)/, stdout.shift
     assert_equal "=> [\"PP\"]", stdout.shift
     assert_equal "-- create_table(:customers, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
@@ -418,9 +418,9 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:products, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "-- create_table(:line_items, {:force=>true})", stdout.shift
@@ -492,7 +492,7 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_match /^=> \[.*\]$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
     assert_equal "-- create_table(:people, {:force=>true})", stdout.shift
     stdout.shift if stdout.first =~ /\s+-> \d\.\d+s$/
@@ -528,9 +528,9 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:catalog_entries, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "-- create_table(:articles, {:force=>true})", stdout.shift
@@ -554,9 +554,9 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "=> nil", stdout.shift
     4.times { assert_match /^=> (nil|#<Proc:.*>)$/, stdout.shift }
     assert_equal "Article One:  Article", stdout.shift
@@ -592,9 +592,9 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_match /^=> \[.*\]$/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:employees, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -619,11 +619,11 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_match /^=> (Parent\(.*\)|nil|#<Proc:.*>|\[#<.*>\])$/, stdout.shift
     assert_match /^=> (Child\(.*\)|nil|\[.*?\])/, stdout.shift
     assert_equal "=> #<Parent id: 1>", stdout.shift
@@ -651,11 +651,11 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:categories, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -685,9 +685,9 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:invoices, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "-- create_table(:orders, {:force=>true})", stdout.shift
@@ -715,9 +715,9 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:products, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "-- create_table(:line_items, {:force=>true})", stdout.shift
@@ -749,8 +749,8 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|false|\[\])/, stdout.shift
-    assert_equal '=> []', stdout.shift
-    assert_equal '=> []', stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:orders, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "-- create_table(:users, {:force=>:true})", stdout.shift
@@ -778,7 +778,7 @@ class DepotTest < Gorp::TestCase
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|false|\[\])/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_match /^=> (true|\[\])/, stdout.shift
+    assert_match /^=> (true|\[.*\])/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
     assert_equal "-- create_table(:payments, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
@@ -799,10 +799,10 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "=> [\"PP\"]", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "=> 1", stdout.shift
     assert_match /^=> #<LineItem id: 3, product_id: 27/, stdout.shift
@@ -843,9 +843,9 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:accounts, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -864,9 +864,9 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:accounts, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -886,9 +886,9 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:accounts, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -903,9 +903,9 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:accounts, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -920,9 +920,9 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:accounts, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
@@ -937,8 +937,8 @@ class DepotTest < Gorp::TestCase
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
-    assert_equal "=> []", stdout.shift
-    assert_equal "=> []", stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
+    assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_equal "-- create_table(:counters, {:force=>true})", stdout.shift
     assert_match /^   -> \d+\.\d+s$/, stdout.shift
     assert_equal "=> nil", stdout.shift
