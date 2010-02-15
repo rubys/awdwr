@@ -122,8 +122,6 @@ args << "--work=#{WORK}"
 source=PROFILE.rvm['src']
 if source
   release=PROFILE.rvm['bin'].split('-')[1]
-  puts "#{HOME}/.rvm/gems/#{PROFILE.gems}/cache"
-  puts Dir["#{HOME}/.rvm/gems/#{PROFILE.gems}/cache"].sort.last
 
   Dir.chdir("#{HOME}/.rvm/src") do
     rev = Dir.chdir(source) do
@@ -131,17 +129,23 @@ if source
       `svn info`.scan(/Last Changed Rev: (\d+)/).flatten.first
     end
 
-    break if File.exist? "ruby-#{release}-r#{rev}"
+    break if File.exist? "../bin/ruby-#{release}-r#{rev}"
 
     cache = Dir["#{HOME}/.rvm/gems/#{PROFILE.gems}/cache"].sort.last
 
+    system "mkdir -p cache"
+    system "rm -f cache/*"
+    Dir.chdir(File.join(File.dirname(cache),'gems')) {Dir['*']}.each do |gem|
+      system "cp -v #{cache}/#{gem}.gem cache"
+    end
+    
     bash %{
       cp -r #{source} ruby-#{release}-r#{rev}
       source #{HOME}/.rvm/scripts/rvm
       TERM=dumb rvm install #{release}-#{rev}
       rvm #{release}-#{rev}
-      gem env path | xargs chmod -R 0755
-      gem install --no-ri --no-rdoc #{cache}/*
+      gem env path | cut -d ':' -f 1 | xargs chmod -R 0755
+      gem install --no-ri --no-rdoc cache/*
     }
 
     # keep the last three, and anything built in a week; remove the rest
@@ -149,9 +153,9 @@ if source
     keep    = 3
 
     Dir.chdir("#{HOME}/.rvm") do
-      vms = Dir["ruby-#{release}-r*"].sort
+      vms = Dir.chdir('rubies') { Dir["ruby-#{release}-r*"].sort }
       vms.slice! -keep..-1
-      vms.delete_if {|vm| File.stat(vm).mtime >= horizon}
+      vms.delete_if {|vm| File.stat("rubies/#{vm}").mtime >= horizon}
 
       vms.each do |vm|
         system "find . -name #{vm} -exec rm -rfv {} \\;"
@@ -161,9 +165,9 @@ if source
 end
 
 # find the rvm
-rvm = Dir[File.join(HOME,'.rvm',PROFILE.rvm['bin'])].sort.last
+rvm = Dir[File.join(HOME,'.rvm','rubies',PROFILE.rvm['bin'])].sort.last
 unless rvm
-  puts "Unable to locate #{File.join(HOME,'.rvm',PROFILE.rvm['bin'])}"
+  puts "Unable to locate #{File.join(HOME,'.rvm','rubies',PROFILE.rvm['bin'])}"
   exit
 end
 
@@ -171,7 +175,7 @@ end
 bash %{
   source #{HOME}/.rvm/scripts/rvm
   rvm #{rvm.gsub(/.*\/ruby-/,'')}
-  eval export BUNDLE_PATH='$'GEM_PATH
+  test "$BUNDLE_PATH" || eval export BUNDLE_PATH='$'GEM_PATH
   cd #{WORK}
   bundle install
   cd ..
