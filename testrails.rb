@@ -136,7 +136,7 @@ if source
     system "mkdir -p cache"
     system "rm -f cache/*"
     Dir.chdir(File.join(File.dirname(cache),'gems')) {Dir['*']}.each do |gem|
-      system "cp -v #{cache}/#{gem}.gem cache"
+      system "cp #{cache}/#{gem}.gem cache"
     end
     
     bash %{
@@ -158,7 +158,7 @@ if source
       vms.delete_if {|vm| File.stat("rubies/#{vm}").mtime >= horizon}
 
       vms.each do |vm|
-        system "find . -name #{vm} -exec rm -rfv {} \\;"
+        system "find . -name #{vm} -exec rm -rf {} \\;"
       end
     end
   end
@@ -175,7 +175,6 @@ end
 bash %{
   source #{HOME}/.rvm/scripts/rvm
   rvm #{rvm.gsub(/.*\/ruby-/,'')}
-  test "$BUNDLE_PATH" || eval export BUNDLE_PATH='$'GEM_PATH
   cd #{WORK}
   bundle install
   cd ..

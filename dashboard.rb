@@ -29,7 +29,7 @@ $cgi.post do
 end
 
 # determine if any processes are active
-ACTIVE = `ps xo start,args`.scan(/^.{8} .*/).grep(/testrails/)
+ACTIVE = `ps xo start,args`.scan(/^.{8} .*/).grep(/(\d |\/)testrails/)
 
 LOG = []
 unless ACTIVE.empty?

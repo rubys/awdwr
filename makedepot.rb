@@ -2108,7 +2108,7 @@ $APP = $R22 ? 'application' : 'application_controller'
 # what gems are required?
 required = %w(will_paginate rdoc nokogiri htmlentities)
 required.push 'rails' if $rails == 'rails'
-required.push 'test-unit' if RUBY_VERSION =~ /^1\.9/
+# required.push 'test-unit' if RUBY_VERSION =~ /^1\.9/
 required -= `gem list`.scan(/(^[-_\w]+)\s\(/).flatten
 
 # Re-enable "wild" controller for Edition 3 testing
