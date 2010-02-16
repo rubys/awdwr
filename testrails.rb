@@ -78,18 +78,22 @@ end
 
 # update gems
 Dir.chdir File.join(PROFILE.source,WORK) do
-  open('Gemfile','w') do |gemfile|
-    gemfile.puts "source 'http://gemcutter.org'"
-    gemfile.puts "gem 'rails', :path => #{$rails.inspect}"
-    gemfile.puts "gem 'sqlite3-ruby', :require => 'sqlite3'"
-    gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
-    gemfile.puts "gem 'test-unit'"
-    gemfile.puts "gem 'rdoc'"
-    # begin
-    #   require 'nokogiri'
-    # rescue LoadError
-      gemfile.puts "gem 'htmlentities'"
-    # end
+  if File.exist? File.join($rails, 'Gemfile')
+    open('Gemfile','w') do |gemfile|
+      gemfile.puts "source 'http://gemcutter.org'"
+      gemfile.puts "gem 'rails', :path => #{$rails.inspect}"
+      gemfile.puts "gem 'sqlite3-ruby', :require => 'sqlite3'"
+      gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
+      gemfile.puts "gem 'test-unit'"
+      gemfile.puts "gem 'rdoc'"
+      # begin
+      #   require 'nokogiri'
+      # rescue LoadError
+        gemfile.puts "gem 'htmlentities'"
+      # end
+    end
+  else
+    system 'rm -f Gemfile'
   end
 end
 
@@ -171,13 +175,17 @@ unless rvm
   exit
 end
 
+if File.exist? File.join(WORK, 'Gemfile')
+  install = "cd #{WORK}; bundle install; cd -"
+else
+  install = ''
+end
+
 # run the script
 bash %{
   source #{HOME}/.rvm/scripts/rvm
   rvm #{rvm.gsub(/.*\/ruby-/,'')}
-  cd #{WORK}
-  bundle install
-  cd ..
+  #{install}
   ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1
 }
 
