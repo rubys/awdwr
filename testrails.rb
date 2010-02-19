@@ -244,8 +244,9 @@ if File.exist?("#{WORK}/checkdepot.html")
     open('index.html','w') {|file| file.write(head+toc+env+tail)}
     head.sub! /(<h1.*h1>)/, '<a href="index.html">\1</a>'
     Hash[*sections].each do |section, body|
-      links = "    #{next_link[section]}\n    #{prev_link[section]}\n"
-      body = links + '    <a class="toc">'+body
+      links = "      #{next_link[section]}\n      #{prev_link[section]}\n"
+      links = "    <p>\n#{links}    </p>\n"
+      body = links + '    <a class="toc">'+ body + links
       open(page(section),'w') {|file| file.write(head+body+tail)}
     end
   end
