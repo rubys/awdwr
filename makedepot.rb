@@ -13,7 +13,9 @@ section 4, 'Instant Gratification' do
     erb = ($R2 ? 'erb' : 'erubis') + " -r #{$WORK}/erbshim -T -"
 
     open("#{$WORK}/erbshim.rb", 'w') do |file|
-      if File.exist? "#{$WORK}/vendor/gems/environment.rb"
+      if File.exist? "#{$WORK}/.bundle/environment.rb"
+        file.puts "require '#{$WORK}/.bundle/environment.rb'"
+      elsif File.exist? "#{$WORK}/vendor/gems/environment.rb"
         file.puts "require '#{$WORK}/vendor/gems/environment.rb'"
       end
 
