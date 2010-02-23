@@ -22,6 +22,7 @@ end.flatten
 
 # submit a new run in the background
 $cgi.post do
+  ENV['PATH'] += File::PATH_SEPARATOR + config['path'] if config['path']
   submit "ruby #{BINDIR}/testrails #{$param.args} " +
          "> #{LOGDIR}/post.out 2> #{LOGDIR}/post.err "
 
@@ -29,7 +30,9 @@ $cgi.post do
 end
 
 # determine if any processes are active
-ACTIVE = `ps xo start,args`.scan(/^.{8} .*/).grep(/(\d |\/)testrails/)
+ACTIVE = `ps xo start,args`.
+  scan(/^(?:\d\d:\d\d:\d\d|.\d:\d\d[AP]M) .*/).
+  grep(/(\d |\/)testrails/)
 
 LOG = []
 unless ACTIVE.empty?
