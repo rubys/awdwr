@@ -33,6 +33,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.1, 'Iteration A1: Getting Something Running' do
+    ticket 134,
+      :list  => :bundler,
+      :title =>  "Avoid deprecated Gem::Dependency#version_requirements w/gems 1.3.6",
+      :match => /Gem::Dependency#version_requirements is deprecated/
+
     assert_select '.stderr', 0
   end
 
@@ -164,9 +169,6 @@ class DepotTest < Gorp::TestCase
       :list  => :ruby,
       :title =>  "Array expansion inside case/when gives unexpected results",
       :match => /&gt;\*{99,}&lt;/
-    ticket 3570,
-      :title =>  "Intermittent reloading issue: model",
-      :match => /undefined method `orders' for #&amp;lt;Product/
 
     # assert_select '.stdout', /No route matches &amp;quot;\/info\/who_bought\//
     assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/
@@ -1013,14 +1015,6 @@ class DepotTest < Gorp::TestCase
   end
 
   section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
-    ticket 25,
-      :list  => :will_paginate,
-      :title =>  "Will Paginate is broken on Rails 3",
-      :match => /can't convert nil into Array/
-    ticket 25,
-      :list  => :will_paginate,
-      :title =>  "Will Paginate is broken on Rails 3",
-      :match => /Cannot define scope :find because User.find method already exists./
     assert_select '.stdout', /^==  CreateUsers: migrated/
     assert_select '.stdout', '=&gt; 763'
     assert_select "a[href=http://localhost:#{$PORT}/pager/user_list?page=27]", '27'
