@@ -22,7 +22,10 @@ end.flatten
 
 # submit a new run in the background
 $cgi.post do
-  ENV['PATH'] += File::PATH_SEPARATOR + config['path'] if config['path']
+  if config['path']
+    ENV['PATH'] = config['path'] + File::PATH_SEPARATOR + ENV['PATH']
+  end
+
   submit "ruby #{BINDIR}/testrails #{$param.args} " +
          "> #{LOGDIR}/post.out 2> #{LOGDIR}/post.err "
 
