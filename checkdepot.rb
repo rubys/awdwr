@@ -42,6 +42,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.2, 'Creating the Products Model and Maintenance Application' do
+    ticket 138,
+      :list  => :bundler,
+      :title =>  "bundler 0.9.8 error on dependencies in rubygems_ext",
+      :match => /undefined method `dependencies' for class `Gem::Specification'/
+
     assert_select 'th', 'Image url'
     assert_select 'input#product_title[value=Pragmatic Version Control]'
     assert_select "a[href=http://localhost:#{$PORT}/products/1]", 'redirected'
