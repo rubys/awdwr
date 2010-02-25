@@ -2147,7 +2147,7 @@ fail = false
 
 unless $R2
   # what libraries are required?
-  %w(arel).each do |lib|
+  %w().each do |lib| # was arel ...
     unless $:.any? {|path| File.exist? File.join(path,lib)}
       STDERR.puts "Missing library: #{lib}"
       fail = true
@@ -2156,10 +2156,12 @@ unless $R2
 end
 
 # what commands are required?
-%w(sqlite3 curl).each do |cmd|
-  if `which #{cmd}`.empty?
-    STDERR.puts "Missing command: #{cmd}"
-    fail = true
+unless RUBY_PLATFORM =~ /w32/
+  %w(sqlite3 curl).each do |cmd|
+    if `which #{cmd}`.empty?
+      STDERR.puts "Missing command: #{cmd}"
+      fail = true
+    end
   end
 end
 
