@@ -997,9 +997,7 @@ class DepotTest < Gorp::TestCase
     # routes_for_blog.rb
     stdout.shift if stdout.first == '=> false'
     assert_match /^=> (true|\[.*\])/, stdout.shift
-    stdout.shift if stdout.first == '=> []'
-    assert_equal '=> nil', stdout.shift
-    assert_match /^=> \[("article", "blog"|"Mocha")?\]/, stdout.shift
+    stdout.shift while stdout.first =~ /^=> (nil|\[.*?\])/
     assert_match /^=> #<Action\w+::Routing::RouteSet:.*>/, stdout.shift
     assert_match /^=> #<Action\w+::Integration::Session:.*>/, stdout.shift
     assert_match /^=> (\[ActionController::Base, ActionView::Base\]|#<Rack::Mount::RouteSet.*>|nil)/, stdout.shift

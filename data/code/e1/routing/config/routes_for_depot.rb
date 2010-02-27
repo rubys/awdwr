@@ -1,10 +1,8 @@
 require "./config/environment.rb"
-
-Rails::Application.reload_routes!
-require "active_support/test_case"
+require "rails/console/app"
 
 rs = ActionController::Routing::Routes
-app = ActionDispatch::Integration::Session.new(nil)
+app
 
 puts rs.routes
 rs.recognize_path "/store"

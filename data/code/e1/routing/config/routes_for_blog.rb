@@ -1,10 +1,8 @@
 require "./config/environment.rb"
-
-ActionController::Base.session_store = nil
-require "active_support/test_case"
+require "rails/console/app"
 
 rs = ActionController::Routing::Routes
-app = ActionDispatch::Integration::Session.new(nil)
+app
 
 #START:draw
 ActionController::Routing::Routes.draw do |map| 
