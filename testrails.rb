@@ -220,19 +220,23 @@ if File.exist?("#{WORK}/checkdepot.html")
   end
 
   # determine the value for previous / next links
-  forward=[nil] + sections.map {|data| data.slice(/\A\s*<h2>.*/)}[0..-2]
-  forward2=[nil,nil] + sections[0..-3]
+  headers=sections.map {|data| data.slice(/\A\s*<h2>.*/)}
+  identity = [nil] + sections[0..-2]
+  backward=[nil,nil] + identity[0..-3]
+  forward=identity[2..-1] + [nil,nil]
+
   next_link = {sections[-2] => 
     '<a href="index.html" class="next_link">Table of Contents</a>'}
   prev_link = {sections[0] => 
     '<a href="index.html" class="prev_link">Table of Contents</a>'}
-  sections.zip(forward,forward2).each do |before, header, after|
+
+  headers.zip(identity,backward,forward).each do |header, this, before, after|
     next unless header
     header.sub!('</h2', '</a').strip!
-    next_link[after] = header.sub('h2>', 
-      "a href=#{page(before).inspect} class='next_link'>")
-    prev_link[before] = header.sub('h2>', 
-      "a href=#{page(after).inspect} class='prev_link'>")
+    next_link[before] = header.sub('h2>', 
+      "a href=#{page(this).inspect} class='next_link'>")
+    prev_link[after] = header.sub('h2>', 
+      "a href=#{page(this).inspect} class='prev_link'>")
   end
 
   # output the files
