@@ -113,6 +113,7 @@ $cgi.html do |x|
     end
 
     x.script '', :src => 'jquery-1.3.2.min.js'
+    x.script '', :src => 'jquery-ui-1.7.2.custom.min.js'
     x.script '', :src => 'jquery.tablesorter.min.js'
 
     x.script! %{
@@ -158,6 +159,10 @@ $cgi.html do |x|
             parent.find('td:eq(1)').text().replace(/\\D/g,'') + ' ' +
             parent.find('td:eq(2)').text().replace(/\\D/g,'')
           );
+          $(this).css({backgroundColor: '#ff0'}); 
+          $(this).animate({backgroundColor: '#fff'}, 'slow'); 
+          $('input[name=args]').css({backgroundColor: '#f70'}); 
+          $('input[name=args]').animate({backgroundColor: '#fff'}, 'slow'); 
         });
       });
     } unless $param.static
