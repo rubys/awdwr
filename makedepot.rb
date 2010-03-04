@@ -397,9 +397,11 @@ section 8.1, 'Sessions' do
     end
   else
     edit 'config/initializers/session_store.rb' do |data|
-      data[/()# ActionController::Base.session_store =/,1] = "#START:session\n"
-      data[/ActionController::Base.session_store =.*()/,1] = "\n#END:session"
-      data[/(# )ActionController::Base.session_store/,1] = ''
+      data[/()# Rails.application.config.action_dispatch.session_store =/,1] =
+        "#START:session\n"
+      data[/Rails.application.config.action_dispatch.session_store =.*()/,1] =
+        "\n#END:session"
+      data[/(# )Rails.application.config.action_dispatch.session_store/,1] = ''
     end
   end
   restart_server
