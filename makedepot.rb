@@ -396,12 +396,10 @@ section 8.1, 'Sessions' do
       data[/(# )config.action_controller.session_store/,1] = ''
     end
   else
-    edit 'config/initializers/session_store.rb' do |data|
-      data[/()# Rails.application.config.action_dispatch.session_store =/,1] =
-        "#START:session\n"
-      data[/Rails.application.config.action_dispatch.session_store =.*()/,1] =
-        "\n#END:session"
-      data[/(# )Rails.application.config.action_dispatch.session_store/,1] = ''
+    edit 'config/initializers/session_store.rb' do
+      edit 'config.session_store :active_record_store', :mark=>'session' do
+        msub /^(# )/, ''
+      end
     end
   end
   restart_server
