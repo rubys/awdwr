@@ -389,11 +389,11 @@ section 8.1, 'Sessions' do
   cmd 'rake db:sessions:create'
   cmd 'rake db:migrate'
   cmd 'sqlite3 db/development.sqlite3 .schema'
-  if $R22
-    edit 'config/environment.rb' do |data|
-      data[/()  config.action_controller.session =/,1] = "  #START:session\n"
-      data[/config.action_controller.session =.*?\}()/m,1] = "\n#END:session"
-      data[/(# )config.action_controller.session_store/,1] = ''
+  if $R2
+    edit 'config/initializers/session_store.rb' do
+      edit 'Base.session_store = :active_record_store', :mark=>'session' do
+        msub /^(# )/, ''
+      end
     end
   else
     edit 'config/initializers/session_store.rb' do
