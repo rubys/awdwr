@@ -2007,7 +2007,11 @@ section 25.1, 'Sending E-mail' do
       edit 'sent.html.erb' do
         msub /(html_)line_item/, ''
       end
-      cmd "mv _html_line_item.erb _line_item.htlm.erb"
+      cmd "mv _html_line_item.erb _line_item.html.erb"
+      edit '_line_item.html.erb' do
+        msub /(html_)line_item/, ''
+        msub /(html_)line_item/, ''
+      end
       cmd "rm sent.text.erb"
     end
   end
