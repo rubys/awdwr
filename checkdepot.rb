@@ -978,9 +978,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 21.2, 'Routing Requests' do
-    ticket 4073,
-      :title =>  "overwrite_params no longer works with url_for ",
-      :match => /RoutingError: .*:overwrite_params/
+    ticket 4073, :title =>  "overwrite_params needs to be deprecated" do |raw|
+      not raw.index(/DEPRECATION WARNING.*overwrite_params/)
+    end
 
     # routes_for_depot.rb
     stdout = collect_stdout.grep(/^=>/).map {|line| sort_hash(line)}
