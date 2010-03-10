@@ -56,4 +56,3 @@ rs.generate({:day => 25}, last_request)
 rs.generate({:year => 2005}, last_request)
 
 app.url_for :controller => 'blog', :action => 'show_date', :year => 2002
-app.url_for :controller => 'blog', :action => 'show_date', :overwrite_params => {:year => "2002" }

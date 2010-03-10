@@ -1022,7 +1022,9 @@ class DepotTest < Gorp::TestCase
     assert_equal '=> "/blog/2006/07/25"', stdout.shift
     assert_equal '=> "/blog/2005"', stdout.shift
     assert_equal '=> "http://www.example.com/blog/2002"', stdout.shift
-    assert_equal '=> "http://www.example.com/blog/2002"', stdout.shift
+    if ActiveSupport::VERSION::STRING =~ /^2\.[23]/
+      assert_select '.stderr', /DEPRECATION WARNING.*overwrite_params/
+    end
   end
 
   section 23.3, 'Helpers for Formatting, Linking, and Pagination' do
