@@ -1933,10 +1933,20 @@ section 23.5, 'Forms That Wrap Model Objects' do
   cmd "cp -v #{$CODE}/e1/views/app/models/detail.rb app/models"
   cmd 'rake db:migrate'
   cmd "cp -vr #{$CODE}/e1/views/app/views/form_for app/views"
-  get '/form_for/new'
   cmd "cp -vr #{$CODE}/e1/views/app/views/test app/views"
-  get '/test/select'
   cmd "cp -vr #{$CODE}/e1/views/app/views/products app/views"
+  unless $R2
+    %w(form_for/new test/select products/new upload_get).each do |view|
+      edit "app/views/#{view}.html.erb" do
+        gsub! '<% form_for ', '<%= form_for('
+        gsub! ' do |form| %>', ') do |form| %>'
+        gsub! '<% fields_for ', '<%= fields_for('
+        gsub! ' do |detail| %>', ') do |detail| %>'
+      end
+    end
+  end
+  get '/form_for/new'
+  get '/test/select'
   get '/products/new'
 end
 
@@ -1944,14 +1954,30 @@ section 23.6, 'Custom Form Builders' do
   Dir.chdir(File.join($WORK,'view'))
   cmd "cp -vr #{$CODE}/e1/views/app/helpers/tagged_builder.rb app/helpers"
   cmd "cp -vr #{$CODE}/e1/views/app/views/builder app/views"
-  get '/builder/new'
   cmd "cp -vr #{$CODE}/e1/views/app/helpers/builder_helper.rb app/helpers"
-  get '/builder/new_with_helper'
   cmd "cp -vr #{$CODE}/e1/views/app/views/array app/views"
+  unless $R2
+    %w(builder/new builder/new_with_helper array/edit).each do |view|
+      edit "app/views/#{view}.html.erb" do
+        gsub! '<% form_for ', '<%= form_for('
+        gsub! '<% tagged_form_for ', '<%= tagged_form_for('
+        gsub! ' do |form| %>', ') do |form| %>'
+      end
+    end
+  end
+  get '/builder/new'
+  get '/builder/new_with_helper'
   get '/array/edit'
 end
 
 section 23.7, 'Working with Nonmodel Fields' do
+  unless $R2
+    %w(test/calculate).each do |view|
+      edit "app/views/#{view}.html.erb" do
+        gsub! '<% form_', '<%= form_'
+      end
+    end
+  end
   Dir.chdir(File.join($WORK,'view'))
   get '/test/calculate'
 end
@@ -1964,6 +1990,13 @@ section 23.8, 'Uploading Files to Rails Applications' do
   cmd "cp -v #{$CODE}/e1/views/app/models/picture.rb app/models"
   cmd 'rake db:migrate'
   cmd "cp -vr #{$CODE}/e1/views/app/views/upload app/views"
+  unless $R2
+    %w(upload/get).each do |view|
+      edit "app/views/#{view}.html.erb" do
+        gsub! '<% form_for', '<%= form_for'
+      end
+    end
+  end
   get '/upload/get'
   # get '/upload/show'
 end
