@@ -696,7 +696,7 @@ section 9.2, 'Iteration D2: Creating an AJAX-Based Cart' do
       EOF
     else
       data[/\n(\s+<%= button_to.*\n)/,1] = <<-EOF.unindent(4)
-        <% form_tag({:action=>'add_to_cart', :id=>product}, :remote=>true) do %>
+        <%= form_tag({:action=>'add_to_cart', :id=>product}, :remote=>true) do %>
           <%= submit_tag "Add to Cart" %>
         <% end %>
       EOF
@@ -785,9 +785,10 @@ section 9.4, 'Iteration D4: Hide an Empty Cart' do
   edit 'app/views/layouts/store.html.erb', 'hidden_div' do |data|
     data[/<div id="cart">.*?(<\/div>)/m,1] = '<% end %>' +
       "\n    <!-- END:hidden_div -->"
+    eq = '=' unless $R2
     data[/(<div id="cart">)/,1] =
       "<!-- START:hidden_div -->\n      " +
-      '<% hidden_div_if(@cart.items.empty?, :id => "cart") do %>'
+      "<%#{eq} hidden_div_if(@cart.items.empty?, :id => 'cart') do %>"
   end
   edit 'app/helpers/store_helper.rb' do |data|
     data[/()^end/,1] = <<-EOF.unindent(4)
@@ -896,6 +897,11 @@ section 10.1, 'Iteration E1: Capturing an Order' do
   end
   edit 'app/views/store/checkout.html.erb' do |data|
     data[/()/,1] = read('orders/checkout.html.erb')
+    unless $R2
+      data[/%() form_for/,1] = '='
+      data[/%= form_for( )/,1] = '('
+      data[/%= form_for.*() do/,1] = ')'
+    end
   end
   edit 'app/models/order.rb', 'select' do |data|
     data[/()class Order.*/,1] = "#START:select\n"
@@ -1066,6 +1072,7 @@ section 11.1, 'Iteration F1: Adding Users' do
   end
   edit "app/views/users/new.html.erb" do |data|
     data[/(.*)/m,1] = read('users/new.html.erb')
+    data[/%() form_for/,1] = '='
   end
   edit 'app/views/layouts/users.html.erb', 'head' do |data|
     data[/()<!DOCTYPE/,1] = "<!-- START:head -->\n"
@@ -1090,6 +1097,7 @@ section 11.2, 'Iteration F2: Logging in' do
   end
   edit "app/views/admin/login.html.erb" do |data|
     data[/(.*)/m,1] = read('users/login.html.erb')
+    data[/%() form_tag/,1] = '='
   end
   edit "app/views/admin/index.html.erb" do |data|
     data[/(.*)/m,1] = read('users/index.html.erb')
@@ -1164,7 +1172,7 @@ section 11.4, 'Iteration F4: Adding a Sidebar, More Administration' do
   get '/users'
   edit "app/views/layouts/store.html.erb", 'hidden_div' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
-    data.gsub! /\n +<% hidden_div_if.*? end %>\s*\n/m do |hidden_div|
+    data.gsub! /\n +<%=? hidden_div_if.*? end %>\s*\n/m do |hidden_div|
       hidden_div.gsub!(/^/, '  ')
       s,e = "<!-- START_HIGHLIGHT -->\n", "<!-- END_HIGHLIGHT -->"
       "\n#{s}      <% if @cart %>\n#{e}#{hidden_div}#{s}      <% end %>\n#{e}\n"
@@ -1400,6 +1408,11 @@ section 13, 'Task I: Internationalization' do
       <% end %>
       <!-- END:i18n -->
     EOF
+    unless $R2
+      data[/%() form_tag/,1] = '='
+      data[/%= form_tag( )/,1] = '('
+      data[/%= form_tag.*() do/,1] = ')'
+    end
   end
 
   get '/store?locale=en'

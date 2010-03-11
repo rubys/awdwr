@@ -978,8 +978,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 21.2, 'Routing Requests' do
-    ticket 4073, :title =>  "overwrite_params needs to be deprecated" do |raw|
-      not raw.index(/DEPRECATION WARNING.*overwrite_params/)
+    if ActiveSupport::VERSION::STRING =~ /^2\.[23]/
+      ticket 4073, :title =>  "overwrite_params needs to be deprecated" do |raw|
+        not raw.index(/DEPRECATION WARNING.*overwrite_params/)
+      end
     end
 
     # routes_for_depot.rb
