@@ -1072,7 +1072,7 @@ section 11.1, 'Iteration F1: Adding Users' do
   end
   edit "app/views/users/new.html.erb" do |data|
     data[/(.*)/m,1] = read('users/new.html.erb')
-    data[/%() form_for/,1] = '='
+    data[/%() form_for/,1] = '=' unless $R2
   end
   edit 'app/views/layouts/users.html.erb', 'head' do |data|
     data[/()<!DOCTYPE/,1] = "<!-- START:head -->\n"
@@ -1097,7 +1097,7 @@ section 11.2, 'Iteration F2: Logging in' do
   end
   edit "app/views/admin/login.html.erb" do |data|
     data[/(.*)/m,1] = read('users/login.html.erb')
-    data[/%() form_tag/,1] = '='
+    data[/%() form_tag/,1] = '=' unless $R2
   end
   edit "app/views/admin/index.html.erb" do |data|
     data[/(.*)/m,1] = read('users/index.html.erb')
