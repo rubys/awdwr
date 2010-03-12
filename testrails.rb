@@ -135,7 +135,9 @@ if source
 
     break if File.exist? "../bin/ruby-#{release}-r#{rev}"
 
-    cache = Dir["#{HOME}/.rvm/gems/#{PROFILE.gems}/cache"].sort.last
+    caches = Dir["#{HOME}/.rvm/gems/#{PROFILE.gems}/cache"]
+    caches.reject! {|cache| cache =~ /[%:]/}
+    cache = caches.sort.last
 
     system "mkdir -p cache"
     system "rm -f cache/*"
@@ -146,8 +148,8 @@ if source
     bash %{
       cp -r #{source} ruby-#{release}-r#{rev}
       source #{HOME}/.rvm/scripts/rvm
-      TERM=dumb rvm install #{release}-#{rev}
-      rvm #{release}-#{rev}
+      TERM=dumb rvm install ruby-#{release}-r#{rev}
+      rvm #{release}-r#{rev}
       gem env path | cut -d ':' -f 1 | xargs chmod -R 0755
       gem install --no-ri --no-rdoc cache/*
     }
