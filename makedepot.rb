@@ -897,11 +897,7 @@ section 10.1, 'Iteration E1: Capturing an Order' do
   end
   edit 'app/views/store/checkout.html.erb' do |data|
     data[/()/,1] = read('orders/checkout.html.erb')
-    unless $R2
-      data[/%() form_for/,1] = '='
-      data[/%= form_for( )/,1] = '('
-      data[/%= form_for.*() do/,1] = ')'
-    end
+    data[/%() form_for/,1] = '=' unless $R2
   end
   edit 'app/models/order.rb', 'select' do |data|
     data[/()class Order.*/,1] = "#START:select\n"
@@ -1408,11 +1404,7 @@ section 13, 'Task I: Internationalization' do
       <% end %>
       <!-- END:i18n -->
     EOF
-    unless $R2
-      data[/%() form_tag/,1] = '='
-      data[/%= form_tag( )/,1] = '('
-      data[/%= form_tag.*() do/,1] = ')'
-    end
+    data[/%() form_tag/,1] = '=' unless $R2
   end
 
   get '/store?locale=en'
@@ -1938,10 +1930,8 @@ section 23.5, 'Forms That Wrap Model Objects' do
   unless $R2
     %w(form_for/new test/select products/new upload_get).each do |view|
       edit "app/views/#{view}.html.erb" do
-        gsub! '<% form_for ', '<%= form_for('
-        gsub! ' do |form| %>', ') do |form| %>'
-        gsub! '<% fields_for ', '<%= fields_for('
-        gsub! ' do |detail| %>', ') do |detail| %>'
+        gsub! '<% form_for ', '<%= form_for'
+        gsub! '<% fields_for ', '<%= fields_for '
       end
     end
   end
@@ -1959,9 +1949,8 @@ section 23.6, 'Custom Form Builders' do
   unless $R2
     %w(builder/new builder/new_with_helper array/edit).each do |view|
       edit "app/views/#{view}.html.erb" do
-        gsub! '<% form_for ', '<%= form_for('
-        gsub! '<% tagged_form_for ', '<%= tagged_form_for('
-        gsub! ' do |form| %>', ') do |form| %>'
+        gsub! '<% form_for ', '<%= form_for '
+        gsub! '<% tagged_form_for ', '<%= tagged_form_for '
       end
     end
   end
