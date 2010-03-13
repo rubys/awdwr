@@ -1930,7 +1930,7 @@ section 23.5, 'Forms That Wrap Model Objects' do
   unless $R2
     %w(form_for/new test/select products/new upload_get).each do |view|
       edit "app/views/#{view}.html.erb" do
-        gsub! '<% form_for ', '<%= form_for'
+        gsub! '<% form_for ', '<%= form_for '
         gsub! '<% fields_for ', '<%= fields_for '
       end
     end
