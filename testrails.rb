@@ -256,6 +256,9 @@ if File.exist?("#{WORK}/checkdepot.html")
       open(page(section),'w') {|file| file.write(head+body+tail)}
     end
   end
+
+  # copy the log
+  system "cp #{LOG} #{WORK}/checkdepot/makedepot.log"
 end
 
 # restore rails to master

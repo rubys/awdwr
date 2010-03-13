@@ -222,7 +222,13 @@ $cgi.html do |x|
             link =  "#{job['work']}/checkdepot.html"
           end
 
-          link.sub! ".html", '/' if File.directory? "#{job['path']}/checkdepot/"
+          checkdir = "#{job['path']}/checkdepot/"
+          checkfile = checkdir.sub(/\/$/,'.html')
+          if File.directory? checkdir
+            if File.stat(checkdir).mtime >= File.stat(checkfile).mtime
+              link.sub! ".html", '/'
+            end
+          end
 
           if File.exist?(statfile+'.run')
             color = 'hilite'
