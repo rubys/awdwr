@@ -207,9 +207,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.4, "Integration Testing of Applications" do
-    ticket 4115,
-      :title =>  "integration tests fail due to invalid authenticity tokens",
-      :match => /ActionController::InvalidAuthenticityToken/
+    ticket 4213,
+      :title =>  "undefined method `named_routes' in integration test",
+      :match => /NoMethodError: undefined method `named_routes' for nil:NilClass/
 
     assert_select '.stdout', /1 tests, \d+ assertions, 0 failures, 0 errors/
     assert_select '.stdout', /2 tests, \d+ assertions, 0 failures, 0 errors/
