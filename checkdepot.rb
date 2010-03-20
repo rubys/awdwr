@@ -113,7 +113,11 @@ class DepotTest < Gorp::TestCase
       raw.scan(/>[a-zA-Z0-9+\/]{60}</).length > 5
     end
 
-    assert_select "a[href=http://localhost:#{$PORT}/store]", 'redirected'
+    if ActiveSupport::VERSION::STRING =~ /^2\.[23]/
+      assert_select "a[href=http://localhost:#{$PORT}/store]", 'redirected'
+    else
+      assert_select "a[href=http://localhost:#{$PORT}/store/index]", 'redirected'
+    end
     assert_select '.hilight', 'Attempt to access invalid product wibble'
     assert_select '#notice', 'Invalid product'
   end
@@ -974,7 +978,11 @@ class DepotTest < Gorp::TestCase
       \{:action=&gt;"edit", \s :controller=&gt;"comments"\} ) $
     /x
     assert_select '.stdout', /5 tests, 29 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /1 tests, 1 assertions, 0 failures, 0 errors/
+    if ActiveSupport::VERSION::STRING =~ /^2\.[23]/
+      assert_select '.stdout', /1 tests, 1 assertions, 0 failures, 0 errors/
+    else
+      assert_select '.stdout', /2 tests, 2 assertions, 0 failures, 0 errors/
+    end
   end
 
   section 21.2, 'Routing Requests' do
@@ -994,8 +1002,13 @@ class DepotTest < Gorp::TestCase
     assert_equal '=> {:action=>"index", :controller=>"store"}', stdout.shift
     assert_equal '=> {:action=>"add_to_cart", :controller=>"store", :id=>"1"}', stdout.shift
     assert_equal '=> {:action=>"add_to_cart", :controller=>"store", :format=>"xml", :id=>"1"}', stdout.shift
-    assert_equal '=> "/store"', stdout.shift
-    assert_equal '=> "/store/index/123"', stdout.shift
+    if ActiveSupport::VERSION::STRING =~ /^2\.[23]/
+      assert_equal '=> "/store"', stdout.shift
+      assert_equal '=> "/store/index/123"', stdout.shift
+    else
+      assert_equal '=> "/store/index"', stdout.shift
+      assert_equal '=> "/store/index?id=123"', stdout.shift
+    end
     if stdout.first =~ /coupon/ # Rails 2.x
       # Demo ActionController::Routing.use_controllers!
       assert_equal '=> {:action=>"show", :controller=>"coupon", :id=>"1"}', stdout.shift
