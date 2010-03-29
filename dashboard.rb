@@ -224,7 +224,7 @@ $cgi.html do |x|
 
           checkdir = "#{job['path']}/checkdepot/"
           checkfile = checkdir.sub(/\/$/,'.html')
-          if File.directory? checkdir
+          if File.directory?(checkdir) and File.exist?(checkfile)
             if File.stat(checkdir).mtime >= File.stat(checkfile).mtime
               link.sub! ".html", '/'
             end
