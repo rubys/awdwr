@@ -312,6 +312,7 @@ class DepotTest < Gorp::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> #<Order id: 7, name: "Dave Thomas"/, stdout.shift
     assert_match /^=> \[#<Order id: 8, name: "Dave Thomas"/, stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
     stdout.shift while stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
@@ -376,6 +377,7 @@ class DepotTest < Gorp::TestCase
     assert_equal "=> 9", stdout.shift
     assert_equal "9", stdout.shift
     assert_match /^=> (nil|9)/, stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
     stdout.shift while stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
@@ -395,6 +397,7 @@ class DepotTest < Gorp::TestCase
     assert_match /^=> (nil|\[.*\])/, stdout.shift
     assert_equal "\"ski mask\"", stdout.shift
     assert_match /^=> (nil|"ski mask")/, stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
     stdout.shift while stdout.first =~ prelude
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
@@ -424,6 +427,7 @@ class DepotTest < Gorp::TestCase
     assert_equal "=> nil", stdout.shift
     assert_match /^=> .*Truman/, stdout.shift
     assert_equal "=> true", stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
     assert stdout.empty?
   end
 
@@ -631,6 +635,7 @@ class DepotTest < Gorp::TestCase
     assert_match /^=> (nil|\[\])/, stdout.shift
     assert_equal "\"Clem\"", stdout.shift
     assert_match /^=> (nil|"Clem")/, stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
@@ -663,6 +668,7 @@ class DepotTest < Gorp::TestCase
     assert_equal "=> #<Child id: 1, parent_id: 1, name: \"One\", position: nil>", stdout.shift
     assert_equal "Three, Two, Four", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
@@ -697,6 +703,7 @@ class DepotTest < Gorp::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "Books", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
@@ -756,6 +763,7 @@ class DepotTest < Gorp::TestCase
     assert_equal "=> nil", stdout.shift
     assert_equal "Refreshed size = 1", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
     assert stdout.empty?
   end
 
@@ -784,6 +792,8 @@ class DepotTest < Gorp::TestCase
     assert_equal "=> #<Order id: 1, user_id: nil, name: \"Dave Thomas\", address: \"123 The Street\", email: \"dave@example.com\">", stdout.shift
     assert_equal "Dave Thomas", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
+
     assert_equal "     id = 1", stdout.shift
     assert_equal "user_id = ", stdout.shift
     assert_equal "   name = Dbwf Tipnbt", stdout.shift
@@ -810,7 +820,7 @@ class DepotTest < Gorp::TestCase
     assert_equal "=> #<Order id: 2, user_id: nil, name: nil, address: nil, email: nil>", stdout.shift
     assert_select '.stderr', "[Audit] Payment 1 created"
     assert_equal "=> #<Payment id: 1>", stdout.shift
-    assert_equal "?> >> ", stdout.shift
+    stdout.shift if stdout.first == "?> >> "
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
@@ -846,7 +856,7 @@ class DepotTest < Gorp::TestCase
     assert_equal "=> 500", stdout.shift
     assert_equal "true", stdout.shift
     assert_match /^=> (nil|true)/, stdout.shift
-    assert_equal "?> >> ", stdout.shift
+    stdout.shift if stdout.first == "?> >> "
     assert_equal "                 id = 3", stdout.shift
     assert_equal "quantity*unit_price = 29.95", stdout.shift
     assert_equal " ", stdout.shift
@@ -869,6 +879,8 @@ class DepotTest < Gorp::TestCase
     assert_match /^=> #<Account id: 1, number: \"12345\", .*>$/, stdout.shift
     assert_match /^=> #<Account id: 2, number: \"54321\", .*>$/, stdout.shift
     assert_equal "=> true", stdout.shift
+
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
     assert_equal "     id = 1", stdout.shift
     assert_equal " number = 12345", stdout.shift
     assert_equal "balance = 90", stdout.shift
@@ -891,6 +903,8 @@ class DepotTest < Gorp::TestCase
     assert_match /^=> #<Account id: 2, number: \"54321\", .*>$/, stdout.shift
     assert_match /^\sfrom .*\/transactions.rb:\d+$/, stdout.shift
     stdout.shift while stdout.first =~ /^\tfrom /
+
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
     assert_equal "     id = 1", stdout.shift
     assert_equal " number = 12345", stdout.shift
     assert_equal "balance = 100", stdout.shift
@@ -915,6 +929,8 @@ class DepotTest < Gorp::TestCase
     assert_equal "Paul has 550.0", stdout.shift
     assert_equal "Peter has -250.0", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
+
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
@@ -932,6 +948,8 @@ class DepotTest < Gorp::TestCase
     assert_equal "Paul has 200.0", stdout.shift
     assert_equal "Peter has 100.0", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
+
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
@@ -949,6 +967,8 @@ class DepotTest < Gorp::TestCase
     assert_equal "Paul has 200.0", stdout.shift
     assert_equal "Peter has 100.0", stdout.shift
     assert_equal "=> nil", stdout.shift
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
+
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
     assert_match /^=> (true|\[\])/, stdout.shift
@@ -967,6 +987,7 @@ class DepotTest < Gorp::TestCase
     assert_equal "=> 4", stdout.shift
     assert_match /^\sfrom /, stdout.shift
     stdout.shift while stdout.first =~ /^\sfrom /
+    stdout.shift if stdout.first == '=> nil' # 1.9.2?
     assert stdout.empty?
   end
 
