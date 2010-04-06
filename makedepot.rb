@@ -2014,6 +2014,15 @@ section 23.11, 'Adding New Templating Systems' do
   Dir.chdir(File.join($WORK,'view'))
   cmd "cp -v #{$CODE}/e1/views/config/initializers/* config/initializers/"
   cmd "cp -v #{$CODE}/e1/views/lib/*_template.rb lib"
+  unless $R2
+    Dir.chdir 'app/views/test' do
+      cmd "mv date_format.reval date_format.text.reval"
+      cmd "mv example1.reval example1.text.reval"
+    end
+    # edit 'app/controllers/test_controller.rb' do
+    #   msub /class.*\n()/, "  respond_to :html, :text\n\n"
+    # end
+  end
   if $bundle and File.exist?('Gemfile')
     edit 'Gemfile' do
       msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'rdoc'\n"
