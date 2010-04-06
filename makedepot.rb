@@ -246,10 +246,6 @@ section 6.4, 'Iteration A3: Validate!' do
     data[/,( :allow_blank.*)/,1] = ''
     data[/(0.00)/,1] = '0.01'
   end
-
-  edit 'app/views/layouts/products.html.erb', 'head' do |data|
-    data[/'scaffold'.*()\n/,1] = ' <!-- <label id="code.scaffold1"/> -->'
-  end
 end
 
 section 6.5, 'Iteration A4: Making Prettier Listings' do
@@ -258,12 +254,13 @@ section 6.5, 'Iteration A4: Making Prettier Listings' do
     data[/()/,1] = read('products/003_add_test_data.rb')
   end
   cmd 'rake db:migrate'
-  edit 'app/views/layouts/products.html.erb', 'head' do |data|
+  layout = ($R2 ? 'products' : 'application')
+  edit "app/views/layouts/#{layout}.html.erb", 'head' do |data|
     data.gsub!(/ <!--.*-->/,'')
     data[/()<!DOCTYPE/,1] = "<!-- START:head -->\n"
-    data[/'scaffold'()/,1] = ", 'depot'"
-    data[/\n().*'scaffold'.*/,1] = "<!-- START_HIGHLIGHT -->\n"
-    data[/'scaffold'.*\n()/,1] = "<!-- END_HIGHLIGHT -->\n"
+    data[/stylesheet_link_tag.*() %>/,1] = ", 'depot'"
+    data[/\n().*stylesheet_link_tag.*/,1] = "<!-- START_HIGHLIGHT -->\n"
+    data[/stylesheet_link_tag.*\n()/,1] = "<!-- END_HIGHLIGHT -->\n"
     data[/()<body>/,1] = "<!-- END:head -->\n"
   end
   edit 'app/views/products/index.html.erb' do |data|
@@ -303,8 +300,8 @@ section 7.1, 'Iteration B1: Create the Catalog Listing' do
 end
 
 section 7.2, 'Iteration B2: Add a Page Layout' do
-  edit 'app/views/layouts/store.html.erb' do |data|
-    data[/()/,1] = read('store/store.html.erb')
+  edit 'app/views/layouts/store.html.erb' do
+    self.all = read('store/store.html.erb')
   end
   edit 'public/stylesheets/depot.css', 'mainlayout' do |data|
     data[/().*An entry in the store catalog/,1] = <<-EOF.unindent(6) + "\n"
@@ -1070,12 +1067,14 @@ section 11.1, 'Iteration F1: Adding Users' do
     data[/(.*)/m,1] = read('users/new.html.erb')
     data[/%() form_for/,1] = '=' unless $R2
   end
-  edit 'app/views/layouts/users.html.erb', 'head' do |data|
-    data[/()<!DOCTYPE/,1] = "<!-- START:head -->\n"
-    data[/'scaffold'()/,1] = ", 'depot'"
-    data[/\n().*'scaffold'.*/,1] = "<!-- START_HIGHLIGHT -->\n"
-    data[/'scaffold'.*\n()/,1] = "<!-- END_HIGHLIGHT -->\n"
-    data[/()<body>/,1] = "<!-- END:head -->\n"
+  if $R2
+    edit 'app/views/layouts/users.html.erb', 'head' do |data|
+      data[/()<!DOCTYPE/,1] = "<!-- START:head -->\n"
+      data[/'scaffold'()/,1] = ", 'depot'"
+      data[/\n().*'scaffold'.*/,1] = "<!-- START_HIGHLIGHT -->\n"
+      data[/'scaffold'.*\n()/,1] = "<!-- END_HIGHLIGHT -->\n"
+      data[/()<body>/,1] = "<!-- END:head -->\n"
+    end
   end
   get '/users'
   post '/users/new',
@@ -1158,15 +1157,18 @@ section 11.4, 'Iteration F4: Adding a Sidebar, More Administration' do
   edit "app/controllers/#{$APP}.rb", 'layout' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
     data[/()class ApplicationController/,1] = "#START:layout\n"
-    data[/class ApplicationController.*\n()/,1] = <<-EOF.unindent(4)
-      layout "store"
-      #...
-      #END:layout
-    EOF
+    if $R2
+      data[/class ApplicationController.*\n()/,1] = <<-EOF.unindent(4)
+        layout "store"
+      EOF
+    else
+      msub /layout '(application)'/, 'store'
+    end
+    msub /layout .*\n()/, "  #...\n  #END:layout\n"
   end
   get '/admin'
   get '/users'
-  edit "app/views/layouts/store.html.erb", 'hidden_div' do |data|
+  edit 'app/views/layouts/store.html.erb', 'hidden_div' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
     data.gsub! /\n +<%=? hidden_div_if.*? end %>\s*\n/m do |hidden_div|
       hidden_div.gsub!(/^/, '  ')
