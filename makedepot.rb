@@ -2030,8 +2030,8 @@ section 23.11, 'Adding New Templating Systems' do
   end
   restart_server
   get '/test/example'
-  get '/test/date_format'
-  get '/test/example1'
+  get '/test/date_format', :accept => 'text/plain'
+  get '/test/example1', :accept => 'text/plain'
 end
 
 section 25.1, 'Sending E-mail' do
