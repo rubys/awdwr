@@ -895,6 +895,20 @@ section 10.1, 'Iteration E1: Capturing an Order' do
   edit 'app/views/store/checkout.html.erb' do |data|
     data[/()/,1] = read('orders/checkout.html.erb')
     data[/%() form_for/,1] = '=' unless $R2
+    unless $R2
+      msub /^(  <%= error_messages_for 'order' %>\n)/, <<-EOF.unindent(6)
+        <% if @order.errors.any? %>
+          <div id="errorExplanation">
+            <h2><%= pluralize(@order.errors.count, "error") %> prohibited this order from being saved:</h2>
+            <ul>
+            <% @order.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+            </ul>
+          </div>
+        <% end %>
+      EOF
+    end
   end
   edit 'app/models/order.rb', 'select' do |data|
     data[/()class Order.*/,1] = "#START:select\n"
@@ -1538,6 +1552,10 @@ section 13, 'Task I: Internationalization' do
     data.gsub! '"Select a payment method"', "I18n.t('checkout.pay_prompt')"
     data.gsub! /(.*pay_prompt)/, "# START_HIGHLIGHT\n\\1"
     data.gsub! /(pay_prompt.*)/, "\\1\n# END_HIGHLIGHT"
+    data.edit '<h2>', :highlight
+    data.msub /<h2>(.*)<\/h2>/, 
+      "<%= I18n.t('errors.template.header', :count=>@order.errors.size,\n" +
+      "        :model=>I18n.t('activerecord.models.order')) %>:"
   end
   edit 'app/controllers/store_controller.rb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''

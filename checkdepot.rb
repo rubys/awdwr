@@ -63,7 +63,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.4, "Iteration A3: Validate!" do
-    assert_select 'h2', '3 errors prohibited this product from being saved'
+    assert_select 'h2', /3 errors prohibited this product from being saved/
     assert_select 'li', "Image url can't be blank"
     assert_select 'li', 'Price is not a number'
     assert_select '.fieldWithErrors input[id=product_price]'
@@ -142,7 +142,7 @@ class DepotTest < Gorp::TestCase
   section 10.1, "Iteration E1: Capturing an Order" do
     assert_select 'input[type=submit][value=Place Order]'
     assert_select 'p', /No action responded to save_order.|The action 'save_order' could not be found/
-    assert_select 'h2', '5 errors prohibited this order from being saved'
+    assert_select 'h2', /5 errors prohibited this order from being saved/
     assert_select '#notice', 'Thank you for your order'
   end
 
@@ -194,7 +194,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.price', /28,50(.|&#?\w+;)\$US/u
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
     assert_select 'input[type=submit][value$=dir al Carrito]'
-    assert_select 'h2', '5 errores han impedido que este pedido se guarde'
+    assert_select 'h2', /5 errores han impedido que este pedido se guarde/
     assert_select '#notice', 'Gracias por su pedido'
   end
 
