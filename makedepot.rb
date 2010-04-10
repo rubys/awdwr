@@ -1552,10 +1552,12 @@ section 13, 'Task I: Internationalization' do
     data.gsub! '"Select a payment method"', "I18n.t('checkout.pay_prompt')"
     data.gsub! /(.*pay_prompt)/, "# START_HIGHLIGHT\n\\1"
     data.gsub! /(pay_prompt.*)/, "\\1\n# END_HIGHLIGHT"
-    data.edit '<h2>', :highlight
-    data.msub /<h2>(.*)<\/h2>/, 
-      "<%= I18n.t('errors.template.header', :count=>@order.errors.size,\n" +
-      "        :model=>I18n.t('activerecord.models.order')) %>:"
+    unless $R2
+      data.edit '<h2>', :highlight
+      data.msub /<h2>(.*)<\/h2>/, 
+        "<%= I18n.t('errors.template.header', :count=>@order.errors.size,\n" +
+        "        :model=>I18n.t('activerecord.models.order')) %>:"
+    end
   end
   edit 'app/controllers/store_controller.rb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
