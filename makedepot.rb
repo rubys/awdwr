@@ -1056,13 +1056,16 @@ section 11.1, 'Iteration F1: Adding Users' do
     data[/@user.errors,() :status/,1] = "\n" + (' ' * 28)
     data[/@user.errors,() :status/,1] = "\n" + (' ' * 28)
   end
-  edit 'app/views/users/index.html.erb' do |data|
-    data[/(.*<th>Hashed password.*\n)/,1] = ''
-    data[/(.*<th>Salt.*\n)/,1] = ''
-    data[/(.*user.hashed_password.*\n)/,1] = ''
-    data[/(.*user.salt.*\n)/,1] = ''
-    data[/,() :method => :del/,1] = "\n" + (' ' * 39)
+
+  edit 'app/views/users/index.html.erb' do
+    msub /\A()/, "<p class=\"notice\"><%= notice %></p>\n\n" unless $R2
+    msub /(.*<th>Hashed password.*\n)/, ''
+    msub /(.*<th>Salt.*\n)/, ''
+    msub /(.*user.hashed_password.*\n)/, ''
+    msub /(.*user.salt.*\n)/, ''
+    msub /,() :method => :del/, "\n" + (' ' * 39)
   end
+
   edit "app/views/users/new.html.erb" do |data|
     data[/(.*)/m,1] = read('users/new.html.erb')
     data[/%() form_for/,1] = '=' unless $R2
