@@ -98,7 +98,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
 end
 
 # update libs
-libs = %w(gorp arel rack)
+libs = %w(gorp)
 libs.each do |lib|
   Dir.chdir(File.join(HOME,'git',lib)) { system 'git pull' }
 end

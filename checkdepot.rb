@@ -66,7 +66,11 @@ class DepotTest < Gorp::TestCase
     assert_select 'h2', /3 errors prohibited this product from being saved/
     assert_select 'li', "Image url can't be blank"
     assert_select 'li', 'Price is not a number'
-    assert_select '.fieldWithErrors input[id=product_price]'
+    if ActiveSupport::VERSION::STRING =~ /^2\.[23]/
+      assert_select '.fieldWithErrors input[id=product_price]'
+    else
+      assert_select '.field_with_errors input[id=product_price]'
+    end
   end
 
   section 6.5, "Iteration A4: Prettier Listings" do
