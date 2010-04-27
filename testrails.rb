@@ -136,7 +136,7 @@ if source
     break if File.exist? "../bin/ruby-#{release}-r#{rev}"
 
     caches = Dir["#{HOME}/.rvm/gems/#{PROFILE.gems}/cache"]
-    caches.reject! {|cache| cache =~ /[%:]/}
+    caches.reject! {|cache| cache =~ /[%:@]/}
     cache = caches.sort.last
 
     system "mkdir -p cache"
