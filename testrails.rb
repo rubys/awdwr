@@ -178,9 +178,15 @@ unless rvm
 end
 
 if File.exist? File.join(WORK, 'Gemfile')
-  install = "cd #{WORK}; bundle install; cd -"
+  install =  <<-EOF
+    gem list bundler | grep -q bundler || gem install bundler
+    cd #{WORK}; bundle install; cd -
+  EOF
 else
-  install = ''
+  install = <<-EOF
+    gem list rack | grep -q 1.0.1 || gem install rack -v 1.0.1
+    gem list will_paginate | grep -q 2 || gem install will_paginate
+  EOF
 end
 
 # run the script
