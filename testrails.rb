@@ -124,9 +124,8 @@ args << "--work=#{WORK}"
 
 # build a new rvm, if necessary
 source=PROFILE.rvm['src']
+release=PROFILE.rvm['bin'].split('-')[1]
 if source
-  release=PROFILE.rvm['bin'].split('-')[1]
-
   Dir.chdir("#{HOME}/.rvm/src") do
     rev = Dir.chdir(source) do
       system 'svn update'
@@ -168,6 +167,11 @@ if source
       end
     end
   end
+else
+  bash %{
+    source #{HOME}/.rvm/scripts/rvm
+    rvm ruby-#{release} || TERM=dumb rvm install ruby-#{release}
+  }
 end
 
 # find the rvm
