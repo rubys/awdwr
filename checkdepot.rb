@@ -106,6 +106,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 8.3, "Iteration C2: A Smarter Cart" do
+    ticket 4536,
+      :title =>  "retrieve_connection failure processing error template",
+      :match => /Internal Server Error/
+
     assert_select 'h1', /NoMethodError/
     assert_select 'h1', /in StoreController#add_to_cart/
     assert_select 'li', /2 (.|&#?\w+;) Pragmatic Project Automation/u
