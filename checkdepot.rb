@@ -266,6 +266,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 18, 'Active Record: The Basics' do
+    ticket 3235,
+      :list  => :ruby,
+      :title =>  "Stack Traceback running irb on Linux",
+      :match => /glibc detected .*: invalid next size/
+
     prelude = /Loading development environment|Switch to inspect mode/
     stdout = collect_stdout
     stdout.shift while stdout.first =~ prelude
@@ -440,6 +445,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 19, 'Active Record: Relationships Between Tables' do
+    ticket 3235,
+      :list  => :ruby,
+      :title =>  "Stack Traceback running irb on Linux",
+      :match => /glibc detected .*: invalid next size/
+
     stdout = collect_stdout
     stdout.reject! {|line| line =~ /' -> `vendor\/plugins\//}
     stdout.shift if stdout.first == 'Switch to inspect mode.'
@@ -776,6 +786,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 20, 'Active Record: Object Life Cycle' do
+    ticket 3235,
+      :list  => :ruby,
+      :title =>  "Stack Traceback running irb on Linux",
+      :match => /glibc detected .*: invalid next size/
+
     stdout = collect_stdout
     stdout.shift if stdout.first == 'Switch to inspect mode.'
     assert_match /^=> \[.*\]$/, stdout.shift
@@ -1015,6 +1030,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 21.2, 'Routing Requests' do
+    ticket 3235,
+      :list  => :ruby,
+      :title =>  "Stack Traceback running irb on Linux",
+      :match => /glibc detected .*: invalid next size/
+
     if ActiveSupport::VERSION::STRING =~ /^2\.[23]/
       ticket 4073, :title =>  "overwrite_params needs to be deprecated" do |raw|
         not raw.index(/DEPRECATION WARNING.*overwrite_params/)
