@@ -83,6 +83,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       gemfile.puts "source 'http://gemcutter.org'"
       gemfile.puts "gem 'rails', :path => #{$rails.inspect}"
       gemfile.puts "gem 'sqlite3-ruby', :require => 'sqlite3'"
+      gemfile.puts "gem 'mysql'"
       gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
       gemfile.puts "gem 'capistrano'"
       gemfile.puts "gem 'test-unit'"
