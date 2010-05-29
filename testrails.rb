@@ -253,6 +253,12 @@ if File.exist?("#{WORK}/checkdepot.html")
       "a href=#{page(this).inspect} class='prev_link'>")
   end
 
+  # adjust todo links
+  env.gsub! /<li>.*?<\/li>/m do |li|
+    section = li.scan(/href="#(section-.*?)"/).flatten.first
+    li.gsub('href="#', "href=\"#{section}.html#").gsub("##{section}\"", '"')
+  end
+
   # output the files
   system "rm -rf #{WORK}/checkdepot"
   system "mkdir -p #{WORK}/checkdepot"
