@@ -190,7 +190,7 @@ if File.exist? File.join(WORK, 'Gemfile')
   EOF
 else
   install = <<-EOF
-    gem list rack | grep -q 1.0.1 || gem install rack -v 1.0.1
+    gem list rack | grep -q 1.1.0 || gem install rack -v 1.1.0
     gem list will_paginate | grep -q 2 || gem install will_paginate
   EOF
 end
