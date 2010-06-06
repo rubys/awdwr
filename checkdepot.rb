@@ -219,9 +219,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.4, "Integration Testing of Applications" do
-    ticket 4213,
-      :title =>  "undefined method `named_routes' in integration test",
-      :match => /NoMethodError: undefined method `named_routes' for nil:NilClass/
+    ticket 4781,
+      :title =>  "rjs function tests fail",
+      :match => /NoMethodError: undefined method `size' for :js:Symbol/
 
     assert_select '.stdout', /1 tests, \d+ assertions, 0 failures, 0 errors/
     assert_select '.stdout', /2 tests, \d+ assertions, 0 failures, 0 errors/
