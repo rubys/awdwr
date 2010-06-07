@@ -1731,7 +1731,7 @@ section 18, 'Active Record: The Basics' do
   console 'Order.column_names'
   console 'Order.columns_hash["pay_type"]'
   db "select * from orders limit 1"
-  console 'Product.find(:first).price_before_type_cast'
+  # console 'Product.find(:first).price_before_type_cast'
   console 'Product.find(:first).updated_at_before_type_cast'
   irb 'e1/ar/new_examples.rb'
   irb 'e1/ar/find_examples.rb'
