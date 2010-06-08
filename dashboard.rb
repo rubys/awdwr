@@ -244,7 +244,12 @@ $cgi.html do |x|
             x.td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='1.8.7')
             x.td job['rails'], ({:class=>'hilite'} if job['rails']!='3.0pre')
             x.td :class=>color, :align=>'center' do
-              x.a status, :href => "#{job['web']}/#{link}" #todos"
+              if status == 'NO OUTPUT'
+                link.sub! ".html", '/'
+                x.a status, :href => "#{job['web']}/#{link}makedepot.log"
+              else
+                x.a status, :href => "#{job['web']}/#{link}" #todos"
+              end
             end
             x.td mtime.sub('T',' ').sub(/[+-]\d\d:\d\d$/,'')
           end

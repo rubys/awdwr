@@ -195,6 +195,8 @@ else
   EOF
 end
 
+system "rm -f #{WORK}/checkdepot.html"
+
 # run the script
 bash %{
   source #{HOME}/.rvm/scripts/rvm
@@ -274,10 +276,12 @@ if File.exist?("#{WORK}/checkdepot.html")
       open(page(section),'w') {|file| file.write(head+body+tail)}
     end
   end
-
-  # copy the log
-  system "cp #{LOG} #{WORK}/checkdepot/makedepot.log"
+else
+  open(File.join(WORK, 'status'), 'w') {|file| file.puts 'NO OUTPUT'}
 end
+
+# copy the log
+system "cp #{LOG} #{WORK}/checkdepot/makedepot.log"
 
 # restore rails to master
 Dir.chdir($rails) do
