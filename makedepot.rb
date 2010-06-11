@@ -1174,13 +1174,9 @@ section 11.4, 'Iteration F4: Adding a Sidebar, More Administration' do
   edit "app/controllers/#{$APP}.rb", 'layout' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
     data[/()class ApplicationController/,1] = "#START:layout\n"
-    if $R2
-      data[/class ApplicationController.*\n()/,1] = <<-EOF.unindent(4)
-        layout "store"
-      EOF
-    else
-      msub /layout '(application)'/, 'store'
-    end
+    data[/class ApplicationController.*\n()/,1] = <<-EOF.unindent(4)
+      layout "store"
+    EOF
     msub /layout .*\n()/, "  #...\n  #END:layout\n"
   end
   get '/admin'
