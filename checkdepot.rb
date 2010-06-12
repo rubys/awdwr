@@ -874,7 +874,7 @@ class DepotTest < Gorp::TestCase
     assert_match /^=> (nil|"?29.95"?)/, stdout.shift
     assert_match /^=> 0.07/, stdout.shift
     assert_match /""|2.0965/, stdout.shift
-    assert_match /^=> (nil|"")/, stdout.shift
+    assert_match /^=> (nil|""|2\.0965\d*)/, stdout.shift
     assert_equal "=> nil", stdout.shift
     assert_equal "2.54", stdout.shift
     assert_match /^=> (nil|2.54)/, stdout.shift
