@@ -208,9 +208,13 @@ bash %{
 status = $?
 
 if File.exist?("#{WORK}/checkdepot.html")
-  # disect checkdepot output 
+  # parse and normalize checkdepot output
   body = open("#{WORK}/checkdepot.html").read
   body.gsub! "src='data", "src='../data"
+  eof = '#&lt;EOFError: end of file reached&gt;'
+  body.gsub! eof, "<a href='makedepot.log'>#{eof}</a>"
+
+  # dissect checkdepot output 
   sections = body.split(/^\s+<a class="toc" id="section-(.*?)">/)
   head=sections.shift
   toc = head.slice!(/^\s*<h2>Table of Contents<\/h2>.*/m)
