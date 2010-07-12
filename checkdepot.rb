@@ -42,10 +42,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.2, 'Creating the Products Model and Maintenance Application' do
-    ticket 138,
-      :list  => :bundler,
-      :title =>  "bundler 0.9.8 error on dependencies in rubygems_ext",
-      :match => /undefined method `dependencies' for class `Gem::Specification'/
+    ticket 3562,
+      :list => :ruby,
+      :title =>  "regression in respond_to?",
+      :match => /I18n::UnknownFileType/
 
     assert_select 'th', 'Image url'
     assert_select 'input#product_title[value=Pragmatic Version Control]'
@@ -55,6 +55,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.3, "Iteration A2: Add a Missing Column" do
+    ticket 3555,
+      :list => :ruby,
+      :title =>  "segvs since r28570",
+      :match => /active_support\/core_ext\/module\/introspection.rb:\d+: \[BUG\] Segmentation fault/
     assert_select '.stdout', 
       /add_column\(:products, :price, :decimal, \{.*:precision=&gt;8.*\}\)/
     assert_select '.stdout', /"price" decimal\(8,2\) DEFAULT 0/
