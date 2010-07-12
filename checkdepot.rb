@@ -59,6 +59,10 @@ class DepotTest < Gorp::TestCase
       :list => :ruby,
       :title =>  "segvs since r28570",
       :match => /active_support\/core_ext\/module\/introspection.rb:\d+: \[BUG\] Segmentation fault/
+    ticket 3555,
+      :list => :ruby,
+      :title =>  "segvs since r28570",
+      :match => /active_support\/dependencies.rb:\d+: \[BUG\] Segmentation fault/
     assert_select '.stdout', 
       /add_column\(:products, :price, :decimal, \{.*:precision=&gt;8.*\}\)/
     assert_select '.stdout', /"price" decimal\(8,2\) DEFAULT 0/
