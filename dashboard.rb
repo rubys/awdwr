@@ -41,8 +41,9 @@ LOG = []
 unless ACTIVE.empty?
   start = Time.parse(ACTIVE.first.split.first)
 
-  Dir["#{LOGDIR}/makedepot*.log"].each do |log|
-    next unless File.stat(log).mtime >= start
+  logs = Dir["#{LOGDIR}/makedepot*.log"]
+  log = logs.sort_by {|log| File.stat(log).mtime}.last
+  if File.stat(log).mtime >= start
     LOG.push *open(log) {|file| file.read.grep(/====>/)[-3..-1] or []}
   end
 
