@@ -185,8 +185,8 @@ end
 
 if File.exist? File.join(WORK, 'Gemfile')
   install =  <<-EOF
-    gem list bundler | grep -q bundler || gem install bundler
-    cd #{WORK}; bundle install; cd -
+    gem list bundler | grep -q bundler || gem install bundler --pre
+    cd #{WORK}; bundle update; cd -
   EOF
 else
   install = <<-EOF
