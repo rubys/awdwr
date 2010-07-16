@@ -186,12 +186,13 @@ end
 if File.exist? File.join(WORK, 'Gemfile')
   install =  <<-EOF
     gem list bundler | grep -q bundler || gem install bundler --pre
-    cd #{WORK}; bundle update; cd -
+    cd #{WORK}; rm -f Gemfile.lock; bundle install; cd -
   EOF
 else
   install = <<-EOF
     gem list rack | grep -q 1.1.0 || gem install rack -v 1.1.0
     gem list will_paginate | grep -q 2 || gem install will_paginate
+    gem list activesupport | grep -q 3.0 && gem uninstall activesupport -I -a
   EOF
 end
 
