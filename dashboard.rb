@@ -243,7 +243,7 @@ $cgi.html do |x|
             x.td job['book'], {:align=>'right'}.
               merge(job['book']=='3' ? {} : {:class=>'hilite'})
             x.td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='1.8.7')
-            x.td job['rails'], ({:class=>'hilite'} if job['rails']!='3.0pre')
+            x.td job['rails'], ({:class=>'hilite'} if job['rails']!='3.0rc')
             x.td :class=>color, :align=>'center' do
               if status == 'NO OUTPUT'
                 link.sub! ".html", '/'
