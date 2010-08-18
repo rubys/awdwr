@@ -55,7 +55,7 @@ class ProductTest < ActiveSupport::TestCase
                             :description => "yyy",
                             :price       => 1,
                             :image_url   => name)
-      assert product.valid?, product.errors.full_messages
+      assert product.valid?, product.errors.full_messages.join
     end
 
     bad.each do |name|
