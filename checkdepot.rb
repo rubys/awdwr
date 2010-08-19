@@ -215,6 +215,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.2, "Unit Testing of Models" do
+    ticket 5406,
+      :title =>  "undefined method name in rescue in run",
+      :match => /`rescue in run': undefined method `name'/
+    
     assert_select '.stdout', /SQLite3::SQLException: no such table: \w+/
     assert_select '.stdout', /1 tests, 1 assertions, 0 failures, 0 errors/
     assert_select '.stdout', /4 tests, 4 assertions, 0 failures, 0 errors/
