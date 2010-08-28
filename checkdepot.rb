@@ -544,7 +544,7 @@ class DepotTest < Gorp::TestCase
     assert_match /^=> (\[.*\]|nil)$/, stdout.shift
     assert_match /^=> #<Logger:.*>$/, stdout.shift
     assert_equal "-- create_table(:people, {:force=>true})", stdout.shift
-    stdout.shift if stdout.first =~ /\s+-> \d\.\d+s$/
+    stdout.shift if stdout.first =~ /\s+-> \d+\.\d+s$/
     stdout.shift if stdout.first =~ /=> nil/
     assert_equal "=> nil", stdout.shift
     assert_equal "=> nil", stdout.shift
