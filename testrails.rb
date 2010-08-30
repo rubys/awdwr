@@ -76,12 +76,27 @@ if !updated
   end
 end
 
+# update libs
+libs = %w(gorp arel)
+libs.each do |lib|
+  Dir.chdir(File.join(HOME,'git',lib)) { system 'git pull' }
+end
+ENV['RUBYLIB'] = libs.map {|lib| File.join(HOME,'git',lib,'lib')}.
+  join(File::PATH_SEPARATOR)
+
 # update gems
 Dir.chdir File.join(PROFILE.source,WORK) do
   if File.exist? File.join($rails, 'Gemfile')
     open('Gemfile','w') do |gemfile|
       gemfile.puts "source 'http://gemcutter.org'"
       gemfile.puts "gem 'rails', :path => #{$rails.inspect}"
+      ENV['RUBYLIB'].split(File::PATH_SEPARATOR).each do |path|
+        path.sub! /\/lib$/, ''
+        name = path.split(File::SEPARATOR).last
+        if File.exist?(File.join(path, "/#{name}.gemspec"))
+          gemfile.puts "gem #{name.inspect}, :path => #{path.inspect}"
+        end
+      end
       gemfile.puts "gem 'sqlite3-ruby', :require => 'sqlite3'"
       gemfile.puts "gem 'mysql'"
       gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
@@ -98,14 +113,6 @@ Dir.chdir File.join(PROFILE.source,WORK) do
     system 'rm -f Gemfile'
   end
 end
-
-# update libs
-libs = %w(gorp)
-libs.each do |lib|
-  Dir.chdir(File.join(HOME,'git',lib)) { system 'git pull' }
-end
-ENV['RUBYLIB'] = libs.map {|lib| File.join(HOME,'git',lib,'lib')}.
-  join(File::PATH_SEPARATOR)
 
 # update awdwr tests
 Dir.chdir PROFILE.source
