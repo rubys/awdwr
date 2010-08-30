@@ -167,6 +167,14 @@ if source
       vms.each do |vm|
         system "find . -name #{vm} -exec rm -rf {} \\;"
       end
+
+      gems = Dir.chdir('gems') { Dir["ruby-#{release}-r*"].sort }
+      gems.slice! -keep*2..-1
+      gems.delete_if {|gem| File.stat("gems/#{gem}").mtime >= horizon}
+
+      gems.each do |gem|
+        system "find . -name #{vm} -exec rm -rf {} \\;"
+      end
     end
   end
 else
@@ -185,7 +193,7 @@ end
 
 if File.exist? File.join(WORK, 'Gemfile')
   install =  <<-EOF
-    gem list bundler | grep -q bundler || gem install bundler --pre
+    gem list bundler | grep -q bundler || gem install bundler
     cd #{WORK}; rm -f Gemfile.lock; bundle install; cd -
   EOF
 else
