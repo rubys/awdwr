@@ -180,7 +180,7 @@ if source
       gems.delete_if {|gem| File.stat("gems/#{gem}").mtime >= horizon}
 
       gems.each do |gem|
-        system "find . -name #{vm} -exec rm -rf {} \\;"
+        system "find . -name #{gem} -exec rm -rf {} \\;"
       end
     end
   end
