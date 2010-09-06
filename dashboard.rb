@@ -10,13 +10,16 @@ LOGDIR = config.delete('log')
 BINDIR = config.delete('bin')
 
 # identify the unique jobs
-JOBS = config['book'].map do |book, book_info|
-  book_info['env'].map do |info|
-    work=info['work']
-    info['book']=book
-    info['path']=File.join(book_info['home'],work)
-    info['id']=work.gsub('.','') + '-' + book.to_s
-    info.update(book_info)
+JOBS = config['book'].map do |editions|
+  editions = [editions] if editions.respond_to? :push
+  editions.map do |book, book_info|
+    book_info['env'].map do |info|
+      work=info['work']
+      info['book']=book
+      info['path']=File.join(book_info['home'],work)
+      info['id']=work.gsub('.','') + '-' + book.to_s
+      info.update(book_info)
+    end
   end
 end.flatten
 
@@ -215,7 +218,7 @@ $cgi.html do |x|
           mtime = File.stat(statfile).mtime.iso8601 rescue 'missing'
 
           attrs = {:id => job['id']}
-          attrs[:class]='r23' if job['rails']=='2.3.5'
+          attrs[:class]='r23' if job['rails']=='3.0'
 
           if $param.static
             link =  "#{job['work'].sub('work','checkdepot')}.html"
@@ -241,9 +244,9 @@ $cgi.html do |x|
 
           x.tr attrs do
             x.td job['book'], {:align=>'right'}.
-              merge(job['book']=='3' ? {} : {:class=>'hilite'})
+              merge(job['book']=='4' ? {} : {:class=>'hilite'})
             x.td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='1.8.7')
-            x.td job['rails'], ({:class=>'hilite'} if job['rails']!='3.0')
+            x.td job['rails'], ({:class=>'hilite'} if job['rails']!='3.1')
             x.td :class=>color, :align=>'center' do
               if status == 'NO OUTPUT'
                 link.sub! ".html", '/'
