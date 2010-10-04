@@ -77,7 +77,7 @@ if !updated
 end
 
 # update libs
-libs = %w(gorp arel)
+libs = %w(gorp arel rack)
 libs.each do |lib|
   Dir.chdir(File.join(HOME,'git',lib)) { system 'git pull' }
 end
