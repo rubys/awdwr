@@ -77,7 +77,18 @@ if !updated
 end
 
 # update libs
-libs = %w(gorp arel rack)
+libs = %w(gorp)
+
+# add in any 'edge' gems
+template = File.join(HOME,'git','rails',
+  'railties/lib/rails/generators/rails/app/templates/Gemfile')
+if File.exist? template
+  gemfile = open(template).read
+  libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/).flatten
+  libs.uniq!
+  libs -= %w(rails)
+end
+
 libs.each do |lib|
   Dir.chdir(File.join(HOME,'git',lib)) { system 'git pull' }
 end
