@@ -119,6 +119,8 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       # rescue LoadError
         gemfile.puts "gem 'htmlentities'"
       # end
+
+      gemfile.puts "gem 'activemerchant'"
     end
   else
     system 'rm -f Gemfile'
