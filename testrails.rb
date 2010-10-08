@@ -122,6 +122,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
 
       gemfile.puts "gem 'activemerchant'"
       gemfile.puts "gem 'haml'"
+      gemfile.puts "gem 'jquery-rails'"
     end
   else
     system 'rm -f Gemfile'
