@@ -1029,6 +1029,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 21, "Action Controller: Routing and URLs" do
+    ticket 5934,
+      :list  => :rails,
+      :title =>  "carets and dollars in rake route output",
+      :match => /\^GET\$/
+
     assert_select '.stdout', /^ \s*
       edit_article_comment \s GET \s+
       \/articles\/:article_id\/comments\/:id\/edit (\(.:format\))? \s+
