@@ -93,7 +93,6 @@ if File.exist? template
     libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/)
   end
   libs = libs.flatten.uniq - %w(rails)
-  STDERR.puts libs.inspect
 end
 
 libs.each do |lib|
