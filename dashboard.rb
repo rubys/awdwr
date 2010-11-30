@@ -116,8 +116,8 @@ $cgi.html do |x|
       x.indented_text! '#executing {display: none}' if ACTIVE.empty?
     end
 
-    x.script '', :src => 'jquery-1.3.2.min.js'
-    x.script '', :src => 'jquery-ui-1.7.2.custom.min.js'
+    x.script '', :src => 'jquery.min.js'
+    x.script '', :src => 'jquery-ui.min.js'
     x.script '', :src => 'jquery.tablesorter.min.js'
 
     x.script! %{
