@@ -1,2 +1,2 @@
 $EDITION = 'edition3'
-require "#{$EDITION}/makedepot"
+require "#{File.dirname(__FILE__)}/#{$EDITION}/makedepot"
