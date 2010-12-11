@@ -1,0 +1,11 @@
+<% for column in User.user_columns %>
+<p>
+  <b><%= column.human_name %>:</b> 
+  <%= in_place_editor_field "user", column.name, {}, {
+    :load_text_url=> url_for(:action=>"get_user_#{column.name}", :id=>@user)
+  } %>
+</p>
+<% end %>
+
+<%= link_to 'Edit', :action => 'edit', :id => @user %> |
+<%= link_to 'Back', :action => 'list' %>

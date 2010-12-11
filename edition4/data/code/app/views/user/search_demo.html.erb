@@ -1,0 +1,21 @@
+<!-- START:noop_form -->
+<% form_tag('javascript:void(0)') do %>
+<!-- END:noop_form -->
+  <div class="fake-h1">Listing users
+  <%= text_field_tag 'search', @search %>
+<!-- START:observe_field -->
+  <%= observe_field :search,                     # <label id="code.search1"/> 
+                    :frequency => 0.5,           # <label id="code.search2"/> 
+                    :update    => 'ajaxWrapper', # <label id="code.search3"/>
+                    :before    => "Element.show('spinner')", # <label id="code.search5"/> 
+                    :complete  => "Element.hide('spinner')", # <label id="code.search4"/> 
+                    :url       => {:action=>'search', :only_path => false}, # <label id="code.search7"/> 
+                    :with      => "'search=' + encodeURIComponent(value)" %> <!-- <label id="code.search6"/> -->
+<!-- END:observe_field -->
+  </div>
+<% end %>
+<!-- START:ajaxWrapper -->
+<div id='ajaxWrapper'>
+<%= render :partial=>'search' %>  
+</div>
+<!-- END:ajaxWrapper -->

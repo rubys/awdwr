@@ -1,0 +1,16 @@
+<% form_for :product, :url => { :action => :create } do |form| %>
+  <%= error_messages_for :product %>
+  Title:       <%= form.text_field :title %><br/>
+  Description: <%= form.text_area :description, :rows => 3 %><br/>
+  Image url:   <%=form.text_field :image_url  %><br/>
+
+  <fieldset>
+    <legend>Details...</legend>
+    <%= error_messages_for :details %>
+    <% fields_for :details do |detail| %>
+      SKU:          <%= detail.text_field :sku %><br/>
+      Manufacturer: <%= detail.text_field :manufacturer %>
+    <% end %>
+  </fieldset>
+  <%= submit_tag %>
+<% end %>

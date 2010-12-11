@@ -1,0 +1,10 @@
+<h1>New product</h1>
+
+<% form_tag :action => 'create' do %>
+  <%= render(:partial => "form") %>
+  <%= submit_tag "Create" %>
+<% end %>
+
+<%= error_message_on(:product, :title) %>
+
+<%= link_to 'Back', :action => 'list' %>

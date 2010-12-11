@@ -1,0 +1,8 @@
+<% 1.upto(1000) do |i| %>
+product_<%= i %>:
+  id: <%= i %>
+  title: Product Number <%= i %>
+  description: My description
+  image_url: product.gif
+  price: 1234
+<% end %>

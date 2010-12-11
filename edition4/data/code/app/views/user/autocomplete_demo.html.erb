@@ -1,0 +1,25 @@
+<%= stylesheet_link_tag 'autocomplete' %>
+<h1>Editing user</h1>
+
+<% form_tag :action => 'update', :id => @user do %>
+  <%= error_messages_for 'user' %>
+
+  <p>Username<br/>
+  <%= @user.username  %></p>
+
+  <%# codecite autocomplete %>
+  <!-- START: codecite autocomplete -->
+  <p><label for="user_favorite_language">Favorite language</label><br/>
+  <%= text_field 'user', 'favorite_language'  %></p>   <!-- <label id="code.auto.1"/> -->
+  <div class="auto_complete" 
+       id="user_favorite_language_auto_complete"></div>
+  <!-- <label id="code.auto.helper"/> --><%= auto_complete_field :user_favorite_language,
+        :url=>{:action=>'autocomplete_favorite_language'}, :tokens => ',' %>
+  <!-- END: codecite autocomplete -->
+  <%# codecite autocomplete %>
+  <%= submit_tag 'Edit' %>
+<% end %>
+
+
+<%= link_to 'Show', :action => 'show', :id => @user %> |
+<%= link_to 'Back', :action => 'list' %>

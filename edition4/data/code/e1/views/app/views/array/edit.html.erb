@@ -1,0 +1,6 @@
+<% form_tag do %>
+  <% for @product in @products %>
+    <%= text_field("product[]", 'image_url') %><br />
+  <% end %>
+  <%= submit_tag %>
+<% end %>

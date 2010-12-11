@@ -1,0 +1,86 @@
+#START:layout
+#START:main
+#START:cart
+#START:currency
+#START:checkout
+#START:errors
+#START:model
+#START:flash
+es:
+
+#END:cart
+#END:flash
+#END:model
+#END:errors
+#END:checkout
+#END:main
+#END:layout
+  number:
+    currency:
+      format:
+        unit:      "$US"
+        precision: 2
+        separator: ","
+        delimiter: "."
+        format:    "%n&nbsp;%u"
+#END:currency
+
+#START:model
+#START:errors
+  activerecord:
+#END:errors
+#END:model
+#START:errors
+    errors:
+      messages:
+        inclusion: "no est&aacute; incluido en la lista"
+        blank:     "no puede quedar en blanco"
+  errors:
+    template:
+      body:        "Hay problemas con los siguientes campos:"
+      header:
+        one:       "1 error ha impedido que este %{model} se guarde"
+        other:     "%{count} errores han impedido que este %{model} se guarde"
+#END:errors
+
+#START:layout
+  layouts:
+    application:
+      title:       "Publicaciones de Pragmatic"
+      home:        "Inicio"
+      questions:   "Preguntas"
+      news:        "Noticias"
+      contact:     "Contacto"
+#END:layout
+
+#START:cart
+  carts:
+    cart:
+      title:       "Carrito de la Compra"
+      empty:       "Vaciar Carrito"
+      checkout:    "Comprar"
+#END:cart
+
+#START:main
+  store:
+    index:
+      title_html:  "Su Cat&aacute;logo de Pragmatic"
+      add_html:    "A&ntilde;adir al Carrito"
+#END:main
+
+#START:checkout
+  orders:
+    new:
+      legend:       "Por favor, introduzca sus datos"
+    form:
+      name:         "Nombre"
+      address_html: "Direcci&oacute;n"
+      email:        "E-mail"
+      pay_type:     "Pagar con"
+      pay_prompt_html: "Seleccione un m&eacute;todo de pago"
+      submit:       "Realizar Pedido"
+#END:checkout
+
+#START:flash
+  thanks:          "Gracias por su pedido"
+#END:flash

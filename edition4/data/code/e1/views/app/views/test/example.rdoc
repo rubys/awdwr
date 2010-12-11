@@ -1,0 +1,8 @@
+= Greetings from RDoc
+
+Let's see if we're doing 
+_real_ formatting...
+
+* This should be
+* A bullet list
+  all nicely formatted

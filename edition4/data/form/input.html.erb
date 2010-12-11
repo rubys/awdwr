@@ -1,0 +1,46 @@
+<%= form_for :model do |form| %>
+<p>
+  <%= form.label :input %> <!-- <label id="helper.label"/> -->
+  <%= form.text_field :input, :placeholder => 'Enter text here...' %> <!-- <label id="helper.text"/> -->
+</p>
+
+<p>
+  <%= form.label :address, :style => 'float: left' %>
+  <%= form.text_area :address, :rows => 3, :cols => 40 %> <!-- <label id="helper.textarea"/> -->
+</p>
+
+<p>
+  <%= form.label :color %>:
+  <%= form.radio_button :color, 'red' %> <!-- <label id="helper.radio"/> -->
+  <%= form.label :red %>
+  <%= form.radio_button :color, 'yellow' %>
+  <%= form.label :yellow %>
+  <%= form.radio_button :color, 'green' %>
+  <%= form.label :green %>
+</p>
+
+<p>
+  <%= form.label 'condiment' %>:
+  <%= form.check_box :ketchup %> <!-- <label id="helper.checkbox"/> -->
+  <%= form.label :ketchup %>
+  <%= form.check_box :mustard %>
+  <%= form.label :mustard %>
+  <%= form.check_box :mayonnaise %>
+  <%= form.label :mayonnaise %>
+</p>
+
+<p>
+  <%= form.label :priority %>:
+  <%= form.select :priority, (1..10) %> <!-- <label id="helper.select"/> -->
+</p>
+
+<p>
+  <%= form.label :start %>:
+  <%= form.date_select :start %> <!-- <label id="helper.date"/> -->
+</p>
+
+<p>
+  <%= form.label :alarm %>:
+  <%= form.time_select :alarm %> <!-- <label id="helper.time"/> -->
+</p>
+<% end %>

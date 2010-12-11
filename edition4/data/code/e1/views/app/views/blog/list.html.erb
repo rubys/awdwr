@@ -1,0 +1,12 @@
+<%= @dynamic_content %>   <!-- Here's dynamic content. -->
+
+<% cache do %>            <!-- Here's the content we cache -->
+  <ul>
+    <% for article in Article.find_recent %>
+      <li><p><%= h(article.body) %></p></li>
+    <% end %>
+  </ul>
+<% end %>                 <!-- End of cached content -->
+
+<%= @dynamic_content %>   <!-- More dynamic content. -->
+
