@@ -2632,13 +2632,17 @@ section 15.4, 'Task I4: Add a locale switcher.' do
     data.clear_highlights
     data[/\n()\s+<%= image_tag/,1] = <<-EOF.unindent(2)
       <!-- START:i18n -->
+      <!-- START_HIGHLIGHT -->
       <%= form_tag store_path, :class => 'locale' do %>
+      <!-- END_HIGHLIGHT -->
         <%= select_tag 'set_locale', 
           options_for_select(LANGUAGES, I18n.locale.to_s),
           :onchange => 'this.form.submit()' %>
         <%= submit_tag 'submit' %>
         <%= javascript_tag "$$('.locale input').each(Element.hide)" %>
+      <!-- START_HIGHLIGHT -->
       <% end %>
+      <!-- END_HIGHLIGHT -->
       <!-- END:i18n -->
     EOF
   end

@@ -49,7 +49,7 @@ class UserStoriesTest < ActionController::IntegrationTest
     #END:step4
     
     #START:step5
-    orders = Order.find(:all)
+    orders = Order.all
     assert_equal 1, orders.size
     order = orders[0]
     
