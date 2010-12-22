@@ -675,19 +675,28 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
       before_destroy :ensure_not_referenced_by_any_line_item
       #END_HIGHLIGHT
 
+      #...
+
+      #END:has_many
+    EOF
+
+    msub /^()end/, <<-EOF.unindent(4)
+      #START:has_many
       #START_HIGHLIGHT
-      # ensure that there are no line items referencing this product
-      def ensure_not_referenced_by_any_line_item
-        if line_items.count.zero?
-          return true
-        else
-          errors.add(:base, 'Line Items present')
-          return false
-        end
-      end
+      private
       #END_HIGHLIGHT
 
-      #...
+        #START_HIGHLIGHT
+        # ensure that there are no line items referencing this product
+        def ensure_not_referenced_by_any_line_item
+          if line_items.count.zero?
+            return true
+          else
+            errors.add(:base, 'Line Items present')
+            return false
+          end
+        end
+        #END_HIGHLIGHT
     EOF
   end
 
@@ -812,11 +821,10 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
 
   desc 'Create a method to add a product to the cart by either incrementing ' +
        'the quantity of an existing line item, or creating a new line item.'
-  edit 'app/models/cart.rb', 'add_product' do |data|
-    data[/^()end/,1] = "\n" + <<-'EOF'.unindent(4)
-      #START:add_product
+  edit 'app/models/cart.rb', 'add_product' do
+    msub /^()end/, "\n" + <<-'EOF'.unindent(4), :mark => 'add_product'
       def add_product(product_id)
-        current_item = line_items.where(:product_id => product_id).first
+        current_item = line_items.find_by_product_id(product_id)
         if current_item
           current_item.quantity += 1
         else
@@ -824,7 +832,6 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
         end
         current_item
       end
-      #END:add_product
     EOF
   end
 
@@ -2440,6 +2447,7 @@ section 15.1, 'Task I1: Selecting the locale' do
 
   desc 'Replace translatable text with calls out to translation functions.'
   edit 'app/views/layouts/application.html.erb' do |data|
+    clear_highlights
     data.gsub! '"Pragmatic Bookshelf"', "t('.title')"
     data.gsub! 'Home', "<%= t('.home') %>"
     data.gsub! 'Questions', "<%= t('.questions') %>"
