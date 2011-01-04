@@ -166,7 +166,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
 
   desc 'Add precision and scale to the price'
   edit Dir['db/migrate/*create_products.rb'].first do
-    up = (include?('self.up') ? 'self.up' : 'up')
+    up = (include?('self.up') ? 'self.up' : 'change')
     dcl up, :mark=>'up' do
       edit 'price', :highlight do
         self << ', :precision => 8, :scale => 2'
@@ -1105,7 +1105,7 @@ section 10.4, 'Playtime' do
   desc 'Add price to line item'
   generate 'migration add_price_to_line_item price:decimal'
   edit Dir['db/migrate/*add_price_to_line_item.rb'].first do
-    up = (include?('self.up') ? 'self.up' : 'up')
+    up = (include?('self.up') ? 'self.up' : 'change')
     dcl up do
       msub /add_column.*\n()/, <<-EOF.unindent(4)
         LineItem.all.each do |li|
@@ -1387,7 +1387,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     'name:string address:text email:string pay_type:string'
 
   edit Dir['db/migrate/*_create_orders.rb'].first, 'up' do |data|
-    up = (include?('self.up') ? 'self.up' : 'up')
+    up = (include?('self.up') ? 'self.up' : 'change')
     dcl up, :mark=>'up' do
       edit 'pay_type', :highlight do
         self << ', :limit => 10'
