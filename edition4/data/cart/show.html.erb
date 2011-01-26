@@ -1,6 +1,6 @@
 <div class="cart_title">Your Cart</div>
 <table>
-  <% for item in @cart.line_items %>
+  <% @cart.line_items.each do |item| %>
     <tr>
       <td><%= item.quantity %>&times;</td>
       <td><%= item.product.title %></td>

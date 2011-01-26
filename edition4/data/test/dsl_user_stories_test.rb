@@ -80,7 +80,7 @@ class DslUserStoriesTest < ActionController::IntegrationTest
       def user.has_a_cart_containing(*products)
         cart = Cart.find(session[:cart_id])
         assert_equal products.size, cart.line_items.size
-        for item in cart.line_items
+        cart.line_items.each do |item|
           assert products.include?(item.product)
         end
       end

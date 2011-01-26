@@ -563,8 +563,10 @@ section 8.3, 'Iteration C3: Use a Helper to Format the Price' do
   EOF
 
   desc 'Format the price using a built-in helper.'
-  edit 'app/views/store/index.html.erb' do |data|
-    data[/<%= (product.price) %>/m,1] = "number_to_currency(product.price)"
+  edit 'app/views/store/index.html.erb' do
+    edit 'product.price', :mark => 'currency' do
+      msub /<%= (product.price) %>/, "number_to_currency(product.price)"
+    end
   end
 
   desc 'Show the results.'
@@ -1147,7 +1149,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
   desc 'Replace that portion of the view with a callout to the partial'
   edit 'app/views/carts/show.html.erb' do |data|
-    data.msub /^(  <% for .* end %>\n)/m, 
+    data.msub /^(  <% @cart.line_items.each do .* end %>\n)/m, 
       "  <%= render(@cart.line_items) %>\n", :highlight
   end
 
@@ -1229,7 +1231,7 @@ end
 
 section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
   edit 'app/views/store/index.html.erb' do |data|
-    data.clear_highlights
+    data.clear_all_marks
     data.edit '<%= button_to', :highlight
     data.msub /<%= button_to.*() %>/, ",\n        :remote => true"
   end
@@ -1647,7 +1649,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
                   xhtml.th 'Quantity'
                   xhtml.th 'Total Price'
                 end
-                for item in order.line_items
+                order.line_items.each do |item|
                   xhtml.tr do
                     xhtml.td item.product.title
                     xhtml.td item.quantity

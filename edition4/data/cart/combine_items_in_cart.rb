@@ -23,15 +23,15 @@ class CombineItemsInCart < ActiveRecord::Migration
 #START:down
   def self.down
     # split items with quantity>1 into multiple items
-    LineItem.where("quantity>1").each do |lineitem|
+    LineItem.where("quantity>1").each do |line_item|
       # add individual items
-      lineitem.quantity.times do 
-        LineItem.create :cart_id=>lineitem.cart_id,
-          :product_id=>lineitem.product_id, :quantity=>1
+      line_item.quantity.times do 
+        LineItem.create :cart_id=>line_item.cart_id,
+          :product_id=>line_item.product_id, :quantity=>1
       end
 
       # remove original item
-      lineitem.destroy
+      line_item.destroy
     end
   end
 #END:down
