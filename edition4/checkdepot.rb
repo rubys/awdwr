@@ -243,9 +243,12 @@ class DepotTest < Gorp::TestCase
   end
 
   section 15.3, "Task I3: i18n for the order page" do
-    ticket 6125,
-      :title =>  "SQLite3::CorruptException: database disk image is malformed",
-      :match => /SQLite3::CorruptException: database disk image is malformed/
+    # ticket 5971,
+    #   :title =>  "labels don't treat I18n name_html as html_safe",
+    #   :match => /Direcci&amp;oacute;n/
+    # ticket 5971,
+    #   :title =>  "labels don't treat I18n name_html as html_safe",
+    #   :match => /&lt;span class=&quot;translation_missing&quot;&gt;/
 
     assert_select 'input[type=submit][value$=Comprar]'
     assert_select '#error_explanation',
@@ -254,9 +257,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 15.4, "Task I4: Add a locale switcher" do
-    ticket 6125,
-      :title =>  "SQLite3::CorruptException: database disk image is malformed",
-      :match => /SQLite3::CorruptException: database disk image is malformed/
+    ticket 4786,
+      :title =>  "render with a partial in rjs fails ",
+      :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
 
     assert_select 'option[value=es]'
     assert_select 'h1', 'Your Pragmatic Catalog'
@@ -274,26 +277,14 @@ class DepotTest < Gorp::TestCase
   end
 
   section 18, "Finding Your Way Around" do
-    ticket 6125,
-      :title =>  "SQLite3::CorruptException: database disk image is malformed",
-      :match => /SQLite3::CorruptException: database disk image is malformed/
-
     assert_select '.stdout', 'Current version: 20110211000009'
   end
 
   section 20.1, "Testing Routing" do
-    ticket 6125,
-      :title =>  "SQLite3::CorruptException: database disk image is malformed",
-      :match => /SQLite3::CorruptException: database disk image is malformed/
-
     assert_select '.stdout', /13 tests, 49 assertions, 0 failures, 0 errors/
   end
 
   section 21.1, "Views" do
-    ticket 6125,
-      :title =>  "database disk image is malformed",
-      :match => /database disk image is malformed/
-
     assert_select '.stdout', /&lt;price currency="USD"&gt;49.5&lt;\/price&gt;/
     assert_select '.stdout', /"1 minute"/
     assert_select '.stdout', /"half a minute"/
@@ -308,10 +299,6 @@ class DepotTest < Gorp::TestCase
   end
 
   section 22, "Active Resources" do
-    ticket 6125,
-      :title =>  "SQLite3::CorruptException: database disk image is malformed",
-      :match => /SQLite3::CorruptException: database disk image is malformed/
-
     # assert_select '.stdout', /ActiveResource::Redirection: Failed.* 302/
     assert_select '.stdout', '42.95'
     assert_select '.stdout', '=&gt; true'
@@ -324,10 +311,6 @@ class DepotTest < Gorp::TestCase
   end
 
   section 25.1, 'rack' do
-    ticket 6125,
-      :title =>  "SQLite3::CorruptException: database disk image is malformed",
-      :match => /SQLite3::CorruptException: database disk image is malformed/
-
     assert_select 'p', '37.95'
     assert_select 'h2', 'Programming Ruby 1.9'
   end
@@ -350,19 +333,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 26.3, 'HAML' do
-    ticket 6125,
-      :title =>  "SQLite3::CorruptException: database disk image is malformed",
-      :match => /SQLite3::CorruptException: database disk image is malformed/
-
     assert_select 'h1', 'Your Pragmatic Catalog'
     assert_select 'span.price', '$49.50'
   end
 
   section 26.4, 'JQuery' do
-    ticket 6125,
-      :title =>  "SQLite3::CorruptException: database disk image is malformed",
-      :match => /SQLite3::CorruptException: database disk image is malformed/
-
     assert_select '.logger', /force\s+public\/javascripts\/rails\.js/
     assert_select '.stdout', /No RJS statement/
     assert_select '.stdout', /4\d tests, 7\d assertions, 0 failures, 0 errors/

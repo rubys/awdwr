@@ -2905,7 +2905,7 @@ section 26.1, 'Active Merchant' do
     clear_all_marks
     edit 'will_paginate', :mark => 'plugins'
     msub /paginate.*\n()/, <<-EOF.unindent(6), :highlight
-      gem 'activemerchant', '~> 1.9.0'
+      gem 'activemerchant', '~> 1.10.0'
     EOF
   end
   cmd 'bundle install'
