@@ -152,22 +152,30 @@ class DepotTest < Gorp::TestCase
 
   section 12.2, "Iteration G2: Atom Feeds" do
     # raw xml
-    assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/
-    assert_select '.stdout', /&lt;id type="integer"&gt;1&lt;\/id&gt;/
+    assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/,
+      'Missing <email>customer@example.com</email>'
+    assert_select '.stdout', /&lt;id type="integer"&gt;1&lt;\/id&gt;/,
+      'Missing <id type="integer">1</id>'
 
     # html
-    assert_select '.stdout', /&lt;a href="mailto:customer@example.com"&gt;/
+    assert_select '.stdout', /&lt;a href="mailto:customer@example.com"&gt;/,
+      'Missing <a href="mailto:customer@example.com">'
 
     # atom
-    assert_select '.stdout', /&lt;summary type="xhtml"&gt;/
-    assert_select '.stdout', /&lt;td&gt;Programming Ruby 1.9&lt;\/td&gt;/
+    assert_select '.stdout', /&lt;summary type="xhtml"&gt;/,
+      'Missing <summary type="xhtml">'
+    assert_select '.stdout', /&lt;td&gt;Programming Ruby 1.9&lt;\/td&gt;/,
+      'Missing <td>Programming Ruby 1.9</td>'
 
     # json
-    assert_select '.stdout', /, ?"title": ?"Programming Ruby 1.9"/
+    assert_select '.stdout', /, ?"title": ?"Programming Ruby 1.9"/,
+      'Missing "title": "Programming Ruby 1.9"'
 
     # custom xml
-    assert_select '.stdout', /&lt;order_list for_product=.*&gt;/
+    assert_select '.stdout', /&lt;order_list for_product=.*&gt;/,
+      'Missing <order_list for_product=.*>'
   end
+
   section 12.3, "Iteration G3: Pagination" do
     assert_select 'td', 'Customer 100'
     assert_select "a[href=http://localhost:#{$PORT}/orders?page=4]"
