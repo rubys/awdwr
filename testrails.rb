@@ -87,7 +87,7 @@ if File.exist? template
     'railties/lib/rails/generators/app_base.rb')
   if File.exist? base # Rails 3.1
     gemfile = open(base).read
-    libs += gemfile.scan(/^gem ['"](\w+)['"],\s+:git/)
+    libs += gemfile.scan(/^\s*gem ['"](\w+)['"],\s+:git/)
   else # Rails 3.0
     gemfile = open(template).read
     libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/)
