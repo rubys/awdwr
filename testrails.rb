@@ -78,6 +78,7 @@ end
 
 # update libs
 libs = %w(gorp)
+gems = []
 
 # add in any 'edge' gems
 template = File.join(HOME,'git','rails',
@@ -86,11 +87,13 @@ if File.exist? template
   base = File.join(HOME,'git','rails',
     'railties/lib/rails/generators/app_base.rb')
   if File.exist? base # Rails 3.1
-    gemfile = open(base).read
-    libs += gemfile.scan(/^\s*gem ['"](\w+)['"],\s+:git/)
+    libs += File.read(base).scan(/^\s*gem ['"](\w+)['"],\s+:git/)
+    gems += File.read(template).scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
+    gems += [['json',nil]] if RUBY_VERSION < "1.9.2"
   else # Rails 3.0
     gemfile = open(template).read
     libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/)
+    gems += [['jquery-rails',nil]]
   end
   libs = libs.flatten.uniq - %w(rails)
 end
@@ -114,7 +117,8 @@ Dir.chdir File.join(PROFILE.source,WORK) do
           gemfile.puts "gem #{name.inspect}, :path => #{path.inspect}"
         end
       end
-      gemfile.puts "gem 'sqlite3-ruby', :require => 'sqlite3'"
+      gems.each {|gem,opts| gemfile.puts "gem #{gem.first.inspect}#{opts}"}
+      gemfile.puts "gem 'sqlite3'"
       gemfile.puts "gem 'mysql'"
       gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
       gemfile.puts "gem 'capistrano'"
@@ -126,9 +130,8 @@ Dir.chdir File.join(PROFILE.source,WORK) do
         gemfile.puts "gem 'htmlentities'"
       # end
 
-      gemfile.puts "gem 'activemerchant', '~> 1.10.0'"
+      gemfile.puts "gem 'activemerchant'" #, '~> 1.11.0'"
       gemfile.puts "gem 'haml'"
-      gemfile.puts "gem 'jquery-rails'"
     end
   else
     system 'rm -f Gemfile'
