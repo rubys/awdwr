@@ -103,7 +103,7 @@ section 2, 'Instant Gratification' do
     msub /<\/p>\n()/, <<-EOF.unindent(6), :highlight
       <p>
         Time to say
-        <%= link_to "Goodbye!", say_goodbye_path %>
+        <%= link_to "Goodbye", say_goodbye_path %>!
       </p>
     EOF
   end
@@ -691,7 +691,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
         #START_HIGHLIGHT
         # ensure that there are no line items referencing this product
         def ensure_not_referenced_by_any_line_item
-          if line_items.count.zero?
+          if line_items.empty?
             return true
           else
             errors.add(:base, 'Line Items present')
@@ -808,10 +808,10 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   EOF
 
   desc "Add a quantity column to the line_item table in the database."
-  generate 'migration add_quantity_to_line_item quantity:integer'
+  generate 'migration add_quantity_to_line_items quantity:integer'
 
   desc "Modify the migration to add a default value for the new column"
-  edit Dir['db/migrate/*add_quantity_to_line_item.rb'].first do |data|
+  edit Dir['db/migrate/*add_quantity_to_line_items.rb'].first do |data|
     data[/\n().*add_column/,1] = "# START_HIGHLIGHT\n"
     data[/add_column.*\n()/,1] = "# END_HIGHLIGHT\n"
 
