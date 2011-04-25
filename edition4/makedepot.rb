@@ -513,6 +513,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
   desc 'Modify the application layout'
   edit 'app/views/layouts/application.html.erb' do
     self.all = read('store/layout.html.erb')
+    self.gsub! ':defaults', '"application"' unless File.exist? 'public/images'
   end
 
   desc 'Modify the stylesheet'
@@ -1253,10 +1254,18 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
     clear_highlights
     msub /format.html.*store_url.*\n()/, "        format.js\n", :highlight
   end
-  edit 'app/views/line_items/create.js.rjs' do |data|
-    data.all =  <<-EOF.unindent(6)
-      page.replace_html('cart', render(@cart))
-    EOF
+  if File.exist? 'public/images'
+    edit 'app/views/line_items/create.js.rjs' do |data|
+      data.all =  <<-EOF.unindent(8)
+        page.replace_html('cart', render(@cart))
+      EOF
+    end
+  else
+    edit 'app/views/line_items/create.js.erb' do |data|
+      data.all =  <<-EOF.unindent(8)
+        $('#cart').html("<%=j render @cart %>");
+      EOF
+    end
   end
   publish_code_snapshot :l
 end
@@ -1282,21 +1291,38 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
       <!-- END_HIGHLIGHT -->
     EOF
   end
-  edit 'app/views/line_items/create.js.rjs' do |data|
-    msub /.*()/m, "\n" + <<-EOF.unindent(6), :highlight
-      page[:current_item].visual_effect :highlight,
-                                        :startcolor => "#88ff88",
-                                        :endcolor => "#114411"
-    EOF
+  if File.exist? 'app/views/line_items/create.js.rjs'
+    edit 'app/views/line_items/create.js.rjs' do |data|
+      msub /.*()/m, "\n" + <<-EOF.unindent(6), :highlight
+        page[:current_item].visual_effect :highlight,
+                                          :startcolor => "#88ff88",
+                                          :endcolor => "#114411"
+      EOF
+    end
+  else
+    edit 'app/views/line_items/create.js.erb' do |data|
+      msub /.*()/m, "\n" + <<-EOF.unindent(6), :highlight
+        $('#current_item').css({'background-color':'#88ff88'}).
+	  animate({'background-color':'#114411'}, 1000);
+      EOF
+    end
   end
   publish_code_snapshot :m
 end
 
 section 11.4, 'Iteration F4: Hide an Empty Cart' do
-  edit 'app/views/line_items/create.js.rjs' do
-    msub /().*visual_effect/, <<-EOF.unindent(6) + "\n", :highlight
-      page[:cart].visual_effect :blind_down if @cart.total_items == 1
-    EOF
+  if File.exist? 'app/views/line_items/create.js.rjs'
+    edit 'app/views/line_items/create.js.rjs' do
+      msub /().*visual_effect/, <<-EOF.unindent(8) + "\n", :highlight
+        page[:cart].visual_effect :blind_down if @cart.total_items == 1
+      EOF
+    end
+  else
+    edit 'app/views/line_items/create.js.erb' do
+      msub /().*current_item/, <<-EOF.unindent(8) + "\n", :highlight
+        if ($('#cart tr').length == 1) { $('#cart').show('blind', 1000); }
+      EOF
+    end
   end
   edit 'app/models/cart.rb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
@@ -1390,6 +1416,9 @@ section 11.5, 'Iteration F5: Testing AJAX changes' do
       end
       #END:ajax
     EOF
+    unless File.exist? 'public/images'
+      gsub! "_rjs :replace_html, 'cart'", "_jquery :html, '#cart'"
+    end
   end
 
   desc 'Run the tests again.'
@@ -1586,13 +1615,24 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     'order[pay_type]' => 'Check'
   db "select * from orders"
   db "select * from line_items"
-  edit 'app/views/line_items/create.js.rjs' do
-    clear_highlights
-    msub /()/, <<-EOF.unindent(6) + "\n"
-      #START_HIGHLIGHT
-      page.select("#notice").each { |notice| notice.hide }
-      #END_HIGHLIGHT
-    EOF
+  if File.exist? 'app/views/line_items/create.js.rjs'
+    edit 'app/views/line_items/create.js.rjs' do
+      clear_highlights
+      msub /()/, <<-EOF.unindent(8) + "\n"
+        #START_HIGHLIGHT
+        page.select("#notice").each { |notice| notice.hide }
+        #END_HIGHLIGHT
+      EOF
+    end
+  else
+    edit 'app/views/line_items/create.js.erb' do
+      clear_highlights
+      msub /()/, <<-EOF.unindent(8) + "\n"
+        #START_HIGHLIGHT
+        $("#notice").hide();
+        #END_HIGHLIGHT
+      EOF
+    end
   end
 end
 
