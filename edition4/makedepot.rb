@@ -148,18 +148,18 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   desc 'Break lines for formatting reasons'
   edit 'app/controllers/products_controller.rb' do
     dcl 'create' do
-      msub /,( ):notice/, "\n          "
-      msub /,( ):location/, "\n          "
-      msub /,( ):status => :un/, "\n          "
+      msub /,( ):?notice/, "\n          "
+      msub /,( ):?location/, "\n          "
+      msub /,( ):?status:? ?=?>? :un/, "\n          "
     end
     dcl 'update' do
-      msub /,( ):notice/, "\n          "
-      msub /,( ):status => :un/, "\n          "
+      msub /,( ):?notice/, "\n          "
+      msub /,( ):?status:? ?=?>? :un/, "\n          "
     end
   end
 
   edit 'app/views/products/index.html.erb' do
-    msub /,( ):method/, "\n            "
+    msub /,( ):?method/, "\n            "
   end
 
   restart_server
@@ -209,7 +209,8 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
       </p>
     EOF
     'product[price]' => '42.95',
-    'product[image_url]' => '/images/wd4d.jpg'
+    'product[image_url]' => 
+      (File.exist?('public/images') ? '/images/wd4d.jpg' : 'wd4d.jpg')
 
   desc 'Verify that the product has been added'
   get '/products'
@@ -228,6 +229,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   desc 'Load some "seed" data'
   edit "db/seeds.rb", 'vcc' do |data|
     data.all = read('products/seeds.rb')
+    data.gsub! '/images/', '' unless File.exist? 'public/images'
   end
   cmd 'rake db:seed'
 
@@ -244,8 +246,15 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   end
 
   desc 'Copy some images and a stylesheet'
-  cmd "cp -v #{$DATA}/images/* public/images/"
-  cmd "cp -v #{$DATA}/depot.css public/stylesheets"
+  if File.exist? 'public/images'
+    cmd "cp -v #{$DATA}/images/* public/images/"
+    cmd "cp -v #{$DATA}/depot.css public/stylesheets"
+    DEPOT_CSS = "public/stylesheets/depot.css"
+  else
+    cmd "cp -v #{$DATA}/images/* app/assets/images/"
+    cmd "cp -v #{$DATA}/depot.css app/assets/stylesheets"
+    DEPOT_CSS =  "app/assets/stylesheets/depot.css"
+  end
 
   desc 'See the finished result'
   get '/products'
@@ -319,7 +328,8 @@ section 7.1, 'Iteration B1: Validate!' do
       period.  Move over, Tolstoy, there's a new
       funster in town.
     EOF
-    'product[image_url]' => '/images/utj.jpg',
+    'product[image_url]' => 
+      (File.exist?('public/images') ? '/images/utj.jpg' : 'utj.jpg'),
     'product[price]' => 'wibble'
 
   edit 'app/models/product.rb' do |data|
@@ -506,7 +516,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
   end
 
   desc 'Modify the stylesheet'
-  edit 'public/stylesheets/depot.css', 'mainlayout' do |data|
+  edit DEPOT_CSS, 'mainlayout' do |data|
     data[/().*An entry in the store catalog/,1] = <<-EOF.unindent(6) + "\n"
       /* START:mainlayout */
       /* Styles for main page */
@@ -727,7 +737,7 @@ section 9.3, 'Iteration D3: Adding a button' do
   end
 
   desc 'Add a bit of style to make it show all on one line'
-  edit 'public/stylesheets/depot.css', 'inline' do |data|
+  edit DEPOT_CSS, 'inline' do |data|
     data << "\n" + <<-EOF.unindent(6)
       /* START:inline */
       #store .entry form, #store .entry form div {
@@ -750,13 +760,13 @@ section 9.3, 'Iteration D3: Adding a button' do
         msub /(LineItem.new\(.*\))/,
           "@cart.line_items.build(:product => product)"
       end
-      msub /,( ):notice/, "\n          "
-      msub /,( ):status/, "\n          "
-      msub /,( ):status/, "\n          "
+      msub /,( ):?notice/, "\n          "
+      msub /,( ):?status/, "\n          "
+      msub /,( ):?status/, "\n          "
     end
 
     data.edit 'redirect_to', :highlight
-    data.msub /redirect_to\(@line_item()/, '.cart'
+    data.msub /redirect_to[\(\s]@line_item()/, '.cart'
   end
 
   desc "Try it once, and see that the output isn't very useful yet."
@@ -791,7 +801,11 @@ section 9.4, 'Playtime' do
   edit 'test/functional/line_items_controller_test.rb', 'create' do |data|
     data.dcl 'should create', :mark => 'create' do
       edit 'post :create', :highlight do
-        msub /(:line_item =>.*)/, ':product_id => products(:ruby).id'
+        if self =~ /:line_item =>/
+          msub /(:line_item =>.*)/, ':product_id => products(:ruby).id'
+        else
+          msub /(line_item:.*)/, 'product_id: products(:ruby).id'
+        end
       end
       edit 'line_item_path', :highlight do
         msub /(line_item_path.*)/, 'cart_path(assigns(:line_item).cart)'
@@ -981,9 +995,9 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   edit 'app/controllers/line_items_controller.rb', 'create' do
     dcl 'create' do
       gsub! /.*_HIGHLIGHT.*\n/, ''
-      msub /\n().*,\s+:notice/, "#START_HIGHLIGHT\n"
-      msub /:notice.*\n()/, "#END_HIGHLIGHT\n"
-      msub /(,\s+:notice.*)\)/, ''
+      msub /\n().*,\s+:?notice/, "#START_HIGHLIGHT\n"
+      msub /,\s+:?notice.*\n()/, "#END_HIGHLIGHT\n"
+      msub /(,\s+:?notice.*)\)?\s\}/, ''
     end
   end
 
@@ -1013,7 +1027,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   end
 
   desc 'Add some style.'
-  edit 'public/stylesheets/depot.css', 'cartmain' do |data|
+  edit DEPOT_CSS, 'cartmain' do |data|
     data << "\n" + <<-EOF.unindent(6)
       /* START:cartmain */
       /* Styles for the cart in the main page */
@@ -1191,7 +1205,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   end
 
   desc 'Add a small bit of style.'
-  edit 'public/stylesheets/depot.css', 'cartside' do |data|
+  edit DEPOT_CSS, 'cartside' do |data|
     data << "\n" + <<-EOF.unindent(6)
       /* START:cartside */
       /* Styles for the cart in the sidebar */
@@ -1248,10 +1262,12 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
 end
 
 section 11.3, 'Iteration F3: Highlighting Changes' do
-  edit 'app/controllers/line_items_controller.rb', 'create' do |data|
-    data.clear_highlights
-    data.edit 'format.js', :highlight do |format|
-      format.msub /format.js()/, '   { @current_item = @line_item }'
+  edit 'app/controllers/line_items_controller.rb', 'create' do
+    clear_highlights
+    dcl 'create' do
+      edit 'format.js', :highlight do
+        msub /format.js()\n/, '   { @current_item = @line_item }'
+      end
     end
   end
 
@@ -1471,7 +1487,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     EOF
     edit /^end()/, :mark => 'select'
   end
-  edit 'public/stylesheets/depot.css', 'form' do |data|
+  edit DEPOT_CSS, 'form' do |data|
     data << "\n" + <<-EOF.unindent(6)
       /* START:form */
       /* Styles for order form */
@@ -1537,7 +1553,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     data[/Order was successfully created.*\n()/,1] = <<-EOF
       #END_HIGHLIGHT
     EOF
-    data[/redirect_to\((@order), :notice/,1] = 'store_url'
+    data[/redirect_to[\(\s](@order), :notice/,1] = 'store_url'
     data.msub /('Order was successfully created.')/,
       "\n          'Thank you for your order.'"
     data.msub /,( ):location/, "\n          "
@@ -2612,7 +2628,7 @@ end
 section 15.4, 'Task I4: Add a locale switcher.' do
   desc 'Add form for setting and showing the site based on the locale.'
   desc 'Use CSS to position the form.'
-  edit 'public/stylesheets/depot.css', 'i18n' do |data|
+  edit DEPOT_CSS, 'i18n' do |data|
     data << "\n" + <<-EOF.unindent(6)
       /* START:i18n */
       .locale {
@@ -3455,8 +3471,18 @@ end
 
 $cleanup = Proc.new do
   # fetch stylesheets
-  Dir[File.join($WORK,'depot/public/stylesheets/*.css')].each do |css|
-    File.open(css) {|file| $style.text! file.read}
+  if File.exist? File.join($WORK,'depot/public/stylesheets/*.css')
+    Dir[File.join($WORK,'depot/public/stylesheets/*.css')].each do |css|
+      File.open(css) {|file| $style.text! file.read}
+    end
+  else
+    require 'sass'
+    Dir[File.join($WORK,'depot/app/assets/stylesheets/*.css*')].each do |css|
+      text = File.read(css)
+      next if text =~ /\A\/\*[^*]*\*\/\s*\Z/ # nothing but a single comment
+      text = Sass::Engine.new(text, :syntax => :scss).render if css =~ /\.scss/
+      $style.text! text
+    end
   end
 
   # Link static files

@@ -27,13 +27,19 @@ class DepotTest < Gorp::TestCase
       :list => :ruby,
       :title =>  "regression in respond_to?",
       :match => /I18n::UnknownFileType/
-    assert_select '.stderr', 0
+    assert_select '.stderr', :minimum => 0 do |errors|
+      errors.each do |err|
+        assert_match /\d+ tests, \d+ assertions, 0 failures, 0 errors/, err.to_s
+      end
+    end
 
     assert_select 'th', 'Image url'
     assert_select 'input#product_title[value=Web Design for Developers]'
     assert_select "a[href=http://localhost:#{$PORT}/products/1]", 'redirected'
-    assert_select '.stdout', /1 tests, 1 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /7 tests, 10 assertions, 0 failures, 0 errors/
+    assert_select 'pre', /(1|0) tests, (1|0) assertions, 0 failures, 0 errors/,
+      '(1|0) tests, (1|0) assertions, 0 failures, 0 errors'
+    assert_select 'pre', /7 tests, 10 assertions, 0 failures, 0 errors/,
+      '7 tests, 10 assertions, 0 failures, 0 errors'
   end
 
   section 6.2, "Iteration A2: Prettier Listings" do
@@ -63,9 +69,12 @@ class DepotTest < Gorp::TestCase
       :list => :ruby,
       :title =>  "segvs since r28570",
       :match => /active_support\/dependencies.rb:\d+: \[BUG\] Segmentation fault/
-    assert_select '.stdout', /1 tests, 1 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /7 tests, 10 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /5 tests, 23 assertions, 0 failures, 0 errors/
+    assert_select 'pre', /(1|0) tests, (1|0) assertions, 0 failures, 0 errors/,
+      '(1|0) tests, (1|0) assertions, 0 failures, 0 errors'
+    assert_select 'pre', /7 tests, 10 assertions, 0 failures, 0 errors/,
+      '7 tests, 10 assertions, 0 failures, 0 errors'
+    assert_select 'pre', /5 tests, 23 assertions, 0 failures, 0 errors/,
+      '5 tests, 23 assertions, 0 failures, 0 errors'
   end
 
   section 8.1, "Iteration C1: Create the Catalog Listing" do
@@ -83,9 +92,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 8.4, "Iteration C4: Functional Testing" do
-    assert_select '.stdout', /5 tests, 23 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /8 tests, 11 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /8 tests, 15 assertions, 0 failures, 0 errors/
+    assert_select 'pre', /5 tests, 23 assertions, 0 failures, 0 errors/
+    assert_select 'pre', /8 tests, 11 assertions, 0 failures, 0 errors/
+    assert_select 'pre', /8 tests, 15 assertions, 0 failures, 0 errors/
   end
 
   section 9.3, "Iteration D3: Adding a button" do
@@ -96,8 +105,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 9.4, "Playtime" do
-    assert_select '.stdout', /7 tests, 25 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /22 tests, 35 assertions, 0 failures, 0 errors/
+    assert_select 'pre', /\d tests, 2\d assertions, 0 failures, 0 errors/,
+      '\d tests, 2\d assertions, 0 failures, 0 errors'
+    assert_select 'pre', /22 tests, 35 assertions, 0 failures, 0 errors/,
+      '22 tests, 35 assertions, 0 failures, 0 errors'
   end
 
   section 10.1, "Iteration E1: Creating A Smarter Cart" do
@@ -118,8 +129,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 10.4, "Playtime" do
-    assert_select '.stdout', /7 tests, 25 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /23 tests, 37 assertions, 0 failures, 0 errors/
+    assert_select 'pre', /\d tests, 2\d assertions, 0 failures, 0 errors/,
+      '7 tests, 25 assertions, 0 failures, 0 errors'
+    assert_select 'pre', /23 tests, 37 assertions, 0 failures, 0 errors/,
+      '23 tests, 37 assertions, 0 failures, 0 errors'
     assert_select '.stdout', /AddPriceToLineItem: migrated/
   end
 
@@ -139,9 +152,11 @@ class DepotTest < Gorp::TestCase
       :title =>  "render with a partial in rjs fails ",
       :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
 
-    assert_select '.stdout', /8 tests, 29 assertions, 0 failures, 0 errors/
+    assert_select 'pre', /\d tests, 2\d assertions, 0 failures, 0 errors/,
+      '\d tests, 2\d assertions, 0 failures, 0 errors'
     assert_select 'code', "undefined method `line_items' for nil:NilClass"
-    assert_select '.stdout', /24 tests, 41 assertions, 0 failures, 0 errors/
+    assert_select 'pre', /24 tests, 41 assertions, 0 failures, 0 errors/,
+      '24 tests, 41 assertions, 0 failures, 0 errors'
   end
 
   section 12.1, "Iteration G1: Capturing an Order" do

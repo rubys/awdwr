@@ -89,7 +89,10 @@ if File.exist? template
   if File.exist? base # Rails 3.1
     libs += File.read(base).scan(/^\s*gem ['"](\w+)['"],\s+:git/)
     gems += File.read(template).scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
-    gems += [['json',nil]] if RUBY_VERSION < "1.9.2"
+
+    release=PROFILE.rvm['bin'].split('-')[1]
+    gems += [['json',nil]] if release < "1.9.2"
+    gems += [['turn',', :require => false']] unless release < "1.9.2"
   else # Rails 3.0
     gemfile = open(template).read
     libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/)
