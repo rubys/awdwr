@@ -96,8 +96,8 @@ if File.exist? template
   else # Rails 3.0
     gemfile = open(template).read
     libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/)
-    gems += [['jquery-rails',nil]]
   end
+  gems += [['jquery-rails',nil]]
   libs = libs.flatten.uniq - %w(rails)
 end
 
