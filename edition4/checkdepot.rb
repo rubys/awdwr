@@ -192,6 +192,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.3, "Iteration G3: Pagination" do
+    next unless File.exist? 'public/images'
     assert_select 'td', 'Customer 100'
     assert_select "a[href=http://localhost:#{$PORT}/orders?page=4]"
   end
@@ -361,6 +362,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 26.4, 'JQuery' do
+    next unless File.exist? 'public/images'
     assert_select '.logger', /force\s+public\/javascripts\/rails\.js/
     assert_select '.stdout', /No RJS statement/
     assert_select '.stdout', /4\d tests, 7\d assertions, 0 failures, 0 errors/

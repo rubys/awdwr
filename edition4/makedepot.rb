@@ -1582,11 +1582,11 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     data[/Order was successfully created.*\n()/,1] = <<-EOF
       #END_HIGHLIGHT
     EOF
-    data[/redirect_to[\(\s](@order), :notice/,1] = 'store_url'
+    data[/redirect_to[\(\s](@order), :?notice/,1] = 'store_url'
     data.msub /('Order was successfully created.')/,
       "\n          'Thank you for your order.'"
-    data.msub /,( ):location/, "\n          "
-    data.msub /,( ):status => :un/, "\n          "
+    data.msub /,( ):?location/, "\n          "
+    data.msub /,( ):?status:?\s=?>?\s?:un/, "\n          "
   end
   edit 'app/models/order.rb' do |data|
     data[/#END:has_many\n()#START:has_many/,1] = <<-EOF.unindent(4)
@@ -1828,6 +1828,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
 end
 
 section 12.3, 'Iteration G3: Pagination' do
+  next unless File.exist? 'public/images'
   desc 'Add in the will_paginate gem'
   edit 'Gemfile' do
     msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'will_paginate', '>= 3.0.pre'\n",
@@ -2090,9 +2091,9 @@ section 13.1, 'Iteration H1: Adding Users' do
         edit /.*'.*'.*/, :highlight do
           gsub!("'",'"').sub!('User ', 'User #{@user.name} ')
         end
-        msub /redirect_to\((@user, ):notice/, "users_url,\n" + (' ' * 10)
-        msub /,( ):status/, "\n" + (' ' * 10)
-        msub /,( ):status/, "\n" + (' ' * 10) if action == 'create'
+        msub /redirect_to\(?\s?(@user, ):?notice/, "users_url,\n" + (' ' * 10)
+        msub /,( ):?status/, "\n" + (' ' * 10)
+        msub /,( ):?status/, "\n" + (' ' * 10) if action == 'create'
       end
     end
   end
@@ -2959,10 +2960,17 @@ section 26.1, 'Active Merchant' do
   desc 'Determine if a credit card is valid'
   edit 'Gemfile', 'plugins' do
     clear_all_marks
-    edit 'will_paginate', :mark => 'plugins'
-    msub /paginate.*\n()/, <<-EOF.unindent(6), :highlight
-      gem 'activemerchant', '~> 1.10.0'
-    EOF
+    if File.exist? 'public/images'
+      edit 'will_paginate', :mark => 'plugins'
+      msub /paginate.*\n()/, <<-EOF.unindent(6), :highlight
+        gem 'activemerchant', '~> 1.10.0'
+      EOF
+    else
+      edit /\Z/, :mark => 'plugins'
+      msub /()\Z/, "\n\n" + <<-EOF.unindent(6), :highlight
+        gem 'activemerchant'
+      EOF
+    end
   end
   cmd 'bundle install'
   edit 'script/creditcard.rb' do
@@ -3026,6 +3034,7 @@ section 26.3, 'HAML' do
 end
 
 section 26.4, 'JQuery' do
+  next unless File.exist? 'public/images'
   edit 'Gemfile', 'plugins' do
     msub /haml.*\n()/, <<-EOF.unindent(6), :highlight
       gem 'jquery-rails', '~> 0.2.2'
