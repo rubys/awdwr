@@ -995,10 +995,9 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   desc 'Remove scaffolding generated flash notice for line item create.'
   edit 'app/controllers/line_items_controller.rb', 'create' do
     dcl 'create' do
-      gsub! /.*_HIGHLIGHT.*\n/, ''
-      msub /\n().*,\s+:?notice/, "#START_HIGHLIGHT\n"
-      msub /,\s+:?notice.*\n()/, "#END_HIGHLIGHT\n"
-      msub /(,\s+:?notice.*)\)?\s\}/, ''
+      clear_highlights
+      msub /(,\s+:?notice.*?)\)?\s\}/, ''
+      edit 'redirect_to', :highlight
     end
   end
 
@@ -1274,9 +1273,8 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
   edit 'app/controllers/line_items_controller.rb', 'create' do
     clear_highlights
     dcl 'create' do
-      edit 'format.js', :highlight do
-        msub /format.js()\n/, '   { @current_item = @line_item }'
-      end
+      msub /format.js()\n/, '   { @current_item = @line_item }'
+      edit 'format.js', :highlight
     end
   end
 
@@ -1293,7 +1291,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
   end
   if File.exist? 'app/views/line_items/create.js.rjs'
     edit 'app/views/line_items/create.js.rjs' do |data|
-      msub /.*()/m, "\n" + <<-EOF.unindent(6), :highlight
+      msub /.*()/m, "\n" + <<-EOF.unindent(8), :highlight
         page[:current_item].visual_effect :highlight,
                                           :startcolor => "#88ff88",
                                           :endcolor => "#114411"
@@ -1301,7 +1299,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
     end
   else
     edit 'app/views/line_items/create.js.erb' do |data|
-      msub /.*()/m, "\n" + <<-EOF.unindent(6), :highlight
+      msub /.*()/m, "\n" + <<-EOF.unindent(8), :highlight
         $('#current_item').css({'background-color':'#88ff88'}).
 	  animate({'background-color':'#114411'}, 1000);
       EOF
@@ -1319,6 +1317,7 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
     end
   else
     edit 'app/views/line_items/create.js.erb' do
+      clear_highlights
       msub /().*current_item/, <<-EOF.unindent(8) + "\n", :highlight
         if ($('#cart tr').length == 1) { $('#cart').show('blind', 1000); }
       EOF
@@ -3520,7 +3519,7 @@ end
 
 $cleanup = Proc.new do
   # fetch stylesheets
-  if File.exist? File.join($WORK,'depot/public/stylesheets/*.css')
+  if File.exist?(File.join($WORK,'depot/public/stylesheets'))
     Dir[File.join($WORK,'depot/public/stylesheets/*.css')].each do |css|
       File.open(css) {|file| $style.text! file.read}
     end

@@ -83,9 +83,9 @@ gems = []
 # add in any 'edge' gems
 template = File.join(HOME,'git','rails',
   'railties/lib/rails/generators/rails/app/templates/Gemfile')
+base = File.join(HOME,'git','rails',
+  'railties/lib/rails/generators/app_base.rb')
 if File.exist? template
-  base = File.join(HOME,'git','rails',
-    'railties/lib/rails/generators/app_base.rb')
   if File.exist? base # Rails 3.1
     libs += File.read(base).scan(/^\s*gem ['"](\w+)['"],\s+:git/)
     gems += File.read(template).scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
@@ -93,11 +93,12 @@ if File.exist? template
     release=PROFILE.rvm['bin'].split('-')[1]
     gems += [['json',nil]] if release < "1.9.2"
     gems += [['turn',', :require => false']] unless release < "1.9.2"
+    gems += [['jquery-rails',nil]]
   else # Rails 3.0
     gemfile = open(template).read
     libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/)
+    gems += [['jquery-rails',', "~> 0.2.2"']]
   end
-  gems += [['jquery-rails',nil]]
   libs = libs.flatten.uniq - %w(rails)
 end
 
@@ -133,7 +134,11 @@ Dir.chdir File.join(PROFILE.source,WORK) do
         gemfile.puts "gem 'htmlentities'"
       # end
 
-      gemfile.puts "gem 'activemerchant'" #, '~> 1.11.0'"
+      if File.exist? base # Rails 3.1
+        gemfile.puts "gem 'activemerchant'" #, '~> 1.11.0'"
+      else
+        gemfile.puts "gem 'activemerchant', '~> 1.10.0'"
+      end
       gemfile.puts "gem 'haml'"
     end
   else
