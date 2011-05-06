@@ -119,7 +119,8 @@ class DepotTest < Gorp::TestCase
       :match => /Internal Server Error/
 
     assert_select 'h1', /NoMethodError/
-    assert_select 'h1', /in StoreController#add_to_cart/
+    assert_select 'h1', /in StoreController#add_to_cart/,
+      'in StoreController#add_to_cart'
     assert_select 'li', /2 (.|&#?\w+;) Pragmatic Project Automation/u
     assert_select 'pre', "Couldn't find Product with ID=wibble"
   end
