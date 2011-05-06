@@ -135,11 +135,12 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       # end
 
       if File.exist? base # Rails 3.1
-        gemfile.puts "gem 'activemerchant'" #, '~> 1.11.0'"
+        gemfile.puts "gem 'activemerchant'"
+        gemfile.puts "gem 'haml'"
       else
         gemfile.puts "gem 'activemerchant', '~> 1.10.0'"
+        gemfile.puts "gem 'haml', '~> 3.0.18'"
       end
-      gemfile.puts "gem 'haml'"
     end
   else
     system 'rm -f Gemfile'
