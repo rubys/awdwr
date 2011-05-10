@@ -1827,7 +1827,11 @@ section 12.2, 'Iteration G2: Atom Feeds' do
 end
 
 section 12.3, 'Iteration G3: Pagination' do
-  next unless File.exist? 'public/images'
+  unless File.exist? 'public/images'
+    desc 'Not supported with Rails 3.1'
+    next
+  end
+
   desc 'Add in the will_paginate gem'
   edit 'Gemfile' do
     msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'will_paginate', '>= 3.0.pre'\n",
@@ -2112,7 +2116,7 @@ section 13.1, 'Iteration H1: Adding Users' do
     msub /(.*<th>Salt.*\n)/, ''
     msub /(.*user.hashed_password.*\n)/, ''
     msub /(.*user.salt.*\n)/, ''
-    msub /,() :method => :del/, "\n" + (' ' * 6)
+    msub /,() :?method:?\s?=?>? :del/, "\n" + (' ' * 6)
   end
   edit "app/views/users/_form.html.erb" do
     self.all = read('users/new.html.erb')
@@ -2822,7 +2826,11 @@ section 21.1, 'Views' do
   end
   edit 'app/controllers/products_controller.rb', 'index' do
     dcl 'index', :mark => 'index' do
-      msub /format.xml(.*)/, '  # index.xml.builder'
+      if self =~ /format\.xml/
+        msub /format.xml(.*)/, '  # index.xml.builder'
+      else
+        msub /format.html.*\n()/, "      format.xml\n"
+      end
     end
   end
   cmd 'curl --silent --user dave:secret http://localhost:3000/products.xml'
@@ -2979,6 +2987,11 @@ section 26.1, 'Active Merchant' do
 end
 
 section 26.2, 'Asset Packager' do
+  unless File.exist? 'public/images'
+    desc 'Not required with Rails 3.1'
+    next
+  end
+
   Dir.chdir(File.join($WORK,'depot'))
   overview <<-EOF
     Minimize scripts and stylesheets
@@ -3033,7 +3046,11 @@ section 26.3, 'HAML' do
 end
 
 section 26.4, 'JQuery' do
-  next unless File.exist? 'public/images'
+  unless File.exist? 'public/images'
+    desc 'Not required with Rails 3.1'
+    next
+  end
+
   edit 'Gemfile', 'plugins' do
     msub /haml.*\n()/, <<-EOF.unindent(6), :highlight
       gem 'jquery-rails', '~> 0.2.2'

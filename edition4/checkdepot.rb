@@ -155,8 +155,8 @@ class DepotTest < Gorp::TestCase
     assert_select 'pre', /\d tests, 2\d assertions, 0 failures, 0 errors/,
       '\d tests, 2\d assertions, 0 failures, 0 errors'
     assert_select 'code', "undefined method `line_items' for nil:NilClass"
-    assert_select 'pre', /24 tests, 41 assertions, 0 failures, 0 errors/,
-      '24 tests, 41 assertions, 0 failures, 0 errors'
+    assert_select 'pre', /2\d tests, 4\d assertions, 0 failures, 0 errors/,
+      '2\d tests, 4\d assertions, 0 failures, 0 errors'
   end
 
   section 12.1, "Iteration G1: Capturing an Order" do
@@ -202,12 +202,16 @@ class DepotTest < Gorp::TestCase
       :title =>  "render with a partial in rjs fails ",
       :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
 
-    assert_select '.stdout', /9 tests, 30 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /32 tests, 5\d assertions, 0 failures, 0 errors/
+    assert_select 'pre', 
+      /\d tests, [23]\d assertions, 0 failures, 0 errors/,
+      '\d tests, [23]\d assertions, 0 failures, 0 errors'
+    assert_select 'pre', 
+      /3\d tests, [45]\d assertions, 0 failures, 0 errors/,
+      '3\d tests, [45]\d assertions, 0 failures, 0 errors'
   end
 
   section 12.7, "Iteration J2: Email Notifications" do
-    assert_select '.stdout', /2 tests, \d+ assertions, 0 failures, 0 errors/
+    assert_select 'pre', /2 tests, \d+ assertions, 0 failures, 0 errors/
   end
 
   section 12.8, "Iteration J3: Integration Tests" do
@@ -218,7 +222,7 @@ class DepotTest < Gorp::TestCase
     ticket 4213,
       :title =>  "undefined method `named_routes' in integration test",
       :match => /NoMethodError: undefined method `named_routes' for nil:NilClass/
-    assert_select '.stdout', /3 tests, \d+ assertions, 0 failures, 0 errors/
+    assert_select 'pre', /3 tests, \d+ assertions, 0 failures, 0 errors/
   end
 
   section 13.1, "Iteration H1: Adding Users" do
@@ -247,8 +251,12 @@ class DepotTest < Gorp::TestCase
       :title =>  "render with a partial in rjs fails ",
       :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
 
-    assert_select '.stdout', /10 tests, 31 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /46 tests, [78]\d assertions, 0 failures, 0 errors/
+    assert_select 'pre',
+      /1?\d tests, [23]\d assertions, 0 failures, 0 errors/,
+      '1?\d tests, [23]\d assertions, 0 failures, 0 errors'
+    assert_select 'pre', 
+      /46 tests, [78]\d assertions, 0 failures, 0 errors/
+      '46 tests, [78]\d assertions, 0 failures, 0 errors'
 
     assert_select '.stdout', /login"&gt;redirected/
     assert_select '.stdout', /customer@example.com/
@@ -288,9 +296,15 @@ class DepotTest < Gorp::TestCase
     assert_select 'option[value=es]'
     assert_select 'h1', 'Your Pragmatic Catalog'
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
-    assert_select '.stdout', /10 tests, 31 assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /46 tests, [78]\d assertions, 0 failures, 0 errors/
-    assert_select '.stdout', /3 tests, \d+ assertions, 0 failures, 0 errors/
+    assert_select 'pre', 
+      /1?\d tests, [23]\d assertions, 0 failures, 0 errors/,
+      '1?\d tests, [23]\d assertions, 0 failures, 0 errors'
+    assert_select 'pre', 
+      /46 tests, [78]\d assertions, 0 failures, 0 errors/,
+      '46 tests, [78]\d assertions, 0 failures, 0 errors'
+    assert_select 'pre', 
+      /3 tests, \d+ assertions, 0 failures, 0 errors/,
+      '3 tests, \d+ assertions, 0 failures, 0 errors'
   end
 
   section 16, "Deployment" do
@@ -305,7 +319,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 20.1, "Testing Routing" do
-    assert_select '.stdout', /13 tests, 49 assertions, 0 failures, 0 errors/
+    assert_select 'pre', 
+      /1\d tests, 4\d assertions, 0 failures, 0 errors/,
+      '1\d tests, 4\d assertions, 0 failures, 0 errors'
   end
 
   section 21.1, "Views" do
@@ -335,7 +351,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 25.1, 'rack' do
-    assert_select 'p', '37.95'
+    assert_select 'p', '43.75'
     assert_select 'h2', 'Programming Ruby 1.9'
   end
 
@@ -350,6 +366,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 26.2, 'Asset Packager' do
+    next unless File.exist? 'public/images'
     assert_select '.stdout', 'config/asset_packages.yml example file created!'
     assert_select '.stdout', '  - depot'
     assert_select '.stdout', 
