@@ -7,7 +7,7 @@ namespace :db do
     source = File.join(Rails.root, 'db', "production.db")
     dest   = File.join(backup_dir, "production.backup")
 
-    makedirs backup_dir
+    makedirs backup_dir, :verbose => true
     sh "sqlite3 #{source} .dump > #{dest}"
   end
 

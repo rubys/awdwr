@@ -1955,8 +1955,8 @@ end
 section 12.7, 'Iteration J2: Email Notifications' do
   generate 'mailer Notifier order_received order_shipped'
   edit 'app/mailers/notifier.rb' do
-    edit ':from', :highlight do
-      msub /:from\s*=>\s*(.*)/, "'Sam Ruby <depot@example.com>'"
+    edit 'from', :highlight do
+      msub /from:?\s*=?>?\s*(.*)/, "'Sam Ruby <depot@example.com>'"
     end
   end
   publish_code_snapshot :p
@@ -2896,7 +2896,8 @@ section 22, 'Active Resources' do
   # restart_server
   Dir.chdir(File.join($WORK,'depot_client'))
   console 'Product.find(2).title'
-  console 'p = Product.find(2)\nputs p.price\np.price-=5\np.save'
+  console 'p = Product.find(2)\nputs p.price\n' +
+    'p.price = BigDecimal.new(p.price)-5\np.save'
   get '/'
   edit 'app/models/order.rb' do |data|
     data << <<-EOF.unindent(6)
@@ -2914,10 +2915,14 @@ section 22, 'Active Resources' do
     EOF
   end
   post '/admin', {'submit' => 'Logout'}, {:snapget => false}
-  get '/orders/1/line_items.xml', :auth => ['dave', 'secret']
+  if File.exist? 'public/images'
+    get '/orders/1/line_items.xml', :auth => ['dave', 'secret']
+  else
+    get '/orders/1/line_items.json', :auth => ['dave', 'secret']
+  end
   console 'LineItem.find(:all, :params => {:order_id=>1})'
   console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
-       'puts li.price\nli.price*=0.8\nli.save'
+       'puts li.price\nli.price = BigDecimal.new(li.price) * 0.8\nli.save'
   console 'li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, ' +
        ':price=>0.0)\nli2.save'
        'li2.save'

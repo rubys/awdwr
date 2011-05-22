@@ -345,7 +345,11 @@ class DepotTest < Gorp::TestCase
     assert_select '.price', '$37.95'
     assert_select '.stdout', '=&gt; "Dave Thomas"'
     assert_select '.stdout', /NoMethodError: undefined method `line_items'/
-    assert_select '.stdout', /&lt;id type="integer"&gt;\d+&lt;\/id&gt;/
+    if File.exist? 'public/images'
+      assert_select '.stdout', /&lt;id type="integer"&gt;\d+&lt;\/id&gt;/
+    else
+      assert_select '.body', /[{,]"id":\d+[,}]/
+    end
     assert_select '.stdout', /"product_id"=&gt;3/
     assert_select '.stdout', /=&gt; 39.6/
   end
