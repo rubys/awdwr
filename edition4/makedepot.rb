@@ -169,7 +169,11 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
     up = (include?('self.up') ? 'self.up' : 'change')
     dcl up, :mark=>'up' do
       edit 'price', :highlight do
-        self << ', :precision => 8, :scale => 2'
+        if RUBY_VERSION =~ /^1\.8/
+          self << ', :precision => 8, :scale => 2'
+        else
+          self << ', precision: 8, scale: 2'
+        end
       end
     end
   end
@@ -184,7 +188,11 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   edit 'app/views/products/_form.html.erb' do
     msub /<%= pluralize.*%>( )/, "\n      "
     edit 'text_area :description', :highlight do
-      msub /:description() %>/, ', :rows => 6'
+      if RUBY_VERSION =~ /^1\.8/
+        msub /:description() %>/, ', :rows => 6'
+      else
+        msub /:description() %>/, ', rows: 6'
+      end
     end
   end
 
@@ -230,6 +238,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   edit "db/seeds.rb", 'vcc' do |data|
     data.all = read('products/seeds.rb')
     data.gsub! '/images/', '' unless File.exist? 'public/images'
+    data.gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
   end
   cmd 'rake db:seed'
 
@@ -243,6 +252,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   desc 'Replace the scaffold generated view with some custom HTML'
   edit 'app/views/products/index.html.erb' do |data|
     data.all = read('products/index.html.erb')
+    data.gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Copy some images and a stylesheet'
@@ -3037,7 +3047,7 @@ end
 section 26.3, 'HAML' do
   edit 'Gemfile', 'plugins' do
     msub /activemerchant.*\n()/, <<-EOF.unindent(6), :highlight
-      gem 'haml', '~> 3.0.18'
+      gem 'haml', '~> 3.1.1'
     EOF
   end
   cmd 'bundle install'

@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class UserStoriesTest < ActionController::IntegrationTest
+class UserStoriesTest < ActionDispatch::IntegrationTest
   fixtures :products
 
   # A user goes to the index page. They select a product, adding it to their
@@ -39,9 +39,9 @@ class UserStoriesTest < ActionController::IntegrationTest
     #START:step4
     post_via_redirect "/orders",
                       :order => { :name     => "Dave Thomas",
-                                 :address  => "123 The Street",
-                                 :email    => "dave@example.com",
-                                 :pay_type => "Check" }
+                                  :address  => "123 The Street",
+                                  :email    => "dave@example.com",
+                                  :pay_type => "Check" }
     assert_response :success
     assert_template "index"
     cart = Cart.find(session[:cart_id])
@@ -53,10 +53,10 @@ class UserStoriesTest < ActionController::IntegrationTest
     assert_equal 1, orders.size
     order = orders[0]
     
-    assert_equal "Dave Thomas",       order.name
-    assert_equal "123 The Street",    order.address
+    assert_equal "Dave Thomas",      order.name
+    assert_equal "123 The Street",   order.address
     assert_equal "dave@example.com", order.email
-    assert_equal "Check",             order.pay_type
+    assert_equal "Check",            order.pay_type
     
     assert_equal 1, order.line_items.size
     line_item = order.line_items[0]
