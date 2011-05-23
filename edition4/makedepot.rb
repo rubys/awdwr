@@ -323,6 +323,7 @@ section 7.1, 'Iteration B1: Validate!' do
       #END:val4
       #END:validation
     EOF
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Demonstrate failures.'
@@ -391,6 +392,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
           :price       => 19.95
         }
       EOF
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
     
     %w(update create).each do |test|
@@ -411,6 +413,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
   desc 'Add some unit tests for new function.'
   edit "test/unit/product_test.rb" do |data|
     data.all = read('test/product_test.rb')
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Tests pass!'
@@ -433,6 +436,7 @@ section 7.3, 'Playtime' do
   edit 'app/models/product.rb' do
     msub /()#END:validation/,
       "  validates :title, :length => {:minimum => 10}\n"
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 end
 
