@@ -2910,8 +2910,12 @@ section 22, 'Active Resources' do
   # restart_server
   Dir.chdir(File.join($WORK,'depot_client'))
   console 'Product.find(2).title'
-  console 'p = Product.find(2)\nputs p.price\n' +
-    'p.price = BigDecimal.new(p.price)-5\np.save'
+  if File.exist? 'public/images'
+    console 'p = Product.find(2)\nputs p.price\np.price -= 5\np.save'
+  else
+    console 'p = Product.find(2)\nputs p.price\n' +
+      'p.price = BigDecimal.new(p.price)-5\np.save'
+  end
   get '/'
   edit 'app/models/order.rb' do |data|
     data << <<-EOF.unindent(6)
@@ -2935,8 +2939,13 @@ section 22, 'Active Resources' do
     get '/orders/1/line_items.json', :auth => ['dave', 'secret']
   end
   console 'LineItem.find(:all, :params => {:order_id=>1})'
-  console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
-       'puts li.price\nli.price = BigDecimal.new(li.price) * 0.8\nli.save'
+  if File.exist? 'public/images'
+    console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
+         'puts li.price\nli.price *= 0.8\nli.save'
+  else
+    console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
+         'puts li.price\nli.price = BigDecimal.new(li.price) * 0.8\nli.save'
+  end
   console 'li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, ' +
        ':price=>0.0)\nli2.save'
        'li2.save'
