@@ -1379,7 +1379,8 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
       "\n    <!-- END:hidden_div -->"
     data.msub /(<div id="cart">)/,
       "<!-- START:hidden_div -->\n      " +
-      '<%= hidden_div_if(@cart.line_items.empty?, :id => "cart") do %>'
+      "<%= hidden_div_if(@cart.line_items.empty?, :id => 'cart') do %>"
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   edit 'app/helpers/application_helper.rb' do |data|
@@ -1454,6 +1455,7 @@ section 11.5, 'Iteration F5: Testing AJAX changes' do
     EOF
     unless File.exist? 'public/images'
       gsub! "_rjs :replace_html, 'cart'", "_jquery :html, '#cart'"
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
   end
 
@@ -1663,10 +1665,8 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   else
     edit 'app/views/line_items/create.js.erb' do
       clear_highlights
-      msub /()/, <<-EOF.unindent(8) + "\n"
-        #START_HIGHLIGHT
+      msub /()/, <<-EOF.unindent(8) + "\n", :highlight
         $("#notice").hide();
-        #END_HIGHLIGHT
       EOF
     end
   end
@@ -1690,6 +1690,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
       end
       #END:who_bought
     EOF
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Add to the routes'
@@ -1702,13 +1703,16 @@ section 12.2, 'Iteration G2: Atom Feeds' do
         end
       EOF
     end
+    edit ':who_bought' do
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
   end
 
   desc 'Try again... success... but not much there'
   cmd 'curl --silent --user dave:secret http://localhost:3000/products/3/who_bought.xml'
 
   desc 'Add "orders" to the Product class'
-  edit 'app/models/product.rb', 'relationships' do |data|
+  edit 'app/models/product.rb', 'relationships' do
     clear_all_marks
     msub /^( +#\.\.\.\n)/, ''
     edit /class.*has_many.*?\n/m, :mark=>'relationships' do
@@ -1718,6 +1722,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
     msub /has_many :line_items\n()/, <<-EOF.unindent(4), :highlight
       has_many :orders, :through => :line_items
     EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Define an Atom view (using the Atom builder)'
@@ -1765,6 +1770,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
         end
       end
     EOF
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Add the atom format to the controller'
@@ -1786,6 +1792,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
     data.dcl('who_bought') do |wb|
       wb.edit 'format.xml', :highlight do |xml|
         xml.msub /@product() \}/, '.to_xml(:include => :orders)'
+        xml.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
       end
     end
   end
