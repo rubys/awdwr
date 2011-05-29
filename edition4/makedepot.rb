@@ -1496,6 +1496,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     EOF
     data[/()^end/,1] = "#START:has_many\n"
     data[/^end()/,1] = "\n#END:has_many"
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   edit 'app/models/line_item.rb', 'belongs_to' do
     clear_all_marks
@@ -1508,6 +1509,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     msub /().*Empty cart/, <<-'EOF'.unindent(6), :highlight
       <%= button_to "Checkout", new_order_path, :method => :get %>
     EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   edit 'app/controllers/orders_controller.rb', 'checkout' do
     dcl 'new', :mark => 'checkout'
@@ -1518,6 +1520,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
         return
       end
     EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   edit 'app/views/orders/new.html.erb' do
     self.all = read('orders/new.html.erb')
@@ -1543,6 +1546,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     edit 'submit', :highlight do
       msub /() %>/, " 'Place Order'"
     end
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   edit 'app/models/order.rb', 'select' do |data|
     data[/()class Order.*/,1] = "#START:select\n"
@@ -1603,6 +1607,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     EOF
     edit 'class Order', :mark => 'validate'
     edit /^end/, :mark => 'validate'
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   edit 'app/controllers/orders_controller.rb', 'create' do |data|
     data[/().*def create/,1] = "#START:create\n"
@@ -1950,6 +1955,7 @@ section 12.4, 'Playtime' do
       EOF
 
       getnew.msub /()\A/, empty + "\n"
+      getnew.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
   end
 
@@ -2021,6 +2027,7 @@ section 12.7, 'Iteration J2: Email Notifications' do
           "order.email, :subject => 'Pragmatic Store Order Shipped'"
       end
     end
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Tailor the confirm receipt email'
@@ -2045,6 +2052,7 @@ section 12.7, 'Iteration J2: Email Notifications' do
                   line_item.quantity,
                   truncate(line_item.product.title, :length => 50)) %>
     EOF
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'HTML partial for the line items'
@@ -2113,6 +2121,11 @@ section 12.8, 'Iteration J3: Integration Tests' do
   generate 'integration_test user_stories'
   edit "test/integration/user_stories_test.rb" do |data|
     data[/(.*)/m,1] = read('test/user_stories_test.rb')
+    unless RUBY_VERSION =~ /^1\.8/
+      data.gsub! /\s{3}:/, ':'
+      data.gsub! /:(\w+) (\s*)=>/, '\1:\2'
+      data.sub! 'order: {', '   order: {'
+    end
   end
 
   rake 'test:integration'
@@ -2131,6 +2144,7 @@ section 13.1, 'Iteration H1: Adding Users' do
   cmd 'rake db:migrate'
   edit "app/models/user.rb" do |data|
     data[/(.*)/m,1] = read('users/user.rb')
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   %w(create update).each do |action|
     edit 'app/controllers/users_controller.rb', action do
@@ -2164,6 +2178,7 @@ section 13.1, 'Iteration H1: Adding Users' do
   end
   edit "app/views/users/_form.html.erb" do
     self.all = read('users/new.html.erb')
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   get '/users'
   post '/users/new',
