@@ -138,7 +138,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
         gemfile.puts "gem 'haml'"
       else
         gemfile.puts "gem 'activemerchant', '~> 1.10.0'"
-        gemfile.puts "gem 'haml', '~> 3.0.18'"
+        gemfile.puts "gem 'haml', '~> 3.1.1'"
         gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
       end
     end

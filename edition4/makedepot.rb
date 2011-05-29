@@ -462,6 +462,9 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
       # ...
       # END:root
     EOF
+    data.edit 'store#index' do
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
 
     data.edit /^end/, :mark=>'root'
   end
@@ -492,6 +495,9 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
     #END:salable
     EOF
     data.edit /^end/, :mark => 'salable'
+    data.edit 'default_scope' do
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
   end
 
   desc 'In the view, display a list of products'
@@ -527,7 +533,8 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
   desc 'Modify the application layout'
   edit 'app/views/layouts/application.html.erb' do
     self.all = read('store/layout.html.erb')
-    self.gsub! ':defaults', '"application"' unless File.exist? 'public/images'
+    gsub! ':defaults', '"application"' unless File.exist? 'public/images'
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Modify the stylesheet'
@@ -618,6 +625,7 @@ section 8.4, 'Iteration C4: Functional Testing' do
         assert_select '.price', /\$[,\d]+\.\d\d/
       EOF
     end
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Show that the tests pass.'
@@ -687,6 +695,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
     data.msub /class Cart.*\n()/, <<-EOF.unindent(4), :highlight
       has_many :line_items, :dependent => :destroy
     EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Product has many line items.'
@@ -749,6 +758,7 @@ section 9.3, 'Iteration D3: Adding a button' do
     data.msub /number_to_currency.*\n()/, <<-EOF, :highlight
       <%= button_to 'Add to Cart', line_items_path(:product_id => product) %>
     EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Add a bit of style to make it show all on one line'
@@ -774,6 +784,7 @@ section 9.3, 'Iteration D3: Adding a button' do
         EOF
         msub /(LineItem.new\(.*\))/,
           "@cart.line_items.build(:product => product)"
+        gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
       end
       msub /,( ):?notice/, "\n          "
       msub /,( ):?status/, "\n          "
@@ -845,6 +856,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
     data[/add_column.*\n()/,1] = "# END_HIGHLIGHT\n"
 
     data[/add_column.* :quantity,.*()/,1] = ', :default => 1'
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc "Apply the migration"
@@ -864,6 +876,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
         current_item
       end
     EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Replace the call to LineItem.new with a call to the new method.'
@@ -896,6 +909,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
     selfup = include?('self.up')
     self.all = read('cart/combine_items_in_cart.rb')
     gsub! 'self.', '' unless selfup
+    gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
   end
 
   desc 'Combine entries'
@@ -957,6 +971,7 @@ section 10.2, 'Iteration E2: Handling Errors' do
           # END_HIGHLIGHT
         end
       EOF
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
   end
 
@@ -982,6 +997,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
           :confirm => 'Are you sure?' %>
       <!-- END_HIGHLIGHT -->
     EOF
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Clear session and add flash notice when cart is destroyed.'
@@ -999,6 +1015,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
         sub! 'carts_url', 
           "store_url,\n        :notice => 'Your cart is currently empty'"
       end
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
   end
 
@@ -1018,6 +1035,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   desc 'Update the view to add totals.'
   edit 'app/views/carts/show.html.erb' do |data|
     data[/(.*)/m,1] = read('cart/show.html.erb')
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Add a method to compute the total price of a single line item.'
@@ -1191,7 +1209,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
       edit '@cart', :highlight
       sub! '@cart', 'cart'
     end
-    msub /,\n()<!-- END_HIGHLIGHT -->/, '#'
+    sub! /,\n<!-- END_HIGHLIGHT -->/, ",\n# END_HIGHLIGHT"
   end
 
   desc 'Insert a call in the controller to find the cart'
@@ -1262,6 +1280,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
     data.clear_all_marks
     data.edit '<%= button_to', :highlight
     data.msub /<%= button_to.*() %>/, ",\n        :remote => true"
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   edit 'app/controllers/line_items_controller.rb', 'create' do
     clear_highlights
@@ -1318,6 +1337,10 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
 	  animate({'background-color':'#114411'}, 1000);
       EOF
     end
+    desc 'Now pull in the jquery-ui libraries'
+    edit 'app/assets/javascripts/application.js' do
+      msub /()\/\/= require jquery_ujs/, "//= require jquery-ui\n", :highlight
+    end
   end
   publish_code_snapshot :m
 end
@@ -1356,7 +1379,8 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
       "\n    <!-- END:hidden_div -->"
     data.msub /(<div id="cart">)/,
       "<!-- START:hidden_div -->\n      " +
-      '<%= hidden_div_if(@cart.line_items.empty?, :id => "cart") do %>'
+      "<%= hidden_div_if(@cart.line_items.empty?, :id => 'cart') do %>"
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   edit 'app/helpers/application_helper.rb' do |data|
@@ -1373,7 +1397,7 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
   edit 'app/controllers/carts_controller.rb', 'destroy' do
     clear_highlights
     dcl 'destroy' do
-      sub! /,\s+:notice => 'Your cart is currently empty'/, ''
+      sub! /,\s+:?notice:?\s?=?>? 'Your cart is currently empty'/, ''
       edit 'format.html', :highlight
     end
   end
@@ -1431,6 +1455,7 @@ section 11.5, 'Iteration F5: Testing AJAX changes' do
     EOF
     unless File.exist? 'public/images'
       gsub! "_rjs :replace_html, 'cart'", "_jquery :html, '#cart'"
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
   end
 
@@ -1640,10 +1665,8 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   else
     edit 'app/views/line_items/create.js.erb' do
       clear_highlights
-      msub /()/, <<-EOF.unindent(8) + "\n"
-        #START_HIGHLIGHT
+      msub /()/, <<-EOF.unindent(8) + "\n", :highlight
         $("#notice").hide();
-        #END_HIGHLIGHT
       EOF
     end
   end
@@ -1667,6 +1690,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
       end
       #END:who_bought
     EOF
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Add to the routes'
@@ -1679,13 +1703,16 @@ section 12.2, 'Iteration G2: Atom Feeds' do
         end
       EOF
     end
+    edit ':who_bought' do
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
   end
 
   desc 'Try again... success... but not much there'
   cmd 'curl --silent --user dave:secret http://localhost:3000/products/3/who_bought.xml'
 
   desc 'Add "orders" to the Product class'
-  edit 'app/models/product.rb', 'relationships' do |data|
+  edit 'app/models/product.rb', 'relationships' do
     clear_all_marks
     msub /^( +#\.\.\.\n)/, ''
     edit /class.*has_many.*?\n/m, :mark=>'relationships' do
@@ -1695,6 +1722,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
     msub /has_many :line_items\n()/, <<-EOF.unindent(4), :highlight
       has_many :orders, :through => :line_items
     EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Define an Atom view (using the Atom builder)'
@@ -1742,6 +1770,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
         end
       end
     EOF
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Add the atom format to the controller'
@@ -1763,6 +1792,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
     data.dcl('who_bought') do |wb|
       wb.edit 'format.xml', :highlight do |xml|
         xml.msub /@product() \}/, '.to_xml(:include => :orders)'
+        xml.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
       end
     end
   end
@@ -2910,8 +2940,12 @@ section 22, 'Active Resources' do
   # restart_server
   Dir.chdir(File.join($WORK,'depot_client'))
   console 'Product.find(2).title'
-  console 'p = Product.find(2)\nputs p.price\n' +
-    'p.price = BigDecimal.new(p.price)-5\np.save'
+  if File.exist? 'public/images'
+    console 'p = Product.find(2)\nputs p.price\np.price -= 5\np.save'
+  else
+    console 'p = Product.find(2)\nputs p.price\n' +
+      'p.price = BigDecimal.new(p.price)-5\np.save'
+  end
   get '/'
   edit 'app/models/order.rb' do |data|
     data << <<-EOF.unindent(6)
@@ -2935,8 +2969,13 @@ section 22, 'Active Resources' do
     get '/orders/1/line_items.json', :auth => ['dave', 'secret']
   end
   console 'LineItem.find(:all, :params => {:order_id=>1})'
-  console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
-       'puts li.price\nli.price = BigDecimal.new(li.price) * 0.8\nli.save'
+  if File.exist? 'public/images'
+    console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
+         'puts li.price\nli.price *= 0.8\nli.save'
+  else
+    console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
+         'puts li.price\nli.price = BigDecimal.new(li.price) * 0.8\nli.save'
+  end
   console 'li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, ' +
        ':price=>0.0)\nli2.save'
        'li2.save'
