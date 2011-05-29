@@ -124,7 +124,6 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       gems.each {|gem,opts| gemfile.puts "gem #{gem.first.inspect}#{opts}"}
       gemfile.puts "gem 'sqlite3'"
       gemfile.puts "gem 'mysql'"
-      gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
       gemfile.puts "gem 'capistrano'"
       gemfile.puts "gem 'test-unit'"
       gemfile.puts "gem 'rdoc'"
@@ -140,6 +139,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       else
         gemfile.puts "gem 'activemerchant', '~> 1.10.0'"
         gemfile.puts "gem 'haml', '~> 3.0.18'"
+        gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
       end
     end
   else
