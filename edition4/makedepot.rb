@@ -964,7 +964,7 @@ section 10.2, 'Iteration E2: Handling Errors' do
           # END_HIGHLIGHT
             respond_to do |format|
               format.html # show.html.erb
-              format.xml  { render :xml => @cart }
+              format.json { render :json => @cart }
             end
           # START_HIGHLIGHT
           end
@@ -1339,7 +1339,11 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
     end
     desc 'Now pull in the jquery-ui libraries'
     edit 'app/assets/javascripts/application.js' do
-      msub /()\/\/= require jquery_ujs/, "//= require jquery-ui\n", :highlight
+      msub /()\/\/= require jquery_ujs/, <<-EOF.unindent(8)
+        //#START_HIGHLIGHT
+        //= require jquery-ui
+        //#END_HIGHLIGHT
+      EOF
     end
   end
   publish_code_snapshot :m
@@ -1478,6 +1482,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
         self << ', :limit => 10'
       end
     end
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   generate 'migration add_order_id_to_line_item order_id:integer'
@@ -2209,6 +2214,7 @@ section 13.2, 'Iteration H2: Authenticating Users' do
         redirect_to store_url, :notice => "Logged out"
       EOF
     end
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   edit "app/views/sessions/new.html.erb" do |data|
@@ -2231,6 +2237,7 @@ section 13.2, 'Iteration H2: Authenticating Users' do
     data.clear_highlights
     edit 'admin/index', :highlight do
       msub /(get.*)/, "get 'admin' => 'admin#index'"
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
 
     edit 'sessions/new', :highlight do
@@ -2241,6 +2248,7 @@ section 13.2, 'Iteration H2: Authenticating Users' do
           delete 'logout' => :destroy
         end
       EOF
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
 
     sub! /.*sessions\/create.*\n\n/, ''
@@ -2273,6 +2281,7 @@ section 13.3, 'Iteration H3: Limiting Access' do
           end
       EOF
     end
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   %w(sessions store).each do |controller|
@@ -2300,6 +2309,7 @@ section 13.3, 'Iteration H3: Limiting Access' do
           top.msub /class.*\n()/, <<-EOF.unindent(8) + "\n", :highlight
             skip_before_filter :authorize, :only => #{auth[controller].inspect}
           EOF
+          top.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
         end
       end
     end
@@ -2317,6 +2327,7 @@ section 13.3, 'Iteration H3: Limiting Access' do
         <%= button_to 'Logout', logout_path, :method => :delete   %>
       <% end %>
     EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   publish_code_snapshot :r
@@ -2423,6 +2434,7 @@ section 13.5, 'Playtime' do
         #END_HIGHLIGHT
       EOF
     end
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   edit "test/fixtures/users.yml" do |data|
@@ -2461,6 +2473,8 @@ section 13.5, 'Playtime' do
         msub /(user_path.*)/, 'users_path'
       end
     end
+
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   cmd 'rake test'
@@ -2560,6 +2574,7 @@ section 15.1, 'Task I1: Selecting the locale' do
       end
       #END_HIGHLIGHT
     EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc "Verify that the routes work."
@@ -2688,6 +2703,7 @@ section 15.3, 'Task I3: Translating Checkout' do
       <!-- ... -->
       <!-- END:explanation -->
     EOF
+    gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
   end
 
   desc 'Translate the model names to human names.'
@@ -2754,6 +2770,7 @@ section 15.4, 'Task I4: Add a locale switcher.' do
       index.msub /^()\s+end/, <<-EOF.unindent(4), :highlight
         end
       EOF
+      index.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
   end
 
@@ -2774,6 +2791,7 @@ section 15.4, 'Task I4: Add a locale switcher.' do
       <!-- END_HIGHLIGHT -->
       <!-- END:i18n -->
     EOF
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc "Try out the form"
@@ -2875,6 +2893,7 @@ end
 section 20.1, 'Testing Routes' do
   edit 'test/unit/routing_test.rb' do
     self.all = read('test/routing_test.rb')
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   rake 'test:units'
 end
@@ -2882,6 +2901,7 @@ end
 section 21.1, 'Views' do
   edit 'app/views/products/index.xml.builder' do
     self.all = read('products/index.xml.builder')
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   edit 'app/controllers/products_controller.rb', 'index' do
     dcl 'index', :mark => 'index' do
@@ -2978,18 +2998,24 @@ section 22, 'Active Resources' do
     EOF
   end
   post '/admin', {'submit' => 'Logout'}, {:snapget => false}
-  if File.exist? 'public/images'
-    get '/orders/1/line_items.xml', :auth => ['dave', 'secret']
-  else
-    get '/orders/1/line_items.json', :auth => ['dave', 'secret']
-  end
   console 'LineItem.find(:all, :params => {:order_id=>1})'
+  get '/orders/1/line_items.json', :auth => ['dave', 'secret']
   if File.exist? 'public/images'
     console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
          'puts li.price\nli.price *= 0.8\nli.save'
   else
-    console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
-         'puts li.price\nli.price = BigDecimal.new(li.price) * 0.8\nli.save'
+    Dir.chdir(File.join($WORK,'depot')) do
+      edit 'app/controllers/line_items_controller.rb', 'index' do
+        dcl 'index', :mark => 'index' do
+          msub /format.json.*\n()/, 
+            "      format.xml { render xml: @line_items }\n"
+        end
+      end
+    end
+    get '/orders/1/line_items.xml', :auth => ['dave', 'secret']
+    console 'LineItem.format = :xml\n' +
+         'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
+         'puts li.price\nli.price *= 0.8\nli.save'
   end
   console 'li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, ' +
        ':price=>0.0)\nli2.save'
@@ -3006,6 +3032,7 @@ section 25.1, 'rack' do
 
   edit 'app/store.rb' do
     self.all = read('rack/store.rb')
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   edit 'config/routes.rb' do
@@ -3042,19 +3069,21 @@ section 26.1, 'Active Merchant' do
     clear_all_marks
     if File.exist? 'public/images'
       edit 'will_paginate', :mark => 'plugins'
-      msub /paginate.*\n()/, <<-EOF.unindent(6), :highlight
+      msub /paginate.*\n()/, <<-EOF.unindent(8), :highlight
         gem 'activemerchant', '~> 1.10.0'
       EOF
     else
-      edit /\Z/, :mark => 'plugins'
-      msub /()\Z/, "\n\n" + <<-EOF.unindent(6), :highlight
+      msub /()\Z/, "\n\n" + <<-EOF.unindent(6)
         gem 'activemerchant'
       EOF
+      edit 'activemerchant', :mark => 'plugins'
+      edit 'activemerchant', :highlight
     end
   end
   cmd 'bundle install'
   edit 'script/creditcard.rb' do
     self.all = read('script/creditcard.rb')
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   runner 'script/creditcard.rb'
 end
@@ -3114,6 +3143,7 @@ section 26.3, 'HAML' do
   cmd 'rm app/views/store/index.html.erb'
   edit 'app/views/store/index.html.haml' do
     self.all = read('plugins/index.html.haml')
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   get '/'
 end
@@ -3121,6 +3151,7 @@ end
 section 26.4, 'JQuery' do
   unless File.exist? 'public/images'
     desc 'Not required with Rails 3.1'
+    publish_code_snapshot :v
     next
   end
 
@@ -3470,6 +3501,17 @@ section 123.8, 'Uploading Files to Rails Applications' do
   cmd "cp -v #{$CODE}/e1/views/app/models/picture.rb app/models"
   cmd 'rake db:migrate'
   cmd "cp -vr #{$CODE}/e1/views/app/views/upload app/views"
+  unless RUBY_VERSION =~ /^1\.8/
+    edit 'app/controllers/upload_controller.rb' do
+      gsub! /:(\w+) =>/, '\1:'
+    end
+    edit 'app/views/upload/get.html.erb' do
+      gsub! /:(\w+) =>/, '\1:'
+    end
+    edit 'app/models/picture.rb' do
+      gsub! /:(\w+) =>/, '\1:'
+    end
+  end
   get '/upload/get'
   # get '/upload/show'
 end
