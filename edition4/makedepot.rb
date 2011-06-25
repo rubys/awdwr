@@ -446,7 +446,7 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   EOF
 
   desc 'Create a second controller with a single index action'
-  generate 'controller store index'
+  generate 'controller Store index'
 
   desc "Route the 'root' of the site to the store"
   edit 'config/routes.rb', 'root' do |data|
@@ -2194,8 +2194,8 @@ section 13.1, 'Iteration H1: Adding Users' do
 end
 
 section 13.2, 'Iteration H2: Authenticating Users' do
-  generate 'controller sessions new create destroy'
-  generate 'controller admin index'
+  generate 'controller Sessions new create destroy'
+  generate 'controller Admin index'
 
   edit "app/controllers/sessions_controller.rb" do |data|
     data.dcl 'create', :mark => 'login' do |create|
@@ -2923,7 +2923,7 @@ section 21.2, 'Form Helpers' do
   generate 'model model input:string address:text color:string ' +
     'ketchup:boolean mustard:boolean mayonnaise:boolean start:date ' +
     'alarm:time'
-  generate 'controller form input'
+  generate 'controller Form input'
   rake 'db:migrate'
   restart_server
 
@@ -3008,7 +3008,8 @@ section 22, 'Active Resources' do
       edit 'app/controllers/line_items_controller.rb', 'index' do
         dcl 'index', :mark => 'index' do
           msub /format.json.*\n()/, 
-            "      format.xml { render xml: @line_items }\n"
+            "      format.xml { render :xml => @line_items }\n"
+        gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
         end
       end
     end
@@ -3397,7 +3398,7 @@ section 121, 'Action Controller: Routing and URLs' do
   end
   cmd 'rake routes'
   generate 'model comment comment:text article_id:integer'
-  generate 'controller comments new edit update destroy'
+  generate 'controller Comments new edit update destroy'
   cmd 'rm app/views/comments/destroy.html.erb'
   cmd 'rm app/views/comments/update.html.erb'
   edit 'app/models/article.rb' do |data|
@@ -3429,7 +3430,7 @@ section 121, 'Action Controller: Routing and URLs' do
   end
   publish_code_snapshot nil, 'restful2'
   rails 'routing', :e1
-  generate 'controller store index add_to_cart'
+  generate 'controller Store index add_to_cart'
   cmd "cp -v #{$DATA}/routing/* config"
   cmd 'mv -v config/*_test.rb test/unit'
   cmd 'rake db:schema:dump'
