@@ -3074,7 +3074,7 @@ section 26.1, 'Active Merchant' do
         gem 'activemerchant', '~> 1.10.0'
       EOF
     else
-      msub /()\Z/, "\n\n" + <<-EOF.unindent(6)
+      msub /()\Z/, "\n\n" + <<-EOF.unindent(8)
         gem 'activemerchant'
       EOF
       edit 'activemerchant', :mark => 'plugins'
@@ -3086,7 +3086,15 @@ section 26.1, 'Active Merchant' do
     self.all = read('script/creditcard.rb')
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
+  ENV.delete('BUNDLE_GEMFILE')
   runner 'script/creditcard.rb'
+
+  `rake about 2> /dev/null > /dev/null`
+  unless $?.success?
+    edit 'Gemfile', 'plugins' do
+      msub /()gem 'activemerchant'/, '# '
+    end
+  end
 end
 
 section 26.2, 'Asset Packager' do
@@ -3139,6 +3147,16 @@ section 26.3, 'HAML' do
     EOF
   end
   cmd 'bundle install'
+
+  cmd %{rails runner "require \'haml\'"}
+  `rails runner "require 'haml'" 2> /dev/null > /dev/null`
+  unless $?.success?
+    edit 'Gemfile', 'plugins' do
+      msub /()gem 'haml'/, '# '
+    end
+    next
+  end
+
   restart_server
   cmd 'cat app/views/store/index.html.erb'
   cmd 'rm app/views/store/index.html.erb'

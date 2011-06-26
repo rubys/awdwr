@@ -58,6 +58,9 @@ updated = Dir.chdir($rails) do
   `git log -1 --pretty=format:%H` != before
 end
 
+$rails_version = (File.read("#{$rails}/RAILS_VERSION").strip rescue nil)
+$rails_version.sub! '3.1.0.rc1', '3.2.0.pre'
+
 # If unchanged, select next or exit now
 if !updated
   Process.exit if ARGV.empty?
@@ -134,8 +137,12 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       # end
 
       if File.exist? base # Rails 3.1
-        gemfile.puts "gem 'activemerchant'"
-        gemfile.puts "gem 'haml'"
+        puts $rails_version =~ /^3\.1/
+        puts $rails_version
+        if $rails_version =~ /^3\.1/
+          gemfile.puts "gem 'activemerchant'"
+          gemfile.puts "gem 'haml'"
+        end
       else
         gemfile.puts "gem 'activemerchant', '~> 1.10.0'"
         gemfile.puts "gem 'haml', '~> 3.1.1'"
@@ -234,6 +241,8 @@ end
 if File.exist? File.join(WORK, 'Gemfile')
   install =  <<-EOF
     gem list bundler | grep -q bundler || gem install bundler
+    gem list activemerchant | grep -q activemerchant || gem install activemerchant
+    gem list haml | grep -q haml || gem install haml
     cd #{WORK}; rm -f Gemfile.lock; bundle install; cd -
   EOF
 else
