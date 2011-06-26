@@ -2999,11 +2999,11 @@ section 22, 'Active Resources' do
   end
   post '/admin', {'submit' => 'Logout'}, {:snapget => false}
   console 'LineItem.find(:all, :params => {:order_id=>1})'
-  get '/orders/1/line_items.json', :auth => ['dave', 'secret']
   if File.exist? 'public/images'
     console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
          'puts li.price\nli.price *= 0.8\nli.save'
   else
+    get '/orders/1/line_items.json', :auth => ['dave', 'secret']
     Dir.chdir(File.join($WORK,'depot')) do
       edit 'app/controllers/line_items_controller.rb', 'index' do
         dcl 'index', :mark => 'index' do
@@ -3013,11 +3013,11 @@ section 22, 'Active Resources' do
         end
       end
     end
-    get '/orders/1/line_items.xml', :auth => ['dave', 'secret']
-    console 'LineItem.format = :xml\n' +
-         'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
-         'puts li.price\nli.price *= 0.8\nli.save'
   end
+  get '/orders/1/line_items.xml', :auth => ['dave', 'secret']
+  console 'LineItem.format = :xml\n' +
+       'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
+       'puts li.price\nli.price *= 0.8\nli.save'
   console 'li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, ' +
        ':price=>0.0)\nli2.save'
        'li2.save'
