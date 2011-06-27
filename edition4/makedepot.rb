@@ -2843,13 +2843,25 @@ section 16, 'Deployment' do
   edit 'config/deploy.rb' do
     self.all = read('config/deploy.rb')
   end
-  edit 'config/environments/production.rb' do
-    msub /^()end/, "\n" + <<-EOF.unindent(4)
-      require 'active_support/core_ext/numeric/bytes'
-      config.logger = Logger.new(paths.log.first, 2, 10.kilobytes)
-    EOF
+  if File.exist? 'public/images'
+    edit 'config/environments/production.rb' do
+      msub /^()end/, "\n" + <<-EOF.unindent(4)
+        require 'active_support/core_ext/numeric/bytes'
+        config.logger = Logger.new(paths.log.first, 2, 10.kilobytes)
+      EOF
+    end
+    console "Depot::Application.configure { paths.log.first }", 'production'
+  else
+    rake 'assets:precompile'
+    cmd 'ls public/assets'
+    edit 'config/environments/production.rb' do
+      msub /^()end/, "\n" + <<-EOF.unindent(4)
+        require 'active_support/core_ext/numeric/bytes'
+        config.logger = Logger.new(paths['log'].first, 2, 10.kilobytes)
+      EOF
+    end
+    console "Depot::Application.configure { paths['log'].first }", 'production'
   end
-  console 'Depot::Application.configure { paths.log.first }', 'production'
   cmd 'git st'
 end
 
