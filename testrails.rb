@@ -58,7 +58,7 @@ updated = Dir.chdir($rails) do
   `git log -1 --pretty=format:%H` != before
 end
 
-$rails_version = (File.read("#{$rails}/RAILS_VERSION").strip rescue nil)
+$rails_version = (File.read("#{$rails}/RAILS_VERSION").strip rescue '2.x')
 $rails_version.sub! '3.1.0.rc1', '3.2.0.pre'
 
 # If unchanged, select next or exit now
