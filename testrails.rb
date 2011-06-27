@@ -137,8 +137,6 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       # end
 
       if File.exist? base # Rails 3.1
-        puts $rails_version =~ /^3\.1/
-        puts $rails_version
         if $rails_version =~ /^3\.1/
           gemfile.puts "gem 'activemerchant'"
           gemfile.puts "gem 'haml'"
