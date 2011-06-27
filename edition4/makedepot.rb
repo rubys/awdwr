@@ -128,6 +128,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   EOF
 
   desc 'Create the application.'
+  ENV.delete('BUNDLE_GEMFILE')
   rails 'depot', :a
 
   desc 'Look at the files created.'
