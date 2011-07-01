@@ -90,7 +90,7 @@ base = File.join(HOME,'git','rails',
   'railties/lib/rails/generators/app_base.rb')
 if File.exist? template
   if File.exist? base # Rails 3.1
-    libs += File.read(base).scan(/^\s*gem ['"](\w+)['"],\s+:git/)
+    libs += File.read(base).scan(/^\s*gem ['"]([-\w]+)['"],\s+:git/)
     gems += File.read(template).scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
 
     release=PROFILE.rvm['bin'].split('-')[1]
