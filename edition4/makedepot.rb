@@ -1360,7 +1360,7 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
   else
     edit 'app/views/line_items/create.js.erb' do
       clear_highlights
-      msub /().*current_item/, <<-EOF.unindent(8) + "\n", :highlight
+      msub /().*render/, <<-EOF.unindent(8) + "\n", :highlight
         if ($('#cart tr').length == 1) { $('#cart').show('blind', 1000); }
       EOF
     end
@@ -2775,24 +2775,19 @@ section 15.4, 'Task I4: Add a locale switcher.' do
     end
   end
 
-  edit 'app/views/layouts/application.html.erb', 'i18n' do |data|
-    data.clear_highlights
-    data[/\n()\s+<%= image_tag/,1] = <<-EOF.unindent(2)
-      <!-- START:i18n -->
-      <!-- START_HIGHLIGHT -->
+  edit 'app/views/layouts/application.html.erb', 'i18n' do
+    clear_highlights
+    edit /^\s+<div id="banner">.*?<\/div>\n/m, :mark => 'i18n'
+    msub /\n()\s+<%= image_tag/, <<-EOF.unindent(2), :highlight
       <%= form_tag store_path, :class => 'locale' do %>
-      <!-- END_HIGHLIGHT -->
         <%= select_tag 'set_locale', 
           options_for_select(LANGUAGES, I18n.locale.to_s),
           :onchange => 'this.form.submit()' %>
         <%= submit_tag 'submit' %>
-        <%= javascript_tag "$$('.locale input').each(Element.hide)" %>
-      <!-- START_HIGHLIGHT -->
+        <%= javascript_tag "$('.locale input').hide()" %>
       <% end %>
-      <!-- END_HIGHLIGHT -->
-      <!-- END:i18n -->
     EOF
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc "Try out the form"
@@ -2948,9 +2943,54 @@ section 21.2, 'Form Helpers' do
   publish_code_snapshot nil, :views
 end
 
-section 22, 'Active Resources' do
+section 22, 'Caching' do
+# Dir.chdir(File.join($WORK,'views'))
+# generate 'model article body:text'
+# cmd 'rake db:migrate'
+# cmd "cp -v #{$CODE}/e1/views/app/models/article.rb app/models"
+# cmd "cp -vr #{$CODE}/e1/views/app/views/blog app/views"
+# get '/blog/list'
+# cmd "cp -vr #{$CODE}/e1/views/app/views/blog1 app/views"
+# get '/blog1/list'
+# cmd "cp -vr #{$CODE}/e1/views/app/views/blog2 app/views"
+# get '/blog2/list'
+
   Dir.chdir(File.join($WORK,'depot'))
   restart_server
+  cmd 'curl --silent --head http://localhost:3000/'
+
+  desc "add a method to return the latest product"
+  edit 'app/models/product.rb' do
+    clear_all_marks
+    msub /\n()\s+private/, "\n" + <<-EOF.unindent(4) + "\n", :highlight
+      def self.latest
+        with_exclusive_scope { Product.order('updated_at desc').limit(1).first }
+      end
+    EOF
+  end
+
+  desc "set ETAG and LastModified headers on the response"
+  edit 'app/controllers/store_controller.rb' do
+    dcl 'index' do
+      msub /^()  end/, "\n" + <<-EOF.unindent(4)
+        latest = Product.latest
+        fresh_when :etag => latest, :last_modified => latest.created_at.utc, :public => true
+      EOF
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
+  end
+
+  cmd 'curl --silent --head http://localhost:3000/'
+  response = Net::HTTP.get_response(URI.parse('http://localhost:3000/'))
+
+  cmd "curl --silent --head http://localhost:3000/ " +
+    "-H 'If-None-Match: #{response['Etag']}'"
+
+  cmd "curl --silent --head http://localhost:3000/ " +
+    "-H 'If-Modified-Since: #{response['Last-Modified']}'"
+end
+
+section 24.3, 'Active Resources' do
   rails 'depot_client'
   edit 'app/models/product.rb' do |data|
     data << <<-EOF.unindent(6)
@@ -3075,6 +3115,11 @@ section 25.2, 'rake' do
   end
 
   publish_code_snapshot :u
+
+  desc 'remove scaffolding needed for standalone operation'
+  edit 'app/store.rb' do
+    msub /(.*?)class StoreApp/m, ''
+  end
 end
 
 section 26.1, 'Active Merchant' do

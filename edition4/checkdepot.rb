@@ -338,7 +338,16 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /"16.67"/
   end
 
-  section 22, "Active Resources" do
+  section '22', 'Caching' do
+    assert_select '.stdout', /304 Not Modified/
+    assert_select '.stdout', /Etag:/i
+    assert_select '.stdout', /Cache-Control: public/i
+
+    # not exactly a good test of the function in question...
+    # assert_select "p", 'There are a total of 4 articles.'
+  end
+
+  section 24.3, "Active Resources" do
     # assert_select '.stdout', /ActiveResource::Redirection: Failed.* 302/
     assert_select '.stdout', '42.95'
     assert_select '.stdout', '=&gt; true'
@@ -1239,11 +1248,6 @@ class DepotTest < Gorp::TestCase
 
   section 123.9, 'Layouts and Components' do
     assert_select "hr"
-  end
-
-  section '123.10', 'Caching, Part Two' do
-    # not exactly a good test of the function in question...
-    assert_select "p", 'There are a total of 4 articles.'
   end
 
   section 123.11, 'Adding New Templating Systems' do
