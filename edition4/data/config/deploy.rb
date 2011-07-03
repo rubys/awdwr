@@ -3,6 +3,12 @@ set :user, 'rubys'
 set :domain, 'depot.pragprog.com'
 set :application, 'depot'
 
+# adjust if you are using RVM, remove if you are not
+$:.unshift(File.expand_path('./lib', ENV['rvm_path']))
+require "rvm/capistrano"
+set :rvm_ruby_string, '1.9.2'
+set :rvm_type, :user
+
 # file paths
 set :repository,  "#{user}@#{domain}:git/#{application}.git" 
 set :deploy_to, "/home/#{user}/#{domain}" 
@@ -30,6 +36,7 @@ set :scm, 'git'
 set :branch, 'master'
 set :scm_verbose, true
 set :use_sudo, false
+set :rails_env, :production
 
 namespace :deploy do
   desc "cause Passenger to initiate a restart"
@@ -39,8 +46,14 @@ namespace :deploy do
 
   desc "reload the database with seed data"
   task :seed do
-    run "cd #{current_path}; rake db:seed RAILS_ENV=production"
+    run "cd #{current_path}; rake db:seed RAILS_ENV=#{rails_env}"
   end
+end
+
+before "deploy:symlink", :compile_assets
+desc "Compile asets"
+task :compile_assets do
+  run "cd #{release_path}; RAILS_ENV=#{rails_env} bundle exec rake assets:precompile"
 end
 
 after "deploy:update_code", :bundle_install

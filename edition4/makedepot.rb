@@ -262,9 +262,9 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     cmd "cp -v #{$DATA}/depot.css public/stylesheets"
     DEPOT_CSS = "public/stylesheets/depot.css"
   else
-    cmd "cp -v #{$DATA}/images/* app/assets/images/"
-    cmd "cp -v #{$DATA}/depot.css app/assets/stylesheets"
-    DEPOT_CSS =  "app/assets/stylesheets/depot.css"
+    cmd "cp -v #{$DATA}/assets/* app/assets/images/"
+    cmd "cp -v #{$DATA}/depot.css.scss app/assets/stylesheets"
+    DEPOT_CSS =  "app/assets/stylesheets/depot.css.scss"
   end
 
   desc 'See the finished result'
@@ -2974,7 +2974,8 @@ section 22, 'Caching' do
     dcl 'index' do
       msub /^()  end/, "\n" + <<-EOF.unindent(4)
         latest = Product.latest
-        fresh_when :etag => latest, :last_modified => latest.created_at.utc, :public => true
+        fresh_when :etag => latest, :last_modified => latest.created_at.utc
+	expires_in 10.minutes, :public => true
       EOF
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
@@ -2988,6 +2989,22 @@ section 22, 'Caching' do
 
   cmd "curl --silent --head http://localhost:3000/ " +
     "-H 'If-Modified-Since: #{response['Last-Modified']}'"
+
+  desc "prevent requests from making it to Rails"
+  edit 'config/initializers/rack_cache.rb' do
+    self.all = <<-EOF.unindent(6)
+      require 'rack/cache'
+      Depot::Application.config.middleware.use Rack::Cache,
+        :verbose => true,
+	:metastore   => 'file:tmp/cache/rack/meta',
+	:entitystore => 'file:tmp/cache/rack/body'
+    EOF
+  end
+
+  restart_server
+  cmd 'curl --silent --head http://localhost:3000/'
+  response = Net::HTTP.get_response(URI.parse('http://localhost:3000/'))
+  cmd 'curl --silent --head http://localhost:3000/'
 end
 
 section 24.3, 'Active Resources' do
@@ -3034,7 +3051,19 @@ section 24.3, 'Active Resources' do
     console 'p = Product.find(2)\nputs p.price\n' +
       'p.price = BigDecimal.new(p.price)-5\np.save'
   end
+
+  desc 'expire cache'
+  cmd 'rm -rf tmp/cache/rack/*'
+
+  desc 'fetch storefront'
   get '/'
+
+  desc 'fetch product (fallback in case storefront is cached)'
+  post '/login',
+    'name' => 'dave',
+    'password' => 'secret'
+  get '/products/2'
+
   edit 'app/models/order.rb' do |data|
     data << <<-EOF.unindent(6)
       class Order < ActiveResource::Base

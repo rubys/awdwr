@@ -341,7 +341,8 @@ class DepotTest < Gorp::TestCase
   section '22', 'Caching' do
     assert_select '.stdout', /304 Not Modified/
     assert_select '.stdout', /Etag:/i
-    assert_select '.stdout', /Cache-Control: public/i
+    assert_select '.stdout', /Cache-Control: max-age=\d+, public/i
+    assert_select '.stdout', /X-Rack-Cache: fresh/
 
     # not exactly a good test of the function in question...
     # assert_select "p", 'There are a total of 4 articles.'
@@ -352,6 +353,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', '42.95'
     assert_select '.stdout', '=&gt; true'
     assert_select '.price', '$37.95'
+    assert_select 'p', /37\.95/
     assert_select '.stdout', '=&gt; "Dave Thomas"'
     assert_select '.stdout', /NoMethodError: undefined method `line_items'/
     if File.exist? "#{$WORK}/depot/public/images"
