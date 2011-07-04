@@ -2290,11 +2290,16 @@ section 12.8, 'Iteration J3: Integration Tests' do
 end
 
 section 13.1, 'Iteration H1: Adding Users' do
-  generate 'scaffold User name:string hashed_password:string salt:string'
+  generate 'scaffold User name:string password_digest:string'
   cmd 'rake db:migrate'
-  edit "app/models/user.rb" do |data|
-    data[/(.*)/m,1] = read('users/user.rb')
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  edit "app/models/user.rb" do
+    self.all = <<-EOF.unindent(6)
+      class User < ActiveRecord::Base
+        validates :name, :presence => true, :uniqueness => true
+        has_secure_password
+      end
+    EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   %w(create update).each do |action|
     edit 'app/controllers/users_controller.rb', action do
@@ -2320,10 +2325,8 @@ section 13.1, 'Iteration H1: Adding Users' do
         <p id="notice"><%= notice %></p>
       <% end %>
     EOF
-    msub /(.*<th>Hashed password.*\n)/, ''
-    msub /(.*<th>Salt.*\n)/, ''
-    msub /(.*user.hashed_password.*\n)/, ''
-    msub /(.*user.salt.*\n)/, ''
+    msub /(.*<th>Password digest.*\n)/, ''
+    msub /(.*user.password_digest.*\n)/, ''
     msub /,() :?method:?\s?=?>? :del/, "\n" + (' ' * 6)
   end
   edit "app/views/users/_form.html.erb" do
@@ -2345,7 +2348,8 @@ section 13.2, 'Iteration H2: Authenticating Users' do
   edit "app/controllers/sessions_controller.rb" do |data|
     data.dcl 'create', :mark => 'login' do |create|
       create.msub /^()\s*end/, <<-EOF.unindent(4), :highlight
-        if user = User.authenticate(params[:name], params[:password])
+        user = User.find_by_name(params[:name])
+        if user and user.authenticate(params[:password])
           session[:user_id] = user.id
           redirect_to admin_url
         else
@@ -2490,17 +2494,17 @@ end
 section 13.4, 'Iteration H4: Adding a Sidebar' do
 
   edit "app/models/user.rb" do |data|
-    data[/() *private/,1] = <<-EOF.unindent(4)
+    msub /()end/, "\n" + <<-EOF.unindent(4)
       #START:after_destroy
       after_destroy :ensure_an_admin_remains
 
-      def ensure_an_admin_remains
-        if User.count.zero?
-          raise "Can't delete last user"
-        end
-      end     
+      private
+        def ensure_an_admin_remains
+          if User.count.zero?
+            raise "Can't delete last user"
+          end
+        end     
       #END:after_destroy
-
     EOF
   end
 
@@ -2583,12 +2587,10 @@ section 13.5, 'Playtime' do
   end
 
   edit "test/fixtures/users.yml" do |data|
-    data.msub /(#.*)/, '<% SALT = "NaCl" unless defined?(SALT) %>'
     data.edit /one:.*?\n\n/m do |one|
       one.msub  /name: (.*)/, 'dave'
-      one.msub  /salt: (.*)/, '<%= SALT %>'
-      one.msub  /hashed_password: (.*)/, 
-        "<%= User.encrypt_password('secret', SALT) %>"
+      one.msub  /password_digest: (.*)/, 
+        "<%= BCrypt::Password.create('secret') %>"
     end
   end
 
@@ -2639,7 +2641,8 @@ section 13.5, 'Playtime' do
       auth.msub /\n()    end/, <<-EOF.unindent(2), :highlight
         else
           authenticate_or_request_with_http_basic do |username, password|
-            User.authenticate(username, password)
+            user = User.find_by_name(username)
+	    user && user.authenticate(password)
           end
         end
       EOF
