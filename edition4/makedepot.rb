@@ -1292,7 +1292,8 @@ section 11.1, 'Iteration F1: Moving the Cart' do
       edit '@cart', :highlight
       sub! '@cart', 'cart'
     end
-    msub /(#START_HIGHLIGHT)\n<%=/, '<!-- START_HIGHLIGHT -->'
+    sub! /,\n<!-- END_HIGHLIGHT -->/, ",\n# END_HIGHLIGHT"
+    sub! /#START_HIGHLIGHT\n<%=/, "<!-- START_HIGHLIGHT -->\n<%="
   end
 
   desc 'Insert a call in the controller to find the cart'
