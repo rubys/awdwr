@@ -539,51 +539,98 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
   end
 
   desc 'Modify the stylesheet'
-  edit DEPOT_CSS, 'mainlayout' do |data|
-    data[/().*An entry in the store catalog/,1] = <<-EOF.unindent(6) + "\n"
-      /* START:mainlayout */
-      /* Styles for main page */
+  edit DEPOT_CSS, 'mainlayout' do
+    if DEPOT_CSS =~ /scss/
+      msub /().*An entry in the store catalog/, <<-EOF.unindent(8) + "\n"
+	/* START:mainlayout */
+	/* Styles for main page */
 
-      #banner {
-        background: #9c9;
-        padding-top: 10px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid;
-        font: small-caps 40px/40px "Times New Roman", serif;
-        color: #282;
-        text-align: center;
-      }
+	#banner {
+	  background: #9c9;
+	  padding-top: 10px;
+	  padding-bottom: 10px;
+	  border-bottom: 2px solid;
+	  font: small-caps 40px/40px "Times New Roman", serif;
+	  color: #282;
+	  text-align: center;
 
-      #banner img {
-        float: left;
-      }
+	  img {
+	    float: left;
+	  }
+	}
 
-      #columns {
-        background: #141;
-      }
+	#columns {
+	  background: #141;
+	}
 
-      #main {
-        margin-left: 17em;
-        padding-top: 4ex;
-        padding-left: 2em;
-        background: white;
-      }
+	#main {
+	  margin-left: 17em;
+	  padding-top: 4ex;
+	  padding-left: 2em;
+	  background: white;
+	}
 
-      #side {
-        float: left;
-        padding-top: 1em;
-        padding-left: 1em;
-        padding-bottom: 1em;
-        width: 16em;
-        background: #141;
-      }
+	#side {
+	  float: left;
+	  padding-top: 1em;
+	  padding-left: 1em;
+	  padding-bottom: 1em;
+	  width: 16em;
+	  background: #141;
 
-      #side a {
-        color: #bfb;
-        font-size: small;
-      }
-      /* END:mainlayout */
-    EOF
+	  a {
+	    color: #bfb;
+	    font-size: small;
+	  }
+	}
+	/* END:mainlayout */
+      EOF
+    else
+      msub /().*An entry in the store catalog/, <<-EOF.unindent(8) + "\n"
+	/* START:mainlayout */
+	/* Styles for main page */
+
+	#banner {
+	  background: #9c9;
+	  padding-top: 10px;
+	  padding-bottom: 10px;
+	  border-bottom: 2px solid;
+	  font: small-caps 40px/40px "Times New Roman", serif;
+	  color: #282;
+	  text-align: center;
+	}
+
+	#banner img {
+	  float: left;
+	}
+
+	#columns {
+	  background: #141;
+	}
+
+	#main {
+	  margin-left: 17em;
+	  padding-top: 4ex;
+	  padding-left: 2em;
+	  background: white;
+	}
+
+	#side {
+	  float: left;
+	  padding-top: 1em;
+	  padding-left: 1em;
+	  padding-bottom: 1em;
+	  width: 16em;
+	  background: #141;
+	}
+
+	#side a {
+	  color: #bfb;
+	  font-size: small;
+	}
+	/* END:mainlayout */
+      EOF
+    end
   end
 
   desc 'Show the results.'
@@ -764,13 +811,25 @@ section 9.3, 'Iteration D3: Adding a button' do
 
   desc 'Add a bit of style to make it show all on one line'
   edit DEPOT_CSS, 'inline' do |data|
-    data << "\n" + <<-EOF.unindent(6)
-      /* START:inline */
-      #store .entry form, #store .entry form div {
-        display: inline;
-      }
-      /* END:inline */
-    EOF
+    if DEPOT_CSS =~ /scss/
+      data << "\n" + <<-EOF.unindent(8)
+	/* START:inline */
+	#store .entry {
+	  form, div {
+	    display: inline;
+	  }
+	}
+	/* END:inline */
+      EOF
+    else
+      data << "\n" + <<-EOF.unindent(8)
+	/* START:inline */
+	#store .entry form, #store .entry form div {
+	  display: inline;
+	}
+	/* END:inline */
+      EOF
+    end
   end
 
   desc 'Update the LineItem.new call to use current_cart and the ' +
@@ -1061,24 +1120,47 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
 
   desc 'Add some style.'
   edit DEPOT_CSS, 'cartmain' do |data|
-    data << "\n" + <<-EOF.unindent(6)
-      /* START:cartmain */
-      /* Styles for the cart in the main page */
+    if DEPOT_CSS =~ /scss/
+      data << "\n" + <<-EOF.unindent(8)
+	/* START:cartmain */
+	/* Styles for the cart in the main page */
 
-      #store .cart_title {
-        font: 120% bold;
-      }
+	#store {
+	  .cart_title {
+	    font: 120% bold;
+	  }
 
-      #store .item_price, #store .total_line {
-        text-align: right;
-      }
+	  .item_price, .total_line {
+	    text-align: right;
+	  }
 
-      #store .total_line .total_cell {
-        font-weight: bold;
-        border-top: 1px solid #595;
-      }
-      /* END:cartmain */
-    EOF
+	  .total_line .total_cell {
+	    font-weight: bold;
+	    border-top: 1px solid #595;
+	  }
+	}
+	/* END:cartmain */
+      EOF
+    else
+      data << "\n" + <<-EOF.unindent(8)
+	/* START:cartmain */
+	/* Styles for the cart in the main page */
+
+	#store .cart_title {
+	  font: 120% bold;
+	}
+
+	#store .item_price, #store .total_line {
+	  text-align: right;
+	}
+
+	#store .total_line .total_cell {
+	  font-weight: bold;
+	  border-top: 1px solid #595;
+	}
+	/* END:cartmain */
+      EOF
+    end
   end
 
   desc 'Add a product to the cart, and see the total.'
@@ -1210,7 +1292,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
       edit '@cart', :highlight
       sub! '@cart', 'cart'
     end
-    sub! /,\n<!-- END_HIGHLIGHT -->/, ",\n# END_HIGHLIGHT"
+    msub /(#START_HIGHLIGHT)\n<%=/, '<!-- START_HIGHLIGHT -->'
   end
 
   desc 'Insert a call in the controller to find the cart'
@@ -1239,22 +1321,41 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
   desc 'Add a small bit of style.'
   edit DEPOT_CSS, 'cartside' do |data|
-    data << "\n" + <<-EOF.unindent(6)
-      /* START:cartside */
-      /* Styles for the cart in the sidebar */
-      
-      #cart, #cart table {
-        font-size: smaller;
-        color:     white;
-      }
+    if DEPOT_CSS =~ /scss/
+      data << "\n" + <<-EOF.unindent(8)
+	/* START:cartside */
+	/* Styles for the cart in the sidebar */
+	
+	#cart {
+	  font-size: smaller;
+	  color:     white;
 
-      #cart table {
-        border-top:    1px dotted #595;
-        border-bottom: 1px dotted #595;
-        margin-bottom: 10px;
-      }
-      /* END:cartside */
-    EOF
+	  table {
+	    border-top:    1px dotted #595;
+	    border-bottom: 1px dotted #595;
+	    margin-bottom: 10px;
+	  }
+	}
+	/* END:cartside */
+      EOF
+    else
+      data << "\n" + <<-EOF.unindent(6)
+	/* START:cartside */
+	/* Styles for the cart in the sidebar */
+	
+	#cart, #cart table {
+	  font-size: smaller;
+	  color:     white;
+	}
+
+	#cart table {
+	  border-top:    1px dotted #595;
+	  border-bottom: 1px dotted #595;
+	  margin-bottom: 10px;
+	}
+	/* END:cartside */
+      EOF
+    end
   end
 
   publish_code_snapshot :j
@@ -1512,7 +1613,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   end
   edit 'app/views/carts/_cart.html.erb' do
     clear_highlights
-    msub /().*Empty cart/, <<-'EOF'.unindent(6), :highlight
+    msub /().*Empty cart.*\n.*>/, <<-'EOF'.unindent(6), :highlight
       <%= button_to "Checkout", new_order_path, :method => :get %>
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -1565,43 +1666,85 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     edit /^end()/, :mark => 'select'
   end
   edit DEPOT_CSS, 'form' do |data|
-    data << "\n" + <<-EOF.unindent(6)
-      /* START:form */
-      /* Styles for order form */
+    if DEPOT_CSS =~ /scss/
+      data << "\n" + <<-EOF.unindent(8)
+	/* START:form */
+	/* Styles for order form */
 
-      .depot_form fieldset {
-        background: #efe;
-      }
+	.depot_form {
+	  fieldset {
+	    background: #efe;
+	  }
 
-      .depot_form legend {
-        color: #dfd;
-        background: #141;
-        font-family: sans-serif;
-        padding: 0.2em 1em;
-      }
+	  legend {
+	    color: #dfd;
+	    background: #141;
+	    font-family: sans-serif;
+	    padding: 0.2em 1em;
+	  }
 
-      .depot_form label {
-        width: 5em;
-        float: left;
-        text-align: right;
-        padding-top: 0.2em;
-        margin-right: 0.1em;
-        display: block;
-      }
+	  label {
+	    width: 5em;
+	    float: left;
+	    text-align: right;
+	    padding-top: 0.2em;
+	    margin-right: 0.1em;
+	    display: block;
+	  }
 
-      .depot_form select, .depot_form textarea, .depot_form input {
-        margin-left: 0.5em;
-      }
+	  select, textarea, input {
+	    margin-left: 0.5em;
+	  }
 
-      .depot_form .submit {
-        margin-left: 4em;
-      }
+	  .submit {
+	    margin-left: 4em;
+	  }
 
-      .depot_form div {
-        margin: 0.5em 0;
-      }
-      /* END:form */
-    EOF
+	  div {
+	    margin: 0.5em 0;
+	  }
+	}
+	/* END:form */
+      EOF
+    else
+      data << "\n" + <<-EOF.unindent(8)
+	/* START:form */
+	/* Styles for order form */
+
+	.depot_form fieldset {
+	  background: #efe;
+	}
+
+	.depot_form legend {
+	  color: #dfd;
+	  background: #141;
+	  font-family: sans-serif;
+	  padding: 0.2em 1em;
+	}
+
+	.depot_form label {
+	  width: 5em;
+	  float: left;
+	  text-align: right;
+	  padding-top: 0.2em;
+	  margin-right: 0.1em;
+	  display: block;
+	}
+
+	.depot_form select, .depot_form textarea, .depot_form input {
+	  margin-left: 0.5em;
+	}
+
+	.depot_form .submit {
+	  margin-left: 4em;
+	}
+
+	.depot_form div {
+	  margin: 0.5em 0;
+	}
+	/* END:form */
+      EOF
+    end
   end
   edit 'app/models/order.rb', 'validate' do |data|
     msub /#END:select\n()/, <<-EOF.unindent(4), :mark => 'validate'

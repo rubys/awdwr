@@ -2,19 +2,17 @@
 #START:vcc
 Product.delete_all
 #END:vcc    
-Product.create(:title => 'Web Design for Developers',
+Product.create(:title => 'CoffeeScript',
   :description => 
     %{<p>
-        <em>Web Design for Developers</em> will show you how to make your
-        web-based application look professionally designed. We'll help you
-        learn how to pick the right colors and fonts, avoid costly interface
-        and accessibility mistakes -- your application will really come alive.
-        We'll also walk you through some common Photoshop and CSS techniques
-        and work through a web site redesign, taking a new design from concept
-        all the way to implementation.
+        CoffeeScript is JavaScript done right. It provides all of JavaScript’s
+	functionality wrapped in a cleaner, more succinct syntax. In the first
+	book on this exciting new language, CoffeeScript guru Trevor Burnham
+	shows you how to hold onto all the power and flexibility of JavaScript
+	while writing clearer, cleaner, and safer code.
       </p>},
-  :image_url =>   '/images/wd4d.jpg',    
-  :price => 42.95)
+  :image_url =>   '/images/cs.jpg',    
+  :price => 36.00)
 #START:vcc
 # . . .
 Product.create(:title => 'Programming Ruby 1.9',

@@ -124,7 +124,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.3, "Iteration E3: Finishing the Cart" do
     assert_select '#notice', 'Your cart is currently empty'
-    assert_select '.total_cell', '$135.40'
+    assert_select '.total_cell', '$121.50'
     assert_select 'input[type=submit][value=Empty cart]'
   end
 
@@ -138,13 +138,13 @@ class DepotTest < Gorp::TestCase
 
   section 11.1, "Iteration F1: Moving the Cart" do
     assert_select '.cart_title', 'Your Cart'
-    assert_select '.total_cell', '$135.40'
+    assert_select '.total_cell', '$121.50'
     assert_select 'input[type=submit][value=Empty cart]'
   end
 
   section 11.4, "Iteration F4: Hide an Empty Cart" do
     assert_select '#cart[style=display: none]'
-    assert_select '.total_cell', '$184.90'
+    assert_select '.total_cell', '$171.00'
   end
 
   section 11.5, "Testing AJAX changes" do
@@ -271,7 +271,7 @@ class DepotTest < Gorp::TestCase
 
   section 15.2, "Task I2: i18n for the cart" do
     assert_select 'td', /1(.|&#?\w+;)/u
-    assert_select 'td', 'Web Design for Developers'
+    assert_select 'td', 'CoffeeScript'
   end
 
   section 15.3, "Task I3: i18n for the order page" do
@@ -350,10 +350,10 @@ class DepotTest < Gorp::TestCase
 
   section 24.3, "Active Resources" do
     # assert_select '.stdout', /ActiveResource::Redirection: Failed.* 302/
-    assert_select '.stdout', '42.95'
+    assert_select '.stdout', '36.0'
     assert_select '.stdout', '=&gt; true'
-    assert_select '.price', '$37.95'
-    assert_select 'p', /37\.95/
+    assert_select '.price', '$31.00'
+    assert_select 'p', /31\.0/
     assert_select '.stdout', '=&gt; "Dave Thomas"'
     assert_select '.stdout', /NoMethodError: undefined method `line_items'/
     if File.exist? "#{$WORK}/depot/public/images"
