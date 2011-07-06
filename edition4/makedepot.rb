@@ -479,26 +479,8 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   desc 'In the controller, get a list of products from the model'
   edit 'app/controllers/store_controller.rb' do |data|
     data.msub /def index.*\n()/, <<-EOF.unindent(2), :highlight
-      @products = Product.all
+      @products = Product.order(:title)
     EOF
-  end
-
-  desc 'In the model, define a default sort order'
-  edit 'app/models/product.rb', 'salable' do |data|
-    clear_highlights
-    data.msub /()class Product/, "#START:salable\n"
-    data.msub /class Product.*()/, "\n" + <<-EOF.unindent(4) + "\n"
-      # START_HIGHLIGHT
-      default_scope :order => 'title'
-      # END_HIGHLIGHT
-
-      # validation stuff...
-    #END:salable
-    EOF
-    data.edit /^end/, :mark => 'salable'
-    data.edit 'default_scope' do
-      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    end
   end
 
   desc 'In the view, display a list of products'
@@ -542,93 +524,93 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
   edit DEPOT_CSS, 'mainlayout' do
     if DEPOT_CSS =~ /scss/
       msub /().*An entry in the store catalog/, <<-EOF.unindent(8) + "\n"
-	/* START:mainlayout */
-	/* Styles for main page */
+        /* START:mainlayout */
+        /* Styles for main page */
 
-	#banner {
-	  background: #9c9;
-	  padding-top: 10px;
-	  padding-bottom: 10px;
-	  border-bottom: 2px solid;
-	  font: small-caps 40px/40px "Times New Roman", serif;
-	  color: #282;
-	  text-align: center;
+        #banner {
+          background: #9c9;
+          padding-top: 10px;
+          padding-bottom: 10px;
+          border-bottom: 2px solid;
+          font: small-caps 40px/40px "Times New Roman", serif;
+          color: #282;
+          text-align: center;
 
-	  img {
-	    float: left;
-	  }
-	}
+          img {
+            float: left;
+          }
+        }
 
-	#columns {
-	  background: #141;
-	}
+        #columns {
+          background: #141;
+        }
 
-	#main {
-	  margin-left: 17em;
-	  padding-top: 4ex;
-	  padding-left: 2em;
-	  background: white;
-	}
+        #main {
+          margin-left: 17em;
+          padding-top: 4ex;
+          padding-left: 2em;
+          background: white;
+        }
 
-	#side {
-	  float: left;
-	  padding-top: 1em;
-	  padding-left: 1em;
-	  padding-bottom: 1em;
-	  width: 16em;
-	  background: #141;
+        #side {
+          float: left;
+          padding-top: 1em;
+          padding-left: 1em;
+          padding-bottom: 1em;
+          width: 16em;
+          background: #141;
 
-	  a {
-	    color: #bfb;
-	    font-size: small;
-	  }
-	}
-	/* END:mainlayout */
+          a {
+            color: #bfb;
+            font-size: small;
+          }
+        }
+        /* END:mainlayout */
       EOF
     else
       msub /().*An entry in the store catalog/, <<-EOF.unindent(8) + "\n"
-	/* START:mainlayout */
-	/* Styles for main page */
+        /* START:mainlayout */
+        /* Styles for main page */
 
-	#banner {
-	  background: #9c9;
-	  padding-top: 10px;
-	  padding-bottom: 10px;
-	  border-bottom: 2px solid;
-	  font: small-caps 40px/40px "Times New Roman", serif;
-	  color: #282;
-	  text-align: center;
-	}
+        #banner {
+          background: #9c9;
+          padding-top: 10px;
+          padding-bottom: 10px;
+          border-bottom: 2px solid;
+          font: small-caps 40px/40px "Times New Roman", serif;
+          color: #282;
+          text-align: center;
+        }
 
-	#banner img {
-	  float: left;
-	}
+        #banner img {
+          float: left;
+        }
 
-	#columns {
-	  background: #141;
-	}
+        #columns {
+          background: #141;
+        }
 
-	#main {
-	  margin-left: 17em;
-	  padding-top: 4ex;
-	  padding-left: 2em;
-	  background: white;
-	}
+        #main {
+          margin-left: 17em;
+          padding-top: 4ex;
+          padding-left: 2em;
+          background: white;
+        }
 
-	#side {
-	  float: left;
-	  padding-top: 1em;
-	  padding-left: 1em;
-	  padding-bottom: 1em;
-	  width: 16em;
-	  background: #141;
-	}
+        #side {
+          float: left;
+          padding-top: 1em;
+          padding-left: 1em;
+          padding-bottom: 1em;
+          width: 16em;
+          background: #141;
+        }
 
-	#side a {
-	  color: #bfb;
-	  font-size: small;
-	}
-	/* END:mainlayout */
+        #side a {
+          color: #bfb;
+          font-size: small;
+        }
+        /* END:mainlayout */
       EOF
     end
   end
@@ -749,8 +731,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
   desc 'Product has many line items.'
   edit 'app/models/product.rb', 'has_many' do
     clear_highlights
-    edit /class Product.*default_scope.*?\n/m, :mark => 'has_many'
-    msub /default_scope.*\n()/, <<-EOF.unindent(4)
+    msub /class Product.*\n()/, <<-EOF.unindent(4), :mark => 'has_many'
       #START_HIGHLIGHT
       has_many :line_items
       #END_HIGHLIGHT
@@ -764,8 +745,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
       #END:has_many
     EOF
 
-    msub /^()end/, <<-EOF.unindent(4)
-      #START:has_many
+    msub /^()end/, "\n" + <<-EOF.unindent(4), :mark => 'has_many'
       #START_HIGHLIGHT
       private
       #END_HIGHLIGHT
@@ -813,21 +793,21 @@ section 9.3, 'Iteration D3: Adding a button' do
   edit DEPOT_CSS, 'inline' do |data|
     if DEPOT_CSS =~ /scss/
       data << "\n" + <<-EOF.unindent(8)
-	/* START:inline */
-	#store .entry {
-	  form, div {
-	    display: inline;
-	  }
-	}
-	/* END:inline */
+        /* START:inline */
+        #store .entry {
+          form, div {
+            display: inline;
+          }
+        }
+        /* END:inline */
       EOF
     else
       data << "\n" + <<-EOF.unindent(8)
-	/* START:inline */
-	#store .entry form, #store .entry form div {
-	  display: inline;
-	}
-	/* END:inline */
+        /* START:inline */
+        #store .entry form, #store .entry form div {
+          display: inline;
+        }
+        /* END:inline */
       EOF
     end
   end
@@ -1122,43 +1102,43 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   edit DEPOT_CSS, 'cartmain' do |data|
     if DEPOT_CSS =~ /scss/
       data << "\n" + <<-EOF.unindent(8)
-	/* START:cartmain */
-	/* Styles for the cart in the main page */
+        /* START:cartmain */
+        /* Styles for the cart in the main page */
 
-	#store {
-	  .cart_title {
-	    font: 120% bold;
-	  }
+        #store {
+          .cart_title {
+            font: 120% bold;
+          }
 
-	  .item_price, .total_line {
-	    text-align: right;
-	  }
+          .item_price, .total_line {
+            text-align: right;
+          }
 
-	  .total_line .total_cell {
-	    font-weight: bold;
-	    border-top: 1px solid #595;
-	  }
-	}
-	/* END:cartmain */
+          .total_line .total_cell {
+            font-weight: bold;
+            border-top: 1px solid #595;
+          }
+        }
+        /* END:cartmain */
       EOF
     else
       data << "\n" + <<-EOF.unindent(8)
-	/* START:cartmain */
-	/* Styles for the cart in the main page */
+        /* START:cartmain */
+        /* Styles for the cart in the main page */
 
-	#store .cart_title {
-	  font: 120% bold;
-	}
+        #store .cart_title {
+          font: 120% bold;
+        }
 
-	#store .item_price, #store .total_line {
-	  text-align: right;
-	}
+        #store .item_price, #store .total_line {
+          text-align: right;
+        }
 
-	#store .total_line .total_cell {
-	  font-weight: bold;
-	  border-top: 1px solid #595;
-	}
-	/* END:cartmain */
+        #store .total_line .total_cell {
+          font-weight: bold;
+          border-top: 1px solid #595;
+        }
+        /* END:cartmain */
       EOF
     end
   end
@@ -1305,56 +1285,51 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   end
 
   desc 'Reference the partial from the layout.'
-  edit 'app/views/layouts/application.html.erb' do |data|
-    data.clear_highlights
-    data[/<div id="side">()/,1] = "\n" + <<-'EOF'
-      <!-- START_HIGHLIGHT -->
+  edit 'app/views/layouts/application.html.erb' do
+    clear_highlights
+    msub /<div id="side">\n()/, <<-'EOF' + "\n", :highlight
       <div id="cart">
         <%= render @cart %>
       </div>
-      <!-- END_HIGHLIGHT -->
     EOF
-    data[/(<!-- <label id="code.slt"\/> -->)/,1] = ''
-    data[/(<!-- <label id="code.csrf"\/> -->)/,1] = ''
-    data[/(<!-- <label id="code.depot.e.title"\/> -->)/,1] = ''
-    data[/(<!-- <label id="code.depot.e.include"\/> -->)/,1] = ''
+    gsub! /(<!-- <label id="[.\w]+"\/> -->)/, ''
   end
 
   desc 'Add a small bit of style.'
   edit DEPOT_CSS, 'cartside' do |data|
     if DEPOT_CSS =~ /scss/
       data << "\n" + <<-EOF.unindent(8)
-	/* START:cartside */
-	/* Styles for the cart in the sidebar */
-	
-	#cart {
-	  font-size: smaller;
-	  color:     white;
+        /* START:cartside */
+        /* Styles for the cart in the sidebar */
+        
+        #cart {
+          font-size: smaller;
+          color:     white;
 
-	  table {
-	    border-top:    1px dotted #595;
-	    border-bottom: 1px dotted #595;
-	    margin-bottom: 10px;
-	  }
-	}
-	/* END:cartside */
+          table {
+            border-top:    1px dotted #595;
+            border-bottom: 1px dotted #595;
+            margin-bottom: 10px;
+          }
+        }
+        /* END:cartside */
       EOF
     else
       data << "\n" + <<-EOF.unindent(6)
-	/* START:cartside */
-	/* Styles for the cart in the sidebar */
-	
-	#cart, #cart table {
-	  font-size: smaller;
-	  color:     white;
-	}
+        /* START:cartside */
+        /* Styles for the cart in the sidebar */
+        
+        #cart, #cart table {
+          font-size: smaller;
+          color:     white;
+        }
 
-	#cart table {
-	  border-top:    1px dotted #595;
-	  border-bottom: 1px dotted #595;
-	  margin-bottom: 10px;
-	}
-	/* END:cartside */
+        #cart table {
+          border-top:    1px dotted #595;
+          border-bottom: 1px dotted #595;
+          margin-bottom: 10px;
+        }
+        /* END:cartside */
       EOF
     end
   end
@@ -1437,7 +1412,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
     edit 'app/views/line_items/create.js.erb' do |data|
       msub /.*()/m, "\n" + <<-EOF.unindent(8), :highlight
         $('#current_item').css({'background-color':'#88ff88'}).
-	  animate({'background-color':'#114411'}, 1000);
+          animate({'background-color':'#114411'}, 1000);
       EOF
     end
     desc 'Now pull in the jquery-ui libraries'
@@ -1669,81 +1644,81 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   edit DEPOT_CSS, 'form' do |data|
     if DEPOT_CSS =~ /scss/
       data << "\n" + <<-EOF.unindent(8)
-	/* START:form */
-	/* Styles for order form */
+        /* START:form */
+        /* Styles for order form */
 
-	.depot_form {
-	  fieldset {
-	    background: #efe;
-	  }
+        .depot_form {
+          fieldset {
+            background: #efe;
+          }
 
-	  legend {
-	    color: #dfd;
-	    background: #141;
-	    font-family: sans-serif;
-	    padding: 0.2em 1em;
-	  }
+          legend {
+            color: #dfd;
+            background: #141;
+            font-family: sans-serif;
+            padding: 0.2em 1em;
+          }
 
-	  label {
-	    width: 5em;
-	    float: left;
-	    text-align: right;
-	    padding-top: 0.2em;
-	    margin-right: 0.1em;
-	    display: block;
-	  }
+          label {
+            width: 5em;
+            float: left;
+            text-align: right;
+            padding-top: 0.2em;
+            margin-right: 0.1em;
+            display: block;
+          }
 
-	  select, textarea, input {
-	    margin-left: 0.5em;
-	  }
+          select, textarea, input {
+            margin-left: 0.5em;
+          }
 
-	  .submit {
-	    margin-left: 4em;
-	  }
+          .submit {
+            margin-left: 4em;
+          }
 
-	  div {
-	    margin: 0.5em 0;
-	  }
-	}
-	/* END:form */
+          div {
+            margin: 0.5em 0;
+          }
+        }
+        /* END:form */
       EOF
     else
       data << "\n" + <<-EOF.unindent(8)
-	/* START:form */
-	/* Styles for order form */
+        /* START:form */
+        /* Styles for order form */
 
-	.depot_form fieldset {
-	  background: #efe;
-	}
+        .depot_form fieldset {
+          background: #efe;
+        }
 
-	.depot_form legend {
-	  color: #dfd;
-	  background: #141;
-	  font-family: sans-serif;
-	  padding: 0.2em 1em;
-	}
+        .depot_form legend {
+          color: #dfd;
+          background: #141;
+          font-family: sans-serif;
+          padding: 0.2em 1em;
+        }
 
-	.depot_form label {
-	  width: 5em;
-	  float: left;
-	  text-align: right;
-	  padding-top: 0.2em;
-	  margin-right: 0.1em;
-	  display: block;
-	}
+        .depot_form label {
+          width: 5em;
+          float: left;
+          text-align: right;
+          padding-top: 0.2em;
+          margin-right: 0.1em;
+          display: block;
+        }
 
-	.depot_form select, .depot_form textarea, .depot_form input {
-	  margin-left: 0.5em;
-	}
+        .depot_form select, .depot_form textarea, .depot_form input {
+          margin-left: 0.5em;
+        }
 
-	.depot_form .submit {
-	  margin-left: 4em;
-	}
+        .depot_form .submit {
+          margin-left: 4em;
+        }
 
-	.depot_form div {
-	  margin: 0.5em 0;
-	}
-	/* END:form */
+        .depot_form div {
+          margin: 0.5em 0;
+        }
+        /* END:form */
       EOF
     end
   end
@@ -2642,7 +2617,7 @@ section 13.5, 'Playtime' do
         else
           authenticate_or_request_with_http_basic do |username, password|
             user = User.find_by_name(username)
-	    user && user.authenticate(password)
+            user && user.authenticate(password)
           end
         end
       EOF
@@ -3111,7 +3086,7 @@ section 22, 'Caching' do
     clear_all_marks
     msub /\n()\s+private/, "\n" + <<-EOF.unindent(4) + "\n", :highlight
       def self.latest
-        with_exclusive_scope { Product.order('updated_at desc').limit(1).first }
+        Product.order('updated_at desc').limit(1).first
       end
     EOF
   end
@@ -3122,7 +3097,7 @@ section 22, 'Caching' do
       msub /^()  end/, "\n" + <<-EOF.unindent(4)
         latest = Product.latest
         fresh_when :etag => latest, :last_modified => latest.created_at.utc
-	expires_in 10.minutes, :public => true
+        expires_in 10.minutes, :public => true
       EOF
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
@@ -3143,8 +3118,8 @@ section 22, 'Caching' do
       require 'rack/cache'
       Depot::Application.config.middleware.use Rack::Cache,
         :verbose => true,
-	:metastore   => 'file:tmp/cache/rack/meta',
-	:entitystore => 'file:tmp/cache/rack/body'
+        :metastore   => 'file:tmp/cache/rack/meta',
+        :entitystore => 'file:tmp/cache/rack/body'
     EOF
   end
 
@@ -3665,7 +3640,7 @@ section 121, 'Action Controller: Routing and URLs' do
       <!-- START_HIGHLIGHT -->
       <% unless @article.comments.empty? %>
         <%= render :partial => "/comments/comment",
-	           :collection => @article.comments %>
+                   :collection => @article.comments %>
       <% end %>
 
       <%= link_to "Add comment", new_article_comment_url(@article) %> |
