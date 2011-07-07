@@ -72,7 +72,8 @@ if !updated
     rows.reject! {|row| !row.at('td')}
     rows.reject! {|row| row.at('td:nth-child(4).hilite')}
     if rows.length>0
-      stale = rows.min {|a,b| a.at('td:last').text <=> b.at('td:last').text}
+      stale = rows.find {|r| r.at('td:last').text !~ /^\d+(-\d+)+.\d+(:\d+)+$/}
+      stale ||= rows.min {|a,b| a.at('td:last').text <=> b.at('td:last').text}
       stale = stale.search('td').to_a[0..2]
       exec "#{$0} #{stale.map {|td| td.text.gsub(/\D/,'')}.join(' ')}"
     end
