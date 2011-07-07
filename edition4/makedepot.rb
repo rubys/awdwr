@@ -479,8 +479,26 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   desc 'In the controller, get a list of products from the model'
   edit 'app/controllers/store_controller.rb' do |data|
     data.msub /def index.*\n()/, <<-EOF.unindent(2), :highlight
-      @products = Product.order(:title)
+      @products = Product.all
     EOF
+  end
+
+  desc 'In the model, define a default sort order'
+  edit 'app/models/product.rb', 'salable' do |data|
+    clear_highlights
+    data.msub /()class Product/, "#START:salable\n"
+    data.msub /class Product.*()/, "\n" + <<-EOF.unindent(4) + "\n"
+      # START_HIGHLIGHT
+      default_scope :order => 'title'
+      # END_HIGHLIGHT
+
+      # validation stuff...
+    #END:salable
+    EOF
+    data.edit /^end/, :mark => 'salable'
+    data.edit 'default_scope' do
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
   end
 
   desc 'In the view, display a list of products'
@@ -731,7 +749,8 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
   desc 'Product has many line items.'
   edit 'app/models/product.rb', 'has_many' do
     clear_highlights
-    msub /class Product.*\n()/, <<-EOF.unindent(4), :mark => 'has_many'
+    edit /class Product.*default_scope.*?\n/m, :mark => 'has_many'
+    msub /default_scope.*\n()/, <<-EOF.unindent(4)
       #START_HIGHLIGHT
       has_many :line_items
       #END_HIGHLIGHT
@@ -745,7 +764,8 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
       #END:has_many
     EOF
 
-    msub /^()end/, "\n" + <<-EOF.unindent(4), :mark => 'has_many'
+    msub /^()end/, <<-EOF.unindent(4)
+      #START:has_many
       #START_HIGHLIGHT
       private
       #END_HIGHLIGHT
@@ -2265,15 +2285,23 @@ section 12.8, 'Iteration J3: Integration Tests' do
 end
 
 section 13.1, 'Iteration H1: Adding Users' do
-  generate 'scaffold User name:string password_digest:string'
+  if File.exist? 'public/images'
+    generate 'scaffold User name:string hashed_password:string salt:string'
+  else
+    generate 'scaffold User name:string password_digest:string'
+  end
   cmd 'rake db:migrate'
   edit "app/models/user.rb" do
-    self.all = <<-EOF.unindent(6)
-      class User < ActiveRecord::Base
-        validates :name, :presence => true, :uniqueness => true
-        has_secure_password
-      end
-    EOF
+    if File.exist? 'public/images'
+      self.all = read('users/user.rb')
+    else
+      self.all = <<-EOF.unindent(8)
+        class User < ActiveRecord::Base
+          validates :name, :presence => true, :uniqueness => true
+          has_secure_password
+        end
+      EOF
+    end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   %w(create update).each do |action|
@@ -2300,8 +2328,15 @@ section 13.1, 'Iteration H1: Adding Users' do
         <p id="notice"><%= notice %></p>
       <% end %>
     EOF
-    msub /(.*<th>Password digest.*\n)/, ''
-    msub /(.*user.password_digest.*\n)/, ''
+    if File.exist? 'public/images'
+      msub /(.*<th>Hashed password.*\n)/, ''
+      msub /(.*<th>Salt.*\n)/, ''
+      msub /(.*user.hashed_password.*\n)/, ''
+      msub /(.*user.salt.*\n)/, ''
+    else
+      msub /(.*<th>Password digest.*\n)/, ''
+      msub /(.*user.password_digest.*\n)/, ''
+    end
     msub /,() :?method:?\s?=?>? :del/, "\n" + (' ' * 6)
   end
   edit "app/views/users/_form.html.erb" do
@@ -2331,6 +2366,11 @@ section 13.2, 'Iteration H2: Authenticating Users' do
           redirect_to login_url, :alert => "Invalid user/password combination"
         end
       EOF
+      if File.exist? 'public/images'
+        msub /user = (.*)/, 
+          'User.authenticate(params[:name], params[:password])'
+        msub /user (and .*)/, ''
+      end
     end
     data.dcl 'destroy', :mark => 'logout' do |destroy|
       destroy.msub /^()\s*end/, <<-EOF.unindent(4), :highlight
@@ -2469,7 +2509,7 @@ end
 section 13.4, 'Iteration H4: Adding a Sidebar' do
 
   edit "app/models/user.rb" do |data|
-    msub /()end/, "\n" + <<-EOF.unindent(4)
+    msub /^()end/, "\n" + <<-EOF.unindent(4)
       #START:after_destroy
       after_destroy :ensure_an_admin_remains
 
@@ -2562,10 +2602,20 @@ section 13.5, 'Playtime' do
   end
 
   edit "test/fixtures/users.yml" do |data|
-    data.edit /one:.*?\n\n/m do |one|
-      one.msub  /name: (.*)/, 'dave'
-      one.msub  /password_digest: (.*)/, 
-        "<%= BCrypt::Password.create('secret') %>"
+    if File.exist? 'public/images'
+      data.msub /(#.*)/, '<% SALT = "NaCl" unless defined?(SALT) %>'
+      data.edit /one:.*?\n\n/m do |one|
+        one.msub  /name: (.*)/, 'dave'
+        one.msub  /salt: (.*)/, '<%= SALT %>'
+        one.msub  /hashed_password: (.*)/, 
+          "<%= User.encrypt_password('secret', SALT) %>"
+      end
+    else
+      data.edit /one:.*?\n\n/m do |one|
+        one.msub  /name: (.*)/, 'dave'
+        one.msub  /password_digest: (.*)/, 
+          "<%= BCrypt::Password.create('secret') %>"
+      end
     end
   end
 
@@ -2621,6 +2671,9 @@ section 13.5, 'Playtime' do
           end
         end
       EOF
+      if File.exist? 'public/images'
+        msub /user = (.*\n.*)/, 'User.authenticate(username, password)'
+      end
     end
   end
 
@@ -3086,7 +3139,7 @@ section 22, 'Caching' do
     clear_all_marks
     msub /\n()\s+private/, "\n" + <<-EOF.unindent(4) + "\n", :highlight
       def self.latest
-        Product.order('updated_at desc').limit(1).first
+        with_exclusive_scope { Product.order('updated_at desc').limit(1).first }
       end
     EOF
   end
@@ -3112,15 +3165,17 @@ section 22, 'Caching' do
   cmd "curl --silent --head http://localhost:3000/ " +
     "-H 'If-Modified-Since: #{response['Last-Modified']}'"
 
-  desc "prevent requests from making it to Rails"
-  edit 'config/initializers/rack_cache.rb' do
-    self.all = <<-EOF.unindent(6)
-      require 'rack/cache'
-      Depot::Application.config.middleware.use Rack::Cache,
-        :verbose => true,
-        :metastore   => 'file:tmp/cache/rack/meta',
-        :entitystore => 'file:tmp/cache/rack/body'
-    EOF
+  unless File.exist? 'public/images'
+    desc "prevent requests from making it to Rails"
+    edit 'config/initializers/rack_cache.rb' do
+      self.all = <<-EOF.unindent(8)
+        require 'rack/cache'
+        Depot::Application.config.middleware.use Rack::Cache,
+          :verbose => true,
+          :metastore   => 'file:tmp/cache/rack/meta',
+          :entitystore => 'file:tmp/cache/rack/body'
+      EOF
+    end
   end
 
   restart_server
@@ -3337,7 +3392,6 @@ section 26.2, 'Asset Packager' do
     clear_all_marks
     msub /()<!DOCTYPE/, "<!-- #START:head -->\n"
     msub /<\/head>\n()/, "<!-- ... -->\n<!-- END:head -->\n"
-    msub /(\s+<%=.*scaffold.*)/, ''
     edit 'stylesheet_link_tag', :highlight do
       msub /link_(tag.*) %>/, 'merged :base'
       msub /<%=() /, ' raw'

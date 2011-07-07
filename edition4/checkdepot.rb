@@ -342,7 +342,9 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /304 Not Modified/
     assert_select '.stdout', /Etag:/i
     assert_select '.stdout', /Cache-Control: max-age=\d+, public/i
-    assert_select '.stdout', /X-Rack-Cache: fresh/
+    unless File.exist? "#{$WORK}/depot/public/images"
+      assert_select '.stdout', /X-Rack-Cache: fresh/
+    end
 
     # not exactly a good test of the function in question...
     # assert_select "p", 'There are a total of 4 articles.'

@@ -1,14 +1,13 @@
+<!-- START:head -->
 <!DOCTYPE html>
 <html>
 <head>
   <title>Pragprog Books Online Store</title>
-<!-- START:stylesheet -->
-  <%= stylesheet_link_tag "application" %>
-  <%= stylesheet_link_tag "depot", :media => "all" %><!-- <label id="code.slt"/> -->
-<!-- END:stylesheet -->
-  <%= javascript_include_tag "application" %>
+  <%= stylesheet_link_tag "application" %><!-- <label id="code.slt"/> -->
+  <%= javascript_include_tag "application" %><!-- <label id="code.jlt"/> -->
   <%= csrf_meta_tag %><!-- <label id="code.csrf"/> -->
 </head>
+<!-- END:head -->
 <body id="store">
   <div id="banner">
     <%= image_tag("logo.png") %>
