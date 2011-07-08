@@ -479,26 +479,8 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   desc 'In the controller, get a list of products from the model'
   edit 'app/controllers/store_controller.rb' do |data|
     data.msub /def index.*\n()/, <<-EOF.unindent(2), :highlight
-      @products = Product.all
+      @products = Product.order(:title)
     EOF
-  end
-
-  desc 'In the model, define a default sort order'
-  edit 'app/models/product.rb', 'salable' do |data|
-    clear_highlights
-    data.msub /()class Product/, "#START:salable\n"
-    data.msub /class Product.*()/, "\n" + <<-EOF.unindent(4) + "\n"
-      # START_HIGHLIGHT
-      default_scope :order => 'title'
-      # END_HIGHLIGHT
-
-      # validation stuff...
-    #END:salable
-    EOF
-    data.edit /^end/, :mark => 'salable'
-    data.edit 'default_scope' do
-      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    end
   end
 
   desc 'In the view, display a list of products'
@@ -749,8 +731,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
   desc 'Product has many line items.'
   edit 'app/models/product.rb', 'has_many' do
     clear_highlights
-    edit /class Product.*default_scope.*?\n/m, :mark => 'has_many'
-    msub /default_scope.*\n()/, <<-EOF.unindent(4)
+    msub /class Product.*\n()/, <<-EOF.unindent(4), :mark => 'has_many'
       #START_HIGHLIGHT
       has_many :line_items
       #END_HIGHLIGHT
@@ -764,8 +745,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
       #END:has_many
     EOF
 
-    msub /^()end/, <<-EOF.unindent(4)
-      #START:has_many
+    msub /^()end/, "\n" + <<-EOF.unindent(4), :mark => 'has_many'
       #START_HIGHLIGHT
       private
       #END_HIGHLIGHT
@@ -3139,7 +3119,7 @@ section 22, 'Caching' do
     clear_all_marks
     msub /\n()\s+private/, "\n" + <<-EOF.unindent(4) + "\n", :highlight
       def self.latest
-        with_exclusive_scope { Product.order('updated_at desc').limit(1).first }
+        Product.order('updated_at desc').limit(1).first
       end
     EOF
   end
