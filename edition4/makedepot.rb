@@ -3146,22 +3146,19 @@ section 22, 'Caching' do
     "-H 'If-Modified-Since: #{response['Last-Modified']}'"
 
   unless File.exist? 'public/images'
-    desc "prevent requests from making it to Rails"
-    edit 'config/initializers/rack_cache.rb' do
-      self.all = <<-EOF.unindent(8)
-        require 'rack/cache'
-        Depot::Application.config.middleware.use Rack::Cache,
-          :verbose => true,
-          :metastore   => 'file:tmp/cache/rack/meta',
-          :entitystore => 'file:tmp/cache/rack/body'
-      EOF
+    desc "Turn on caching in development"
+    edit 'config/environments/development.rb' do
+      edit 'perform_caching', :highlight do
+        msub /perform_caching = (false)/, 'true'
+      end
     end
   end
 
   restart_server
   cmd 'curl --silent --head http://localhost:3000/'
   response = Net::HTTP.get_response(URI.parse('http://localhost:3000/'))
-  cmd 'curl --silent --head http://localhost:3000/'
+  cmd 'curl --silent --head http://localhost:3000/ ' +
+    "-H 'If-None-Match: #{response['Etag']}'"
 end
 
 section 24.3, 'Active Resources' do
