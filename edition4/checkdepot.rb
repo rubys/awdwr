@@ -315,7 +315,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 18, "Finding Your Way Around" do
-    assert_select '.stdout', 'Current version: 20110211000009'
+    assert_select '.stdout', 'Current version: 20110711000009'
   end
 
   section 20.1, "Testing Routing" do
@@ -412,7 +412,7 @@ class DepotTest < Gorp::TestCase
     assert_match /"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL/, stdout.shift
     assert_match /schema_migrations/, stdout.shift
     assert_match /unique_schema_migrations/, stdout.shift
-    assert_equal 'version = 20110211000001', stdout.shift
+    assert_equal 'version = 20110711000001', stdout.shift
     assert_equal "class Product < ActiveRecord::Base", stdout.shift
     assert_equal "end", stdout.shift
 
