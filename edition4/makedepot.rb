@@ -257,7 +257,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     DEPOT_CSS = "public/stylesheets/depot.css"
   else
     cmd "cp -v #{$DATA}/assets/* app/assets/images/"
-    cmd "cp -v #{$DATA}/*.css.scss app/assets/stylesheets"
+    cmd "cp -v #{$DATA}/products.css.scss app/assets/stylesheets"
     DEPOT_CSS =  "app/assets/stylesheets/depot.css.scss"
   end
 
@@ -451,6 +451,10 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
 
   desc 'Create a second controller with a single index action'
   generate 'controller Store index'
+
+  unless File.exist? 'public/images'
+    cmd "cp -v #{$DATA}/store.css.scss app/assets/stylesheets"
+  end
 
   desc "Route the 'root' of the site to the store"
   edit 'config/routes.rb', 'root' do |data|
@@ -806,7 +810,8 @@ section 9.3, 'Iteration D3: Adding a button' do
   desc 'Add a bit of style to make it show all on one line'
   if DEPOT_CSS =~ /scss/
     edit 'app/assets/stylesheets/store.css.scss', 'inline' do
-      msub /.entry \{.*?()\n  \}/m, "\n" + <<-EOF.unindent(4), :mark => 'inline'
+      edit /^ +.price_line \{.*?\n()    \}\n/m, :mark => 'inline'
+      msub /^ +.price_line \{.*?\n()    \}\n/m, "\n" + <<-EOF.unindent(2)
         form, div {
           display: inline;
         }
