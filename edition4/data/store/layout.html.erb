@@ -8,7 +8,7 @@
   <%= csrf_meta_tag %><!-- <label id="code.csrf"/> -->
 </head>
 <!-- END:head -->
-<body id="store">
+<body class="<%= controller.controller_name %>">
   <div id="banner">
     <%= image_tag("logo.png") %>
     <%= @page_title || "Pragmatic Bookshelf" %><!-- <label id="code.depot.e.title"/> -->

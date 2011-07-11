@@ -244,16 +244,10 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   cmd 'rake db:seed'
 
   desc 'Link to the stylesheet in the layout'
-  edit 'app/views/layouts/application.html.erb', 'head' do |data|
+  edit 'app/views/layouts/application.html.erb' do |data|
     data.clear_highlights
-    data.edit /<!DOCTYPE.*<\/head>/m, :mark=>'head'
-    data.edit 'stylesheet_link_tag', :highlight
-  end
-
-  desc 'Replace the scaffold generated view with some custom HTML'
-  edit 'app/views/products/index.html.erb' do |data|
-    data.all = read('products/index.html.erb')
-    data.gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
+    data.edit '<body>', :highlight
+    data.msub /<body()>/, " class='<%= controller.controller_name %>'"
   end
 
   desc 'Copy some images and a stylesheet'
@@ -263,8 +257,17 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     DEPOT_CSS = "public/stylesheets/depot.css"
   else
     cmd "cp -v #{$DATA}/assets/* app/assets/images/"
-    cmd "cp -v #{$DATA}/depot.css.scss app/assets/stylesheets"
+    cmd "cp -v #{$DATA}/*.css.scss app/assets/stylesheets"
     DEPOT_CSS =  "app/assets/stylesheets/depot.css.scss"
+  end
+
+  desc 'Replace the scaffold generated view with some custom HTML'
+  edit 'app/views/products/index.html.erb' do
+    self.all = read('products/index.html.erb')
+    if DEPOT_CSS =~ /scss/
+      sub!(/<div.*?>\n(.*?)<\/div>\n/m) { $1.gsub /^  /,'' }
+    end
+    gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'See the finished result'
@@ -521,11 +524,10 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
   end
 
   desc 'Modify the stylesheet'
-  edit DEPOT_CSS, 'mainlayout' do
-    if DEPOT_CSS =~ /scss/
-      msub /().*An entry in the store catalog/, <<-EOF.unindent(8) + "\n"
-        /* START:mainlayout */
-        /* Styles for main page */
+  if DEPOT_CSS =~ /scss/
+    edit DEPOT_CSS do
+      self.all = <<-EOF.unindent(8)
+        /* Global styles */
 
         #banner {
           background: #9c9;
@@ -539,6 +541,15 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
           img {
             float: left;
           }
+        }
+
+        #notice {
+          color: #000;
+          border: 2px solid red;
+          padding: 1em;
+          margin-bottom: 2em;
+          background-color: #f0f0f0;
+          font: bold smaller sans-serif;
         }
 
         #columns {
@@ -565,9 +576,10 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
             font-size: small;
           }
         }
-        /* END:mainlayout */
       EOF
-    else
+    end
+  else
+    edit DEPOT_CSS, 'mainlayout' do
       msub /().*An entry in the store catalog/, <<-EOF.unindent(8) + "\n"
         /* START:mainlayout */
         /* Styles for main page */
@@ -731,7 +743,9 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
   desc 'Product has many line items.'
   edit 'app/models/product.rb', 'has_many' do
     clear_highlights
-    msub /class Product.*\n()/, <<-EOF.unindent(4), :mark => 'has_many'
+    edit 'class Product', :mark => 'has_many'
+    edit /^()end\n/, :mark => 'has_many'
+    msub /class Product.*\n()/, <<-EOF.unindent(4)
       #START_HIGHLIGHT
       has_many :line_items
       #END_HIGHLIGHT
@@ -745,7 +759,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
       #END:has_many
     EOF
 
-    msub /^()end/, "\n" + <<-EOF.unindent(4), :mark => 'has_many'
+    msub /^()end/, "\n" + <<-EOF.unindent(4)
       #START_HIGHLIGHT
       private
       #END_HIGHLIGHT
@@ -790,18 +804,16 @@ section 9.3, 'Iteration D3: Adding a button' do
   end
 
   desc 'Add a bit of style to make it show all on one line'
-  edit DEPOT_CSS, 'inline' do |data|
-    if DEPOT_CSS =~ /scss/
-      data << "\n" + <<-EOF.unindent(8)
-        /* START:inline */
-        #store .entry {
-          form, div {
-            display: inline;
-          }
+  if DEPOT_CSS =~ /scss/
+    edit 'app/assets/stylesheets/store.css.scss', 'inline' do
+      msub /.entry \{.*?()\n  \}/m, "\n" + <<-EOF.unindent(4), :mark => 'inline'
+        form, div {
+          display: inline;
         }
-        /* END:inline */
       EOF
-    else
+    end
+  else
+    edit DEPOT_CSS, 'inline' do |data|
       data << "\n" + <<-EOF.unindent(8)
         /* START:inline */
         #store .entry form, #store .entry form div {
