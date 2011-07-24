@@ -382,12 +382,13 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', 'Is 4111111111111111 valid?  false'
   end
 
-  section 26.2, 'Asset Packager' do
-    next unless File.exist? 'public/images'
-    assert_select '.stdout', 'config/asset_packages.yml example file created!'
-    assert_select '.stdout', '  - depot'
-    assert_select '.stdout', 
-      /Created .*\/public\/javascripts\/base_packaged\.js/
+  if File.exist? 'public/images'
+    section 26.2, 'Asset Packager' do
+      assert_select '.stdout', 'config/asset_packages.yml example file created!'
+      assert_select '.stdout', '  - depot'
+      assert_select '.stdout', 
+        /Created .*\/public\/javascripts\/base_packaged\.js/
+    end
   end
 
   section 26.3, 'HAML' do
@@ -395,10 +396,11 @@ class DepotTest < Gorp::TestCase
     assert_select 'span.price', '$49.50'
   end
 
-  section 26.4, 'JQuery' do
-    next unless File.exist? 'public/images'
-    assert_select '.logger', /force\s+public\/javascripts\/rails\.js/
-    assert_select '.stdout', /No RJS statement/
-    assert_select '.stdout', /4\d tests, 7\d assertions, 0 failures, 0 errors/
+  if File.exist? 'public/images'
+    section 26.4, 'JQuery' do
+      assert_select '.logger', /force\s+public\/javascripts\/rails\.js/
+      assert_select '.stdout', /No RJS statement/
+      assert_select '.stdout', /4\d tests, 7\d assertions, 0 failures, 0 errors/
+    end
   end
 end

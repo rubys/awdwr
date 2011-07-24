@@ -3356,44 +3356,42 @@ section 26.1, 'Active Merchant' do
   end
 end
 
-section 26.2, 'Asset Packager' do
-  unless File.exist? 'public/images'
-    desc 'Not required with Rails 3.1'
-    next
-  end
+if File.exist? 'public/images'
+  section 26.2, 'Asset Packager' do
 
-  Dir.chdir(File.join($WORK,'depot'))
-  overview <<-EOF
-    Minimize scripts and stylesheets
-  EOF
+    Dir.chdir(File.join($WORK,'depot'))
+    overview <<-EOF
+      Minimize scripts and stylesheets
+    EOF
 
-  desc 'rails plugin install git://github.com/sbecker/asset_packager.git'
-  # cmd "mkdir -p vendor/plugins"
-  cmd "cp -rpv #{$DATA}/plugins/asset_packager vendor/plugins/"
+    desc 'rails plugin install git://github.com/sbecker/asset_packager.git'
+    # cmd "mkdir -p vendor/plugins"
+    cmd "cp -rpv #{$DATA}/plugins/asset_packager vendor/plugins/"
 
-  desc 'list the new tasks introduced'
-  rake '-T asset'
+    desc 'list the new tasks introduced'
+    rake '-T asset'
 
-  desc 'inventory existing assets'
-  rake 'asset:packager:create_yml'
+    desc 'inventory existing assets'
+    rake 'asset:packager:create_yml'
 
-  desc 'Look at the file that was produced'
-  cmd 'cat config/asset_packages.yml'
+    desc 'Look at the file that was produced'
+    cmd 'cat config/asset_packages.yml'
 
-  desc 'produce a minimized version'
-  rake 'asset:packager:build_all'
+    desc 'produce a minimized version'
+    rake 'asset:packager:build_all'
 
-  edit 'app/views/layouts/application.html.erb', 'head' do
-    clear_all_marks
-    msub /()<!DOCTYPE/, "<!-- #START:head -->\n"
-    msub /<\/head>\n()/, "<!-- ... -->\n<!-- END:head -->\n"
-    edit 'stylesheet_link_tag', :highlight do
-      msub /link_(tag.*) %>/, 'merged :base'
-      msub /<%=() /, ' raw'
-    end
-    edit 'javascript_include_tag', :highlight do
-      msub /include_(tag.*) %>/, 'merged :base'
-      msub /<%=() /, ' raw'
+    edit 'app/views/layouts/application.html.erb', 'head' do
+      clear_all_marks
+      msub /()<!DOCTYPE/, "<!-- #START:head -->\n"
+      msub /<\/head>\n()/, "<!-- ... -->\n<!-- END:head -->\n"
+      edit 'stylesheet_link_tag', :highlight do
+	msub /link_(tag.*) %>/, 'merged :base'
+	msub /<%=() /, ' raw'
+      end
+      edit 'javascript_include_tag', :highlight do
+	msub /include_(tag.*) %>/, 'merged :base'
+	msub /<%=() /, ' raw'
+      end
     end
   end
 end
@@ -3425,56 +3423,53 @@ section 26.3, 'HAML' do
   get '/'
 end
 
-section 26.4, 'JQuery' do
-  unless File.exist? 'public/images'
-    desc 'Not required with Rails 3.1'
-    next
-  end
-
-  edit 'Gemfile', 'plugins' do
-    msub /haml.*\n()/, <<-EOF.unindent(6), :highlight
-      gem 'jquery-rails', '~> 0.2.2'
-    EOF
-  end
-  cmd 'bundle install'
-  generate 'jquery:install --ui --force'
-  edit 'app/views/line_items/create.js.rjs' do
-    clear_all_marks
-  end
-  cmd 'rm app/views/line_items/create.js.rjs'
-  edit 'app/views/line_items/create.js.erb' do
-    self.all = read('plugins/create.js.erb')
-  end
-  edit 'app/views/layouts/application.html.erb', 'banner' do
-    msub /()\s+<div/, "\n<!-- #START:banner -->\n<!-- ... -->"
-    msub /<\/div>\n()/, "<!-- ... -->\n<!-- END:banner -->\n"
-    edit 'javascript_tag', :highlight do
-      msub /"(.*)"/, "$('.locale input').hide()"
+if File.exist? 'public/images'
+  section 26.4, 'JQuery' do
+    edit 'Gemfile', 'plugins' do
+      msub /haml.*\n()/, <<-EOF.unindent(8), :highlight
+	gem 'jquery-rails', '~> 0.2.2'
+      EOF
     end
-  end
-  rake 'test'
-  edit 'test/functional/line_items_controller_test.rb', 'ajax' do
-    clear_all_marks
-    dcl "should create line_item via ajax", :mark => 'ajax' do
-      edit ':replace_html', :highlight do
-        msub /assert_select_(rjs .*) do/, "jquery :html, '#cart'"
+    cmd 'bundle install'
+    generate 'jquery:install --ui --force'
+    edit 'app/views/line_items/create.js.rjs' do
+      clear_all_marks
+    end
+    cmd 'rm app/views/line_items/create.js.rjs'
+    edit 'app/views/line_items/create.js.erb' do
+      self.all = read('plugins/create.js.erb')
+    end
+    edit 'app/views/layouts/application.html.erb', 'banner' do
+      msub /()\s+<div/, "\n<!-- #START:banner -->\n<!-- ... -->"
+      msub /<\/div>\n()/, "<!-- ... -->\n<!-- END:banner -->\n"
+      edit 'javascript_tag', :highlight do
+	msub /"(.*)"/, "$('.locale input').hide()"
       end
     end
-  end
-  rake 'test'
-  edit 'config/asset_packages.yml' do
-    if include? 'dragdrop'
-      msub /\s+- (dragdrop)\n/, 'jquery'
-      msub /\s+- (effects)\n/, 'jquery-ui'
-      msub /(\s+- controls)\n/, ''
-      msub /(\s+- prototype)\n/, ''
-    else
-      msub /().*prototype\n/, "  - jquery\n"
-      msub /\s+- (prototype)\n/, 'jquery-ui'
+    rake 'test'
+    edit 'test/functional/line_items_controller_test.rb', 'ajax' do
+      clear_all_marks
+      dcl "should create line_item via ajax", :mark => 'ajax' do
+	edit ':replace_html', :highlight do
+	  msub /assert_select_(rjs .*) do/, "jquery :html, '#cart'"
+	end
+      end
     end
+    rake 'test'
+    edit 'config/asset_packages.yml' do
+      if include? 'dragdrop'
+	msub /\s+- (dragdrop)\n/, 'jquery'
+	msub /\s+- (effects)\n/, 'jquery-ui'
+	msub /(\s+- controls)\n/, ''
+	msub /(\s+- prototype)\n/, ''
+      else
+	msub /().*prototype\n/, "  - jquery\n"
+	msub /\s+- (prototype)\n/, 'jquery-ui'
+      end
+    end
+    rake 'asset:packager:build_all'
+    rake "db:seed"
   end
-  rake 'asset:packager:build_all'
-  rake "db:seed"
 end
 
 section 99, 'cleanup' do
@@ -3487,5 +3482,74 @@ section 99, 'cleanup' do
     end
     cmd 'rm -f public/assets/*'
     cmd 'rm -rf tmp/*cache/*'
+    restart_server
   end
+end
+
+# what version of Rails are we running?
+if `#{Gorp.which_rails($rails)} -v` =~ /^Rails 2/
+  STDERR.puts 'This scenario is for Rails 3'
+  Process.exit!
+end
+
+required = %w(will_paginate rdoc nokogiri htmlentities)
+required.push 'rails' if $rails == 'rails'
+required.push 'test-unit' if RUBY_VERSION =~ /^1\.9/
+required -= `gem list`.scan(/(^[-_\w]+)\s\(/).flatten
+
+# only one of nokogiri and htmlentities are required
+required.delete('nokogiri') or required.delete('htmlentities')
+required.delete('will_paginate') or required.delete('mislav-will_paginate')
+
+unless required.empty?
+  required.each do |gem|
+    STDERR.puts "Missing gem: #{gem}"
+  end
+  Process.exit!
+end
+
+# verify that required libraries are present
+fail = false
+%w().each do |lib|
+  unless $:.any? {|path| File.exist? File.join(path,lib)}
+    STDERR.puts "Missing library: #{lib}"
+    fail = true
+  end
+end
+Process.exit! if fail
+
+# verify that MySQL is installed and permissions are granted
+begin
+  require 'mysql'
+  configs = %w(mysql_config mysql_config5)
+  config = configs.find {|config| not `which #{config}`.empty?}
+  socket = `#{config} --socket`.chomp
+  dbh = Mysql.real_connect("localhost", "username", "password", nil, 0, socket)
+  unless dbh.list_dbs.include?('depot_production')
+    dbh.query('create database depot_production')
+  end
+rescue Exception => e
+  puts "MySQL: #{e}"
+  Process.exit!
+end
+
+
+$cleanup = Proc.new do
+  # fetch stylesheets
+  if File.exist?(File.join($WORK,'depot/public/stylesheets'))
+    Dir[File.join($WORK,'depot/public/stylesheets/*.css')].each do |css|
+      File.open(css) {|file| $style.text! file.read}
+    end
+  else
+    require 'sass'
+    Dir[File.join($WORK,'depot/app/assets/stylesheets/*.css*')].each do |css|
+      text = File.read(css)
+      next if text =~ /\A\/\*[^*]*\*\/\s*\Z/ # nothing but a single comment
+      text = Sass::Engine.new(text, :syntax => :scss).render if css =~ /\.scss/
+      $style.text! text
+    end
+  end
+
+  # Link static files
+  system "ln -f -s #{$DATA} #{$WORK}"
 end
