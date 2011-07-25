@@ -244,10 +244,12 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   cmd 'rake db:seed'
 
   desc 'Link to the stylesheet in the layout'
-  edit 'app/views/layouts/application.html.erb' do |data|
-    data.clear_highlights
-    data.edit '<body>', :highlight
-    data.msub /<body()>/, " class='<%= controller.controller_name %>'"
+  edit 'app/views/layouts/application.html.erb' do
+    clear_highlights
+    edit '<body>', :highlight
+    msub /<body()>/, " class='<%= controller.controller_name %>'"
+    msub /stylesheet_link_tag.*()/, 
+      '<!-- <label id="code.depot.b.stylesheet.link.tag"/> -->'
   end
 
   desc 'Copy some images and a stylesheet'
@@ -559,26 +561,25 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
         #columns {
           background: #141;
-        }
 
-        #main {
-          margin-left: 17em;
-          padding-top: 4ex;
-          padding-left: 2em;
-          background: white;
-        }
+          #main {
+            margin-left: 17em;
+            padding-top: 4ex;
+            padding-left: 2em;
+            background: white;
+          }
 
-        #side {
-          float: left;
-          padding-top: 1em;
-          padding-left: 1em;
-          padding-bottom: 1em;
-          width: 16em;
-          background: #141;
+          #side {
+            float: left;
+            padding-top: 1em;
+            padding-left: 1em;
+            padding-bottom: 1em;
+            width: 16em;
 
-          a {
-            color: #bfb;
-            font-size: small;
+            a {
+              color: #bfb;
+              font-size: small;
+            }
           }
         }
       EOF
@@ -1295,11 +1296,10 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   end
 
   desc 'Insert a call in the controller to find the cart'
-  edit 'app/controllers/store_controller.rb', 'index' do |data|
-    data.clear_highlights
-    data.dcl 'index', :mark => 'index'
-    data.msub /@products = .*\n()/, "    @cart = current_cart\n",
-      :highlight
+  edit 'app/controllers/store_controller.rb', 'index' do
+    clear_highlights
+    dcl 'index', :mark => 'index'
+    msub /@products = .*\n()/, "    @cart = current_cart\n", :highlight
   end
 
   desc 'Reference the partial from the layout.'
@@ -1372,11 +1372,11 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 end
 
 section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
-  edit 'app/views/store/index.html.erb' do |data|
-    data.clear_all_marks
-    data.edit '<%= button_to', :highlight
-    data.msub /<%= button_to.*() %>/, ",\n        :remote => true"
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  edit 'app/views/store/index.html.erb' do
+    clear_all_marks
+    edit '<%= button_to', :highlight
+    msub /<%= button_to.*() %>/, ",\n        :remote => true"
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   edit 'app/controllers/line_items_controller.rb', 'create' do
     clear_highlights
@@ -3385,12 +3385,12 @@ if File.exist? 'public/images'
       msub /()<!DOCTYPE/, "<!-- #START:head -->\n"
       msub /<\/head>\n()/, "<!-- ... -->\n<!-- END:head -->\n"
       edit 'stylesheet_link_tag', :highlight do
-	msub /link_(tag.*) %>/, 'merged :base'
-	msub /<%=() /, ' raw'
+        msub /link_(tag.*) %>/, 'merged :base'
+        msub /<%=() /, ' raw'
       end
       edit 'javascript_include_tag', :highlight do
-	msub /include_(tag.*) %>/, 'merged :base'
-	msub /<%=() /, ' raw'
+        msub /include_(tag.*) %>/, 'merged :base'
+        msub /<%=() /, ' raw'
       end
     end
   end
@@ -3427,7 +3427,7 @@ if File.exist? 'public/images'
   section 26.4, 'JQuery' do
     edit 'Gemfile', 'plugins' do
       msub /haml.*\n()/, <<-EOF.unindent(8), :highlight
-	gem 'jquery-rails', '~> 0.2.2'
+        gem 'jquery-rails', '~> 0.2.2'
       EOF
     end
     cmd 'bundle install'
@@ -3443,28 +3443,28 @@ if File.exist? 'public/images'
       msub /()\s+<div/, "\n<!-- #START:banner -->\n<!-- ... -->"
       msub /<\/div>\n()/, "<!-- ... -->\n<!-- END:banner -->\n"
       edit 'javascript_tag', :highlight do
-	msub /"(.*)"/, "$('.locale input').hide()"
+        msub /"(.*)"/, "$('.locale input').hide()"
       end
     end
     rake 'test'
     edit 'test/functional/line_items_controller_test.rb', 'ajax' do
       clear_all_marks
       dcl "should create line_item via ajax", :mark => 'ajax' do
-	edit ':replace_html', :highlight do
-	  msub /assert_select_(rjs .*) do/, "jquery :html, '#cart'"
-	end
+        edit ':replace_html', :highlight do
+          msub /assert_select_(rjs .*) do/, "jquery :html, '#cart'"
+        end
       end
     end
     rake 'test'
     edit 'config/asset_packages.yml' do
       if include? 'dragdrop'
-	msub /\s+- (dragdrop)\n/, 'jquery'
-	msub /\s+- (effects)\n/, 'jquery-ui'
-	msub /(\s+- controls)\n/, ''
-	msub /(\s+- prototype)\n/, ''
+        msub /\s+- (dragdrop)\n/, 'jquery'
+        msub /\s+- (effects)\n/, 'jquery-ui'
+        msub /(\s+- controls)\n/, ''
+        msub /(\s+- prototype)\n/, ''
       else
-	msub /().*prototype\n/, "  - jquery\n"
-	msub /\s+- (prototype)\n/, 'jquery-ui'
+        msub /().*prototype\n/, "  - jquery\n"
+        msub /\s+- (prototype)\n/, 'jquery-ui'
       end
     end
     rake 'asset:packager:build_all'
