@@ -259,8 +259,11 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     DEPOT_CSS = "public/stylesheets/depot.css"
   else
     cmd "cp -v #{$DATA}/assets/* app/assets/images/"
-    cmd "cp -v #{$DATA}/products.css.scss app/assets/stylesheets"
     DEPOT_CSS =  "app/assets/stylesheets/application.css.scss"
+    edit "app/assets/stylesheets/products.css.scss" do
+      msub /(\s*)\Z/, "\n\n"
+      msub /\n\n()\Z/, read('products.css.scss'), :highlight
+    end
   end
 
   desc 'Replace the scaffold generated view with some custom HTML'
@@ -455,7 +458,10 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   generate 'controller Store index'
 
   unless File.exist? 'public/images'
-    cmd "cp -v #{$DATA}/store.css.scss app/assets/stylesheets"
+    edit "app/assets/stylesheets/store.css.scss" do
+      msub /(\s*)\Z/, "\n\n"
+      msub /\n\n()\Z/, read('store.css.scss'), :highlight
+    end
   end
 
   desc "Route the 'root' of the site to the store"
@@ -533,13 +539,11 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
   if DEPOT_CSS =~ /scss/
     cmd "mv app/assets/stylesheets/application.css #{DEPOT_CSS}"
     edit DEPOT_CSS do
-      self << "\n\n" + <<-EOF.unindent(8)
-        /* Global styles */
-
+      msub /(\s*)\Z/, "\n\n"
+      msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
         #banner {
           background: #9c9;
-          padding-top: 10px;
-          padding-bottom: 10px;
+          padding: 10px;
           border-bottom: 2px solid;
           font: small-caps 40px/40px "Times New Roman", serif;
           color: #282;
@@ -564,16 +568,13 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
           #main {
             margin-left: 17em;
-            padding-top: 4ex;
-            padding-left: 2em;
+            padding: 1em;
             background: white;
           }
 
           #side {
             float: left;
-            padding-top: 1em;
-            padding-left: 1em;
-            padding-bottom: 1em;
+            padding: 1em;
             width: 16em;
 
             a {
@@ -1118,13 +1119,11 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   end
 
   desc 'Add some style.'
-  edit DEPOT_CSS, 'cartmain' do |data|
-    if DEPOT_CSS =~ /scss/
-      data << "\n" + <<-EOF.unindent(8)
-        /* START:cartmain */
-        /* Styles for the cart in the main page */
-
-        #store {
+  if DEPOT_CSS =~ /scss/
+    edit 'app/assets/stylesheets/carts.css.scss' do
+      msub /(\s*)\Z/, "\n\n"
+      msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
+        .carts {
           .cart_title {
             font: 120% bold;
           }
@@ -1138,9 +1137,10 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
             border-top: 1px solid #595;
           }
         }
-        /* END:cartmain */
       EOF
-    else
+    end
+  else
+    edit DEPOT_CSS, 'cartmain' do |data|
       data << "\n" + <<-EOF.unindent(8)
         /* START:cartmain */
         /* Styles for the cart in the main page */
@@ -1314,12 +1314,17 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   end
 
   desc 'Add a small bit of style.'
-  edit DEPOT_CSS, 'cartside' do |data|
-    if DEPOT_CSS =~ /scss/
-      data << "\n" + <<-EOF.unindent(8)
-        /* START:cartside */
-        /* Styles for the cart in the sidebar */
-        
+  if DEPOT_CSS =~ /scss/
+    edit 'app/assets/stylesheets/carts.css.scss' do |data|
+      clear_highlights
+      edit '.carts', :highlight
+      msub /().carts/, '#cart, '
+    end
+
+    edit DEPOT_CSS, 'columns' do
+      clear_highlights
+      edit /#columns.*\n\}/m, :mark => 'columns'
+      msub /^ +#side \{.*?()\n    a \{/m, "\n" + <<-EOF.unindent(4), :highlight
         #cart {
           font-size: smaller;
           color:     white;
@@ -1330,9 +1335,10 @@ section 11.1, 'Iteration F1: Moving the Cart' do
             margin-bottom: 10px;
           }
         }
-        /* END:cartside */
       EOF
-    else
+    end
+  else
+    edit DEPOT_CSS, 'cartside' do |data|
       data << "\n" + <<-EOF.unindent(6)
         /* START:cartside */
         /* Styles for the cart in the sidebar */

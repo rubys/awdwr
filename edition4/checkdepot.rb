@@ -43,9 +43,6 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.2, "Iteration A2: Prettier Listings" do
-    ticket 3570,
-      :title =>  "Intermittent reloading issue: view",
-      :match => /\.list_line_even/
     assert_select '.list_line_even'
   end
 
