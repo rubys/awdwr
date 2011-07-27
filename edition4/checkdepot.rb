@@ -144,7 +144,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.total_cell', '$171.00'
   end
 
-  section 11.5, "Testing AJAX changes" do
+  section 11.6, "Testing AJAX changes" do
     ticket 4786,
       :title =>  "render with a partial in rjs fails ",
       :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
@@ -188,10 +188,11 @@ class DepotTest < Gorp::TestCase
       'Missing <order_list for_product=.*>'
   end
 
-  section 12.3, "Iteration G3: Pagination" do
-    next unless File.exist? 'public/images'
-    assert_select 'td', 'Customer 100'
-    assert_select "a[href=http://localhost:#{$PORT}/orders?page=4]"
+  if File.exist? 'public/images'
+    section 12.3, "Iteration G3: Pagination" do
+      assert_select 'td', 'Customer 100'
+      assert_select "a[href=http://localhost:#{$PORT}/orders?page=4]"
+    end
   end
 
   section 12.4, "Playtime" do

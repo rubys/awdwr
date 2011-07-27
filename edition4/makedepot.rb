@@ -574,8 +574,9 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
           #side {
             float: left;
-            padding: 1em;
-            width: 16em;
+            padding: 2em;
+            width: 13em;
+            background: #141;
 
             a {
               color: #bfb;
@@ -1516,7 +1517,19 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
   cmd 'rake test'
 end
 
-section 11.5, 'Iteration F5: Testing AJAX changes' do
+section 11.5, 'Iteration F5: Making Images Clickable' do
+  edit 'app/assets/javascripts/store.js.coffee' do
+    msub /(\s*)\Z/, "\n\n"
+    msub /\n\n()\Z/, <<-EOF.unindent(6), :highlight
+      $ -> 
+        $('.store .entry > img').click ->
+          $(this).parent().find(':submit').click()
+    EOF
+  end
+  get '/'
+end
+
+section 11.6, 'Iteration F6: Testing AJAX changes' do
   desc 'Verify that yes, indeed, the product index is broken.'
   get '/products'
 
@@ -2024,64 +2037,61 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   issue 'Consider reducing the number of edits to products_controller'
 end
 
-section 12.3, 'Iteration G3: Pagination' do
-  unless File.exist? 'public/images'
-    desc 'Not supported with Rails 3.1'
-    next
-  end
-
-  desc 'Add in the will_paginate gem'
-  edit 'Gemfile' do
-    msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'will_paginate', '>= 3.0.pre'\n",
-      :highlight
-  end
-  unless $bundle
-    edit 'config/application.rb' do
-      msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n",
-      :highlight
+if File.exist? 'public/images'
+  section 12.3, 'Iteration G3: Pagination' do
+    desc 'Add in the will_paginate gem'
+    edit 'Gemfile' do
+      msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'will_paginate', '>= 3.0.pre'\n",
+        :highlight
     end
-  end
-  restart_server
-  
-  cmd 'bundle show'
-
-  desc 'Load in a few orders'
-  edit 'script/load_orders.rb' do
-    self.all = <<-'EOF'.unindent(6)
-      Order.transaction do
-        (1..100).each do |i|
-          Order.create(:name => "Customer #{i}", :address => "#{i} Main Street",
-            :email => "customer-#{i}@example.com", :pay_type => "Check")
-        end
+    unless $bundle
+      edit 'config/application.rb' do
+        msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n",
+        :highlight
       end
-    EOF
-  end
-
-  runner 'script/load_orders.rb'
-
-  desc 'Modify the controller to do pagination'
-  edit 'app/controllers/orders_controller.rb', 'index' do
-    dcl 'index', :mark do
-      # msub /^()/, "require 'will_paginate'\n", :highlight
-      edit 'Order.all', :highlight
-      msub /Order\.(all)/, 
-        "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
-        '      :per_page => 10'
     end
-  end
+    restart_server
+    
+    cmd 'bundle show'
 
-  desc 'Add some navigational aids'
-  edit 'app/views/orders/index.html.erb' do
-    self << <<-EOF.unindent(6)
-      <!-- START_HIGHLIGHT -->
-      <p><%= will_paginate @orders %></p>
-      <!-- END_HIGHLIGHT -->
-    EOF
-    msub /,( ):method/, "\n              "
-  end
+    desc 'Load in a few orders'
+    edit 'script/load_orders.rb' do
+      self.all = <<-'EOF'.unindent(8)
+        Order.transaction do
+          (1..100).each do |i|
+            Order.create(:name => "Customer #{i}", :address => "#{i} Main Street",
+              :email => "customer-#{i}@example.com", :pay_type => "Check")
+          end
+        end
+      EOF
+    end
 
-  desc 'Show the orders'
-  get '/orders'
+    runner 'script/load_orders.rb'
+
+    desc 'Modify the controller to do pagination'
+    edit 'app/controllers/orders_controller.rb', 'index' do
+      dcl 'index', :mark do
+        # msub /^()/, "require 'will_paginate'\n", :highlight
+        edit 'Order.all', :highlight
+        msub /Order\.(all)/, 
+          "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
+          '      :per_page => 10'
+      end
+    end
+
+    desc 'Add some navigational aids'
+    edit 'app/views/orders/index.html.erb' do
+      self << <<-EOF.unindent(6)
+        <!-- START_HIGHLIGHT -->
+        <p><%= will_paginate @orders %></p>
+        <!-- END_HIGHLIGHT -->
+      EOF
+      msub /,( ):method/, "\n              "
+    end
+
+    desc 'Show the orders'
+    get '/orders'
+  end
 end
 
 section 12.4, 'Playtime' do
