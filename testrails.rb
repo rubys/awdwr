@@ -54,6 +54,7 @@ updated = Dir.chdir($rails) do
   system "git checkout #{BRANCH}"
   system "git checkout #{COMMIT.split('/').last}" if COMMIT
   before = `git log -1 --pretty=format:%H`
+  print 'rails: '
   system 'git pull origin'
   `git log -1 --pretty=format:%H` != before
 end
@@ -91,8 +92,11 @@ base = File.join(HOME,'git','rails',
   'railties/lib/rails/generators/app_base.rb')
 if File.exist? template
   if File.exist? base # Rails 3.1
-    libs += File.read(base).scan(/^\s*gem ['"]([-\w]+)['"],\s+:git/)
+    app_base = File.read(base)
+    libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
     gems += File.read(template).scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
+    branches = app_base.scan(
+      /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
 
     release=PROFILE.rvm['bin'].split('-')[1]
     gems += [['json',nil]] if release < "1.9.2"
@@ -105,10 +109,15 @@ if File.exist? template
   end
   libs = libs.flatten.uniq - %w(rails)
   gems.delete_if {|gem,opts| libs.include? gem}
+  branches = Hash[*branches.flatten]
 end
 
 libs.each do |lib|
-  Dir.chdir(File.join(HOME,'git',lib)) { system 'git pull' }
+  Dir.chdir(File.join(HOME,'git',lib)) do 
+    print lib + ': '
+    system 'git pull'
+    system "git checkout #{branches[lib]}" if branches[lib]
+  end
 end
 ENV['RUBYLIB'] = libs.map {|lib| File.join(HOME,'git',lib,'lib')}.
   join(File::PATH_SEPARATOR)
@@ -159,6 +168,7 @@ Dir.chdir PROFILE.source
 if PROFILE.source.include? 'svn'
   system 'svn up'
 else
+  print 'awdwr: '
   system 'git checkout -q master'
   system 'git pull origin'
 end
@@ -348,6 +358,15 @@ system "cp #{LOG} #{WORK}/checkdepot/makedepot.log"
 # restore rails to master
 Dir.chdir($rails) do
   system 'git checkout master' unless BRANCH=='master'
+end
+
+libs.each do |lib|
+  if branches[lib]
+    Dir.chdir(File.join(HOME,'git',lib)) do
+      print lib + ': '
+      system 'git checkout master'
+    end
+  end
 end
 
 exit status.exitstatus
