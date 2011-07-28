@@ -81,7 +81,7 @@ if !updated
 end
 
 # update libs
-libs = %w(gorp)
+libs = %w(gorp) + ARGV.grep(/^\+/).map {|arg| arg[1..-1]}
 gems = []
 
 # add in any 'edge' gems
@@ -104,6 +104,7 @@ if File.exist? template
     gems += [['jquery-rails',', "~> 0.2.2"']]
   end
   libs = libs.flatten.uniq - %w(rails)
+  gems.delete_if {|gem,opts| libs.include? gem}
 end
 
 libs.each do |lib|
