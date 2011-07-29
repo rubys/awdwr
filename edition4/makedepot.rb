@@ -17,6 +17,13 @@ $checker = 'checkdepot'
 
 omit 100..199
 
+# what version of Rails are we running?
+$rails_version = `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`.split(' ').last
+if $rails_version =~ /^2/
+  STDERR.puts 'This scenario is for Rails 3'
+  Process.exit!
+end
+
 section 2, 'Instant Gratification' do
   overview <<-EOF
     We start with a simple "hello world!" demo application
@@ -574,13 +581,21 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
           #side {
             float: left;
-            padding: 2em;
+            padding: 0em 2em;
             width: 13em;
             background: #141;
 
-            a {
-              color: #bfb;
-              font-size: small;
+            ul {
+              padding: 0;
+
+              li {
+                list-style: none;
+
+                a {
+                  color: #bfb;
+                  font-size: small;
+                }
+              }
             }
           }
         }
@@ -1061,6 +1076,21 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
     data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
+  if DEPOT_CSS =~ /scss/
+    edit DEPOT_CSS, 'columns' do
+      clear_highlights
+      msub /^ +#side \{.*?()\n    ul \{/m, "\n" + <<-EOF.unindent(4), :highlight
+        form, div {
+          display: inline;
+        }  
+
+        input {
+          font-size: small;
+        }
+      EOF
+    end
+  end
+
   desc 'Clear session and add flash notice when cart is destroyed.'
   edit 'app/controllers/carts_controller.rb', 'destroy' do
     dcl 'destroy', :mark => 'destroy' do
@@ -1319,13 +1349,13 @@ section 11.1, 'Iteration F1: Moving the Cart' do
     edit 'app/assets/stylesheets/carts.css.scss' do |data|
       clear_highlights
       edit '.carts', :highlight
-      msub /().carts/, '#cart, '
+      msub /(.carts)/, '#cart'
     end
 
     edit DEPOT_CSS, 'columns' do
       clear_highlights
       edit /#columns.*\n\}/m, :mark => 'columns'
-      msub /^ +#side \{.*?()\n    a \{/m, "\n" + <<-EOF.unindent(4), :highlight
+      msub /^ +#side \{.*?()\n    ul \{/m, "\n" + <<-EOF.unindent(4), :highlight
         #cart {
           font-size: smaller;
           color:     white;
@@ -2037,7 +2067,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   issue 'Consider reducing the number of edits to products_controller'
 end
 
-if File.exist? 'public/images'
+if $rails_version =~ /^3\.0/
   section 12.3, 'Iteration G3: Pagination' do
     desc 'Add in the will_paginate gem'
     edit 'Gemfile' do
@@ -2497,11 +2527,11 @@ section 13.3, 'Iteration H3: Limiting Access' do
     data.clear_highlights
     data.msub /<div id="side">.*?() *<\/div>/m, "\n" + <<-EOF, :highlight
       <% if session[:user_id] %>
-        <br />
-        <%= link_to 'Orders',   orders_path   %><br />
-        <%= link_to 'Products', products_path %><br />
-        <%= link_to 'Users',    users_path    %><br />
-        <br />
+        <ul>
+          <li><%= link_to 'Orders',   orders_path   %></li>
+          <li><%= link_to 'Products', products_path %></li>
+          <li><%= link_to 'Users',    users_path    %></li>
+        </ul>
         <%= button_to 'Logout', logout_path, :method => :delete   %>
       <% end %>
     EOF
@@ -3372,7 +3402,7 @@ section 26.1, 'Active Merchant' do
   end
 end
 
-if File.exist? 'public/images'
+if $rails_version =~ /^3\.0/
   section 26.2, 'Asset Packager' do
 
     Dir.chdir(File.join($WORK,'depot'))
@@ -3439,7 +3469,7 @@ section 26.3, 'HAML' do
   get '/'
 end
 
-if File.exist? 'public/images'
+if $rails_version =~ /^3\.0/
   section 26.4, 'JQuery' do
     edit 'Gemfile', 'plugins' do
       msub /haml.*\n()/, <<-EOF.unindent(8), :highlight
@@ -3500,12 +3530,6 @@ section 99, 'cleanup' do
     cmd 'rm -rf tmp/*cache/*'
     restart_server
   end
-end
-
-# what version of Rails are we running?
-if `#{Gorp.which_rails($rails)} -v` =~ /^Rails 2/
-  STDERR.puts 'This scenario is for Rails 3'
-  Process.exit!
 end
 
 required = %w(will_paginate rdoc nokogiri htmlentities)
