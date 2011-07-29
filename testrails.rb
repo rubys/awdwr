@@ -84,6 +84,7 @@ end
 # update libs
 libs = %w(gorp) + ARGV.grep(/^\+/).map {|arg| arg[1..-1]}
 gems = []
+branches = []
 
 # add in any 'edge' gems
 template = File.join(HOME,'git','rails',
@@ -109,8 +110,9 @@ if File.exist? template
   end
   libs = libs.flatten.uniq - %w(rails)
   gems.delete_if {|gem,opts| libs.include? gem}
-  branches = Hash[*branches.flatten]
 end
+
+branches = Hash[*branches.flatten]
 
 libs.each do |lib|
   Dir.chdir(File.join(HOME,'git',lib)) do 
