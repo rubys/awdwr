@@ -34,7 +34,7 @@ class DepotTest < Gorp::TestCase
     end
 
     assert_select 'th', 'Image url'
-    assert_select 'input#product_title[value=Web Design for Developers]'
+    assert_select 'input#product_title[value=CoffeeScript]'
     assert_select "a[href=http://localhost:#{$PORT}/products/1]", 'redirected'
     assert_select 'pre', /(1|0) tests, (1|0) assertions, 0 failures, 0 errors/,
       '(1|0) tests, (1|0) assertions, 0 failures, 0 errors'
@@ -54,22 +54,18 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /(Created initial |root-)commit.*Depot Scaffold/
   end
 
-  section 7.1, "Iteration B1: Validate!" do
+  section 7.1, "Iteration B1: Validation and Unit Testing" do
     assert_select 'h2', /4 errors\s+prohibited this product from being saved/
     assert_select 'li', "Image url can't be blank"
     assert_select 'li', 'Price is not a number'
     assert_select '.field_with_errors input[id=product_price]'
-  end
-
-  section 7.2, 'Iteration B2: Unit Testing' do
-    ticket 3555,
-      :list => :ruby,
-      :title =>  "segvs since r28570",
-      :match => /active_support\/dependencies.rb:\d+: \[BUG\] Segmentation fault/
     assert_select 'pre', /(1|0) tests, (1|0) assertions, 0 failures, 0 errors/,
       '(1|0) tests, (1|0) assertions, 0 failures, 0 errors'
     assert_select 'pre', /7 tests, 10 assertions, 0 failures, 0 errors/,
       '7 tests, 10 assertions, 0 failures, 0 errors'
+  end
+
+  section 7.2, 'Iteration B2: Unit Testing' do
     assert_select 'pre', /5 tests, 23 assertions, 0 failures, 0 errors/,
       '5 tests, 23 assertions, 0 failures, 0 errors'
   end
@@ -77,7 +73,7 @@ class DepotTest < Gorp::TestCase
   section 8.1, "Iteration C1: Create the Catalog Listing" do
     assert_select 'p', 'Find me in app/views/store/index.html.erb'
     assert_select 'h1', 'Your Pragmatic Catalog'
-    assert_select 'span.price', '49.5'
+    assert_select 'span.price', '36.0'
   end
 
   section 8.2, "Iteration C2: Add a Page Layout" do
@@ -85,7 +81,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 8.3, "Iteration C3: Use a Helper to Format the Price" do
-    assert_select 'span.price', '$49.50'
+    assert_select 'span.price', '$36.00'
   end
 
   section 8.4, "Iteration C4: Functional Testing" do
@@ -121,7 +117,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.3, "Iteration E3: Finishing the Cart" do
     assert_select '#notice', 'Your cart is currently empty'
-    assert_select '.total_cell', '$121.50'
+    assert_select '.total_cell', '$121.95'
     assert_select 'input[type=submit][value=Empty cart]'
   end
 
@@ -135,13 +131,13 @@ class DepotTest < Gorp::TestCase
 
   section 11.1, "Iteration F1: Moving the Cart" do
     assert_select '.cart_title', 'Your Cart'
-    assert_select '.total_cell', '$121.50'
+    assert_select '.total_cell', '$121.95'
     assert_select 'input[type=submit][value=Empty cart]'
   end
 
   section 11.4, "Iteration F4: Hide an Empty Cart" do
     assert_select '#cart[style=display: none]'
-    assert_select '.total_cell', '$171.00'
+    assert_select '.total_cell', '$171.90'
   end
 
   section 11.6, "Testing AJAX changes" do
@@ -167,7 +163,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/,
       'Missing <email>customer@example.com</email>'
     assert_select '.stdout', /&lt;id type="integer"&gt;1&lt;\/id&gt;/,
-      'Missing <id type="integer">1</id>'
+      'Missing <id type="integer">2</id>'
 
     # html
     assert_select '.stdout', /&lt;a href="mailto:customer@example.com"&gt;/,
@@ -176,12 +172,12 @@ class DepotTest < Gorp::TestCase
     # atom
     assert_select '.stdout', /&lt;summary type="xhtml"&gt;/,
       'Missing <summary type="xhtml">'
-    assert_select '.stdout', /&lt;td&gt;Programming Ruby 1.9&lt;\/td&gt;/,
-      'Missing <td>Programming Ruby 1.9</td>'
+    assert_select '.stdout', /&lt;td&gt;CoffeeScript&lt;\/td&gt;/,
+      'Missing <td>CoffeeScript</td>'
 
     # json
-    assert_select '.stdout', /, ?"title": ?"Programming Ruby 1.9"/,
-      'Missing "title": "Programming Ruby 1.9"'
+    assert_select '.stdout', /, ?"title": ?"CoffeeScript"/,
+      'Missing "title": "CoffeeScript"'
 
     # custom xml
     assert_select '.stdout', /&lt;order_list for_product=.*&gt;/,
@@ -262,7 +258,7 @@ class DepotTest < Gorp::TestCase
 
   section 15.1, "Task I1: i18n for the store front" do
     assert_select '#notice', 'es translation not available'
-    assert_select '.price', /49,50(.|&#?\w+;)\$US/u
+    assert_select '.price', /49,95(.|&#?\w+;)\$US/u
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
     assert_select 'input[type=submit][value$=dir al Carrito]'
   end
@@ -323,7 +319,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 21.1, "Views" do
-    assert_select '.stdout', /&lt;price currency="USD"&gt;49.5&lt;\/price&gt;/
+    assert_select '.stdout', /&lt;price currency="USD"&gt;49.95&lt;\/price&gt;/
     assert_select '.stdout', /"1 minute"/
     assert_select '.stdout', /"half a minute"/
     assert_select '.stdout', /"CAN\$235"/
@@ -361,12 +357,12 @@ class DepotTest < Gorp::TestCase
     else
       assert_select '.body', /[{,]"id":\d+[,}]/
     end
-    assert_select '.stdout', /"product_id"=&gt;3/
-    assert_select '.stdout', /=&gt; 39.6/
+    assert_select '.stdout', /"product_id"=&gt;2/
+    assert_select '.stdout', /=&gt; 28.8/
   end
 
   section 25.1, 'rack' do
-    assert_select 'p', '43.75'
+    assert_select 'p', '34.95'
     assert_select 'h2', 'Programming Ruby 1.9'
   end
 
@@ -391,7 +387,7 @@ class DepotTest < Gorp::TestCase
 
   section 26.3, 'HAML' do
     assert_select 'h1', 'Your Pragmatic Catalog'
-    assert_select 'span.price', '$49.50'
+    assert_select 'span.price', '$36.00'
   end
 
   if File.exist? 'public/images'

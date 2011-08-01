@@ -141,9 +141,6 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   desc 'Look at the files created.'
   cmd 'ls -p'
 
-  desc 'Database configuration options (generally not required for sqlite3)'
-  cmd 'cat config/database.yml'
-
   overview <<-EOF
     Generate scaffolding for a real model, modify a template, and do
     our first bit of data entry.
@@ -170,8 +167,6 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
     msub /,( ):?method/, "\n            "
   end
 
-  restart_server
-
   desc 'Add precision and scale to the price'
   edit Dir['db/migrate/*create_products.rb'].first do
     up = (include?('self.up') ? 'self.up' : 'change')
@@ -188,6 +183,8 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
 
   desc 'Apply the migration'
   cmd 'rake db:migrate'
+
+  restart_server
 
   desc 'Get an (empty) list of products'
   get '/products'
@@ -206,27 +203,24 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
 
   desc 'Create a product'
   post '/products/new',
-    'product[title]' => 'Web Design for Developers',
+    'product[title]' => 'CoffeeScript',
     'product[description]' => <<-EOF.unindent(6),
       <p>
-        <em>Web Design for Developers</em>
-        will show you how to make your
-        web-based application look
-        professionally designed. We'll help
-        you learn how to pick the right
-        colors and fonts, avoid costly
-        interface and accessibility mistakes
-        -- your application will really come
-        alive.  We'll also walk you through
-        some common Photoshop and CSS
-        techniques and work through a web site
-        redesign, taking a new design from
-        concept all the way to implementation.
+        CoffeeScript is JavaScript done
+        right. It provides all of
+        JavaScript's functionality wrapped in
+        a cleaner, more succinct syntax. In
+        the first book on this exciting new
+        language, CoffeeScript guru Trevor
+        Burnham shows you how to hold onto
+        all the power and flexibility of
+        JavaScript while writing clearer,
+        cleaner, and safer code.
       </p>
     EOF
-    'product[price]' => '42.95',
+    'product[price]' => '29.00',
     'product[image_url]' => 
-      (File.exist?('public/images') ? '/images/wd4d.jpg' : 'wd4d.jpg')
+      (File.exist?('public/images') ? '/images/cs.jpg' : 'cs.jpg')
 
   desc 'Verify that the product has been added'
   get '/products'
@@ -313,7 +307,7 @@ section 6.3, 'Playtime' do
   cmd 'git commit -m "Depot Scaffold"'
 end
 
-section 7.1, 'Iteration B1: Validate!' do
+section 7.1, 'Iteration B1: Validation and Unit Testing' do
   overview <<-EOF
     Augment the model with a few vailidity checks.
   EOF
@@ -365,29 +359,6 @@ section 7.1, 'Iteration B1: Validate!' do
   end
 
   publish_code_snapshot :b
-end
-
-section 7.2, 'Iteration B2: Unit Testing' do
-  overview <<-EOF
-    Introduce the importance of unit testing.
-  EOF
-
-  desc 'Look at what files are generated'
-  cmd 'ls test/unit'
-
-  desc 'Add a fixture.'
-  edit "test/fixtures/products.yml" do
-    msub /.*\n()/m, "\n" + <<-EOF.unindent(6), :mark => 'ruby'
-      ruby: 
-        title:       Programming Ruby 1.9
-        description: 
-          Ruby is the fastest growing and most exciting dynamic
-          language out there.  If you need to get working programs
-          delivered fast, you should add Ruby to your toolbox.
-        price:       49.50
-        image_url:   ruby.png 
-    EOF
-  end
 
   desc 'Now run the tests... and watch them fail :-('
   cmd 'rake test'
@@ -426,10 +397,34 @@ section 7.2, 'Iteration B2: Unit Testing' do
   desc 'Tests now pass again :-)'
   cmd 'rake test'
 
+end
+
+section 7.2, 'Iteration B2: Unit Testing' do
+  overview <<-EOF
+    Introduce the importance of unit testing.
+  EOF
+
+  desc 'Look at what files are generated'
+  cmd 'ls test/unit'
+
   desc 'Add some unit tests for new function.'
   edit "test/unit/product_test.rb" do |data|
     data.all = read('test/product_test.rb')
     data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  end
+
+  desc 'Add a fixture.'
+  edit "test/fixtures/products.yml" do
+    msub /.*\n()/m, "\n" + <<-EOF.unindent(6), :mark => 'ruby'
+      ruby: 
+        title:       Programming Ruby 1.9
+        description: 
+          Ruby is the fastest growing and most exciting dynamic
+          language out there.  If you need to get working programs
+          delivered fast, you should add Ruby to your toolbox.
+        price:       49.50
+        image_url:   ruby.png 
+    EOF
   end
 
   desc 'Tests pass!'
@@ -463,13 +458,6 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
 
   desc 'Create a second controller with a single index action'
   generate 'controller Store index'
-
-  unless File.exist? 'public/images'
-    edit "app/assets/stylesheets/store.css.scss" do
-      msub /(\s*)\Z/, "\n\n"
-      msub /\n\n()\Z/, read('store.css.scss'), :highlight
-    end
-  end
 
   desc "Route the 'root' of the site to the store"
   edit 'config/routes.rb', 'root' do |data|
@@ -510,6 +498,14 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
     data.all = read('store/index.html.erb')
   end
 
+  unless File.exist? 'public/images'
+    desc 'Add some basic style'
+    edit "app/assets/stylesheets/store.css.scss" do
+      msub /(\s*)\Z/, "\n\n"
+      msub /\n\n()\Z/, read('store.css.scss'), :highlight
+    end
+  end
+
   desc 'Show our first (ugly) catalog page'
   get '/'
   publish_code_snapshot :d
@@ -519,21 +515,6 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
   overview <<-EOF
     Demonstrate layouts.
   EOF
-
-# desc 'Look at the layouts that we have so far'
-# cmd 'ls app/views/layouts/*.html.erb'
-#
-# desc 'Remove the current layouts'
-# cmd 'rm app/views/layouts/*.html.erb'
-#
-# desc 'Make sure they never come back'
-# edit 'config/initializers/no_layout.rb' do |data|
-#   data.all = <<-EOF.unindent(6)
-#     Depot::Application.configure do
-#       config.generators.erb={:layout=>false}
-#     end
-#   EOF
-# end
 
   desc 'Modify the application layout'
   edit 'app/views/layouts/application.html.erb' do
@@ -581,7 +562,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
           #side {
             float: left;
-            padding: 0em 2em;
+            padding: 1em 2em;
             width: 13em;
             background: #141;
 
@@ -829,8 +810,8 @@ section 9.3, 'Iteration D3: Adding a button' do
   desc 'Add a bit of style to make it show all on one line'
   if DEPOT_CSS =~ /scss/
     edit 'app/assets/stylesheets/store.css.scss', 'inline' do
-      edit /^ +.price_line \{.*?\n()    \}\n/m, :mark => 'inline'
-      msub /^ +.price_line \{.*?\n()    \}\n/m, "\n" + <<-EOF.unindent(2)
+      edit /^ +p, div.price_line \{.*?\n()    \}\n/m, :mark => 'inline'
+      msub /^ +p, div.price_line \{.*?\n()    \}\n/m, "\n" + <<-EOF.unindent(2)
         form, div {
           display: inline;
         }
@@ -1349,24 +1330,25 @@ section 11.1, 'Iteration F1: Moving the Cart' do
     edit 'app/assets/stylesheets/carts.css.scss' do |data|
       clear_highlights
       edit '.carts', :highlight
-      msub /(.carts)/, '#cart'
+      msub /.carts()/, ', .side #cart'
     end
 
-    edit DEPOT_CSS, 'columns' do
+    edit DEPOT_CSS, 'side' do
       clear_highlights
-      edit /#columns.*\n\}/m, :mark => 'columns'
-      msub /^ +#side \{.*?()\n    ul \{/m, "\n" + <<-EOF.unindent(4), :highlight
-        #cart {
-          font-size: smaller;
-          color:     white;
+      edit /#side.*\n  \}/m, :mark => 'side' do
+        msub /^()    ul \{$/, <<-EOF.unindent(6) + "\n", :highlight
+          #cart {
+            font-size: smaller;
+            color:     white;
 
-          table {
-            border-top:    1px dotted #595;
-            border-bottom: 1px dotted #595;
-            margin-bottom: 10px;
+            table {
+              border-top:    1px dotted #595;
+              border-bottom: 1px dotted #595;
+              margin-bottom: 10px;
+            }
           }
-        }
-      EOF
+        EOF
+      end
     end
   else
     edit DEPOT_CSS, 'cartside' do |data|
@@ -1542,7 +1524,7 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
   publish_code_snapshot :n
 
   post '/carts/2', '_method'=>'delete'
-  post '/', 'product_id' => 3
+  post '/', 'product_id' => 2
   desc 'Run tests... oops.'
   cmd 'rake test'
 end
@@ -1674,6 +1656,10 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   end
   edit 'app/views/orders/new.html.erb' do
     self.all = read('orders/new.html.erb')
+    # unless File.exist? 'public/images'
+    #   gsub! /^<\/?div.*>\n/,''
+    #   gsub! /^  /,''
+    # end
   end
   edit 'app/views/orders/_form.html.erb' do
     msub /<%= pluralize.*%>( )/, "\n      "
@@ -1708,48 +1694,49 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     EOF
     edit /^end()/, :mark => 'select'
   end
-  edit DEPOT_CSS, 'form' do |data|
-    if DEPOT_CSS =~ /scss/
-      data << "\n" + <<-EOF.unindent(8)
-        /* START:form */
-        /* Styles for order form */
-
+  if DEPOT_CSS =~ /scss/
+    edit DEPOT_CSS, 'form' do
+      msub /(\s*)\Z/, "\n\n"
+      msub /\n\n()\Z/, <<-EOF.unindent(8), :mark => 'form'
         .depot_form {
           fieldset {
             background: #efe;
+
+            legend {
+              color: #dfd;
+              background: #141;
+              font-family: sans-serif;
+              padding: 0.2em 1em;
+            }
           }
 
-          legend {
-            color: #dfd;
-            background: #141;
-            font-family: sans-serif;
-            padding: 0.2em 1em;
-          }
+          form {
+            label {
+              width: 5em;
+              float: left;
+              text-align: right;
+              padding-top: 0.2em;
+              margin-right: 0.1em;
+              display: block;
+            }
 
-          label {
-            width: 5em;
-            float: left;
-            text-align: right;
-            padding-top: 0.2em;
-            margin-right: 0.1em;
-            display: block;
-          }
+            select, textarea, input {
+              margin-left: 0.5em;
+            }
 
-          select, textarea, input {
-            margin-left: 0.5em;
-          }
+            .submit {
+              margin-left: 4em;
+            }
 
-          .submit {
-            margin-left: 4em;
-          }
-
-          div {
-            margin: 0.5em 0;
+            br {
+              display: none
+            }
           }
         }
-        /* END:form */
       EOF
-    else
+    end
+  else
+    edit DEPOT_CSS, 'form' do |data|
       data << "\n" + <<-EOF.unindent(8)
         /* START:form */
         /* Styles for order form */
@@ -1906,7 +1893,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   end
 
   desc 'Try again... success... but not much there'
-  cmd 'curl --silent --user dave:secret http://localhost:3000/products/3/who_bought.xml'
+  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
 
   desc 'Add "orders" to the Product class'
   edit 'app/models/product.rb', 'relationships' do
@@ -1981,7 +1968,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   end
 
   desc 'Fetch the Atom feed'
-  cmd 'curl --silent --user dave:secret http://localhost:3000/products/3/who_bought.atom'
+  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.atom'
   publish_code_snapshot :o
 
   desc 'Include "orders" in the response'
@@ -1995,7 +1982,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   end
 
   desc 'Fetch the xml, see that the orders are included'
-  cmd 'curl --silent --user dave:secret http://localhost:3000/products/3/who_bought.xml'
+  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
 
   desc 'Define an HTML view'
   edit 'app/views/products/who_bought.html.erb' do |data|
@@ -2023,7 +2010,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   end
 
   desc 'See the (raw) HTML'
-  cmd 'curl --silent --user dave:secret http://localhost:3000/products/3/who_bought'
+  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought'
 
   desc 'Anything that XML can do, JSON can too...'
   edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
@@ -2034,7 +2021,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   end
 
   desc 'Fetch the data in JSON format'
-  cmd 'curl --silent --user dave:secret http://localhost:3000/products/3/who_bought.json'
+  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.json'
 
   desc 'Customize the xml'
   edit 'app/views/products/who_bought.xml.builder' do |data|
@@ -2060,7 +2047,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   end
 
   desc 'Fetch the (much streamlined) XML'
-  cmd 'curl --silent --user dave:secret http://localhost:3000/products/3/who_bought.xml'
+  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
 
   # cmd 'rake doc:app'
   # cmd 'rake stats'
@@ -2696,7 +2683,7 @@ section 13.5, 'Playtime' do
   cmd 'rake test'
 
   desc 'Try requesting the xml... see auth failure.'
-  cmd 'curl --silent http://localhost:3000/products/3/who_bought.xml'
+  cmd 'curl --silent http://localhost:3000/products/2/who_bought.xml'
 
   issue 'Is this the best way to detect request format?'
   desc 'Enable basic auth'
@@ -2722,7 +2709,7 @@ section 13.5, 'Playtime' do
   end
 
   desc 'Try requesting the xml... see auth succeed.'
-  cmd 'curl --silent --user dave:secret http://localhost:3000/products/3/who_bought.xml'
+  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
 end
 
 section 14.1, 'Playtime' do

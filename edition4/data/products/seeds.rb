@@ -23,7 +23,7 @@ Product.create(:title => 'Programming Ruby 1.9',
         you should add Ruby to your toolbox.
       </p>},
   :image_url => '/images/ruby.jpg',
-  :price => 49.50)
+  :price => 49.95)
 # . . .
 #END:vcc
 
@@ -38,4 +38,4 @@ Product.create(:title => 'Rails Test Prescriptions',
         including Cucumber, Shoulda, Machinist, Mocha, and Rcov.
       </p>},
   :image_url => '/images/rtp.jpg',
-  :price => 43.75)
+  :price => 34.95)
