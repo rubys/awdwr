@@ -3053,6 +3053,11 @@ section 16, 'Deployment' do
     end
     console "Depot::Application.configure { paths.log.first }", 'production'
   else
+    edit 'Capfile' do
+      edit 'deploy/assets', :highlight do
+        msub /^(# )/, ''
+      end
+    end
     rake 'assets:precompile'
     cmd 'ls public/assets'
     edit 'config/environments/production.rb' do

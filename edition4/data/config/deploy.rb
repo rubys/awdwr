@@ -50,12 +50,6 @@ namespace :deploy do
   end
 end
 
-before "deploy:symlink", :compile_assets
-desc "Compile asets"
-task :compile_assets do
-  run "cd #{release_path}; RAILS_ENV=#{rails_env} bundle exec rake assets:precompile"
-end
-
 after "deploy:update_code", :bundle_install
 desc "install the necessary prerequisites"
 task :bundle_install, :roles => :app do
