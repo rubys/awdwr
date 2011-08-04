@@ -3263,7 +3263,7 @@ section 24.3, 'Active Resources' do
   end
 
   desc 'expire cache'
-  cmd 'rm -rf tmp/cache/rack/*'
+  cmd "rm -rf #{File.join($WORK,'depot','tmp','cache')}"
 
   desc 'fetch storefront'
   get '/'
