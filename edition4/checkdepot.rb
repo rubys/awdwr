@@ -154,34 +154,16 @@ class DepotTest < Gorp::TestCase
 
   section 12.1, "Iteration G1: Capturing an Order" do
     assert_select 'input[type=submit][value=Place Order]'
-    assert_select 'h2', /5 errors\s+prohibited this order from being saved/
+    assert_select 'h2', /4 errors\s+prohibited this order from being saved/
     assert_select '#notice', 'Thank you for your order.'
   end
 
   section 12.2, "Iteration G2: Atom Feeds" do
-    # raw xml
-    assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/,
-      'Missing <email>customer@example.com</email>'
-    assert_select '.stdout', /&lt;id type="integer"&gt;1&lt;\/id&gt;/,
-      'Missing <id type="integer">2</id>'
-
-    # html
-    assert_select '.stdout', /&lt;a href="mailto:customer@example.com"&gt;/,
-      'Missing <a href="mailto:customer@example.com">'
-
     # atom
     assert_select '.stdout', /&lt;summary type="xhtml"&gt;/,
       'Missing <summary type="xhtml">'
     assert_select '.stdout', /&lt;td&gt;CoffeeScript&lt;\/td&gt;/,
       'Missing <td>CoffeeScript</td>'
-
-    # json
-    assert_select '.stdout', /, ?"title": ?"CoffeeScript"/,
-      'Missing "title": "CoffeeScript"'
-
-    # custom xml
-    assert_select '.stdout', /&lt;order_list for_product=.*&gt;/,
-      'Missing <order_list for_product=.*>'
   end
 
   if File.exist? 'public/images'
@@ -192,10 +174,25 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.4, "Playtime" do
-    ticket 4786,
-      :title =>  "render with a partial in rjs fails ",
-      :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
+    # raw xml
+    assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/,
+      'Missing <email>customer@example.com</email>'
+    assert_select '.stdout', /&lt;id type="integer"&gt;1&lt;\/id&gt;/,
+      'Missing <id type="integer">2</id>'
 
+    # html
+    assert_select '.stdout', /&lt;a href="mailto:customer@example.com"&gt;/,
+      'Missing <a href="mailto:customer@example.com">'
+
+    # json
+    assert_select '.stdout', /, ?"title": ?"CoffeeScript"/,
+      'Missing "title": "CoffeeScript"'
+
+    # custom xml
+    assert_select '.stdout', /&lt;order_list for_product=.*&gt;/,
+      'Missing <order_list for_product=.*>'
+
+    # test clean
     assert_select 'pre', 
       /\d tests, [23]\d assertions, 0 failures, 0 errors/,
       '\d tests, [23]\d assertions, 0 failures, 0 errors'
@@ -204,11 +201,11 @@ class DepotTest < Gorp::TestCase
       '3\d tests, [45]\d assertions, 0 failures, 0 errors'
   end
 
-  section 12.7, "Iteration J2: Email Notifications" do
+  section 13.1, "Iteration H1: Email Notifications" do
     assert_select 'pre', /2 tests, \d+ assertions, 0 failures, 0 errors/
   end
 
-  section 12.8, "Iteration J3: Integration Tests" do
+  section 13.2, "Iteration H2: Integration Tests" do
     ticket 4786,
       :title =>  "render with a partial in rjs fails ",
       :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
@@ -219,17 +216,27 @@ class DepotTest < Gorp::TestCase
     assert_select 'pre', /3 tests, \d+ assertions, 0 failures, 0 errors/
   end
 
-  section 13.1, "Iteration H1: Adding Users" do
+  section 14.1, "Iteration I1: Adding Users" do
     assert_select 'legend', 'Enter User Details'
     # assert_select 'td', 'User dave was successfully created.'
     assert_select 'h1', 'Listing users'
     assert_select 'td', 'dave'
   end
 
-  section 13.2, "Iteration H2: Authenticating Users" do
+  section 14.2, "Iteration I2: Authenticating Users" do
+    assert_select 'h1', 'Welcome'
+    assert_select 'pre', 
+      /47 tests, [78]\d assertions, 0 failures, 0 errors/,
+      '47 tests, [78]\d assertions, 0 failures, 0 errors'
   end
 
-  section 13.3, "Iteration H3: Limiting Access" do
+  section 14.3, "Iteration I3: Limiting Access" do
+    assert_select 'pre', 
+      /47 tests, [78]\d assertions, 0 failures, 0 errors/,
+      '47 tests, [78]\d assertions, 0 failures, 0 errors'
+  end
+
+  section 14.4, "Iteration I4: Adding a Sidebar" do
     assert_select 'legend', 'Please Log In'
     assert_select 'input[type=submit][value=Login]'
     assert_select 'h1', 'Welcome'
@@ -237,10 +244,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'h1', 'Listing products'
   end
 
-  section 13.4, "Iteration H4: Adding a Sidebar" do
-  end
-
-  section 13.5, "Playtime" do
+  section 14.5, "Playtime" do
     ticket 4786,
       :title =>  "render with a partial in rjs fails ",
       :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
@@ -249,26 +253,26 @@ class DepotTest < Gorp::TestCase
       /1?\d tests, [23]\d assertions, 0 failures, 0 errors/,
       '1?\d tests, [23]\d assertions, 0 failures, 0 errors'
     assert_select 'pre', 
-      /46 tests, [78]\d assertions, 0 failures, 0 errors/
-      '46 tests, [78]\d assertions, 0 failures, 0 errors'
+      /47 tests, [78]\d assertions, 0 failures, 0 errors/,
+      '47 tests, [78]\d assertions, 0 failures, 0 errors'
 
     assert_select '.stdout', /login"&gt;redirected/
     assert_select '.stdout', /customer@example.com/
   end
 
-  section 15.1, "Task I1: i18n for the store front" do
+  section 15.1, "Task J1: i18n for the store front" do
     assert_select '#notice', 'es translation not available'
+  end
+
+  section 15.2, "Task J2: i18n for the cart" do
     assert_select '.price', /49,95(.|&#?\w+;)\$US/u
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
     assert_select 'input[type=submit][value$=dir al Carrito]'
-  end
-
-  section 15.2, "Task I2: i18n for the cart" do
     assert_select 'td', /1(.|&#?\w+;)/u
     assert_select 'td', 'CoffeeScript'
   end
 
-  section 15.3, "Task I3: i18n for the order page" do
+  section 15.3, "Task J3: i18n for the order page" do
     # ticket 5971,
     #   :title =>  "labels don't treat I18n name_html as html_safe",
     #   :match => /Direcci&amp;oacute;n/
@@ -278,11 +282,11 @@ class DepotTest < Gorp::TestCase
 
     assert_select 'input[type=submit][value$=Comprar]'
     assert_select '#error_explanation',
-      /5 errores han impedido que este pedido se guarde/
+      /4 errores han impedido que este pedido se guarde/
     assert_select '#notice', 'Gracias por su pedido'
   end
 
-  section 15.4, "Task I4: Add a locale switcher" do
+  section 15.4, "Task J4: Add a locale switcher" do
     ticket 4786,
       :title =>  "render with a partial in rjs fails ",
       :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
@@ -294,8 +298,8 @@ class DepotTest < Gorp::TestCase
       /1?\d tests, [23]\d assertions, 0 failures, 0 errors/,
       '1?\d tests, [23]\d assertions, 0 failures, 0 errors'
     assert_select 'pre', 
-      /46 tests, [78]\d assertions, 0 failures, 0 errors/,
-      '46 tests, [78]\d assertions, 0 failures, 0 errors'
+      /47 tests, [78]\d assertions, 0 failures, 0 errors/,
+      '47 tests, [78]\d assertions, 0 failures, 0 errors'
     assert_select 'pre', 
       /3 tests, \d+ assertions, 0 failures, 0 errors/,
       '3 tests, \d+ assertions, 0 failures, 0 errors'

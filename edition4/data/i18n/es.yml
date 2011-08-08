@@ -76,7 +76,7 @@ es:
       name:         "Nombre"
       address_html: "Direcci&oacute;n"
       email:        "E-mail"
-      pay_type:     "Pagar con"
+      pay_type:     "Forma de pago"
       pay_prompt_html: "Seleccione un m&eacute;todo de pago"
       submit:       "Realizar Pedido"
 #END:checkout

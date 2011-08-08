@@ -244,6 +244,23 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   end
   cmd 'rake db:seed'
 
+  if File.exist? 'public/images'
+    desc 'Copy some images and a stylesheet'
+    cmd "cp -v #{$DATA}/images/* public/images/"
+    cmd "cp -v #{$DATA}/depot.css public/stylesheets"
+    DEPOT_CSS = "public/stylesheets/depot.css"
+  else
+    desc 'Copy some images'
+    cmd "cp -v #{$DATA}/assets/* app/assets/images/"
+
+    desc 'Add some style'
+    DEPOT_CSS =  "app/assets/stylesheets/application.css.scss"
+    edit "app/assets/stylesheets/products.css.scss" do
+      msub /(\s*)\Z/, "\n\n"
+      msub /\n\n()\Z/, read('products.css.scss'), :highlight
+    end
+  end
+
   desc 'Link to the stylesheet in the layout'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
@@ -253,18 +270,9 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
       '<!-- <label id="code.depot.b.stylesheet.link.tag"/> -->'
   end
 
-  desc 'Copy some images and a stylesheet'
-  if File.exist? 'public/images'
-    cmd "cp -v #{$DATA}/images/* public/images/"
-    cmd "cp -v #{$DATA}/depot.css public/stylesheets"
-    DEPOT_CSS = "public/stylesheets/depot.css"
-  else
-    cmd "cp -v #{$DATA}/assets/* app/assets/images/"
-    DEPOT_CSS =  "app/assets/stylesheets/application.css.scss"
-    edit "app/assets/stylesheets/products.css.scss" do
-      msub /(\s*)\Z/, "\n\n"
-      msub /\n\n()\Z/, read('products.css.scss'), :highlight
-    end
+  unless File.exist? 'public/images'
+    desc 'Review the application stylesheet'
+    edit 'app/assets/stylesheets/application.css'
   end
 
   desc 'Replace the scaffold generated view with some custom HTML'
@@ -525,7 +533,10 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
   desc 'Modify the stylesheet'
   if DEPOT_CSS =~ /scss/
+    desc 'Rename the application stylesheet so that we can use SCSS'
     cmd "mv app/assets/stylesheets/application.css #{DEPOT_CSS}"
+
+    desc 'Add our style rules'
     edit DEPOT_CSS do
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
@@ -543,7 +554,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
         }
 
         #notice {
-          color: #000;
+          color: #000 !important;
           border: 2px solid red;
           padding: 1em;
           margin-bottom: 2em;
@@ -674,6 +685,9 @@ section 8.4, 'Iteration C4: Functional Testing' do
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
+  desc 'Review fixure data'
+  edit 'test/fixtures/products.yml'
+
   desc 'Show that the tests pass.'
   cmd 'rake test:functionals'
   publish_code_snapshot :e
@@ -709,6 +723,7 @@ section 9.1, 'Iteration D1: Finding a Cart' do
         end
     EOF
 
+    <<-IGNOREME
     issue 'Replace with signed cookies?'
     next
 
@@ -724,6 +739,7 @@ section 9.1, 'Iteration D1: Finding a Cart' do
           cart
         end
     EOF
+    IGNOREME
   end
 end
 
@@ -829,6 +845,9 @@ section 9.3, 'Iteration D3: Adding a button' do
     end
   end
 
+  desc "See the button on the page"
+  get '/'
+
   desc 'Update the LineItem.new call to use current_cart and the ' +
        'product id. Additionally change the logic so that redirection upon ' +
        'success goes to the cart instead of the line item.'
@@ -856,8 +875,12 @@ section 9.3, 'Iteration D3: Adding a button' do
   post '/', 'product_id' => 3
 
   desc 'Update the template that shows the Cart.'
-  edit 'app/views/carts/show.html.erb' do |data|
-    data[/(.*)/m,1] = <<-EOF.unindent(6)
+  edit 'app/views/carts/show.html.erb' do
+    self.all = <<-EOF.unindent(6)
+      <% if notice %>
+      <p id="notice"><%= notice %></p>
+      <% end %>
+
       <h2>Your Pragmatic Cart</h2>
       <ul>    
         <% @cart.line_items.each do |item| %>
@@ -1046,15 +1069,14 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   EOF
 
   desc 'Add button to the view.'
-  edit 'app/views/carts/show.html.erb' do |data|
-    data.gsub! /.*_HIGHLIGHT.*\n/, ''
-    data[/.*()/m,1] = "\n" + <<-EOF.unindent(6)
-      <!-- START_HIGHLIGHT -->
+  edit 'app/views/carts/show.html.erb' do
+    clear_highlights
+    msub /(\s*)\Z/, "\n\n"
+    msub /\n\n()\Z/, <<-EOF.unindent(6), :highlight
       <%= button_to 'Empty cart', @cart, :method => :delete,
           :confirm => 'Are you sure?' %>
-      <!-- END_HIGHLIGHT -->
     EOF
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   if DEPOT_CSS =~ /scss/
@@ -1105,9 +1127,9 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   end
 
   desc 'Update the view to add totals.'
-  edit 'app/views/carts/show.html.erb' do |data|
-    data[/(.*)/m,1] = read('cart/show.html.erb')
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  edit 'app/views/carts/show.html.erb' do
+    self.all = read('cart/show.html.erb')
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Add a method to compute the total price of a single line item.'
@@ -1299,6 +1321,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   desc 'Modify the copy to reference the (sub)partial and take input from @cart'
   edit 'app/views/carts/_cart.html.erb' do
     clear_highlights
+    sub! /^<% if notice %>.*?<% end %>\n\n/m, ''
     while include? '@cart'
       edit '@cart', :highlight
       sub! '@cart', 'cart'
@@ -1307,11 +1330,12 @@ section 11.1, 'Iteration F1: Moving the Cart' do
     sub! /#START_HIGHLIGHT\n<%=/, "<!-- START_HIGHLIGHT -->\n<%="
   end
 
-  desc 'Insert a call in the controller to find the cart'
-  edit 'app/controllers/store_controller.rb', 'index' do
-    clear_highlights
-    dcl 'index', :mark => 'index'
-    msub /@products = .*\n()/, "    @cart = current_cart\n", :highlight
+  publish_code_snapshot :j
+
+  desc 'Keep things DRY'
+  edit 'app/views/carts/show.html.erb' do
+    sub! /<div.*/m, "<%= render @cart %>\n"
+    edit 'render', :highlight
   end
 
   desc 'Reference the partial from the layout.'
@@ -1325,12 +1349,19 @@ section 11.1, 'Iteration F1: Moving the Cart' do
     gsub! /(<!-- <label id="[.\w]+"\/> -->)/, ''
   end
 
+  desc 'Insert a call in the controller to find the cart'
+  edit 'app/controllers/store_controller.rb', 'index' do
+    clear_highlights
+    dcl 'index', :mark => 'index'
+    msub /@products = .*\n()/, "    @cart = current_cart\n", :highlight
+  end
+
   desc 'Add a small bit of style.'
   if DEPOT_CSS =~ /scss/
     edit 'app/assets/stylesheets/carts.css.scss' do |data|
       clear_highlights
       edit '.carts', :highlight
-      msub /.carts()/, ', .side #cart'
+      msub /.carts()/, ', #side #cart'
     end
 
     edit DEPOT_CSS, 'side' do
@@ -1371,14 +1402,6 @@ section 11.1, 'Iteration F1: Moving the Cart' do
     end
   end
 
-  publish_code_snapshot :j
-
-  desc 'Keep things DRY'
-  edit 'app/views/carts/show.html.erb' do
-    self.all = "<%= render @cart %>\n"
-    edit 'render', :highlight
-  end
-
   desc 'Change the redirect to be back to the store.'
   edit 'app/controllers/line_items_controller.rb', 'create' do |data|
     data[/(@line_item.cart)/,1] = "store_url"
@@ -1391,16 +1414,21 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 end
 
 section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
+  desc 'Add remote: true to the Add to Cart button'
   edit 'app/views/store/index.html.erb' do
     clear_all_marks
     edit '<%= button_to', :highlight
     msub /<%= button_to.*() %>/, ",\n        :remote => true"
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
+
+  desc 'Enable a the controller to respond to js requests'
   edit 'app/controllers/line_items_controller.rb', 'create' do
     clear_highlights
     msub /format.html.*store_url.*\n()/, "        format.js\n", :highlight
   end
+
+  desc 'Use JavaScript to replace the cart with a new rendering'
   if File.exist? 'public/images'
     edit 'app/views/line_items/create.js.rjs' do |data|
       data.all =  <<-EOF.unindent(8)
@@ -1414,10 +1442,12 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
       EOF
     end
   end
+
   publish_code_snapshot :l
 end
 
 section 11.3, 'Iteration F3: Highlighting Changes' do
+  desc 'Assign the current item to be the line item in question'
   edit 'app/controllers/line_items_controller.rb', 'create' do
     clear_highlights
     dcl 'create' do
@@ -1426,17 +1456,18 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
     end
   end
 
-  edit 'app/views/line_items/_line_item.html.erb' do |data|
-    data[/(<tr>\n)/,1] = <<-EOF.unindent(6)
-      <!-- START_HIGHLIGHT -->
+  desc 'Add the id to the row in question'
+  edit 'app/views/line_items/_line_item.html.erb' do
+    msub /(<tr>\n)/, <<-EOF.unindent(6), :highlight
       <% if line_item == @current_item %>
       <tr id="current_item">
       <% else %>
       <tr>
       <% end %>
-      <!-- END_HIGHLIGHT -->
     EOF
   end
+
+  desc 'Animate the background color of that row'
   if File.exist? 'app/views/line_items/create.js.rjs'
     edit 'app/views/line_items/create.js.rjs' do |data|
       msub /.*()/m, "\n" + <<-EOF.unindent(8), :highlight
@@ -1452,7 +1483,8 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
           animate({'background-color':'#114411'}, 1000);
       EOF
     end
-    desc 'Now pull in the jquery-ui libraries'
+
+    desc 'Pull in the jquery-ui libraries'
     edit 'app/assets/javascripts/application.js' do
       msub /()\/\/= require jquery_ujs/, <<-EOF.unindent(8)
         //#START_HIGHLIGHT
@@ -1465,10 +1497,20 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
 end
 
 section 11.4, 'Iteration F4: Hide an Empty Cart' do
+  desc 'Add a blind down visual effect on the first item'
   if File.exist? 'app/views/line_items/create.js.rjs'
     edit 'app/views/line_items/create.js.rjs' do
       msub /().*visual_effect/, <<-EOF.unindent(8) + "\n", :highlight
         page[:cart].visual_effect :blind_down if @cart.total_items == 1
+      EOF
+    end
+
+    edit 'app/models/cart.rb' do
+      clear_highlights
+      msub /()^end/, "\n" + <<-EOF.unindent(4), :mark => 'total_items'
+        def total_items
+          line_items.sum(:quantity)
+        end
       EOF
     end
   else
@@ -1479,31 +1521,24 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
       EOF
     end
   end
-  edit 'app/models/cart.rb' do |data|
-    data.gsub! /.*_HIGHLIGHT.*\n/, ''
-    data[/()^end/,1] = "\n" + <<-EOF.unindent(4)
-      #START:total_items
-      def total_items
-        line_items.sum(:quantity)
-      end
-      #END:total_items
-    EOF
-  end
 
+  desc 'Look at the app/helpers director'
   cmd 'ls -p app'
   cmd 'ls -p app/helpers'
 
-  edit 'app/views/layouts/application.html.erb', 'hidden_div' do |data|
-    data.msub /<div id="cart">.*?(<\/div>)/m, '<% end %>' +
+  desc 'Call a hidden_div_if helper'
+  edit 'app/views/layouts/application.html.erb', 'hidden_div' do
+    msub /<div id="cart">.*?(<\/div>)/m, '<% end %>' +
       "\n    <!-- END:hidden_div -->"
-    data.msub /(<div id="cart">)/,
+    msub /(<div id="cart">)/,
       "<!-- START:hidden_div -->\n      " +
       "<%= hidden_div_if(@cart.line_items.empty?, :id => 'cart') do %>"
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
-  edit 'app/helpers/application_helper.rb' do |data|
-    data.msub /()^end/, <<-EOF.unindent(4)
+  desc 'Implement helper'
+  edit 'app/helpers/application_helper.rb' do
+    msub /()^end/, <<-EOF.unindent(4)
       def hidden_div_if(condition, attributes = {}, &block)
         if condition
           attributes["style"] = "display: none"
@@ -1513,6 +1548,7 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
     EOF
   end
 
+  desc 'Remove notice'
   edit 'app/controllers/carts_controller.rb', 'destroy' do
     clear_highlights
     dcl 'destroy' do
@@ -1521,15 +1557,18 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
     end
   end
 
-  publish_code_snapshot :n
-
+  desc 'Demonstrate emptying and recreating the cart'
   post '/carts/2', '_method'=>'delete'
   post '/', 'product_id' => 2
-  desc 'Run tests... oops.'
-  cmd 'rake test'
 end
 
 section 11.5, 'Iteration F5: Making Images Clickable' do
+  desc 'Review our current storefront markup'
+  edit 'app/views/store/index.html.erb' do
+    clear_highlights
+  end
+
+  desc 'Associate image clicks with submit button clicks'
   edit 'app/assets/javascripts/store.js.coffee' do
     msub /(\s*)\Z/, "\n\n"
     msub /\n\n()\Z/, <<-EOF.unindent(6), :highlight
@@ -1538,7 +1577,14 @@ section 11.5, 'Iteration F5: Making Images Clickable' do
           $(this).parent().find(':submit').click()
     EOF
   end
+
+  desc 'The page looks no different'
   get '/'
+
+  desc 'Run tests... oops.'
+  cmd 'rake test'
+
+  publish_code_snapshot :n
 end
 
 section 11.6, 'Iteration F6: Testing AJAX changes' do
@@ -1562,27 +1608,20 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
     end
   end
 
-  desc 'Add an AJAX test.'
+  desc 'Add an XHR test.'
   edit 'test/functional/line_items_controller_test.rb', 'ajax' do
-    msub /()\nend/, "\n\n" + <<-EOF.unindent(4) + "\n"
-      #START:ajax
-      #START_HIGHLIGHT
+    msub /^()end/, "\n"
+    msub /^()end/, <<-EOF.unindent(4), :mark => 'ajax'
       test "should create line_item via ajax" do
-      #END_HIGHLIGHT
         assert_difference('LineItem.count') do
-          #START_HIGHLIGHT
           xhr :post, :create, :product_id => products(:ruby).id
-          #END_HIGHLIGHT
         end 
     
-        #START_HIGHLIGHT
         assert_response :success
         assert_select_rjs :replace_html, 'cart' do
           assert_select 'tr#current_item td', /Programming Ruby 1.9/
         end
-        #END_HIGHLIGHT
       end
-      #END:ajax
     EOF
     unless File.exist? 'public/images'
       gsub! "_rjs :replace_html, 'cart'", "_jquery :html, '#cart'"
@@ -1590,52 +1629,38 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
     end
   end
 
+  desc 'Add an test in support for the coffeescript changes.'
+  edit 'test/functional/store_controller_test.rb', 'cs' do
+    clear_highlights
+    msub /^()end/, <<-EOF.unindent(4), :mark => 'cs'
+      test "markup needed for store.js.coffee is in place" do
+        get :index
+        assert_select '.store .entry > img', 3
+        assert_select '.entry input[type=submit]', 3
+      end
+    EOF
+  end
+
   desc 'Run the tests again.'
   cmd 'rake test'
 
   desc 'Save our progress'
   cmd 'git commit -a -m "AJAX"'
-  cmd 'git tag iteration-g'
+  cmd 'git tag iteration-f'
 end
 
 section 12.1, 'Iteration G1: Capturing an Order' do
+  desc 'Create a model to contain orders'
   generate :scaffold, :Order,
     'name:string address:text email:string pay_type:string'
 
-  edit Dir['db/migrate/*_create_orders.rb'].first, 'up' do |data|
-    up = (include?('self.up') ? 'self.up' : 'change')
-    dcl up, :mark=>'up' do
-      edit 'pay_type', :highlight do
-        self << ', :limit => 10'
-      end
-    end
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-
+  desc 'Create a migration to add an order_id column to line_items'
   generate 'migration add_order_id_to_line_item order_id:integer'
+
+  desc 'Apply both migrations'
   cmd 'rake db:migrate'
-  cmd 'sqlite3 db/development.sqlite3 .schema'
-  edit 'app/models/order.rb', 'has_many' do |data|
-    data[/()class Order/,1] = "#START:has_many\n"
-    data[/class Order.*\n()/,1] = <<-EOF.unindent(4)
-      #END:has_many
-      #START:has_many
-      #START_HIGHLIGHT
-      has_many :line_items, :dependent => :destroy
-      #END_HIGHLIGHT
-      # ...
-      #END:has_many
-    EOF
-    data[/()^end/,1] = "#START:has_many\n"
-    data[/^end()/,1] = "\n#END:has_many"
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-  edit 'app/models/line_item.rb', 'belongs_to' do
-    clear_all_marks
-    msub /class LineItem.*\n()/, <<-EOF.unindent(6), :highlight
-        belongs_to :order
-    EOF
-  end
+
+  desc 'Add a Checkout button to the cart'
   edit 'app/views/carts/_cart.html.erb' do
     clear_highlights
     msub /().*Empty cart.*\n.*>/, <<-'EOF'.unindent(6), :highlight
@@ -1643,6 +1668,8 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
+
+  desc 'Return a notice when checking out an empty cart'
   edit 'app/controllers/orders_controller.rb', 'checkout' do
     dcl 'new', :mark => 'checkout'
     msub /\n()\s+@order = Order.new\n/, <<-EOF.unindent(2) + "\n", :highlight
@@ -1654,13 +1681,35 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
+
+  desc 'Modify tests to ensure that there is an item in the cart'
+  edit 'test/functional/orders_controller_test.rb', 'new' do |data|
+    data.dcl 'should get new', :mark => 'new' do |getnew|
+      empty = getnew.dup
+      empty.edit 'assert_response' do |assert|
+        assert.msub /assert_(response :success)/, 'redirected_to store_path'
+        assert << "\n    assert_equal flash[:notice], 'Your cart is empty'"
+      end
+      empty.sub! 'should get new', 'requires item in cart'
+      empty.dcl 'requires item in cart', :highlight
+    
+      getnew.msub /do\n()/, <<-EOF.unindent(4) + "\n", :highlight
+        cart = Cart.create
+        session[:cart_id] = cart.id
+        LineItem.create(:cart => cart, :product => products(:ruby))
+      EOF
+
+      getnew.msub /()\A/, empty + "\n"
+      getnew.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
+  end
+
+  desc 'Modify the template for new orders'
   edit 'app/views/orders/new.html.erb' do
     self.all = read('orders/new.html.erb')
-    # unless File.exist? 'public/images'
-    #   gsub! /^<\/?div.*>\n/,''
-    #   gsub! /^  /,''
-    # end
   end
+
+  desc 'Modify the partial used by the template'
   edit 'app/views/orders/_form.html.erb' do
     msub /<%= pluralize.*%>( )/, "\n      "
     edit 'text_field :name', :highlight do
@@ -1684,16 +1733,18 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
+
+  desc 'Add payment types to the order'
   edit 'app/models/order.rb', 'select' do |data|
-    data[/()class Order.*/,1] = "#START:select\n"
-    data[/#END:has_many.*()/,1] = "\n" + <<-EOF.unindent(4)
-      #START_HIGHLIGHT
+    msub /class Order.*\n()/, <<-EOF.unindent(4), :mark => 'select'
       PAYMENT_TYPES = [ "Check", "Credit card", "Purchase order" ]
-      #END_HIGHLIGHT
-      #END:select
     EOF
-    edit /^end()/, :mark => 'select'
+    edit 'class Order', :mark => 'select'
+    edit 'PAYMENT_TYPES', :highlight
+    edit /^end/, :mark => 'select'
   end
+
+  desc 'Add some CSS'
   if DEPOT_CSS =~ /scss/
     edit DEPOT_CSS, 'form' do
       msub /(\s*)\Z/, "\n\n"
@@ -1776,11 +1827,15 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       EOF
     end
   end
+
+  desc 'Validate name and pay_type'
   edit 'app/models/order.rb', 'validate' do |data|
-    msub /#END:select\n()/, <<-EOF.unindent(4), :mark => 'validate'
+    msub /^()(#START:.*\n)*end/, <<-EOF.unindent(4), :mark => 'validate'
       # ...
+    EOF
+    msub /^()(#START:.*\n)*end/, <<-EOF.unindent(4), :mark => 'validate'
       #START_HIGHLIGHT
-      validates :name, :address, :email, :pay_type, :presence => true
+      validates :name, :address, :email, :presence => true
       validates :pay_type, :inclusion => PAYMENT_TYPES
       #END_HIGHLIGHT
     EOF
@@ -1788,55 +1843,116 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     edit /^end/, :mark => 'validate'
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
-  edit 'app/controllers/orders_controller.rb', 'create' do |data|
-    data[/().*def create/,1] = "#START:create\n"
-    data[/def create.*?\n  end\n()/m,1] = "#END:create\n"
-    data[/@order = Order.new\(.*\)\n()/,1] = <<-EOF.unindent(2)
-      #START_HIGHLIGHT
-      @order.add_line_items_from_cart(current_cart)
-      #END_HIGHLIGHT
-    EOF
-    data[/if @order.save\n()/,1] = <<-EOF.indent(2)
-      #START_HIGHLIGHT
-      Cart.destroy(session[:cart_id])
-      session[:cart_id] = nil
-    EOF
-    data[/Order was successfully created.*\n()/,1] = <<-EOF
-      #END_HIGHLIGHT
-    EOF
-    data[/redirect_to[\(\s](@order), :?notice/,1] = 'store_url'
-    data.msub /('Order was successfully created.')/,
-      "\n          'Thank you for your order.'"
-    data.msub /,( ):?location/, "\n          "
-    data.msub /,( ):?status:?\s=?>?\s?:un/, "\n          "
+
+  desc 'Update the test data in the orders fixture'
+  edit 'test/fixtures/orders.yml' do
+    edit "name: MyString", :highlight do
+      sub! /MyString/, 'Dave Thomas'
+    end
+    edit "email: MyString", :highlight do
+      sub! /MyString/, 'dave@example.org' 
+    end
+    edit 'pay_type: MyString', :highlight do
+      sub! /MyString/, 'Check'
+    end
   end
-  edit 'app/models/order.rb' do |data|
-    data[/#END:has_many\n()#START:has_many/,1] = <<-EOF.unindent(4)
-      #START:add_line_items_from_cart
-      # ...
-      #START_HIGHLIGHT
+
+  desc 'Move a line item from a cart to an order'
+  edit 'test/fixtures/line_items.yml' do
+    clear_all_marks
+    msub /(cart): one/, 'order'
+    edit 'order:', :highlight
+  end
+
+  desc 'Define a relationship from the line item to the order'
+  edit 'app/models/line_item.rb' do
+    clear_all_marks
+    msub /class LineItem.*\n()/, <<-EOF.unindent(6), :highlight
+        belongs_to :order
+    EOF
+  end
+
+  desc 'Define a relationship from the order to the line item'
+  edit 'app/models/order.rb', 'has_many' do |data|
+    msub /^()(#START:.*\n)* *# \.\.\./, <<-EOF.unindent(4), :mark => 'has_many'
+      has_many :line_items, :dependent => :destroy
+    EOF
+    edit 'class Order', :mark => 'has_many'
+    edit 'has_many :line_items', :highlight
+    edit '# ...', :mark => 'has_many'
+    edit /^end()/, :mark => 'has_many'
+    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  end
+
+  desc 'Add line item to order, destroy cart, and redisplay catalog page'
+  edit 'app/controllers/orders_controller.rb', 'create' do
+    dcl 'create', :mark => 'create' do
+      msub /@order = Order.new\(.*\)\n()/, <<-EOF.unindent(4)
+        #START_HIGHLIGHT
+        @order.add_line_items_from_cart(current_cart)
+        #END_HIGHLIGHT
+      EOF
+      msub /if @order.save\n()/, <<-EOF
+        #START_HIGHLIGHT
+        Cart.destroy(session[:cart_id])
+        session[:cart_id] = nil
+      EOF
+      msub /Order was successfully created.*\n()/, <<-EOF
+        #END_HIGHLIGHT
+      EOF
+      msub /redirect_to[\(\s](@order), :?notice/, 'store_url'
+      msub /('Order was successfully created.')/,
+        "\n          'Thank you for your order.'"
+      msub /,( ):?location/, "\n          "
+      msub /,( ):?status:?\s=?>?\s?:un/, "\n          "
+      msub /^\s+else\n()/, "        @cart = current_cart\n"
+      edit '@cart = current_cart', :highlight
+    end
+  end
+
+  publish_code_snapshot :o
+
+  desc 'Implement add_line_items_from_cart'
+  edit 'app/models/order.rb', 'alifc' do
+    clear_all_marks
+    msub /^()end/, <<-EOF.unindent(4), :mark => 'alifc'
       def add_line_items_from_cart(cart)
         cart.line_items.each do |item|
           item.cart_id = nil
           line_items << item
         end
       end
-      #END_HIGHLIGHT
-      #END:add_line_items_from_cart
     EOF
-    edit 'class Order', :mark => 'add_line_items_from_cart'
-    edit /^end/, :mark => 'add_line_items_from_cart'
+    edit 'class Order', :mark => 'alifc'
+    dcl 'add_line_items_from_cart', :highlight
+    edit '...', :mark => 'alifc'
+    edit /^end/, :mark => 'alifc'
   end
+
+  desc 'Modify the test to reflect the new redirect'
+  edit 'test/functional/orders_controller_test.rb', 'valid' do
+    dcl 'should create order', :mark => 'valid' do
+      edit 'order_path', :highlight do
+        msub /(order_path.*)/, 'store_path'
+      end
+    end
+  end
+
+  desc 'take a look at the validation errors'
   post '/orders/new', 'order[name]' => ''
-  db "select * from orders"
-  db "select * from line_items"
+
+  desc 'process an order'
   post '/orders/new',
     'order[name]' => 'Dave Thomas',
     'order[address]' => '123 Main St',
     'order[email]' => 'customer@example.com',
     'order[pay_type]' => 'Check'
+
+  desc 'look at the underlying database'
   db "select * from orders"
   db "select * from line_items"
+
+  desc 'hide the notice when adding items to the cart'
   if File.exist? 'app/views/line_items/create.js.rjs'
     edit 'app/views/line_items/create.js.rjs' do
       clear_highlights
@@ -1863,55 +1979,22 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   EOF
 
   desc 'Define a "who_bought" member action'
-  edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
-    data.msub /^()end/, "\n" + <<-EOF.unindent(4)
-      #START:who_bought
+  edit 'app/controllers/products_controller.rb', 'who_bought' do
+    msub /^()end/, "\n"
+    msub /^()end/, <<-EOF.unindent(4), :mark => 'who_bought'
       def who_bought
         @product = Product.find(params[:id])
         respond_to do |format|
-          format.xml { render :xml => @product }
+          format.atom
         end
       end
-      #END:who_bought
-    EOF
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  desc 'Add to the routes'
-  edit 'config/routes.rb', 'root' do |data|
-    data.clear_highlights
-    data.edit 'resources :products', :highlight do |products|
-      products.all = <<-EOF.unindent(6)
-        resources :products do
-          get :who_bought, :on => :member
-        end
-      EOF
-    end
-    edit ':who_bought' do
-      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    end
-  end
-
-  desc 'Try again... success... but not much there'
-  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
-
-  desc 'Add "orders" to the Product class'
-  edit 'app/models/product.rb', 'relationships' do
-    clear_all_marks
-    msub /^( +#\.\.\.\n)/, ''
-    edit /class.*has_many.*?\n/m, :mark=>'relationships' do
-      self.all += "  #...\n"
-    end
-    edit /^end/, :mark=>'relationships'
-    msub /has_many :line_items\n()/, <<-EOF.unindent(4), :highlight
-      has_many :orders, :through => :line_items
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Define an Atom view (using the Atom builder)'
-  edit 'app/views/products/who_bought.atom.builder' do |data|
-    data.all = <<-'EOF'.unindent(6)
+  edit 'app/views/products/who_bought.atom.builder' do
+    self.all = <<-'EOF'.unindent(6)
       atom_feed do |feed|
         feed.title "Who bought #{@product.title}"
 
@@ -1954,22 +2037,115 @@ section 12.2, 'Iteration G2: Atom Feeds' do
         end
       end
     EOF
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
-  desc 'Add the atom format to the controller'
-  edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
-    data.clear_highlights
-    data.dcl('who_bought') do
-      msub /respond_to.*\n()/, <<-EOF.unindent(2), :highlight
-        format.atom
+  desc 'Add "orders" to the Product class'
+  edit 'app/models/product.rb', 'relationships' do
+    clear_all_marks
+    msub /^( +#\.\.\.\n)/, ''
+    edit /class.*has_many.*?\n/m, :mark=>'relationships' do
+      self.all += "  #...\n"
+    end
+    edit /^end/, :mark=>'relationships'
+    msub /has_many :line_items\n()/, <<-EOF.unindent(4), :highlight
+      has_many :orders, :through => :line_items
+    EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  end
+
+  desc 'Add to the routes'
+  edit 'config/routes.rb', 'root' do
+    clear_highlights
+    edit 'resources :products', :highlight do |products|
+      products.all = <<-EOF.unindent(6)
+        resources :products do
+          get :who_bought, :on => :member
+        end
       EOF
+    end
+    gsub! /\n\n\n+/, "\n\n"
+    edit ':who_bought' do
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
   end
 
   desc 'Fetch the Atom feed'
   cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.atom'
-  publish_code_snapshot :o
+
+  publish_code_snapshot :p
+end
+
+if $rails_version =~ /^3\.0/
+  section 12.3, 'Iteration G3: Pagination' do
+    desc 'Add in the will_paginate gem'
+    edit 'Gemfile' do
+      msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'will_paginate', '>= 3.0.pre'\n",
+        :highlight
+    end
+    unless $bundle
+      edit 'config/application.rb' do
+        msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n",
+        :highlight
+      end
+    end
+    restart_server
+    
+    cmd 'bundle show'
+
+    desc 'Load in a few orders'
+    edit 'script/load_orders.rb' do
+      self.all = <<-'EOF'.unindent(8)
+        Order.transaction do
+          (1..100).each do |i|
+            Order.create(:name => "Customer #{i}", :address => "#{i} Main Street",
+              :email => "customer-#{i}@example.com", :pay_type => "Check")
+          end
+        end
+      EOF
+    end
+
+    runner 'script/load_orders.rb'
+
+    desc 'Modify the controller to do pagination'
+    edit 'app/controllers/orders_controller.rb', 'index' do
+      dcl 'index', :mark do
+        # msub /^()/, "require 'will_paginate'\n", :highlight
+        edit 'Order.all', :highlight
+        msub /Order\.(all)/, 
+          "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
+          '      :per_page => 10'
+      end
+    end
+
+    desc 'Add some navigational aids'
+    edit 'app/views/orders/index.html.erb' do
+      self << <<-EOF.unindent(6)
+        <!-- START_HIGHLIGHT -->
+        <p><%= will_paginate @orders %></p>
+        <!-- END_HIGHLIGHT -->
+      EOF
+      msub /,( ):method/, "\n              "
+    end
+
+    desc 'Show the orders'
+    get '/orders'
+  end
+end
+
+section 12.4, 'Playtime' do
+  desc 'Add the xml format to the controller'
+  edit 'app/controllers/products_controller.rb', 'who_bought' do
+    clear_highlights
+    dcl 'who_bought' do
+      msub /respond_to.*\n()/, <<-EOF.unindent(2), :highlight
+        format.xml { render :xml => @product }
+      EOF
+    end
+  end
+
+  desc 'Fetch the XML, see that there are no orders there'
+  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
 
   desc 'Include "orders" in the response'
   edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
@@ -2038,172 +2214,54 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   end
 
   desc 'Change the rendering to use templates'
-  edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
-    data.clear_highlights
-    data.dcl('who_bought') do |wb|
-      wb.edit 'format.xml', :highlight
-      wb.msub /format.xml( \{ render .*)/, ''
+  edit 'app/controllers/products_controller.rb', 'who_bought' do
+    clear_highlights
+    dcl('who_bought') do
+      edit 'format.xml', :highlight
+      msub /format.xml( \{ render .*)/, ''
     end
   end
 
   desc 'Fetch the (much streamlined) XML'
   cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
 
-  # cmd 'rake doc:app'
-  # cmd 'rake stats'
-  issue 'Consider reducing the number of edits to products_controller'
-end
-
-if $rails_version =~ /^3\.0/
-  section 12.3, 'Iteration G3: Pagination' do
-    desc 'Add in the will_paginate gem'
-    edit 'Gemfile' do
-      msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'will_paginate', '>= 3.0.pre'\n",
-        :highlight
-    end
-    unless $bundle
-      edit 'config/application.rb' do
-        msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n",
-        :highlight
-      end
-    end
-    restart_server
-    
-    cmd 'bundle show'
-
-    desc 'Load in a few orders'
-    edit 'script/load_orders.rb' do
-      self.all = <<-'EOF'.unindent(8)
-        Order.transaction do
-          (1..100).each do |i|
-            Order.create(:name => "Customer #{i}", :address => "#{i} Main Street",
-              :email => "customer-#{i}@example.com", :pay_type => "Check")
-          end
-        end
-      EOF
-    end
-
-    runner 'script/load_orders.rb'
-
-    desc 'Modify the controller to do pagination'
-    edit 'app/controllers/orders_controller.rb', 'index' do
-      dcl 'index', :mark do
-        # msub /^()/, "require 'will_paginate'\n", :highlight
-        edit 'Order.all', :highlight
-        msub /Order\.(all)/, 
-          "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
-          '      :per_page => 10'
-      end
-    end
-
-    desc 'Add some navigational aids'
-    edit 'app/views/orders/index.html.erb' do
-      self << <<-EOF.unindent(6)
-        <!-- START_HIGHLIGHT -->
-        <p><%= will_paginate @orders %></p>
-        <!-- END_HIGHLIGHT -->
-      EOF
-      msub /,( ):method/, "\n              "
-    end
-
-    desc 'Show the orders'
-    get '/orders'
-  end
-end
-
-section 12.4, 'Playtime' do
+  desc 'Verify that the tests still pass'
   cmd 'rake test'
 
-  edit 'test/functional/orders_controller_test.rb', 'new' do |data|
-    data.dcl 'should get new', :mark => 'new' do |getnew|
-      empty = getnew.dup
-      empty.edit 'assert_response' do |assert|
-        assert.msub /assert_(response :success)/, 'redirected_to store_path'
-        assert << "\n    assert_equal flash[:notice], 'Your cart is empty'"
-      end
-      empty.sub! 'should get new', 'requires item in cart'
-      empty.dcl 'requires item in cart', :highlight
-    
-      getnew.msub /do\n()/, <<-EOF.unindent(4) + "\n", :highlight
-        cart = Cart.create
-        session[:cart_id] = cart.id
-        LineItem.create(:cart => cart, :product => products(:ruby))
-      EOF
-
-      getnew.msub /()\A/, empty + "\n"
-      getnew.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    end
-  end
-
-  edit 'test/functional/orders_controller_test.rb', 'valid' do |data|
-    data.msub /()require/, "#START:valid\n"
-    data.msub /class.*\n()/, <<-EOF.unindent(4)
-      # ...
-      #END:valid
-    EOF
-
-    data.dcl 'should create order', :mark => 'valid' do
-      edit /.*(order_path.*)/, :highlight do
-        msub /(order_path.*)/, 'store_path'
-      end
-      self.all <<= "  # ...\n"
-    end
-
-    data.msub /(\nend)/, "\n#START:valid\nend\n#END:valid"
-  end
-
-  desc 'Update the test data in the fixture'
-  edit 'test/fixtures/orders.yml' do
-    edit "name: MyString", :highlight do
-      sub! /MyString/, 'Dave Thomas'
-    end
-    edit "email: MyString", :highlight do
-      sub! /MyString/, 'dave@example.org' 
-    end
-    edit 'pay_type: MyString', :highlight do
-      sub! /MyString/, 'Check'
-    end
-  end
-
-  desc 'move a line item from a cart to an order'
-  edit 'test/fixtures/line_items.yml' do
-    clear_all_marks
-    msub /(cart): one/, 'order'
-    edit 'order:', :highlight
-  end
-
-  cmd 'rake test'
-
+  desc 'Commit'
   cmd 'git commit -a -m "Orders"'
-  cmd 'git tag iteration-h'
+  cmd 'git tag iteration-g'
 end
 
-section 12.7, 'Iteration J2: Email Notifications' do
+section 13.1, 'Iteration H1: Email Notifications' do
+  desc 'Create a mailer'
   generate 'mailer Notifier order_received order_shipped'
+
+  desc 'Edit development configuration'
+  edit 'config/environments/development.rb' do
+    msub /action_mailer.*\n()/, "\n" + <<-EOF.unindent(4), :highlight
+      # Don't actually send emails
+      config.action_mailer.delivery_method = :test
+      #
+      # Alternate configuration example, using gmail:
+      #   config.action_mailer.delivery_method = :smtp
+      #   config.action_mailer.smtp_settings = {
+      #	    address:        "smtp.gmail.com",
+      #	    port:           587, 
+      #	    domain:         "domain.of.sender.net",
+      #	    authentication: "plain",
+      #	    user_name:      "dave",
+      #	    password:       "secret",
+      #     enable_starttls_auto: true
+      #	  } 
+    EOF
+  end
+
+  desc 'Tailor the from address'
   edit 'app/mailers/notifier.rb' do
     edit 'from', :highlight do
       msub /from:?\s*=?>?\s*(.*)/, "'Sam Ruby <depot@example.com>'"
     end
-  end
-  publish_code_snapshot :p
-
-  edit 'app/mailers/notifier.rb' do
-    %w(order_received order_shipped).each do |notice|
-      dcl notice, :mark => notice
-      msub /def #{notice}(.*)/, '(order)'
-      msub /(.*@greeting.*\n)/, ''
-      msub /def #{notice}.*\n()/, <<-EOF.unindent(4)
-        @order = order
-      EOF
-      if notice == 'order_received'
-        msub /("to@example.org")/, 
-          "order.email, :subject => 'Pragmatic Store Order Confirmation'"
-      else
-        msub /("to@example.org")/, 
-          "order.email, :subject => 'Pragmatic Store Order Shipped'"
-      end
-    end
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Tailor the confirm receipt email'
@@ -2231,12 +2289,40 @@ section 12.7, 'Iteration J2: Email Notifications' do
     data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
-  desc 'HTML partial for the line items'
-  edit 'app/views/line_items/_line_item.html.erb' do
-    clear_all_marks
+  publish_code_snapshot :q
+
+  desc 'Get the order, sent the confirmation'
+  edit 'app/mailers/notifier.rb' do
+    clear_highlights
+    %w(order_received order_shipped).each do |notice|
+      dcl notice, :mark => notice
+      msub /def #{notice}(.*)/, '(order)'
+      msub /(.*@greeting.*\n)/, ''
+      msub /def #{notice}.*\n()/, <<-EOF.unindent(4)
+        @order = order
+      EOF
+      if notice == 'order_received'
+        msub /("to@example.org")/, 
+          "order.email, :subject => 'Pragmatic Store Order Confirmation'"
+      else
+        msub /("to@example.org")/, 
+          "order.email, :subject => 'Pragmatic Store Order Shipped'"
+      end
+    end
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
-  desc 'Tailor the confirm shipped email'
+  desc 'Invoke mailer from the controller'
+  edit 'app/controllers/orders_controller.rb', 'create' do
+    clear_highlights
+    dcl 'create' do
+      msub /\n()\s+format/, <<-EOF, :highlight
+        Notifier.order_received(@order).deliver
+      EOF
+    end
+  end
+
+  desc 'Tailor the confirm shipped email (this time in HTML)'
   edit 'app/views/notifier/order_shipped.html.erb' do |data|
     data.all = <<-EOF.unindent(6)
       <h3>Pragmatic Order Shipped</h3>
@@ -2251,19 +2337,12 @@ section 12.7, 'Iteration J2: Email Notifications' do
     EOF
   end
 
-# desc 'Partial for the line items (html)'
-# edit 'app/views/line_items/_line_item.html.erb' do |data|
-#   data.all = <<-EOF.unindent(6)
-#     <tr>
-#       <td><%= line_item.quantity %></td>
-#       <td>&times;</td>
-#       <td><%= line_item.product.title %></td>
-#     </tr>
-#   EOF
-# end
+  desc 'Review HTML partial for the line items'
+  edit 'app/views/line_items/_line_item.html.erb' do
+    clear_all_marks
+  end
 
   desc 'Update the test case'
-  issue "Not helpful: 'Hi, find me in app'" 
   edit 'test/functional/notifier_test.rb' do
     2.times do
       msub /Notifier.order_\w+()$/, '(orders(:one))'
@@ -2284,16 +2363,8 @@ section 12.7, 'Iteration J2: Email Notifications' do
   ruby '-I test test/functional/notifier_test.rb'
 end
 
-section 12.8, 'Iteration J3: Integration Tests' do
-  edit 'app/controllers/orders_controller.rb', 'create' do
-    clear_highlights
-    dcl 'create' do
-      msub /\n()\s+format/, <<-EOF, :highlight
-        Notifier.order_received(@order).deliver
-      EOF
-    end
-  end
-
+section 13.2, 'Iteration H2: Integration Tests' do
+  desc 'Create an integration test'
   generate 'integration_test user_stories'
   edit "test/integration/user_stories_test.rb" do |data|
     data[/(.*)/m,1] = read('test/user_stories_test.rb')
@@ -2304,24 +2375,36 @@ section 12.8, 'Iteration J3: Integration Tests' do
     end
   end
 
+  desc 'Run the tests'
   rake 'test:integration'
+
+  desc 'Create an integration test using a DSL'
+  generate 'integration_test user_stories'
   edit "test/integration/dsl_user_stories_test.rb" do |data|
     data[/(.*)/m,1] = read('test/dsl_user_stories_test.rb')
   end
-  rake 'test:integration'
 
-  cmd 'git commit -a -m "Admin"'
-  cmd 'git tag iteration-j'
-  publish_code_snapshot :q
+  desc 'Run the tests'
+  rake 'test:integration'
 end
 
-section 13.1, 'Iteration H1: Adding Users' do
+section 13.3, 'Playtime' do
+  cmd 'git commit -a -m "formats"'
+  cmd 'git tag iteration-h'
+end
+
+section 14.1, 'Iteration I1: Adding Users' do
+  desc 'Scaffold the user model'
   if File.exist? 'public/images'
     generate 'scaffold User name:string hashed_password:string salt:string'
   else
     generate 'scaffold User name:string password_digest:string'
   end
+
+  desc 'Run the migration'
   cmd 'rake db:migrate'
+
+  desc 'Add validation, has_secure_password'
   edit "app/models/user.rb" do
     if File.exist? 'public/images'
       self.all = read('users/user.rb')
@@ -2335,6 +2418,8 @@ section 13.1, 'Iteration H1: Adding Users' do
     end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
+
+  desc 'Avoid redirect after create, update operations'
   %w(create update).each do |action|
     edit 'app/controllers/users_controller.rb', action do
       dcl action, :mark do
@@ -2347,16 +2432,20 @@ section 13.1, 'Iteration H1: Adding Users' do
       end
     end
   end
+
+  desc 'Display users sorted by name'
   edit 'app/controllers/users_controller.rb', 'index' do
     dcl 'index', :mark do
       edit '.all', :highlight
       msub /\.(all)/, 'order(:name)'
     end
   end
+
+  desc 'Add Notice, and remove password digest from view'
   edit 'app/views/users/index.html.erb' do
     msub /<\/h1>\n()/, <<-EOF.unindent(4), :highlight
       <% if notice %>
-        <p id="notice"><%= notice %></p>
+      <p id="notice"><%= notice %></p>
       <% end %>
     EOF
     if File.exist? 'public/images'
@@ -2370,25 +2459,61 @@ section 13.1, 'Iteration H1: Adding Users' do
     end
     msub /,() :?method:?\s?=?>? :del/, "\n" + (' ' * 6)
   end
+
+  desc 'Update form used to both create and update users'
   edit "app/views/users/_form.html.erb" do
     self.all = read('users/new.html.erb')
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
+
+  desc 'Demonstrate creating a new user'
   get '/users'
   post '/users/new',
     'user[name]' => 'dave',
     'user[password]' => 'secret',
     'user[password_confirmation]' => 'secret'
+
+  desc 'Show how this is stored in the database'
   db 'select * from users'
+
+  edit 'test/functional/users_controller_test.rb', 'update' do |data|
+    msub /\A()/, "#START:update\n"
+    msub /^  end\n()/, "#END:update\n"
+    edit /^end/, :mark => 'update'
+
+    data.msub /setup do\n()/, <<-EOF.unindent(2) + "\n"
+      #START_HIGHLIGHT
+      @input_attributes = {
+        :name                  => "sam",
+        :password              => "private",
+        :password_confirmation => "private"
+      }
+      #END_HIGHLIGHT
+    EOF
+
+    %w(update create).each do |test|
+      data.dcl "should #{test} user", :mark => 'update' do
+        msub /\A()/, "  #...\n"
+        edit 'attributes', :highlight
+        sub! '@user.attributes', '@input_attributes'
+        edit 'user_path', :highlight
+        msub /(user_path.*)/, 'users_path'
+      end
+    end
+
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  end
 end
 
-section 13.2, 'Iteration H2: Authenticating Users' do
+section 14.2, 'Iteration I2: Authenticating Users' do
+  desc 'Generate empty controllers for sessions and administration'
   generate 'controller Sessions new create destroy'
   generate 'controller Admin index'
 
-  edit "app/controllers/sessions_controller.rb" do |data|
-    data.dcl 'create', :mark => 'login' do |create|
-      create.msub /^()\s*end/, <<-EOF.unindent(4), :highlight
+  desc 'Implement login in and out by storing the user_id in the session'
+  edit "app/controllers/sessions_controller.rb" do
+    dcl 'create', :mark => 'login' do
+      msub /^()\s*end/, <<-EOF.unindent(4), :highlight
         user = User.find_by_name(params[:name])
         if user and user.authenticate(params[:password])
           session[:user_id] = user.id
@@ -2403,31 +2528,35 @@ section 13.2, 'Iteration H2: Authenticating Users' do
         msub /user (and .*)/, ''
       end
     end
-    data.dcl 'destroy', :mark => 'logout' do |destroy|
-      destroy.msub /^()\s*end/, <<-EOF.unindent(4), :highlight
+    dcl 'destroy', :mark => 'logout' do
+      msub /^()\s*end/, <<-EOF.unindent(4), :highlight
         session[:user_id] = nil
         redirect_to store_url, :notice => "Logged out"
       EOF
     end
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
-  edit "app/views/sessions/new.html.erb" do |data|
-    data[/(.*)/m,1] = read('users/login.html.erb')
+  desc 'Create the view using form_for as there is no underlying model'
+  edit "app/views/sessions/new.html.erb" do
+    self.all = read('users/login.html.erb')
   end
 
-  edit "app/views/admin/index.html.erb" do |data|
-    data.all = read('users/index.html.erb')
+  desc 'Create a landing page for the administrator'
+  edit "app/views/admin/index.html.erb" do
+    self.all = read('users/index.html.erb')
   end
 
-  edit "app/controllers/admin_controller.rb" do |data|
-    data.dcl 'index' do |index|
-      index.msub /^()\s*end/, <<-EOF.unindent(4), :highlight
+  desc 'Make the orders count available to the admin page'
+  edit "app/controllers/admin_controller.rb" do
+    dcl 'index' do
+      msub /^()\s*end/, <<-EOF.unindent(4), :highlight
         @total_orders = Order.count
       EOF
     end
   end
 
+  desc 'Connect the routes to the controller actions'
   edit 'config/routes.rb', 'root' do |data|
     data.clear_highlights
     edit 'admin/index', :highlight do
@@ -2448,156 +2577,15 @@ section 13.2, 'Iteration H2: Authenticating Users' do
 
     sub! /.*sessions\/create.*\n\n/, ''
     sub! /.*sessions\/destroy.*\n\n/, ''
+    gsub! /\n\n\n+/, "\n\n"
   end
 
+  desc 'Do a login'
   post '/login',
     'name' => 'dave',
     'password' => 'secret'
-end
 
-section 13.3, 'Iteration H3: Limiting Access' do
-  edit "app/controllers/application_controller.rb", 'auth' do
-    clear_highlights
-    edit /class.*\n/, :mark => 'auth' do
-      msub /\n()\Z/, <<-EOF.unindent(6), :highlight
-        before_filter :authorize
-      EOF
-    end
-
-    edit /^end\n/, :mark => 'auth' do
-      msub /()^end/, "\n    # ...\n"
-      msub /()^end/, "\n" + <<-EOF.unindent(6), :highlight
-        protected
-
-          def authorize
-            unless User.find_by_id(session[:user_id])
-              redirect_to login_url, :notice => "Please log in"
-            end
-          end
-      EOF
-    end
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  %w(sessions store).each do |controller|
-    edit "app/controllers/#{controller}_controller.rb", 'setup' do |data|
-      data.edit /class.*\n/, :mark => 'setup' do |top|
-        top.msub /class.*\n()/, <<-EOF.unindent(8), :highlight
-          skip_before_filter :authorize
-        EOF
-      end
-    end
-  end
-
-  auth = {
-    'carts'      => [:create, :update, :destroy],
-    'line_items' => :create,
-    'orders'     => [:new, :create],
-    'products'   => nil,
-    'users'      => nil
-  }
-
-  %w(carts line_items orders products users).each do |controller|
-    if auth[controller]
-      edit "app/controllers/#{controller}_controller.rb", 'setup' do |data|
-        data.edit /class.*\n/, :mark => 'setup' do |top|
-          top.msub /class.*\n()/, <<-EOF.unindent(8) + "\n", :highlight
-            skip_before_filter :authorize, :only => #{auth[controller].inspect}
-          EOF
-          top.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-        end
-      end
-    end
-  end
-
-  edit "app/views/layouts/application.html.erb" do |data|
-    data.clear_highlights
-    data.msub /<div id="side">.*?() *<\/div>/m, "\n" + <<-EOF, :highlight
-      <% if session[:user_id] %>
-        <ul>
-          <li><%= link_to 'Orders',   orders_path   %></li>
-          <li><%= link_to 'Products', products_path %></li>
-          <li><%= link_to 'Users',    users_path    %></li>
-        </ul>
-        <%= button_to 'Logout', logout_path, :method => :delete   %>
-      <% end %>
-    EOF
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  publish_code_snapshot :r
-
-  post '/admin', 'submit' => 'Logout'
-  get '/'
-  get '/products'
-  post '/login',
-    'name' => 'dave',
-    'password' => 'secret'
-  get '/products'
-  get '/users'
-end
-
-section 13.4, 'Iteration H4: Adding a Sidebar' do
-
-  edit "app/models/user.rb" do |data|
-    msub /^()end/, "\n" + <<-EOF.unindent(4)
-      #START:after_destroy
-      after_destroy :ensure_an_admin_remains
-
-      private
-        def ensure_an_admin_remains
-          if User.count.zero?
-            raise "Can't delete last user"
-          end
-        end     
-      #END:after_destroy
-    EOF
-  end
-
-  edit "app/controllers/users_controller.rb" do |data|
-    data[/()  def destroy/,1] = "  #START:delete_user\n"
-    data[/def destroy\n.*?  end\n()/m,1] = "  #END:delete_user\n"
-    data[/(.*user.destroy.*\n)/,1] = <<-'EOF'.unindent(2)
-      #START_HIGHLIGHT
-      begin
-        @user.destroy
-        flash[:notice] = "User #{@user.name} deleted"
-      rescue Exception => e
-        flash[:notice] = e.message
-      end
-      #END_HIGHLIGHT
-    EOF
-  end
-end
-
-section 13.5, 'Playtime' do
-  desc 'See that requiring a login causes most tests to fail (good!)'
-  cmd 'rake test'
-
-  desc 'Cause all tests to do an implicit login'
-  edit 'test/test_helper.rb', 'more' do |data|
-    data.edit 'class ActiveSupport::TestCase', :mark => 'more'
-    data.edit /\n +# Add more.*\nend\n/, :mark => 'more' do |more|
-      more.msub /\A()/, <<-EOF.unindent(6)
-        # ...
-      EOF
-      more.msub /^()end/, <<-EOF.unindent(6)
-        def login_as(user)
-          session[:user_id] = users(user).id
-        end
-
-        def logout
-          session.delete :user_id
-        end
-
-        def setup
-          login_as :one if defined? session
-        end
-      EOF
-    end
-  end
-
-  desc 'First, lets fix the sessions controller test'
+  desc 'Fix the sessions controller test'
   edit "test/functional/sessions_controller_test.rb" do |data|
     dcl 'should get create' do
       self.all = <<-EOF.unindent(6)
@@ -2650,37 +2638,174 @@ section 13.5, 'Playtime' do
     end
   end
 
-  ruby '-I test test/functional/sessions_controller_test.rb'
+  cmd 'rake test'
+end
 
-  edit 'test/functional/users_controller_test.rb', 'update' do |data|
-    msub /\A()/, "#START:update\n"
-    msub /^  end\n()/, "#END:update\n"
-    edit /^end/, :mark => 'update'
-
-    data.msub /setup do\n()/, <<-EOF.unindent(2) + "\n"
-      #START_HIGHLIGHT
-      @input_attributes = {
-        :name                  => "sam",
-        :password              => "private",
-        :password_confirmation => "private"
-      }
-      #END_HIGHLIGHT
-    EOF
-
-    %w(update create).each do |test|
-      data.dcl "should #{test} user", :mark => 'update' do
-        msub /\A()/, "  #...\n"
-        edit 'attributes', :highlight
-        sub! '@user.attributes', '@input_attributes'
-        edit 'user_path', :highlight
-        msub /(user_path.*)/, 'users_path'
-      end
+section 14.3, 'Iteration I3: Limiting Access' do
+  desc 'require authorization before every access'
+  edit "app/controllers/application_controller.rb", 'auth' do
+    clear_highlights
+    edit /class.*\n/, :mark => 'auth' do
+      msub /\n()\Z/, <<-EOF.unindent(6), :highlight
+        before_filter :authorize
+      EOF
     end
 
+    edit /^end\n/, :mark => 'auth' do
+      msub /()^end/, "\n    # ...\n"
+      msub /()^end/, "\n" + <<-EOF.unindent(6), :highlight
+        protected
+
+          def authorize
+            unless User.find_by_id(session[:user_id])
+              redirect_to login_url, :notice => "Please log in"
+            end
+          end
+      EOF
+    end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
+  desc 'whitelist the sessions and store controllers'
+  %w(sessions store).each do |controller|
+    edit "app/controllers/#{controller}_controller.rb", 'setup' do |data|
+      data.edit /class.*\n/, :mark => 'setup' do |top|
+        top.msub /class.*\n()/, <<-EOF.unindent(8), :highlight
+          skip_before_filter :authorize
+        EOF
+      end
+    end
+  end
+
+  auth = {
+    'carts'      => [:create, :update, :destroy],
+    'line_items' => :create,
+    'orders'     => [:new, :create],
+    'products'   => nil,
+    'users'      => nil
+  }
+
+  auth.keys.each do |controller|
+    if auth[controller]
+      desc "whitelist #{controller.sub(/s$/,'')} operations"
+      edit "app/controllers/#{controller}_controller.rb", 'setup' do |data|
+        data.edit /class.*\n/, :mark => 'setup' do |top|
+          top.msub /class.*\n()/, <<-EOF.unindent(8) + "\n", :highlight
+            skip_before_filter :authorize, :only => #{auth[controller].inspect}
+          EOF
+          top.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+        end
+      end
+    end
+  end
+
+  desc 'Cause all tests to do an implicit login'
+  edit 'test/test_helper.rb', 'more' do |data|
+    data.edit 'class ActiveSupport::TestCase', :mark => 'more'
+    data.edit /\n +# Add more.*\nend\n/, :mark => 'more' do |more|
+      more.msub /\A()/, <<-EOF.unindent(6)
+        # ...
+      EOF
+      more.msub /^()end/, <<-EOF.unindent(6)
+        def login_as(user)
+          session[:user_id] = users(user).id
+        end
+
+        def logout
+          session.delete :user_id
+        end
+
+        def setup
+          login_as :one if defined? session
+        end
+      EOF
+    end
+  end
+
+  desc 'Show that the now pass'
   cmd 'rake test'
+end
+
+section 14.4, 'Iteration I4: Adding a Sidebar' do
+
+  desc 'Add admin links and a button to Logout'
+  edit "app/views/layouts/application.html.erb" do |data|
+    data.clear_highlights
+    data.msub /<div id="side">.*?() *<\/div>/m, "\n" + <<-EOF, :highlight
+      <% if session[:user_id] %>
+        <ul>
+          <li><%= link_to 'Orders',   orders_path   %></li>
+          <li><%= link_to 'Products', products_path %></li>
+          <li><%= link_to 'Users',    users_path    %></li>
+        </ul>
+        <%= button_to 'Logout', logout_path, :method => :delete   %>
+      <% end %>
+    EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  end
+
+  desc 'Log out'
+  post '/admin', 'submit' => 'Logout'
+
+  desc 'Demonstrate that everybody can get to the store'
+  get '/'
+
+  desc 'Demonstrate that login is required to see the products'
+  get '/products'
+
+  desc 'Log in'
+  post '/login',
+    'name' => 'dave',
+    'password' => 'secret'
+
+  desc 'Demonstrate logged in users can see the products'
+  get '/products'
+
+  desc 'Demonstrate logged in users can see the users'
+  get '/users'
+
+  desc 'Show that the tests fail (good!)'
+  cmd 'rake test'
+
+  publish_code_snapshot :r
+
+  edit "app/models/user.rb" do |data|
+    msub /^()end/, "\n" + <<-EOF.unindent(4)
+      #START:after_destroy
+      after_destroy :ensure_an_admin_remains
+
+      private
+        def ensure_an_admin_remains
+          if User.count.zero?
+            raise "Can't delete last user"
+          end
+        end     
+      #END:after_destroy
+    EOF
+  end
+
+  edit "app/controllers/users_controller.rb" do |data|
+    data[/()  def destroy/,1] = "  #START:delete_user\n"
+    data[/def destroy\n.*?  end\n()/m,1] = "  #END:delete_user\n"
+    data[/(.*user.destroy.*\n)/,1] = <<-'EOF'.unindent(2)
+      #START_HIGHLIGHT
+      begin
+        @user.destroy
+        flash[:notice] = "User #{@user.name} deleted"
+      rescue Exception => e
+        flash[:notice] = e.message
+      end
+      #END_HIGHLIGHT
+    EOF
+  end
+end
+
+section 14.5, 'Playtime' do
+  desc 'See that requiring a login causes most tests to fail (good!)'
+  cmd 'rake test'
+
+  desc 'Look at the data in the database'
+  cmd 'sqlite3 db/development.sqlite3 .schema'
 
   desc 'Try requesting the xml... see auth failure.'
   cmd 'curl --silent http://localhost:3000/products/2/who_bought.xml'
@@ -2712,14 +2837,7 @@ section 13.5, 'Playtime' do
   cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
 end
 
-section 14.1, 'Playtime' do
-  cmd 'rake test'
-
-  cmd 'git commit -a -m "formats"'
-  cmd 'git tag iteration-i'
-end
-
-section 15.1, 'Task I1: Selecting the locale' do
+section 15.1, 'Task J1: Selecting the locale' do
   
   desc 'Define the default and available languages.'
   edit "config/initializers/i18n.rb" do |data|
@@ -2787,7 +2905,9 @@ section 15.1, 'Task I1: Selecting the locale' do
   desc "Verify that the routes work."
   get '/en'
   get '/es'
+end
 
+section 15.2, 'Task J2: translating the store front' do
   desc 'Replace translatable text with calls out to translation functions.'
   edit 'app/views/layouts/application.html.erb' do |data|
     clear_highlights
@@ -2806,9 +2926,6 @@ section 15.1, 'Task I1: Selecting the locale' do
   desc 'Define some translations for the layout.'
   edit('config/locales/en.yml', 'layout') {}
   edit('config/locales/es.yml', 'layout') {} 
-
-  desc 'Format the currency.'
-  edit('config/locales/es.yml', 'currency') {} 
 
   desc 'Server needs to be restarted when introducting a new language'
   restart_server
@@ -2836,9 +2953,7 @@ section 15.1, 'Task I1: Selecting the locale' do
 
   desc 'See results'
   get '/es'
-end
 
-section 15.2, 'Task I2: translating the store front' do
   desc 'Replace translatable text with calls out to translation functions.'
   edit 'app/views/carts/_cart.html.erb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
@@ -2854,17 +2969,21 @@ section 15.2, 'Task I2: translating the store front' do
   edit('config/locales/en.yml', 'cart') {}
   edit('config/locales/es.yml', 'cart') {} 
   
+  desc 'Format the currency.'
+  edit('config/locales/es.yml', 'currency') {} 
+
   desc 'Add to Cart'
   post '/es', 'product_id' => 2
 end
 
-section 15.3, 'Task I3: Translating Checkout' do
-  desc 'Replace translatable text with calls out to translation functions.'
+section 15.3, 'Task J3: Translating Checkout' do
+  desc 'Edit the new order page'
   edit 'app/views/orders/new.html.erb' do
     edit 'Please Enter Your Details', :highlight
     gsub! 'Please Enter Your Details', "<%= t('.legend') %>"
   end
 
+  desc 'Edit the form used by the new order page'
   edit 'app/views/orders/_form.html.erb' do
     clear_highlights
     edit "'Place Order'", :highlight do
@@ -2895,9 +3014,9 @@ section 15.3, 'Task I3: Translating Checkout' do
   desc 'Translate the errors to human names.'
   edit('config/locales/es.yml', 'errors') {} 
 
+  desc 'Display messages in raw form, and translate error messages'
   edit 'app/views/orders/_form.html.erb' do
-    edit '<%= msg %>', :mark => :raw
-    msub /<%=() msg %>/, ' raw'
+    edit '<%= msg %>', :highlight
 
     msub /\A()/, "<!-- START:explanation -->\n"
     msub /<h2>(.*)<\/h2>/m,  ''
@@ -2951,7 +3070,7 @@ section 15.3, 'Task I3: Translating Checkout' do
     'order[pay_type]' => 'Check'
 end
 
-section 15.4, 'Task I4: Add a locale switcher.' do
+section 15.4, 'Task J4: Add a locale switcher.' do
   desc 'Add form for setting and showing the site based on the locale.'
   desc 'Use CSS to position the form.'
   edit DEPOT_CSS, 'i18n' do |data|
@@ -3171,19 +3290,23 @@ section 22, 'Caching' do
   cmd 'curl --silent --head http://localhost:3000/'
 
   desc "add a method to return the latest product"
-  edit 'app/models/product.rb' do
+  edit 'app/models/product.rb', :mark => 'latest' do
     clear_all_marks
-    msub /\n()\s+private/, "\n" + <<-EOF.unindent(4) + "\n", :highlight
+    msub /\n()\s+private/, "\n"
+    msub /\n()\s+private/, <<-EOF.unindent(4), :mark => 'latest'
       def self.latest
         Product.order('updated_at desc').limit(1).first
       end
     EOF
+    msub /\n()\s+private/, "\n"
   end
 
   desc "set ETAG and LastModified headers on the response"
   edit 'app/controllers/store_controller.rb' do
+    clear_all_marks
     dcl 'index' do
-      msub /^()  end/, "\n" + <<-EOF.unindent(4)
+      msub /^()  end/, "\n"
+      msub /^()  end/, <<-EOF.unindent(4), :highlight
         latest = Product.latest
         fresh_when :etag => latest, :last_modified => latest.created_at.utc
         expires_in 10.minutes, :public => true
