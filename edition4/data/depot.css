@@ -1,6 +1,6 @@
 /* Global styles */
 
-#store #notice {
+.store #notice {
         color: #000;
         border: 2px solid red;
         padding: 1em;
@@ -10,7 +10,7 @@
 }
 
 
-#store h1 {
+.store h1 {
         font:  150% sans-serif;
         color: #226;
         border-bottom: 3px dotted #77d;
@@ -66,18 +66,18 @@
 
 /* An entry in the store catalog */
 
-#store  .entry {
+.store  .entry {
   overflow: auto;
   margin-top: 1em;
   border-bottom: 1px dotted #77d;
 }
 
-#store  .title {
+.store  .title {
   font-size: 120%;
   font-family: sans-serif;
 }
 
-#store .entry img {
+.store .entry img {
   width: 80px;
   margin-right: 5px;
   margin-bottom: 5px;
@@ -85,27 +85,27 @@
 }
 
 
-#store .entry h3 {
+.store .entry h3 {
  margin-top: 0;
  margin-bottom: 2px;
  color: #227;
 }
 
-#store .entry p {
+.store .entry p {
  margin-top: 0.5em; 
  margin-bottom: 0.8em; 
 }
 
-#store .entry .price_line {
+.store .entry .price_line {
  clear: both;
  margin-bottom: 0.5em;
 }
 
-#store .entry .add_to_cart {
+.store .entry .add_to_cart {
   position: relative;
 }
 
-#store .entry  .price {
+.store .entry  .price {
   color: #44a;
   font-weight: bold;
   margin-right: 2em;

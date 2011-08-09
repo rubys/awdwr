@@ -527,7 +527,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
   desc 'Modify the application layout'
   edit 'app/views/layouts/application.html.erb' do
     self.all = read('store/layout.html.erb')
-    gsub! ':defaults', '"application"' unless File.exist? 'public/images'
+    gsub! '"application"', '"depot"' if File.exist? 'public/images'
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
@@ -636,6 +636,14 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
         #side a {
           color: #bfb;
           font-size: small;
+        }
+
+        #side ul {
+          padding: 0;
+        }
+
+        #side li {
+          list-style: none;
         }
         /* END:mainlayout */
       EOF
