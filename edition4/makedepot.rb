@@ -1570,32 +1570,34 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
   post '/', 'product_id' => 2
 end
 
-section 11.5, 'Iteration F5: Making Images Clickable' do
-  desc 'Review our current storefront markup'
-  edit 'app/views/store/index.html.erb' do
-    clear_highlights
+unless $rails_version =~ /^3\.0/
+  section 11.5, 'Iteration F5: Making Images Clickable' do
+    desc 'Review our current storefront markup'
+    edit 'app/views/store/index.html.erb' do
+      clear_highlights
+    end
+
+    desc 'Associate image clicks with submit button clicks'
+    edit 'app/assets/javascripts/store.js.coffee' do
+      msub /(\s*)\Z/, "\n\n"
+      msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
+        $ -> 
+          $('.store .entry > img').click ->
+            $(this).parent().find(':submit').click()
+      EOF
+    end
+
+    desc 'The page looks no different'
+    get '/'
+
+    desc 'Run tests... oops.'
+    cmd 'rake test'
   end
-
-  desc 'Associate image clicks with submit button clicks'
-  edit 'app/assets/javascripts/store.js.coffee' do
-    msub /(\s*)\Z/, "\n\n"
-    msub /\n\n()\Z/, <<-EOF.unindent(6), :highlight
-      $ -> 
-        $('.store .entry > img').click ->
-          $(this).parent().find(':submit').click()
-    EOF
-  end
-
-  desc 'The page looks no different'
-  get '/'
-
-  desc 'Run tests... oops.'
-  cmd 'rake test'
-
-  publish_code_snapshot :n
 end
 
 section 11.6, 'Iteration F6: Testing AJAX changes' do
+  publish_code_snapshot :n
+
   desc 'Verify that yes, indeed, the product index is broken.'
   get '/products'
 
