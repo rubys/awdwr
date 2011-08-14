@@ -100,6 +100,7 @@ if File.exist? template
       /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
 
     release=PROFILE.rvm['bin'].split('-')[1]
+    gems += [['uglifier',nil]] if app_base.include? 'uglifier'
     gems += [['json',nil]] if release < "1.9.2"
     gems += [['turn',', :require => false']] unless release < "1.9.2"
     gems += [['jquery-rails',nil]]
