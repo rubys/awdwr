@@ -272,7 +272,12 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
 
   unless File.exist? 'public/images'
     desc 'Review the application stylesheet'
-    edit 'app/assets/stylesheets/application.css'
+    edit 'app/assets/stylesheets/application.css' do
+      col = 67
+      comment = self[/((\n \* .*)+)/,1].gsub(/\n \*/,'').strip
+      comment.gsub! /(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/, " * \\1\\3\n"
+      self[/\n(( \* .*\n)+)/,1] = comment
+    end
   end
 
   desc 'Replace the scaffold generated view with some custom HTML'
@@ -1499,6 +1504,10 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
         //= require jquery-ui
         //#END_HIGHLIGHT
       EOF
+      col = 73
+      comment = self[/((\n\/\/ .*)+)/,1].gsub(/\n\/\//,'').strip
+      comment.gsub! /(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/, "// \\1\\3\n"
+      self[/((\/\/ .*\n)+)/,1] = comment
     end
   end
   publish_code_snapshot :m
@@ -3186,6 +3195,7 @@ section 16, 'Deployment' do
       edit 'deploy/assets', :highlight do
         msub /^(# )/, ''
       end
+      msub /\.()each/, "\n  "
     end
     rake 'assets:precompile'
     cmd 'ls public/assets'
