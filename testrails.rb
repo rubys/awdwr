@@ -35,7 +35,7 @@ OUTMIN = OUTPUT.gsub('.','')
 WORK   = 'work' + OUTMIN
 Dir.chdir PROFILE.source do
   system "mkdir -p #{WORK}"
-  system "ln -s ../data #{WORK}" unless File.exist?(File.join(WORK, 'data'))
+  system "ln -f -s ../data #{WORK}" unless File.exist?(File.join(WORK, 'data'))
 end
 
 BRANCH = PROFILE.branch
@@ -140,7 +140,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       end
       gems.each {|gem,opts| gemfile.puts "gem #{gem.first.inspect}#{opts}"}
       gemfile.puts "gem 'sqlite3'"
-      gemfile.puts "gem 'mysql'"
+      gemfile.puts "gem 'mysql2'"
       gemfile.puts "gem 'capistrano'"
       gemfile.puts "gem 'test-unit'"
       gemfile.puts "gem 'rdoc'"

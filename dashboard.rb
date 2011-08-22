@@ -5,18 +5,21 @@ require 'cgi-spa'
 require 'time'
 require 'yaml'
 
+HOME = $HOME.sub(/\/?$/, '/')
+
 config = YAML.load(open('dashboard.yml'))
-LOGDIR = config.delete('log')
-BINDIR = config.delete('bin')
+LOGDIR = config.delete('log').sub('$HOME/',HOME)
+BINDIR = config.delete('bin').sub('$HOME/',HOME)
 
 # identify the unique jobs
 JOBS = config['book'].map do |editions|
   editions = [editions] if editions.respond_to? :push
   editions.map do |book, book_info|
     book_info['env'].map do |info|
+      home = book_info['home'].sub('$HOME/',HOME)
       work=info['work']
       info['book']=book
-      info['path']=File.join(book_info['home'],work)
+      info['path']=File.join(home,work)
       info['id']=work.gsub('.','') + '-' + book.to_s
       info.update(book_info)
     end

@@ -3148,7 +3148,7 @@ section 16, 'Deployment' do
     # msub %r((db)/production.sqlite3), '../../shared/db'
     msub /^(production:.*)/m, <<-EOF.unindent(6), :mark => 'production'
       production:
-        adapter: mysql
+        adapter: mysql2
         encoding: utf8
         reconnect: false
         database: depot_production
@@ -3162,7 +3162,7 @@ section 16, 'Deployment' do
     clear_all_marks
     msub /sqlite.*\n()/, <<-EOF.unindent(6), :mark => 'mysql'
       group :production do
-        gem 'mysql'
+        gem 'mysql2'
       end
     EOF
     edit 'capistrano', :highlight
@@ -3695,13 +3695,15 @@ Process.exit! if fail
 
 # verify that MySQL is installed and permissions are granted
 begin
-  require 'mysql'
+  require 'mysql2'
   configs = %w(mysql_config mysql_config5)
   config = configs.find {|config| not `which #{config}`.empty?}
   socket = `#{config} --socket`.chomp
-  dbh = Mysql.real_connect("localhost", "username", "password", nil, 0, socket)
-  unless dbh.list_dbs.include?('depot_production')
-    dbh.query('create database depot_production')
+  client = Mysql2::Client.new :host=>'localhost',
+    :username=>'username', :password => 'password'
+  dbs = client.query('show databases').map {|row| row['Database']}
+  unless dbs.include? 'depot_production'
+    client.query('create database depot_production')
   end
 rescue Exception => e
   puts "MySQL: #{e}"
