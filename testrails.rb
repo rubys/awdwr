@@ -140,7 +140,6 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       end
       gems.each {|gem,opts| gemfile.puts "gem #{gem.first.inspect}#{opts}"}
       gemfile.puts "gem 'sqlite3'"
-      gemfile.puts "gem 'mysql2'"
       gemfile.puts "gem 'capistrano'"
       gemfile.puts "gem 'test-unit'"
       gemfile.puts "gem 'rdoc'"
@@ -150,12 +149,13 @@ Dir.chdir File.join(PROFILE.source,WORK) do
         gemfile.puts "gem 'htmlentities'"
       # end
 
-      if File.exist? base # Rails 3.1
-        if $rails_version =~ /^3\.1/
-          gemfile.puts "gem 'activemerchant'"
-          gemfile.puts "gem 'haml'"
-        end
+      if File.exist? base # Rails 3.1+
+        gemfile.puts "gem 'mysql2'"
+        gemfile.puts "gem 'activemerchant'"
+        gemfile.puts "gem 'haml'"
+        gemfile.puts "gem 'will_paginate'"
       else
+        gemfile.puts "gem 'mysql'"
         gemfile.puts "gem 'activemerchant', '~> 1.10.0'"
         gemfile.puts "gem 'haml', '~> 3.1.1'"
         gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
