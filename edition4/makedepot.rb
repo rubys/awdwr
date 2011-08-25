@@ -3699,6 +3699,7 @@ begin
   config = configs.find {|config| not `which #{config}`.empty?}
   socket = `#{config} --socket`.chomp
   if $rails_version =~ /^3\.0/
+    require 'mysql'
     dbh = Mysql.real_connect "localhost", "username", "password", nil, 0, socket
     unless dbh.list_dbs.include?('depot_production')
       dbh.query('create database depot_production')
