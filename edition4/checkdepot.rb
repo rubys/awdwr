@@ -166,11 +166,9 @@ class DepotTest < Gorp::TestCase
       'Missing <td>CoffeeScript</td>'
   end
 
-  if File.exist? 'public/images'
-    section 12.3, "Iteration G3: Pagination" do
-      assert_select 'td', 'Customer 100'
-      assert_select "a[href=http://localhost:#{$PORT}/orders?page=4]"
-    end
+  section 12.3, "Iteration G3: Pagination" do
+    assert_select 'td', 'Customer 100'
+    assert_select "a[href=http://localhost:#{$PORT}/orders?page=4]"
   end
 
   section 12.4, "Playtime" do

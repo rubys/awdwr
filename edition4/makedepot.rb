@@ -2095,61 +2095,59 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   publish_code_snapshot :p
 end
 
-if $rails_version =~ /^3\.0/
-  section 12.3, 'Iteration G3: Pagination' do
-    desc 'Add in the will_paginate gem'
-    edit 'Gemfile' do
-      msub /extra.*\n(?:#.*\n)*()/,  "\ngem 'will_paginate', '>= 3.0.pre'\n",
-        :highlight
-    end
-    unless $bundle
-      edit 'config/application.rb' do
-        msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n",
-        :highlight
-      end
-    end
-    restart_server
-    
-    cmd 'bundle show'
-
-    desc 'Load in a few orders'
-    edit 'script/load_orders.rb' do
-      self.all = <<-'EOF'.unindent(8)
-        Order.transaction do
-          (1..100).each do |i|
-            Order.create(:name => "Customer #{i}", :address => "#{i} Main Street",
-              :email => "customer-#{i}@example.com", :pay_type => "Check")
-          end
-        end
-      EOF
-    end
-
-    runner 'script/load_orders.rb'
-
-    desc 'Modify the controller to do pagination'
-    edit 'app/controllers/orders_controller.rb', 'index' do
-      dcl 'index', :mark do
-        # msub /^()/, "require 'will_paginate'\n", :highlight
-        edit 'Order.all', :highlight
-        msub /Order\.(all)/, 
-          "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
-          '      :per_page => 10'
-      end
-    end
-
-    desc 'Add some navigational aids'
-    edit 'app/views/orders/index.html.erb' do
-      self << <<-EOF.unindent(6)
-        <!-- START_HIGHLIGHT -->
-        <p><%= will_paginate @orders %></p>
-        <!-- END_HIGHLIGHT -->
-      EOF
-      msub /,( ):method/, "\n              "
-    end
-
-    desc 'Show the orders'
-    get '/orders'
+section 12.3, 'Iteration G3: Pagination' do
+  desc 'Add in the will_paginate gem'
+  edit 'Gemfile' do
+    msub /(\s*)\Z/, "\n\n"
+    msub /\n\n()\Z/, "gem 'will_paginate', '~> 3.0'\n", :highlight
   end
+  unless $bundle
+    edit 'config/application.rb' do
+      msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n",
+      :highlight
+    end
+  end
+  restart_server
+  
+  cmd 'bundle show'
+
+  desc 'Load in a few orders'
+  edit 'script/load_orders.rb' do
+    self.all = <<-'EOF'.unindent(6)
+      Order.transaction do
+        (1..100).each do |i|
+          Order.create(:name => "Customer #{i}", :address => "#{i} Main Street",
+            :email => "customer-#{i}@example.com", :pay_type => "Check")
+        end
+      end
+    EOF
+  end
+
+  runner 'script/load_orders.rb'
+
+  desc 'Modify the controller to do pagination'
+  edit 'app/controllers/orders_controller.rb', 'index' do
+    dcl 'index', :mark do
+      # msub /^()/, "require 'will_paginate'\n", :highlight
+      edit 'Order.all', :highlight
+      msub /Order\.(all)/, 
+        "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
+        '      :per_page => 10'
+    end
+  end
+
+  desc 'Add some navigational aids'
+  edit 'app/views/orders/index.html.erb' do
+    self << <<-EOF.unindent(6)
+      <!-- START_HIGHLIGHT -->
+      <p><%= will_paginate @orders %></p>
+      <!-- END_HIGHLIGHT -->
+    EOF
+    msub /,( ):?method/, "\n              "
+  end
+
+  desc 'Show the orders'
+  get '/orders'
 end
 
 section 12.4, 'Playtime' do
