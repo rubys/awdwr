@@ -261,7 +261,7 @@ if File.exist? File.join(WORK, 'Gemfile')
 else
   install = <<-EOF
     gem list rack | grep -q 1.1.0 || gem install rack -v 1.1.0
-    gem list will_paginate | grep -q 2 || gem install will_paginate
+    gem list will_paginate | grep -q 2.3 || gem install will_paginate -v 2.3.11
     gem list activesupport | grep -q 3.0 && gem uninstall activesupport -I -a
   EOF
 end
