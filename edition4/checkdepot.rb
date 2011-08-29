@@ -247,12 +247,9 @@ class DepotTest < Gorp::TestCase
       :title =>  "render with a partial in rjs fails ",
       :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
 
-    assert_select 'pre',
-      /1?\d tests, [23]\d assertions, 0 failures, 0 errors/,
-      '1?\d tests, [23]\d assertions, 0 failures, 0 errors'
     assert_select 'pre', 
-      /47 tests, [78]\d assertions, 0 failures, 0 errors/,
-      '47 tests, [78]\d assertions, 0 failures, 0 errors'
+      /48 tests, [78]\d assertions, 0 failures, 0 errors/,
+      '48 tests, [78]\d assertions, 0 failures, 0 errors'
 
     assert_select '.stdout', /login"&gt;redirected/
     assert_select '.stdout', /customer@example.com/
@@ -296,8 +293,8 @@ class DepotTest < Gorp::TestCase
       /1?\d tests, [23]\d assertions, 0 failures, 0 errors/,
       '1?\d tests, [23]\d assertions, 0 failures, 0 errors'
     assert_select 'pre', 
-      /47 tests, [78]\d assertions, 0 failures, 0 errors/,
-      '47 tests, [78]\d assertions, 0 failures, 0 errors'
+      /48 tests, [78]\d assertions, 0 failures, 0 errors/,
+      '48 tests, [78]\d assertions, 0 failures, 0 errors'
     assert_select 'pre', 
       /3 tests, \d+ assertions, 0 failures, 0 errors/,
       '3 tests, \d+ assertions, 0 failures, 0 errors'

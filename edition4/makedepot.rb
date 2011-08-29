@@ -1555,7 +1555,7 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
 
   desc 'Implement helper'
   edit 'app/helpers/application_helper.rb' do
-    msub /()^end/, <<-EOF.unindent(4)
+    msub /()^end/, <<-EOF.unindent(4), :highlight
       def hidden_div_if(condition, attributes = {}, &block)
         if condition
           attributes["style"] = "display: none"
@@ -2162,7 +2162,7 @@ section 12.4, 'Playtime' do
   end
 
   desc 'Fetch the XML, see that there are no orders there'
-  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
+  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.atom'
 
   desc 'Include "orders" in the response'
   edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
@@ -2252,7 +2252,7 @@ end
 
 section 13.1, 'Iteration H1: Email Notifications' do
   desc 'Create a mailer'
-  generate 'mailer Notifier order_received order_shipped'
+  generate 'mailer OrderNotifier received shipped'
 
   desc 'Edit development configuration'
   edit 'config/environments/development.rb' do
@@ -2263,27 +2263,27 @@ section 13.1, 'Iteration H1: Email Notifications' do
       # Alternate configuration example, using gmail:
       #   config.action_mailer.delivery_method = :smtp
       #   config.action_mailer.smtp_settings = {
-      #	    address:        "smtp.gmail.com",
-      #	    port:           587, 
-      #	    domain:         "domain.of.sender.net",
-      #	    authentication: "plain",
-      #	    user_name:      "dave",
-      #	    password:       "secret",
+      #     address:        "smtp.gmail.com",
+      #     port:           587, 
+      #     domain:         "domain.of.sender.net",
+      #     authentication: "plain",
+      #     user_name:      "dave",
+      #     password:       "secret",
       #     enable_starttls_auto: true
-      #	  } 
+      #   } 
     EOF
   end
 
   desc 'Tailor the from address'
-  edit 'app/mailers/notifier.rb' do
+  edit 'app/mailers/order_notifier.rb' do
     edit 'from', :highlight do
       msub /from:?\s*=?>?\s*(.*)/, "'Sam Ruby <depot@example.com>'"
     end
   end
 
   desc 'Tailor the confirm receipt email'
-  edit 'app/views/notifier/order_received.text.erb' do |data|
-    data.all = <<-EOF.unindent(6)
+  edit 'app/views/order_notifier/received.text.erb' do
+    self.all = <<-EOF.unindent(6)
       Dear <%= @order.name %>
 
       Thank you for your recent order from The Pragmatic Store.
@@ -2309,16 +2309,16 @@ section 13.1, 'Iteration H1: Email Notifications' do
   publish_code_snapshot :q
 
   desc 'Get the order, sent the confirmation'
-  edit 'app/mailers/notifier.rb' do
+  edit 'app/mailers/order_notifier.rb' do
     clear_highlights
-    %w(order_received order_shipped).each do |notice|
+    %w(received shipped).each do |notice|
       dcl notice, :mark => notice
       msub /def #{notice}(.*)/, '(order)'
       msub /(.*@greeting.*\n)/, ''
       msub /def #{notice}.*\n()/, <<-EOF.unindent(4)
         @order = order
       EOF
-      if notice == 'order_received'
+      if notice == 'received'
         msub /("to@example.org")/, 
           "order.email, :subject => 'Pragmatic Store Order Confirmation'"
       else
@@ -2334,14 +2334,14 @@ section 13.1, 'Iteration H1: Email Notifications' do
     clear_highlights
     dcl 'create' do
       msub /\n()\s+format/, <<-EOF, :highlight
-        Notifier.order_received(@order).deliver
+        OrderNotifier.received(@order).deliver
       EOF
     end
   end
 
   desc 'Tailor the confirm shipped email (this time in HTML)'
-  edit 'app/views/notifier/order_shipped.html.erb' do |data|
-    data.all = <<-EOF.unindent(6)
+  edit 'app/views/order_notifier/shipped.html.erb' do
+    self.all = <<-EOF.unindent(6)
       <h3>Pragmatic Order Shipped</h3>
       <p>
         This is just to let you know that we've shipped your recent order:
@@ -2360,14 +2360,14 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   desc 'Update the test case'
-  edit 'test/functional/notifier_test.rb' do
+  edit 'test/functional/order_notifier_test.rb' do
     2.times do
-      msub /Notifier.order_\w+()$/, '(orders(:one))'
+      msub /OrderNotifier.\w+()$/, '(orders(:one))'
       msub /do()\s+mail =/, "\n#START_HIGHLIGHT"
       msub /mail.body.encoded()\s+end/, "\n#END_HIGHLIGHT"
     end
-    gsub! 'Order received', 'Pragmatic Store Order Confirmation'
-    gsub! 'Order shipped', 'Pragmatic Store Order Shipped'
+    gsub! 'Received', 'Pragmatic Store Order Confirmation'
+    gsub! 'Shipped', 'Pragmatic Store Order Shipped'
     gsub! 'to@example.org', 'dave@example.org'
     gsub! 'from@example.com', 'depot@example.com'
     msub /assert_match (".*?), mail/, '/1 x Programming Ruby 1.9/'
@@ -2377,7 +2377,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   rake 'db:test:load'
-  ruby '-I test test/functional/notifier_test.rb'
+  ruby '-I test test/functional/order_notifier_test.rb'
 end
 
 section 13.2, 'Iteration H2: Integration Tests' do
@@ -2818,8 +2818,21 @@ section 14.4, 'Iteration I4: Adding a Sidebar' do
 end
 
 section 14.5, 'Playtime' do
-  desc 'See that requiring a login causes most tests to fail (good!)'
-  cmd 'rake test'
+  desc 'Verify that accessing product information requires login'
+  edit 'test/functional/products_controller_test.rb', 'logout' do
+    clear_all_marks
+    msub /^()end/, "\n"
+    msub /^()end/, <<-EOF.unindent(4), :mark => 'logout'
+      test "should require login" do
+        logout
+        get :index
+        assert_redirected_to login_path
+      end
+    EOF
+  end
+
+  desc 'Verify  that the test passes'
+  cmd 'rake test:functionals'
 
   desc 'Look at the data in the database'
   cmd 'sqlite3 db/development.sqlite3 .schema'
@@ -2829,14 +2842,14 @@ section 14.5, 'Playtime' do
 
   issue 'Is this the best way to detect request format?'
   desc 'Enable basic auth'
-  edit 'app/controllers/application_controller.rb', 'auth' do |data|
-    data.clear_highlights
-    data.dcl 'authorize', :mark => 'auth' do |auth|
-      auth.gsub! /^      /, '        '
-      auth.msub /def authorize\n()/, <<-EOF.unindent(2), :highlight
+  edit 'app/controllers/application_controller.rb', 'auth' do
+    clear_highlights
+    dcl 'authorize', :mark => 'auth' do
+      gsub! /^      /, '        '
+      msub /def authorize\n()/, <<-EOF.unindent(2), :highlight
         if request.format == Mime::HTML 
       EOF
-      auth.msub /\n()    end/, <<-EOF.unindent(2), :highlight
+      msub /\n()    end/, <<-EOF.unindent(2), :highlight
         else
           authenticate_or_request_with_http_basic do |username, password|
             user = User.find_by_name(username)
@@ -3033,13 +3046,15 @@ section 15.3, 'Task J3: Translating Checkout' do
 
   desc 'Display messages in raw form, and translate error messages'
   edit 'app/views/orders/_form.html.erb' do
-    edit '<%= msg %>', :highlight
+    edit '<%= msg %>', :highlight do
+      msub /<%=() /, 'raw'
+    end
 
     msub /\A()/, "<!-- START:explanation -->\n"
     msub /<h2>(.*)<\/h2>/m,  ''
     edit '<h2>', :highlight
     msub /(<h2><\/h2>)/, 
-      "<h2><%= t('errors.template.header', :count=>@order.errors.size,\n" +
+      "<h2><%=raw t('errors.template.header', :count=>@order.errors.count,\n" +
       "        :model=>t('activerecord.models.order')) %>.</h2>\n" +
       "      <p><%= t('errors.template.body') %></p>"
     msub /^  <% end %>\n()/, <<-EOF.unindent(6)
