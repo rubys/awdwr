@@ -2416,6 +2416,15 @@ section 14.1, 'Iteration I1: Adding Users' do
     generate 'scaffold User name:string hashed_password:string salt:string'
   else
     generate 'scaffold User name:string password_digest:string'
+
+    if File.read('Gemfile') =~ /^#\sgem\s+['"]bcrypt-ruby['"]/
+      desc 'uncomment out bcrypt-ruby'
+      edit 'Gemfile' do
+        clear_all_marks
+        msub /^(#\s)gem\s+['"]bcrypt-ruby['"]/, ''
+      end
+      restart_server
+    end
   end
 
   desc 'Run the migration'
