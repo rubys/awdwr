@@ -119,7 +119,7 @@ libs.each do |lib|
   Dir.chdir(File.join(HOME,'git',lib)) do 
     print lib + ': '
     system 'git pull'
-    system "git checkout #{branches[lib]}" if branches[lib]
+    system "git checkout #{branches[lib] or 'master'}"
   end
 end
 ENV['RUBYLIB'] = libs.map {|lib| File.join(HOME,'git',lib,'lib')}.
@@ -154,6 +154,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
         gemfile.puts "gem 'activemerchant'"
         gemfile.puts "gem 'haml'"
         gemfile.puts "gem 'will_paginate'"
+        gemfile.puts "gem 'bcrypt-ruby'"
       else
         gemfile.puts "gem 'mysql'"
         gemfile.puts "gem 'activemerchant', '~> 1.10.0'"
