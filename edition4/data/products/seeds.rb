@@ -5,7 +5,7 @@ Product.delete_all
 Product.create(:title => 'CoffeeScript',
   :description => 
     %{<p>
-        CoffeeScript is JavaScript done right. It provides all of JavaScript’s
+        CoffeeScript is JavaScript done right. It provides all of JavaScript's
 	functionality wrapped in a cleaner, more succinct syntax. In the first
 	book on this exciting new language, CoffeeScript guru Trevor Burnham
 	shows you how to hold onto all the power and flexibility of JavaScript

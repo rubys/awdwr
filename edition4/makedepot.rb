@@ -227,7 +227,6 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
 
   desc "And, just to verify that we haven't broken anything"
   cmd 'rake test'
-  publish_code_snapshot :a
 end
 
 section 6.2, 'Iteration A2: Making Prettier Listings' do
@@ -235,14 +234,6 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     Show the relationship between various artifacts: seed data,
     stylesheets, html, and images.
   EOF
-
-  desc 'Load some "seed" data'
-  edit "db/seeds.rb", 'vcc' do |data|
-    data.all = read('products/seeds.rb')
-    data.gsub! '/images/', '' unless File.exist? 'public/images'
-    data.gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
-  end
-  cmd 'rake db:seed'
 
   if File.exist? 'public/images'
     desc 'Copy some images and a stylesheet'
@@ -261,23 +252,19 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     end
   end
 
+  desc 'Load some "seed" data'
+  edit "db/seeds.rb", 'vcc' do |data|
+    data.all = read('products/seeds.rb')
+    data.gsub! '/images/', '' unless File.exist? 'public/images'
+    data.gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
+  end
+  cmd 'rake db:seed'
+
   desc 'Link to the stylesheet in the layout'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
     edit '<body>', :highlight
     msub /<body()>/, " class='<%= controller.controller_name %>'"
-    msub /stylesheet_link_tag.*()/, 
-      '<!-- <label id="code.depot.b.stylesheet.link.tag"/> -->'
-  end
-
-  unless File.exist? 'public/images'
-    desc 'Review the application stylesheet'
-    edit 'app/assets/stylesheets/application.css' do
-      col = 67
-      comment = self[/((\n \* .*)+)/,1].gsub(/\n \*/,'').strip
-      comment.gsub! /(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/, " * \\1\\3\n"
-      self[/\n(( \* .*\n)+)/,1] = comment
-    end
   end
 
   desc 'Replace the scaffold generated view with some custom HTML'
@@ -318,6 +305,8 @@ section 6.3, 'Playtime' do
 
   desc 'Initial commit.'
   cmd 'git commit -m "Depot Scaffold"'
+
+  publish_code_snapshot :a
 end
 
 section 7.1, 'Iteration B1: Validation and Unit Testing' do
@@ -370,8 +359,6 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
     data.sub! /\s:allow_blank.*,/, ''
     data.sub! /0.00/,  '0.01'
   end
-
-  publish_code_snapshot :b
 
   desc 'Now run the tests... and watch them fail :-('
   cmd 'rake test'
@@ -426,6 +413,13 @@ section 7.2, 'Iteration B2: Unit Testing' do
     data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
+  desc 'Look at existing test data'
+  edit "test/fixtures/products.yml" do
+    msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
+  end
+
+  publish_code_snapshot :b
+
   desc 'Add a fixture.'
   edit "test/fixtures/products.yml" do
     msub /.*\n()/m, "\n" + <<-EOF.unindent(6), :mark => 'ruby'
@@ -473,12 +467,12 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   generate 'controller Store index'
 
   desc "Route the 'root' of the site to the store"
-  edit 'config/routes.rb', 'root' do |data|
-    data.msub /^()/, "# START:root\n"
-    data.msub /\n()  #/, "  # ...\n# END:root\n"
+  edit 'config/routes.rb', 'root' do
+    msub /^()/, "# START:root\n"
+    msub /\n()  #/, "  # ...\n# END:root\n"
 
-    data.msub /()\s+#.+root of your site/, "\n# START:root"
-    data.msub /root :to.*\n()/, <<-EOF.unindent(4)
+    msub /()\s+#.+root of your site/, "\n# START:root"
+    msub /root :to.*\n()/, <<-EOF.unindent(4)
       # START_HIGHLIGHT
       root :to => 'store#index', :as => 'store'
       # END_HIGHLIGHT
@@ -486,11 +480,11 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
       # ...
       # END:root
     EOF
-    data.edit 'store#index' do
+    edit 'store#index' do
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
 
-    data.edit /^end/, :mark=>'root'
+    edit /^end/, :mark=>'root'
   end
 
   desc 'Delete public/index.html, as instructed.'
@@ -500,15 +494,15 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   get '/'
 
   desc 'In the controller, get a list of products from the model'
-  edit 'app/controllers/store_controller.rb' do |data|
-    data.msub /def index.*\n()/, <<-EOF.unindent(2), :highlight
+  edit 'app/controllers/store_controller.rb' do
+    msub /def index.*\n()/, <<-EOF.unindent(2), :highlight
       @products = Product.order(:title)
     EOF
   end
 
   desc 'In the view, display a list of products'
-  edit 'app/views/store/index.html.erb' do |data|
-    data.all = read('store/index.html.erb')
+  edit 'app/views/store/index.html.erb' do
+    self.all = read('store/index.html.erb')
   end
 
   unless File.exist? 'public/images'
@@ -531,6 +525,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
   desc 'Modify the application layout'
   edit 'app/views/layouts/application.html.erb' do
+    clear_highlights
     self.all = read('store/layout.html.erb')
     gsub! '"application"', '"depot"' if File.exist? 'public/images'
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -543,6 +538,11 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
     desc 'Add our style rules'
     edit DEPOT_CSS do
+      col = 67
+      comment = self[/((\n \* .*)+)/,1].gsub(/\n \*/,'').strip
+      comment.gsub! /(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/, " * \\1\\3\n"
+      self[/\n(( \* .*\n)+)/,1] = comment
+
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
         #banner {
@@ -723,8 +723,8 @@ section 9.1, 'Iteration D1: Finding a Cart' do
 
   desc "Implement current_cart, which creates a new cart if it" +
     " can't find one."
-  edit 'app/controllers/application_controller.rb' do |data|
-    data.msub /()^end/, "\n" + <<-EOF.unindent(4), :highlight
+  edit 'app/controllers/application_controller.rb' do
+    msub /()^end/, "\n" + <<-EOF.unindent(4), :highlight
       private
 
         def current_cart 
@@ -740,7 +740,7 @@ section 9.1, 'Iteration D1: Finding a Cart' do
     issue 'Replace with signed cookies?'
     next
 
-    data.msub /()^end/, "\n" + <<-EOF.unindent(4), :highlight
+    msub /()^end/, "\n" + <<-EOF.unindent(4), :highlight
       private
 
         def current_cart 
@@ -766,8 +766,8 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
   cmd 'rake db:migrate'
 
   desc 'Cart has many line items.'
-  edit 'app/models/cart.rb' do |data|
-    data.msub /class Cart.*\n()/, <<-EOF.unindent(4), :highlight
+  edit 'app/models/cart.rb' do
+    msub /class Cart.*\n()/, <<-EOF.unindent(4), :highlight
       has_many :line_items, :dependent => :destroy
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -814,8 +814,8 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
   desc 'Line item belongs to both Cart and Product ' +
        '(But slightly more to the Cart).  Also provide convenient access ' +
        "to the total price of the line item"
-  edit 'app/models/line_item.rb' do |data|
-    data.msub /class LineItem.*\n()/, <<-EOF.unindent(4), :highlight
+  edit 'app/models/line_item.rb' do
+    msub /class LineItem.*\n()/, <<-EOF.unindent(4), :highlight
       belongs_to :product
       belongs_to :cart
     EOF
@@ -829,8 +829,8 @@ section 9.3, 'Iteration D3: Adding a button' do
 
   desc 'Add the button, connecting it to the Line Item Controller, passing ' +
        'the product id.'
-  edit 'app/views/store/index.html.erb' do |data|
-    data.msub /number_to_currency.*\n()/, <<-EOF, :highlight
+  edit 'app/views/store/index.html.erb' do
+    msub /number_to_currency.*\n()/, <<-EOF, :highlight
       <%= button_to 'Add to Cart', line_items_path(:product_id => product) %>
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -864,8 +864,8 @@ section 9.3, 'Iteration D3: Adding a button' do
   desc 'Update the LineItem.new call to use current_cart and the ' +
        'product id. Additionally change the logic so that redirection upon ' +
        'success goes to the cart instead of the line item.'
-  edit 'app/controllers/line_items_controller.rb', 'create' do |data|
-    data.dcl 'create', :mark do
+  edit 'app/controllers/line_items_controller.rb', 'create' do
+    dcl 'create', :mark do
       edit 'LineItem.new', :highlight do
         msub /^()/, <<-EOF.unindent(6)
           @cart = current_cart
@@ -880,8 +880,8 @@ section 9.3, 'Iteration D3: Adding a button' do
       msub /,( ):?status/, "\n          "
     end
 
-    data.edit 'redirect_to', :highlight
-    data.msub /redirect_to[\(\s]@line_item()/, '.cart'
+    edit 'redirect_to', :highlight
+    msub /redirect_to[\(\s]@line_item()/, '.cart'
   end
 
   desc "Try it once, and see that the output isn't very useful yet."
@@ -917,8 +917,8 @@ section 9.4, 'Playtime' do
   cmd 'rake test'
 
   desc 'Update parameters passed as well as expected target of redirect'
-  edit 'test/functional/line_items_controller_test.rb', 'create' do |data|
-    data.dcl 'should create', :mark => 'create' do
+  edit 'test/functional/line_items_controller_test.rb', 'create' do
+    dcl 'should create', :mark => 'create' do
       edit 'post :create', :highlight do
         if self =~ /:line_item =>/
           msub /(:line_item =>.*)/, ':product_id => products(:ruby).id'
@@ -973,11 +973,11 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   end
 
   desc 'Replace the call to LineItem.new with a call to the new method.'
-  edit 'app/controllers/line_items_controller.rb', 'create' do |data|
-    data.clear_highlights
-    data.dcl 'create' do |create|
-      create.edit 'line_items.build', :highlight do |linew|
-        linew.msub /@line_item = (.*)/, '@cart.add_product(product.id)'
+  edit 'app/controllers/line_items_controller.rb', 'create' do
+    clear_highlights
+    dcl 'create' do
+      edit 'line_items.build', :highlight do
+        msub /@line_item = (.*)/, '@cart.add_product(product.id)'
       end
     end
   end
@@ -1226,37 +1226,37 @@ section 10.4, 'Playtime' do
   cmd 'rake test'
 
   desc 'Substitute names of products and carts for numbers'
-  edit 'test/fixtures/line_items.yml' do |data|
-    data.gsub! 'product_id: 1', 'product: ruby'
-    data.gsub! '_id: 1', ': one'
-    data.gsub! '_id: 2', ': two'
+  edit 'test/fixtures/line_items.yml' do
+    gsub! 'product_id: 1', 'product: ruby'
+    gsub! '_id: 1', ': one'
+    gsub! '_id: 2', ': two'
 
-    data.msub /one:\n(.*?)\n\n/m, '\1', :highlight
-    data.msub /two:\n(.*?)\n\Z/m, '\1', :highlight
+    msub /one:\n(.*?)\n\n/m, '\1', :highlight
+    msub /two:\n(.*?)\n\Z/m, '\1', :highlight
   end
 
   desc 'Update expected target of redirect: Cart#destroy.'
-  edit 'test/functional/carts_controller_test.rb', 'destroy' do |data|
-    data.dcl 'should destroy', :mark => 'destroy' do |destroy|
+  edit 'test/functional/carts_controller_test.rb', 'destroy' do
+    dcl 'should destroy', :mark => 'destroy' do |destroy|
       msub /().*delete :destroy/, "      session[:cart_id] = @cart.id\n", 
         :highlight
-      destroy.edit 'carts_path', :highlight do
+      edit 'carts_path', :highlight do
         msub /(carts)/, 'store'
       end
     end
   end
 
   desc 'Test both unique and duplicate products.'
-  edit "test/unit/cart_test.rb" do |data|
-    data.all = read('test/cart_test.rb')
+  edit "test/unit/cart_test.rb" do
+    self.all = read('test/cart_test.rb')
   end
   ruby '-I test test/unit/cart_test.rb'
 
   publish_code_snapshot :i
 
   desc 'Refactor.'
-  edit "test/unit/cart_test.rb" do |data|
-    data.all = read('test/cart_test1.rb')
+  edit "test/unit/cart_test.rb" do
+    self.all = read('test/cart_test1.rb')
   end
   ruby '-I test test/unit/cart_test.rb'
 
@@ -1874,6 +1874,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     edit 'pay_type: MyString', :highlight do
       sub! /MyString/, 'Check'
     end
+    msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
   end
 
   desc 'Move a line item from a cart to an order'
@@ -1881,6 +1882,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     clear_all_marks
     msub /(cart): one/, 'order'
     edit 'order:', :highlight
+    msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
   end
 
   desc 'Define a relationship from the line item to the order'
@@ -2132,8 +2134,9 @@ section 12.3, 'Iteration G3: Pagination' do
       edit 'Order.all', :highlight
       msub /Order\.(all)/, 
         "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
-        '      :per_page => 10'
+        '      :per_page=>10'
     end
+    gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
   end
 
   desc 'Add some navigational aids'
@@ -2646,21 +2649,22 @@ section 14.2, 'Iteration I2: Authenticating Users' do
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
-  edit "test/fixtures/users.yml" do |data|
+  edit "test/fixtures/users.yml" do
     if File.exist? 'public/images'
-      data.msub /(#.*)/, '<% SALT = "NaCl" unless defined?(SALT) %>'
-      data.edit /one:.*?\n\n/m do |one|
-        one.msub  /name: (.*)/, 'dave'
-        one.msub  /salt: (.*)/, '<%= SALT %>'
-        one.msub  /hashed_password: (.*)/, 
+      msub /(#.*)/, '<% SALT = "NaCl" unless defined?(SALT) %>'
+      edit /one:.*?\n\n/m do
+        msub  /name: (.*)/, 'dave'
+        msub  /salt: (.*)/, '<%= SALT %>'
+        msub  /hashed_password: (.*)/, 
           "<%= User.encrypt_password('secret', SALT) %>"
       end
     else
-      data.edit /one:.*?\n\n/m do |one|
-        one.msub  /name: (.*)/, 'dave'
-        one.msub  /password_digest: (.*)/, 
+      edit /one:.*?\n\n/m do
+        msub  /name: (.*)/, 'dave'
+        msub  /password_digest: (.*)/, 
           "<%= BCrypt::Password.create('secret') %>"
       end
+      msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
     end
   end
 
