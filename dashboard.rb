@@ -11,6 +11,18 @@ config = YAML.load(open('dashboard.yml'))
 LOGDIR = config.delete('log').sub('$HOME/',HOME)
 BINDIR = config.delete('bin').sub('$HOME/',HOME)
 
+# set up symbolic links
+if ARGV == ['--symlink']
+  config['book'].each do |edition|
+    edition.each do |name, vars|
+      unless File.exist? vars['web']
+        system "ln -s #{vars['home']} #{vars['web']}"
+      end
+    end
+  end
+  exit
+end
+
 # identify the unique jobs
 JOBS = config['book'].map do |editions|
   editions = [editions] if editions.respond_to? :push
