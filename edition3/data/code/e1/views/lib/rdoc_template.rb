@@ -1,3 +1,4 @@
+require 'rdoc'
 require 'rdoc/markup'
 require 'rdoc/markup/to_html'
 
