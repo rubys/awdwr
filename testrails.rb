@@ -186,17 +186,22 @@ OLDSTAT.gsub! /, 0 (pendings|omissions|notifications)/, ''
 args = ARGV.grep(/^(\d+(\.\d+)?-\d+(\.\d+)?|\d+\.\d+?|save|restore)$/)
 args << "--work=#{WORK}"
 
+# extract id from rvm names, useful for sorting
+rvmid = Proc.new {|n| n.split(/-[a-z]/).last.to_i}
+
 # build a new rvm, if necessary
 source=PROFILE.rvm['src']
 release=PROFILE.rvm['bin'].split('-')[1]
 if source
   Dir.chdir("#{RVM_PATH}/src") do
-    rev = Dir.chdir(source) do
-      system 'svn update'
-      `svn info`.scan(/Last Changed Rev: (\d+)/).flatten.first
+    rev = Dir.chdir("#{RVM_PATH}/repos/ruby") do
+      `git checkout #{source} 2>/dev/null`
+      `git pull`
+      log = `git log -n 1`
+      "#{log[/commit ([a-f0-9]{8})/,1]}-n#{log[/git-svn-id: .*@(\d*)/,1]}"
     end
 
-    break if File.exist? "../bin/ruby-#{release}-r#{rev}"
+    break if File.exist? "../bin/ruby-#{release}-s#{rev}"
 
     caches = Dir["#{RVM_PATH}/gems/#{PROFILE.gems}/cache"]
     caches.reject! {|cache| cache =~ /[%:@]/}
@@ -209,10 +214,9 @@ if source
     end
     
     bash %{
-      cp -r #{source} ruby-#{release}-r#{rev}
       source #{RVM_PATH}/scripts/rvm
-      TERM=dumb rvm install ruby-#{release}-r#{rev}
-      rvm #{release}-r#{rev}
+      TERM=dumb rvm install ruby-#{release}-s#{rev}
+      rvm #{release}-s#{rev}
       gem env path | cut -d ':' -f 1 | xargs chmod -R 0755
       gem install --no-ri --no-rdoc cache/*
     }
@@ -222,7 +226,7 @@ if source
     keep    = 3
 
     Dir.chdir(RVM_PATH) do
-      vms = Dir.chdir('rubies') { Dir["ruby-#{release}-r*"].sort }
+      vms = Dir.chdir('rubies') { Dir["ruby-#{release}-s*"].sort_by(&rvmid) }
       vms.slice! -keep..-1
       vms.delete_if {|vm| File.stat("rubies/#{vm}").mtime >= horizon}
 
@@ -230,7 +234,7 @@ if source
         system "find . -name #{vm} -exec rm -rf {} \\;"
       end
 
-      gems = Dir.chdir('gems') { Dir["ruby-#{release}-r*"].sort }
+      gems = Dir.chdir('gems') { Dir["ruby-#{release}-s*"].sort_by(&rvmid) }
       gems.slice! -keep*2..-1
       gems.delete_if {|gem| File.stat("gems/#{gem}").mtime >= horizon}
 
@@ -247,7 +251,7 @@ else
 end
 
 # find the rvm
-rvm = Dir[File.join(RVM_PATH,'rubies',PROFILE.rvm['bin'])].sort.last
+rvm = Dir[File.join(RVM_PATH,'rubies',PROFILE.rvm['bin'])].sort_by(&rvmid).last
 unless rvm
   puts "Unable to locate #{File.join(RVM_PATH,'rubies',PROFILE.rvm['bin'])}"
   exit
