@@ -8,6 +8,7 @@ ENV['LANG']='en_US.UTF-8'
 ENV['USER'] ||= HOME.split(File::Separator).last
 File.umask(0022)
 $rails = "#{HOME}/git/rails"
+RVM_PATH = File.expand_path(ENV['rvm_path'] || '~/.rvm')
 
 # parse ARGV based on configuration
 config = YAML.load(open('testrails.yml'))
@@ -189,7 +190,7 @@ args << "--work=#{WORK}"
 source=PROFILE.rvm['src']
 release=PROFILE.rvm['bin'].split('-')[1]
 if source
-  Dir.chdir("#{HOME}/.rvm/src") do
+  Dir.chdir("#{RVM_PATH}/src") do
     rev = Dir.chdir(source) do
       system 'svn update'
       `svn info`.scan(/Last Changed Rev: (\d+)/).flatten.first
@@ -197,7 +198,7 @@ if source
 
     break if File.exist? "../bin/ruby-#{release}-r#{rev}"
 
-    caches = Dir["#{HOME}/.rvm/gems/#{PROFILE.gems}/cache"]
+    caches = Dir["#{RVM_PATH}/gems/#{PROFILE.gems}/cache"]
     caches.reject! {|cache| cache =~ /[%:@]/}
     cache = caches.sort.last
 
@@ -209,7 +210,7 @@ if source
     
     bash %{
       cp -r #{source} ruby-#{release}-r#{rev}
-      source #{HOME}/.rvm/scripts/rvm
+      source #{RVM_PATH}/scripts/rvm
       TERM=dumb rvm install ruby-#{release}-r#{rev}
       rvm #{release}-r#{rev}
       gem env path | cut -d ':' -f 1 | xargs chmod -R 0755
@@ -220,7 +221,7 @@ if source
     horizon = Time.now - 7 * 86400
     keep    = 3
 
-    Dir.chdir("#{HOME}/.rvm") do
+    Dir.chdir(RVM_PATH) do
       vms = Dir.chdir('rubies') { Dir["ruby-#{release}-r*"].sort }
       vms.slice! -keep..-1
       vms.delete_if {|vm| File.stat("rubies/#{vm}").mtime >= horizon}
@@ -240,15 +241,15 @@ if source
   end
 else
   bash %{
-    source #{HOME}/.rvm/scripts/rvm
+    source #{RVM_PATH}/scripts/rvm
     rvm ruby-#{release} || TERM=dumb rvm install ruby-#{release}
   }
 end
 
 # find the rvm
-rvm = Dir[File.join(HOME,'.rvm','rubies',PROFILE.rvm['bin'])].sort.last
+rvm = Dir[File.join(RVM_PATH,'rubies',PROFILE.rvm['bin'])].sort.last
 unless rvm
-  puts "Unable to locate #{File.join(HOME,'.rvm','rubies',PROFILE.rvm['bin'])}"
+  puts "Unable to locate #{File.join(RVM_PATH,'rubies',PROFILE.rvm['bin'])}"
   exit
 end
 
@@ -271,7 +272,7 @@ system "rm -f #{WORK}/checkdepot.html"
 
 # run the script
 bash %{
-  source #{HOME}/.rvm/scripts/rvm
+  source #{RVM_PATH}/scripts/rvm
   rvm #{rvm.gsub(/.*\/ruby-/,'')}
   #{install}
   ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1
