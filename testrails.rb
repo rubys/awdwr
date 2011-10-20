@@ -117,8 +117,13 @@ end
 branches = Hash[*branches.flatten]
 
 libs.each do |lib|
+  print lib + ': '
+  if not File.exist? File.join(HOME,'git',lib)
+    Dir.chdir(File.join(HOME,'git')) do 
+      system "git clone https://github.com/rails/#{lib}"
+    end
+  end
   Dir.chdir(File.join(HOME,'git',lib)) do 
-    print lib + ': '
     system 'git pull'
     system "git checkout #{branches[lib] or 'master'}"
   end
