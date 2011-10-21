@@ -8,12 +8,12 @@
       <legend>Please Log In</legend>
 
       <div>
-        <label for="name">Name:</label>
+        <%= label_tag :name, 'Name:' %>
         <%= text_field_tag :name, params[:name] %>
       </div>
 
       <div>
-        <label for="password">Password:</label>
+        <%= label_tag :password, 'Password:' %>
         <%= password_field_tag :password, params[:password] %>
       </div>
   

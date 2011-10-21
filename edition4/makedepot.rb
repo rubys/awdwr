@@ -1092,21 +1092,6 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
-  if DEPOT_CSS =~ /scss/
-    edit DEPOT_CSS, 'columns' do
-      clear_highlights
-      msub /^ +#side \{.*?()\n    ul \{/m, "\n" + <<-EOF.unindent(4), :highlight
-        form, div {
-          display: inline;
-        }  
-
-        input {
-          font-size: small;
-        }
-      EOF
-    end
-  end
-
   desc 'Clear session and add flash notice when cart is destroyed.'
   edit 'app/controllers/carts_controller.rb', 'destroy' do
     dcl 'destroy', :mark => 'destroy' do
@@ -1379,8 +1364,16 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
     edit DEPOT_CSS, 'side' do
       clear_highlights
-      edit /#side.*\n  \}/m, :mark => 'side' do
+      edit /^  #side.*\n  \}/m, :mark => 'side' do
         msub /^()    ul \{$/, <<-EOF.unindent(6) + "\n", :highlight
+          form, div {
+            display: inline;
+          }  
+ 
+          input {
+            font-size: small;
+          }
+
           #cart {
             font-size: smaller;
             color:     white;
