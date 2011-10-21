@@ -173,11 +173,15 @@ $cgi.html do |x|
       $(document).ready(function() {
         $('tr td:nth-child(5)').click(function() {
           var parent = $(this).parent();
-          $('input[name=args]').val(
+          var args =
             parent.find('td:eq(0)').text().replace(/\\D/g,'') + ' ' +
             parent.find('td:eq(1)').text().replace(/\\D/g,'') + ' ' +
-            parent.find('td:eq(2)').text().replace(/\\D/g,'')
-          );
+            parent.find('td:eq(2)').text().replace(/\\D/g,'');
+          if ( $('input[name=args]').val().indexOf(',') != -1) {
+            args = $('input[name=args]').val() + ', ' + args;
+            args = args.replace(/,+\\s*/g, ', ')
+          }
+          $('input[name=args]').val(args);
           $(this).css({backgroundColor: '#ff0'}); 
           $(this).animate({backgroundColor: '#fff'}, 'slow'); 
           $('input[name=args]').css({backgroundColor: '#f70'}); 

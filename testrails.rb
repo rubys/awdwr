@@ -10,6 +10,12 @@ File.umask(0022)
 $rails = "#{HOME}/git/rails"
 RVM_PATH = File.expand_path(ENV['rvm_path'] || '~/.rvm')
 
+# chaining support
+if ARGV.join(' ').include?(',')
+  ARGV.join(' ').split(',').each { |args| system "#{$0} #{args.strip}" }
+  exit
+end
+
 # parse ARGV based on configuration
 config = YAML.load(open('testrails.yml'))
 profile = config['default'].dup
