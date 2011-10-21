@@ -110,6 +110,7 @@ if File.exist? template
     gems += [['uglifier',nil]] if app_base.include? 'uglifier'
     gems += [['json',nil]] if release < "1.9.2"
     gems += [['turn',', :require => false']] unless release < "1.9.2"
+    gems.last.last.sub!(',', ', "0.8.2",') if release == '1.9.2'
     gems += [['jquery-rails',nil]]
   else # Rails 3.0
     gemfile = open(template).read
