@@ -147,6 +147,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       ENV['RUBYLIB'].split(File::PATH_SEPARATOR).each do |path|
         path.sub! /\/lib$/, ''
         name = path.split(File::SEPARATOR).last
+        next if name == 'gorp'
         if File.exist?(File.join(path, "/#{name}.gemspec"))
           gemfile.puts "gem #{name.inspect}, :path => #{path.inspect}"
         end
