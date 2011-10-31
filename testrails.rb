@@ -213,10 +213,14 @@ if source
       `git checkout #{source} 2>/dev/null`
       `git pull`
       log = `git log -n 1`
-      "#{log[/commit ([a-f0-9]{8})/,1]}-n#{log[/git-svn-id: .*@(\d*)/,1]}"
+      if source == 'trunk'
+        "n#{log[/git-svn-id: .*@(\d*)/,1]}"
+      else
+        "s#{log[/commit ([a-f0-9]{8})/,1]}-n#{log[/git-svn-id: .*@(\d*)/,1]}"
+      end
     end
 
-    break if File.exist? "../bin/ruby-#{release}-s#{rev}"
+    break if File.exist? "../bin/ruby-#{release}-#{rev}"
 
     caches = Dir["#{RVM_PATH}/gems/#{PROFILE.gems}/cache"]
     caches.reject! {|cache| cache =~ /[%:@]/}
@@ -230,8 +234,8 @@ if source
     
     bash %{
       source #{RVM_PATH}/scripts/rvm
-      TERM=dumb rvm install ruby-#{release}-s#{rev}
-      rvm #{release}-s#{rev}
+      TERM=dumb rvm install ruby-#{release}-#{rev}
+      rvm ruby-#{release}-#{rev}
       gem env path | cut -d ':' -f 1 | xargs chmod -R 0755
       gem install --no-ri --no-rdoc cache/*
     }
@@ -292,7 +296,7 @@ system "rm -f #{WORK}/checkdepot.html"
 # run the script
 bash %{
   source #{RVM_PATH}/scripts/rvm
-  rvm #{rvm.gsub(/.*\/ruby-/,'')}
+  rvm #{rvm.gsub(/.*\/ruby-/,'ruby-')}
   #{install}
   ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1
 }
