@@ -245,7 +245,7 @@ if source
     keep    = 3
 
     Dir.chdir(RVM_PATH) do
-      vms = Dir.chdir('rubies') { Dir["ruby-#{release}-s*"].sort_by(&rvmid) }
+      vms = Dir.chdir('rubies') { Dir[PROFILE.rvm['bin']].sort_by(&rvmid) }
       vms.slice! -keep..-1
       vms.delete_if {|vm| File.stat("rubies/#{vm}").mtime >= horizon}
 
