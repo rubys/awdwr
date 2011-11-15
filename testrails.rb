@@ -259,6 +259,7 @@ if source
 
       gems.each do |gem|
         system "find . -name #{gem} -exec rm -rf {} \\;"
+        system "find . -name #{gem}@global -exec rm -rf {} \\;"
       end
     end
   end
