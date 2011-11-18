@@ -210,7 +210,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 13.1, "Iteration H1: Email Notifications" do
-    assert_test_summary 'pre', :tests => 2, :assertions => 8
+    assert_test_summary 'pre', :tests => 2, :assertions => '(8|10)'
   end
 
   section 13.2, "Iteration H2: Integration Tests" do
