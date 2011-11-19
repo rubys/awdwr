@@ -310,6 +310,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 20.1, "Testing Routing" do
+    ticket 3693,
+      :title =>  "RoutingAssertions fail on master on Ruby 1.8.7",
+      :match => /"path"=&gt;"\(:locale\)"/
     assert_test_summary 'pre', :tests => '1\d', :assertions => '4\d'
   end
 
