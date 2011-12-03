@@ -251,15 +251,7 @@ if source
 
       vms.each do |vm|
         system "find . -name #{vm} -exec rm -rf {} \\;"
-      end
-
-      gems = Dir.chdir('gems') { Dir["ruby-#{release}-s*"].sort_by(&rvmid) }
-      gems.slice! -keep*2..-1
-      gems.delete_if {|gem| File.stat("gems/#{gem}").mtime >= horizon}
-
-      gems.each do |gem|
-        system "find . -name #{gem} -exec rm -rf {} \\;"
-        system "find . -name #{gem}@global -exec rm -rf {} \\;"
+        system "find . -name #{vm}@global -exec rm -rf {} \\;"
       end
     end
   end
