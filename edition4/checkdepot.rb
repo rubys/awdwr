@@ -186,6 +186,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.4, "Playtime" do
+    ticket 3837,
+      :title =>  "to_xml fails on master",
+      :match => /undefined method `xmlschema'/
+
     # raw xml
     assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/,
       'Missing <email>customer@example.com</email>'
