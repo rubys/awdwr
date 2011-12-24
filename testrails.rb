@@ -133,8 +133,8 @@ libs.each do |lib|
     end
   end
   Dir.chdir(File.join(HOME,'git',lib)) do 
-    system 'git pull'
     system "git checkout #{branches[lib] or 'master'}"
+    system 'git pull'
   end
 end
 ENV['RUBYLIB'] = libs.map {|lib| File.join(HOME,'git',lib,'lib')}.
