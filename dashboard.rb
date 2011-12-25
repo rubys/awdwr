@@ -177,6 +177,7 @@ $cgi.html do |x|
             parent.find('td:eq(0)').text().replace(/\\D/g,'') + ' ' +
             parent.find('td:eq(1)').text().replace(/\\D/g,'') + ' ' +
             parent.find('td:eq(2)').text().replace(/\\D/g,'');
+          if (parent.find('td:eq(0)').text() == 'svn') args = 'svn' + args;
           if ( $('input[name=args]').val().indexOf(',') != -1) {
             args = $('input[name=args]').val() + ', ' + args;
             args = args.replace(/,+\\s*/g, ', ')

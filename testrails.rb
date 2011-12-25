@@ -374,6 +374,7 @@ else
 end
 
 # copy the log
+system "mkdir -p #{WORK}/checkdepot"
 system "cp #{LOG} #{WORK}/checkdepot/makedepot.log"
 
 # restore rails to master
