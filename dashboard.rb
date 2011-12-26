@@ -89,7 +89,7 @@ $cgi.html do |x|
 
         table {border-spacing: 0; margin-left: auto; margin-right:auto}
         th {color: #000; background-color: #99C; border: solid #000 1px}
-        .r23 {background-color: #CCC}
+        .odd {background-color: #CCC}
         th, td {border: solid 1px; padding: 0.5em} 
         .hilite {background-color: #FF9}
         .pass {background-color: #9C9}
@@ -238,7 +238,7 @@ $cgi.html do |x|
           mtime = File.stat(statfile).mtime.iso8601 rescue 'missing'
 
           attrs = {:id => job['id']}
-          attrs[:class]='r23' if job['rails']=='3.0'
+          attrs[:class]='odd' if %w(2.3 3.1 4.0).include? job['rails']
 
           if $param.static
             link =  "#{job['work'].sub('work','checkdepot')}.html"
@@ -266,7 +266,7 @@ $cgi.html do |x|
             x.td job['book'], {:align=>'right'}.
               merge(job['book']=='4' ? {} : {:class=>'hilite'})
             x.td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='1.8.7')
-            x.td job['rails'], ({:class=>'hilite'} if job['rails']!='3.1')
+            x.td job['rails'], ({:class=>'hilite'} if job['rails']!='3.2')
             x.td :class=>color, :align=>'center' do
               if status == 'NO OUTPUT'
                 link.sub! ".html", '/'
