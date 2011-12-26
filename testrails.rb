@@ -33,7 +33,8 @@ PROFILE = OpenStruct.new(profile)
 
 COMMIT = ARGV.find {|arg| arg =~ /http:\/\/github.com\/rails\/rails\/commit\//}
 
-log=config.find_all {|k,v| ARGV.include? k.to_s}.map {|k,v| k}.join('-')
+log=config.find_all {|k,v| v['output'] and ARGV.include? k.to_s}.
+  map {|k,v| k}.join('-')
 LOG = "#{HOME}/logs/makedepot#{log}.log"
 system "mkdir -p #{File.dirname(LOG)}"
 
