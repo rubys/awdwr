@@ -202,7 +202,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /total_price = 28.5/
     assert_select '.stdout', /&lt;id type="integer"&gt;3&lt;\/id&gt;/
     assert_select '.stdout', /&lt;td&gt;Pragmatic Version Control&lt;\/td&gt;/
-    assert_select '.stdout', /, ?"title": ?"Pragmatic Version Control"/
+    assert_select '.stdout', /[{,] ?"title": ?"Pragmatic Version Control"[,}]/
   end
 
   section 13, "Internationalization" do
@@ -359,7 +359,7 @@ class DepotTest < Gorp::TestCase
     assert_match /^=> \[#<LineItem id: 1, product_id: 3.*\]$/, stdout.shift
     assert_match /^=> \[#<Order name: "Dave Thomas",.*\]$/, stdout.shift
     assert_equal "=> #<Order name: \"Dave Thomas\", pay_type: \"check\">", stdout.shift
-    assert_equal "{\"name\"=>\"Dave Thomas\", \"pay_type\"=>\"check\"}", stdout.shift
+    assert_match /\{"name"=>"Dave Thomas", "pay_type"=>"check"\}|\{"pay_type"=>"check", "name"=>"Dave Thomas"\}/, stdout.shift
     assert_match /^=> (nil|\{"name")/, stdout.shift
     assert_equal "[\"name\", \"pay_type\"]", stdout.shift
     assert_match /^=> (nil|\["name")/, stdout.shift
