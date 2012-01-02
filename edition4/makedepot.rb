@@ -31,6 +31,7 @@ section 2, 'Instant Gratification' do
   EOF
 
   desc 'Create the application'
+  ENV.delete('BUNDLE_GEMFILE')
   rails 'demo1', :work
 
   desc 'See what files were created'
