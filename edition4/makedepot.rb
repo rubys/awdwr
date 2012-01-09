@@ -2103,6 +2103,16 @@ section 12.3, 'Iteration G3: Pagination' do
       :highlight
     end
   end
+
+  `ruby -I test test/unit/product_test.rb 2> /dev/null > /dev/null`
+  unless $?.success?
+    ruby '-I test test/unit/product_test.rb 2> /dev/null > /dev/null'
+    edit 'Gemfile' do
+      msub /()gem 'will_paginate'/, '# '
+    end
+    next
+  end
+
   restart_server
   
   cmd 'bundle show'
