@@ -57,7 +57,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'input#product_title[value=CoffeeScript]'
     assert_select "a[href=http://localhost:#{$PORT}/products/1]", 'redirected'
     assert_test_summary 'pre', :tests => '[01]', :assertions => '[01]'
-    assert_test_summary 'pre', :tests => 7, :assertions => 10
+    assert_test_summary 'pre', :tests => 7, :assertions => '1[03]'
   end
 
   section 6.2, "Iteration A2: Prettier Listings" do
@@ -78,7 +78,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'li', 'Price is not a number'
     assert_select '.field_with_errors input[id=product_price]'
     assert_test_summary 'pre', :tests => '[01]', :assertions => '[01]'
-    assert_test_summary 'pre', :tests => 7, :assertions => 10
+    assert_test_summary 'pre', :tests => 7, :assertions => '1[03]'
   end
 
   section 7.2, 'Iteration B2: Unit Testing' do
@@ -141,7 +141,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.4, "Playtime" do
     assert_test_summary 'pre', :tests => '\d', :assertions => '2\d'
-    assert_test_summary 'pre', :tests => 23, :assertions => 37
+    assert_test_summary 'pre', :tests => 23, :assertions => '[34]7'
     assert_select '.stdout', /AddPriceToLineItem: migrated/
   end
 
@@ -163,7 +163,7 @@ class DepotTest < Gorp::TestCase
 
     assert_test_summary 'pre', :tests => '[78]', :assertions => '2\d'
     assert_select 'code', "undefined method `line_items' for nil:NilClass"
-    assert_test_summary 'pre', :tests => '2\d', :assertions => '4\d'
+    assert_test_summary 'pre', :tests => '2\d', :assertions => '[45]\d'
   end
 
   section 12.1, "Iteration G1: Capturing an Order" do
@@ -210,7 +210,7 @@ class DepotTest < Gorp::TestCase
 
     # test clean
     assert_test_summary 'pre', :tests => '[79]', :assertions => '[23]\d'
-    assert_test_summary 'pre', :tests => '3\d', :assertions => '[45]\d'
+    assert_test_summary 'pre', :tests => '3\d', :assertions => '[456]\d'
   end
 
   section 13.1, "Iteration H1: Email Notifications" do
@@ -237,11 +237,11 @@ class DepotTest < Gorp::TestCase
 
   section 14.2, "Iteration I2: Authenticating Users" do
     assert_select 'h1', 'Welcome'
-    assert_test_summary 'pre', :tests => 47, :assertions => '[78]\d'
+    assert_test_summary 'pre', :tests => 47, :assertions => '[789]\d'
   end
 
   section 14.3, "Iteration I3: Limiting Access" do
-    assert_test_summary 'pre', :tests => 47, :assertions => '[78]\d'
+    assert_test_summary 'pre', :tests => 47, :assertions => '[789]\d'
   end
 
   section 14.4, "Iteration I4: Adding a Sidebar" do
@@ -257,7 +257,7 @@ class DepotTest < Gorp::TestCase
       :title =>  "render with a partial in rjs fails ",
       :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
 
-    assert_test_summary 'pre', :tests => 48, :assertions => '[78]\d'
+    assert_test_summary 'pre', :tests => 48, :assertions => '[789]\d'
 
     assert_select '.stdout', /login"&gt;redirected/
     assert_select '.stdout', /customer@example.com/
@@ -298,7 +298,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'h1', 'Your Pragmatic Catalog'
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
     assert_test_summary 'pre', :tests => '1?\d', :assertions => '[23]\d'
-    assert_test_summary 'pre', :tests => 48, :assertions => '[78]\d'
+    assert_test_summary 'pre', :tests => 48, :assertions => '[789]\d'
     assert_test_summary 'pre', :tests => 3, :assertions => '\d+'
   end
 
