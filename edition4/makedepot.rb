@@ -2104,9 +2104,9 @@ section 12.3, 'Iteration G3: Pagination' do
     end
   end
 
-  `ruby -I test test/unit/product_test.rb 2> /dev/null > /dev/null`
+  `ruby -I test test/unit/order_test.rb 2> /dev/null > /dev/null`
   unless $?.success?
-    ruby '-I test test/unit/product_test.rb 2> /dev/null > /dev/null'
+    ruby '-I test test/unit/order_test.rb'
     edit 'Gemfile' do
       msub /()gem 'will_paginate'/, '# '
     end
