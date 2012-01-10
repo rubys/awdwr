@@ -2104,6 +2104,7 @@ section 12.3, 'Iteration G3: Pagination' do
     end
   end
 
+  `rake environment RAILS_ENV=test db:migrate` if $rails_version =~ /^3\.0/
   `ruby -I test test/unit/order_test.rb 2> /dev/null > /dev/null`
   unless $?.success?
     ruby '-I test test/unit/order_test.rb'
