@@ -100,10 +100,12 @@ template = File.join(HOME,'git','rails',
 base = File.join(HOME,'git','rails',
   'railties/lib/rails/generators/app_base.rb')
 if File.exist? template
+  gemfile = File.read(template)
   if File.exist? base # Rails 3.1
     app_base = File.read(base)
     libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
-    gems += File.read(template).scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
+    libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
+    gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
     branches = app_base.scan(
       /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
 
@@ -116,7 +118,6 @@ if File.exist? template
     end
     gems += [['jquery-rails',nil]]
   else # Rails 3.0
-    gemfile = open(template).read
     libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/)
     gems += [['jquery-rails',', "~> 0.2.2"']]
   end
