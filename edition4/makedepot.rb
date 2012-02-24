@@ -3226,7 +3226,7 @@ section 16, 'Deployment' do
   else
     edit 'Capfile' do
       edit 'deploy/assets', :highlight do
-        msub /^(# )/, ''
+        msub /^(\s*# )load/, ''
       end
       msub /\.()each/, "\n  "
     end
