@@ -13,7 +13,9 @@ class CombineItemsInCart < ActiveRecord::Migration
           cart.line_items.where(:product_id=>product_id).delete_all
 
           # replace with a single item
-          cart.line_items.create(:product_id=>product_id, :quantity=>quantity)
+          item = cart.line_items.build(:product_id=>product_id)
+          item.quantity = quantity
+          item.save!
         end
       end
     end

@@ -384,9 +384,15 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
     end
     
     %w(update create).each do |test|
-      data.dcl "should #{test} product", :mark => 'valid' do
-        edit 'attributes', :highlight do
-          sub! /@product.attributes/, "@update"
+      dcl "should #{test} product", :mark => 'valid' do
+        if match /attributes/
+          edit 'attributes', :highlight do
+            sub! /@product.attributes/, "@update"
+          end
+        else
+          edit /^\s+(put|post) :.*\n/, :highlight do
+            sub! /\{.*\}/, "@update"
+          end
         end
         self.all <<= "\n  # ...\n"
       end
@@ -873,7 +879,7 @@ section 9.3, 'Iteration D3: Adding a button' do
           product = Product.find(params[:product_id])
         EOF
         msub /(LineItem.new\(.*\))/,
-          "@cart.line_items.build(:product => product)"
+          "@cart.line_items.build\n    @line_item.product = product"
         gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
       end
       msub /,( ):?notice/, "\n          "
@@ -1707,9 +1713,11 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       empty.dcl 'requires item in cart', :highlight
     
       getnew.msub /do\n()/, <<-EOF.unindent(4) + "\n", :highlight
-        cart = Cart.create
-        session[:cart_id] = cart.id
-        LineItem.create(:cart => cart, :product => products(:ruby))
+        item = LineItem.new
+        item.build_cart
+        item.product = products(:ruby)
+        item.save!
+        session[:cart_id] = item.cart.id
       EOF
 
       getnew.msub /()\A/, empty + "\n"
@@ -2456,6 +2464,7 @@ section 14.1, 'Iteration I1: Adding Users' do
     else
       self.all = <<-EOF.unindent(8)
         class User < ActiveRecord::Base
+          attr_accessible :name, :password, :password_confirmation
           validates :name, :presence => true, :uniqueness => true
           has_secure_password
         end
@@ -2539,8 +2548,14 @@ section 14.1, 'Iteration I1: Adding Users' do
     %w(update create).each do |test|
       data.dcl "should #{test} user", :mark => 'update' do
         msub /\A()/, "  #...\n"
-        edit 'attributes', :highlight
-        sub! '@user.attributes', '@input_attributes'
+        if match /attributes/
+          edit 'attributes', :highlight
+          sub! '@user.attributes', '@input_attributes'
+        else
+          edit /^\s+(put|post) :.*\n/, :highlight do
+            sub! /\{.*\}/, "@input_attributes"
+          end
+        end
         edit 'user_path', :highlight
         msub /(user_path.*)/, 'users_path'
       end
