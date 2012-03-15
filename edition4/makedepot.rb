@@ -2697,7 +2697,7 @@ section 14.3, 'Iteration I3: Limiting Access' do
       EOF
     end
 
-    edit /^end\n/, :mark => 'auth' do
+    edit /^end\n?/, :mark => 'auth' do
       msub /()^end/, "\n    # ...\n"
       msub /()^end/, "\n" + <<-EOF.unindent(6), :highlight
         protected
