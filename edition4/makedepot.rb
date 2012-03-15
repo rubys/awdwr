@@ -2092,10 +2092,15 @@ section 12.2, 'Iteration G2: Atom Feeds' do
 end
 
 section 12.3, 'Iteration G3: Pagination' do
-  desc 'Add in the will_paginate gem'
+  if $rails_version =~ /^4\.0/
+    desc 'Add in the kaminari gem'
+  else
+    desc 'Add in the will_paginate gem'
+  end
   edit 'Gemfile' do
     msub /(\s*)\Z/, "\n\n"
     msub /\n\n()\Z/, "gem 'will_paginate', '~> 3.0'\n", :highlight
+    sub! /'will_paginate.*'/, "'kaminari'" if $rails_version =~ /^4\.0/
   end
   unless $bundle
     edit 'config/application.rb' do
@@ -2109,7 +2114,7 @@ section 12.3, 'Iteration G3: Pagination' do
   unless $?.success?
     ruby '-I test test/unit/order_test.rb'
     edit 'Gemfile' do
-      msub /()gem 'will_paginate'/, '# '
+      msub /()gem '(will_paginate|kaminari)'/, '# '
     end
     next
   end
@@ -2137,9 +2142,14 @@ section 12.3, 'Iteration G3: Pagination' do
     dcl 'index', :mark do
       # msub /^()/, "require 'will_paginate'\n", :highlight
       edit 'Order.all', :highlight
-      msub /Order\.(all)/, 
-        "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
-        '      :per_page=>10'
+      if $rails_version =~ /^4\.0/
+        msub /Order\.(all)/, 
+          "order('created_at desc').page(params[:page])"
+      else
+        msub /Order\.(all)/, 
+          "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
+          '      :per_page=>10'
+      end
     end
     gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
   end
@@ -2152,6 +2162,7 @@ section 12.3, 'Iteration G3: Pagination' do
       <!-- END_HIGHLIGHT -->
     EOF
     msub /,( ):?method/, "\n              "
+    gsub! 'will_','' if $rails_version =~ /^4\.0/
   end
 
   desc 'Show the orders'

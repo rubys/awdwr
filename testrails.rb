@@ -172,7 +172,11 @@ Dir.chdir File.join(PROFILE.source,WORK) do
         gemfile.puts "gem 'mysql2'"
         gemfile.puts "gem 'activemerchant'"
         gemfile.puts "gem 'haml'"
-        gemfile.puts "gem 'will_paginate'"
+        if $rails_version =~ /^3\./
+          gemfile.puts "gem 'will_paginate'"
+        else
+          gemfile.puts "gem 'kaminari'"
+        end
         gemfile.puts "gem 'bcrypt-ruby'"
       else
         gemfile.puts "gem 'mysql'"
