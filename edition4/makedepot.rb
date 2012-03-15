@@ -365,9 +365,9 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
   cmd 'rake test'
 
   desc 'Solution is simple, provide valid data.'
-  edit 'test/functional/products_controller_test.rb', 'valid' do |data|
-    data.msub /()require/, "#START:valid\n"
-    data.msub /class.*\n()/, <<-EOF.unindent(6)
+  edit 'test/functional/products_controller_test.rb', 'valid' do
+    msub /()require/, "#START:valid\n"
+    msub /class.*\n()/, <<-EOF.unindent(6)
       #END:valid
     EOF
 
@@ -392,7 +392,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
       end
     end
 
-    data.msub /(\nend)/, "\n#START:valid\nend\n#END:valid"
+    msub /(\nend)/, "\n#START:valid\nend\n#END:valid"
   end
 
   desc 'Tests now pass again :-)'
