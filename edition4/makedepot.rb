@@ -3421,6 +3421,14 @@ end
 
 section 24.3, 'Active Resources' do
   rails 'depot_client'
+  if $rails_version =~ /^4\.0/
+    desc 'Add in the activeresource gem'
+    edit 'Gemfile' do
+      edit "activeresource", :highlight do
+        msub /(), :path/, ", :require => 'active_resource'"
+      end
+    end
+  end
   edit 'app/models/product.rb' do |data|
     data << <<-EOF.unindent(6)
       class Product < ActiveResource::Base
@@ -3453,6 +3461,15 @@ section 24.3, 'Active Resources' do
     edit 'resources :orders', :highlight
     data[/resources :orders()/,1] = 
       " do\n      resources :line_items\n    end\n"
+  end
+  if $rails_version =~ /^4\.0/
+    desc 'Disable CSRF checking'
+    edit 'app/controllers/application_controller.rb' do
+      clear_all_marks
+      edit "protect_from_forgery", :highlight do
+        msub /(:exception)/, ":reset_session"
+      end
+    end
   end
   # restart_server
   Dir.chdir(File.join($WORK,'depot_client'))

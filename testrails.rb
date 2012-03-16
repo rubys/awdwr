@@ -117,6 +117,9 @@ if File.exist? template
       gems.last.last.sub!(',', ', "0.8.2",') if release == '1.9.2'
     end
     gems += [['jquery-rails',nil]]
+    if not File.exist? File.join(HOME,'git','rails','activeresource')
+      libs << 'activeresource'
+    end
   else # Rails 3.0
     libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/)
     gems += [['jquery-rails',', "~> 0.2.2"']]

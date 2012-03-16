@@ -389,7 +389,7 @@ class DepotTest < Gorp::TestCase
 
   section 26.3, 'HAML' do
     assert_select 'h1', 'Your Pragmatic Catalog'
-    assert_select 'span.price', '$31.00'
+    assert_select 'span.price', /\$3[16].00/
   end
 
   if File.exist? 'public/images'
