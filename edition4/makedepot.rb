@@ -3420,6 +3420,17 @@ section 22, 'Caching' do
 end
 
 section 24.3, 'Active Resources' do
+  config = File.join($WORK,'depot/config/environments/development.rb')
+  if File.read(config) =~ /mass_assignment_sanitizer/
+    desc 'Turn off strict sanitization'
+    edit 'config/environments/development.rb' do
+      edit 'mass_assignment_sanitizer', :highlight do
+        msub /:(strict)/, 'logger'
+      end
+    end
+    restart_server
+  end
+
   rails 'depot_client'
   if $rails_version =~ /^4\.0/
     desc 'Add in the activeresource gem'
