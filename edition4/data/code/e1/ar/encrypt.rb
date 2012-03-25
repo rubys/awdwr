@@ -1,5 +1,5 @@
 $: << File.dirname(__FILE__)
-require "connect"
+require "./config/environment.rb"
 
 require "rubygems"
 require "active_record"

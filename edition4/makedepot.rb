@@ -483,7 +483,6 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
       # START_HIGHLIGHT
       root :to => 'store#index', :as => 'store'
       # END_HIGHLIGHT
-
       # ...
       # END:root
     EOF
@@ -545,10 +544,11 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
     desc 'Add our style rules'
     edit DEPOT_CSS do
-      col = 67
-      comment = self[/((\n \* .*)+)/,1].gsub(/\n \*/,'').strip
-      comment.gsub! /(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/, " * \\1\\3\n"
-      self[/\n(( \* .*\n)+)/,1] = comment
+      # reflow comments
+      gsub! /^ [^\n]{76}.*?\n\s.\n/m do |paragraph|
+        paragraph.gsub(/^\s\*/,' ').gsub(/\s+/,' ').strip.
+          gsub(/(.{1,76})(\s+|$)/, "\\1\n").gsub(/^/,' * ') + " * \n"
+      end
 
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
@@ -1499,15 +1499,17 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
 
     desc 'Pull in the jquery-ui libraries'
     edit 'app/assets/javascripts/application.js' do
+      # reflow comments
+      gsub! /^\/\/ [^\n]{76}.*?\n\/\/\n/m do |paragraph|
+        paragraph.gsub(/^\/\//,' ').gsub(/\s+/,' ').strip.
+          gsub(/(.{1,76})(\s+|$)/, "\\1\n").gsub(/^/,'// ') + "//\n"
+      end
+
       msub /()\/\/= require jquery_ujs/, <<-EOF.unindent(8)
         //#START_HIGHLIGHT
         //= require jquery-ui
         //#END_HIGHLIGHT
       EOF
-      col = 73
-      comment = self[/((\n\/\/ .*)+)/,1].gsub(/\n\/\//,'').strip
-      comment.gsub! /(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/, "// \\1\\3\n"
-      self[/((\/\/ .*\n)+)/,1] = comment
     end
   end
   publish_code_snapshot :m
@@ -1958,6 +1960,11 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       edit 'order_path', :highlight do
         msub /(order_path.*)/, 'store_path'
       end
+      unless match /attributes/
+        edit /^\s+post :.*\n/, :highlight do
+          msub /,() :?name[: =]/, "\n     "
+        end
+      end
     end
   end
 
@@ -2053,8 +2060,8 @@ section 12.2, 'Iteration G2: Atom Feeds' do
               xhtml.p "Paid by #{order.pay_type}"
             end
             entry.author do |author|
-              entry.name order.name
-              entry.email order.email
+              author.name order.name
+              author.email order.email
             end
           end
         end
@@ -2066,7 +2073,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   desc 'Add "orders" to the Product class'
   edit 'app/models/product.rb', 'relationships' do
     clear_all_marks
-    msub /^( +#\.\.\.\n)/, ''
+    msub /^( +#\.\.\.\n\n)/, ''
     edit /class.*has_many.*?\n/m, :mark=>'relationships' do
       self.all += "  #...\n"
     end
@@ -2141,6 +2148,7 @@ section 12.3, 'Iteration G3: Pagination' do
         end
       end
     EOF
+    gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
   end
 
   runner 'script/load_orders.rb'
@@ -2446,9 +2454,12 @@ section 14.1, 'Iteration I1: Adding Users' do
 
     if File.read('Gemfile') =~ /^#\sgem\s+['"]bcrypt-ruby['"]/
       desc 'uncomment out bcrypt-ruby'
-      edit 'Gemfile' do
+      edit 'Gemfile', 'bcrypt' do
         clear_all_marks
-        msub /^(#\s)gem\s+['"]bcrypt-ruby['"]/, ''
+        edit /^.*has_secure_password\n.*\n/, :mark => 'bcrypt'
+        edit 'bcrypt-ruby', :highlight do
+          msub /^(#\s)/, ''
+        end
       end
       restart_server
     end
@@ -2712,7 +2723,7 @@ section 14.3, 'Iteration I3: Limiting Access' do
       EOF
     end
 
-    edit /^end\n?/, :mark => 'auth' do
+    edit /^end\n?$/, :mark => 'auth' do
       msub /()^end/, "\n    # ...\n"
       msub /()^end/, "\n" + <<-EOF.unindent(6), :highlight
         protected
