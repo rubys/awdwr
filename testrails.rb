@@ -160,7 +160,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
           gemfile.puts "gem #{name.inspect}, :path => #{path.inspect}"
         end
       end
-      gems.each {|gem,opts| gemfile.puts "gem #{gem.first.inspect}#{opts}"}
+      gems.each {|gem,opts| gemfile.puts "gem #{gem.inspect}#{opts}"}
       gemfile.puts "gem 'sqlite3'"
       gemfile.puts "gem 'capistrano'"
       gemfile.puts "gem 'test-unit'"
