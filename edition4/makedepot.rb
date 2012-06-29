@@ -330,7 +330,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
       #END:val3
       #START:val4
         validates :image_url, :allow_blank => true, :format => {
-          :with    => %r{\.(gif|jpg|png)$}i,
+          :with    => %r{\.(gif|jpg|png)\Z}i,
           :message => 'must be a URL for GIF, JPG or PNG image.'
         }
       #END:val4
@@ -479,7 +479,7 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
     msub /\n()  #/, "  # ...\n# END:root\n"
 
     msub /()\s+#.+root of your site/, "\n# START:root"
-    msub /root :to.*\n()/, <<-EOF.unindent(4)
+    msub /root :?to.*\n()/, <<-EOF.unindent(4)
       # START_HIGHLIGHT
       root :to => 'store#index', :as => 'store'
       # END_HIGHLIGHT
@@ -2124,6 +2124,7 @@ section 12.3, 'Iteration G3: Pagination' do
     end
   end
 
+  cmd 'rake environment RAILS_ENV=test db:migrate' if $rails_version =~ /^4\./
   `rake environment RAILS_ENV=test db:migrate` if $rails_version =~ /^3\.0/
   `ruby -I test test/unit/order_test.rb 2> /dev/null > /dev/null`
   unless $?.success?
