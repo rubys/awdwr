@@ -49,7 +49,7 @@ def status
     start = Time.parse(active.first.split.first)
 
     logs = Dir["#{LOGDIR}/makedepot*.log"]
-    latest = logs.sort_by {|log| File.stat(log.untaint).mtime}.last
+    latest = logs.sort_by {|file| File.stat(file.untaint).mtime}.last
     if File.stat(latest).mtime >= start
       log.push *open(latest) {|file| file.readlines.grep(/====>/)[-3..-1] or []}
     end
