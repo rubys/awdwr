@@ -1,15 +1,15 @@
 #!/usr/bin/ruby
 
 require 'rubygems'
-require 'cgi-spa'
+require 'wunderbar'
 require 'time'
 require 'yaml'
 
 HOME = $HOME.sub(/\/?$/, '/')
 
 config = YAML.load(open('dashboard.yml'))
-LOGDIR = config.delete('log').sub('$HOME/',HOME)
-BINDIR = config.delete('bin').sub('$HOME/',HOME)
+LOGDIR = config.delete('log').sub('$HOME/',HOME).untaint
+BINDIR = config.delete('bin').sub('$HOME/',HOME).untaint
 
 # set up symbolic links
 if ARGV == ['--symlink']
@@ -38,44 +38,53 @@ JOBS = config['book'].map do |editions|
   end
 end.flatten
 
-# submit a new run in the background
-$cgi.post do
-  if config['path']
-    ENV['PATH'] = config['path'] + File::PATH_SEPARATOR + ENV['PATH']
+def status
+  # determine if any processes are active
+  active = `ps xo start,args`.
+    scan(/^(?:\d\d:\d\d:\d\d|.\d:\d\d[AP]M) .*/).
+    grep(/(\d |\/)testrails/)
+
+  log = []
+  unless active.empty?
+    start = Time.parse(active.first.split.first)
+
+    logs = Dir["#{LOGDIR}/makedepot*.log"]
+    latest = logs.sort_by {|log| File.stat(log.untaint).mtime}.last
+    if File.stat(latest).mtime >= start
+      log.push *open(latest) {|file| file.readlines.grep(/====>/)[-3..-1] or []}
+    end
+
+    log.map! {|line| line.chomp}
+    log.unshift '' unless log.empty?
   end
 
-  submit "ruby #{BINDIR}/testrails #{$param.args} " +
-         "> #{LOGDIR}/post.out 2> #{LOGDIR}/post.err "
-
-  sleep 2
-end
-
-# determine if any processes are active
-ACTIVE = `ps xo start,args`.
-  scan(/^(?:\d\d:\d\d:\d\d|.\d:\d\d[AP]M) .*/).
-  grep(/(\d |\/)testrails/)
-
-LOG = []
-unless ACTIVE.empty?
-  start = Time.parse(ACTIVE.first.split.first)
-
-  logs = Dir["#{LOGDIR}/makedepot*.log"]
-  log = logs.sort_by {|log| File.stat(log).mtime}.last
-  if File.stat(log).mtime >= start
-    LOG.push *open(log) {|file| file.read.grep(/====>/)[-3..-1] or []}
-  end
-
-  LOG.map! {|line| line.chomp}
-  LOG.unshift '' unless LOG.empty?
+  [active, log]
 end
 
 # main output
-$cgi.html do |x|
-  x.header do
-    x.title 'Depot Dashboard'
+_html do
 
-    x.style :type => "text/css" do
-      x.indented_text! <<-'EOF'
+  # submit a new run in the background
+  if _.post?
+    if config['path']
+      ENV['PATH'] = config['path'] + File::PATH_SEPARATOR + ENV['PATH']
+    end
+
+    require 'shellwords'
+    @args = Shellwords.join(@args.split).untaint
+    _.submit "ruby #{BINDIR}/testrails #{@args} " +
+	     "> #{LOGDIR}/post.out 2> #{LOGDIR}/post.err "
+
+    sleep 2
+  end
+
+  active, log = status
+
+  _header do
+    _title 'Depot Dashboard'
+
+    _style :type => "text/css" do
+      _ <<-'EOF'
         body {margin:0; background: #f5f5dc}
 
         h1 {
@@ -121,24 +130,24 @@ $cgi.html do |x|
         }
 
       EOF
-      x.indented_text! <<-'EOF' unless $param.static
+      _ <<-'EOF' unless @static
         .headerlink {float: right; margin-top: -4em; margin-right: 1em}
         .headerlink {color: #282; text-decoration: none}
         #executing pre {margin-left: 5em}
         form {width: 16.2em; margin: 1em auto}
       EOF
-      x.indented_text! 'form {display: none}' unless ACTIVE.empty?
-      x.indented_text! '#executing {display: none}' if ACTIVE.empty?
+      _ 'form {display: none}' unless active.empty?
+      _ '#executing {display: none}' if active.empty?
     end
 
-    x.script '', :src => 'jquery.min.js'
-    x.script '', :src => 'jquery-ui.min.js'
-    x.script '', :src => 'jquery.tablesorter.min.js'
+    _script :src => 'jquery.min.js'
+    _script :src => 'jquery-ui.min.js'
+    _script :src => 'jquery.tablesorter.min.js'
 
-    x.script! %{
+    _script! %{
       setTimeout(update, 1000);
       function update() {
-        $.getJSON("#{SELF?}", {}, function(data) {
+        $.getJSON("", {}, function(data) {
           for (var id in data.config) {
             var line = data.config[id];
             $('#'+id+' td:eq(3) a').text(line.status);
@@ -189,9 +198,9 @@ $cgi.html do |x|
           $('input[name=args]').animate({backgroundColor: '#fff'}, 'slow'); 
         });
       });
-    } unless $param.static
+    } unless @static
 
-    x.script! %{
+    _script! %{
       $(document).ready(function() {
         $.tablesorter.addParser({
           id: 'summary',
@@ -215,23 +224,24 @@ $cgi.html do |x|
     }
   end
 
-  x.body do
-    x.h1 'The Depot Dashboard'
-    x.a 'logs', :href => 'logs', :class => 'headerlink' unless $param.static
+  _body do
+    _h1 'The Depot Dashboard'
+    _a 'logs', :href => 'logs', :class => 'headerlink' unless @static
 
-    x.table do
-      x.thead do
-        x.tr do
-          x.th 'Book'
-          x.th 'Ruby'
-          x.th 'Rails'
-          x.th 'Status'
-          x.th 'Time'
+    _table do
+      _thead do
+        _tr do
+          _th 'Book'
+          _th 'Ruby'
+          _th 'Rails'
+          _th 'Status'
+          _th 'Time'
         end
       end
 
-      x.tbody do
+      _tbody do
         JOBS.flatten.each do |job|
+          job['path'].untaint
           statfile = "#{job['path']}/status"
           status = open(statfile) {|file| file.read.chomp} rescue 'missing'
           status.gsub! /, 0 (pendings|omissions|notifications)/, ''
@@ -240,7 +250,7 @@ $cgi.html do |x|
           attrs = {:id => job['id']}
           attrs[:class]='odd' if %w(2.3 3.1 4.0).include? job['rails']
 
-          if $param.static
+          if @static
             link =  "#{job['work'].sub('work','checkdepot')}.html"
           else
             link =  "#{job['work']}/checkdepot.html"
@@ -262,50 +272,52 @@ $cgi.html do |x|
             color = 'fail'
           end
 
-          x.tr attrs do
-            x.td job['book'], {:align=>'right'}.
+          _tr attrs do
+            _td job['book'], {:align=>'right'}.
               merge(job['book']=='4' ? {} : {:class=>'hilite'})
-            x.td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='1.8.7')
-            x.td job['rails'], ({:class=>'hilite'} if job['rails']!='3.2')
-            x.td :class=>color, :align=>'center' do
+            _td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='1.8.7')
+            _td job['rails'], ({:class=>'hilite'} if job['rails']!='3.2')
+            _td :class=>color, :align=>'center' do
               if status == 'NO OUTPUT'
                 link.sub! ".html", '/'
-                x.a status, :href => "#{job['web']}/#{link}makedepot.log"
+                _a status, :href => "#{job['web']}/#{link}makedepot.log"
               else
-                x.a status, :href => "#{job['web']}/#{link}" #todos"
+                _a status, :href => "#{job['web']}/#{link}" #todos"
               end
             end
-            x.td mtime.sub('T',' ').sub(/[+-]\d\d:\d\d$/,'')
+            _td mtime.sub('T',' ').sub(/[+-]\d\d:\d\d$/,'')
           end
         end
       end
 
-      x.tfoot do
-        x.tr do
-          5.times { x.th '' }
+      _tfoot do
+        _tr do
+          5.times { _th '' }
         end
       end
     end
 
-    unless $param.static
-      x.form :method=>'post' do
-        x.input :name=>'args'
-        x.input :type=>'submit', :value=>'submit'
+    unless @static
+      _form :method=>'post' do
+        _input :name=>'args'
+        _input :type=>'submit', :value=>'submit'
       end
 
-      x.div :id=>'executing' do
-        x.h2 'Currently Executing'
-        x.pre ACTIVE.join("\n"), :id => 'active'
+      _div :id=>'executing' do
+        _h2 'Currently Executing'
+        _pre active.join("\n"), :id => 'active'
       end
     end
   end
 end
 
 # dynamic status updates
-$cgi.json do
+_json do
+  active, log = status
+
   config={}
   JOBS.each do |job|
-    statfile = "#{job['path']}/status"
+    statfile = "#{job['path']}/status".untaint
 
     status = open(statfile) {|file| file.read.chomp} rescue 'missing'
     status.gsub! /, 0 (pendings|omissions|notifications)/, ''
@@ -319,5 +331,6 @@ $cgi.json do
     }
   end
 
-  {'config'=>config, 'active'=>ACTIVE + LOG}
+  _config config
+  _active active + log
 end
