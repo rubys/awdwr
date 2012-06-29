@@ -104,6 +104,7 @@ if File.exist? template
   if File.exist? base # Rails 3.1
     app_base = File.read(base)
     libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
+    libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],\s+github:/)
     libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
     gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
     branches = app_base.scan(
