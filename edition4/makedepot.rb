@@ -2944,6 +2944,7 @@ section 15.1, 'Task J1: Selecting the locale' do
     nonadmin.gsub! /^/, '  '
     nonadmin.msub /()\s*resource/, "  scope '(:locale)' do\n", :highlight
     nonadmin.msub /root.*\n()/, "  end\n", :highlight
+    nonadmin.msub /root.*()/, ', :via => :all' if $rails_version =~ /^4\./
 
     # append to end
     data.msub /^()end/, nonadmin
