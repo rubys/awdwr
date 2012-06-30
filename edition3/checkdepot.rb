@@ -1119,7 +1119,9 @@ class DepotTest < Gorp::TestCase
 
   section 23.5, 'Forms That Wrap Model Objects' do
     assert_select "input[name='product[price]'][value=0.0]"
-    assert_select 'option[selected=selected]', 'United States'
+    if ActiveSupport::VERSION::STRING =~ /^2\.[23]/
+      assert_select 'option[selected=selected]', 'United States'
+    end
     assert_select 'input[id=details_sku]'
   end
 
