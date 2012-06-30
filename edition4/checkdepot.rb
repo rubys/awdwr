@@ -201,7 +201,7 @@ class DepotTest < Gorp::TestCase
       'Missing <a href="mailto:customer@example.com">'
 
     # json
-    assert_select '.stdout', /, ?"title": ?"CoffeeScript"/,
+    assert_select '.stdout', /[{,] ?"title": ?"CoffeeScript"[,}]/,
       'Missing "title": "CoffeeScript"'
 
     # custom xml
