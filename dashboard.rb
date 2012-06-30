@@ -105,30 +105,10 @@ _html do
         .fail {background-color: #F99}
         td a, td a:visited {color: black}
 
-        thead th:first-child {
-          -webkit-border-top-left-radius: 1em;
-          -moz-border-radius: 1em 0 0 0;
-          border-radius: 1em 0 0 0;
-        }
-
-        thead th:last-child {
-          -webkit-border-top-right-radius: 1em;
-          -moz-border-radius: 0 1em 0 0;
-          border-radius: 0 1em 0 0;
-        }
-
-        tfoot th:first-child {
-          -webkit-border-bottom-left-radius: 1em;
-          -moz-border-radius: 0 0 0 1em;
-          border-radius: 0 0 0 1em;
-        }
-
-        tfoot th:last-child {
-          -webkit-border-bottom-right-radius: 1em;
-          -moz-border-radius: 0 0 1em 0;
-          border-radius: 0 0 1em 0;
-        }
-
+        thead th:first-child { border-radius: 1em 0 0 0 }
+        thead th:last-child { border-radius: 0 1em 0 0 } 
+        tfoot th:first-child { border-radius: 0 0 0 1em }
+        tfoot th:last-child { border-radius: 0 0 1em 0 }
       EOF
       _ <<-'EOF' unless @static
         .headerlink {float: right; margin-top: -4em; margin-right: 1em}
