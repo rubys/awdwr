@@ -303,7 +303,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 16, "Deployment" do
-    assert_select '.stderr', /depot_production already exists/
+    assert_select '.stderr', /depot_production('; database| already) exists/
     assert_select '.stdout', /assume_migrated_upto_version/
     assert_select '.stdout', '[done] capified!'
     assert_select '.stdout', /depot\/log\/production.log/
