@@ -147,7 +147,7 @@ _html do
     _script! %{
       setTimeout(update, 1000);
       function update() {
-        $.getJSON("", {}, function(data) {
+        $.post("", {}, function(data) {
           for (var id in data.config) {
             var line = data.config[id];
             $('#'+id+' td:eq(3) a').text(line.status);
@@ -176,7 +176,7 @@ _html do
 
           $('table').trigger('update');
           setTimeout(update, 5000);
-        });
+        }, 'json');
       }
 
       $(document).ready(function() {
