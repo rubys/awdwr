@@ -3578,6 +3578,7 @@ section 25.1, 'rack' do
     msub /do\n()/, <<-EOF.unindent(4), :highlight
       match 'store' => StoreApp.new
     EOF
+    self[/StoreApp.new()/, 1] = ', :via => :all' if $rails_version =~ /^4\./
   end
 
   get '/store'
