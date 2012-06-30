@@ -116,6 +116,7 @@ if File.exist? template
     if app_base.match(/gem ['"]turn['"]/)
       gems += [['turn',', :require => false']] unless release < "1.9.2"
       gems.last.last.sub!(',', ', "0.8.2",') if release == '1.9.2'
+      gems.last.last.sub!(',', ', "0.8.3",') if release == '1.9.3'
     end
     gems += [['jquery-rails',nil]]
     if not File.exist? File.join(HOME,'git','rails','activeresource')
