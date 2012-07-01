@@ -1075,6 +1075,14 @@ section 10.2, 'Iteration E2: Handling Errors' do
     end
   end
 
+  if $rails_version =~ /^4\./
+    desc 'Intermittent cache reloading issue'
+    restart_server
+  elsif RUBY_VERSION =~ /^1\.8/ and $rails_version =~ /^3\.2/
+    desc 'Intermittent cache reloading issue'
+    restart_server
+  end
+
   desc 'Reproduce the error.'
   get '/carts/wibble'
 
@@ -1094,7 +1102,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
     msub /(\s*)\Z/, "\n\n"
     msub /\n\n()\Z/, <<-EOF.unindent(6), :highlight
       <%= button_to 'Empty cart', @cart, :method => :delete,
-          :confirm => 'Are you sure?' %>
+          :data => { :confirm => 'Are you sure?' } %>
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
@@ -1144,6 +1152,11 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
         product.price * quantity
       end
     EOF
+  end
+
+  if RUBY_VERSION =~ /^1\.8/ and $rails_version =~ /^3\.2/
+    desc 'Intermittent cache reloading issue'
+    restart_server
   end
 
   desc 'Add a method to compute the total price of the items in the cart.'
@@ -1962,7 +1975,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       end
       unless match /attributes/
         edit /^\s+post :.*\n/, :highlight do
-          msub /,() :?name[: =]/, "\n     "
+          msub /,() :?name[: =]/, "\n       "
         end
       end
     end
@@ -2107,7 +2120,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
 end
 
 section 12.3, 'Iteration G3: Pagination' do
-  if $rails_version =~ /^4\.0/
+  if $rails_version =~ /^4\./
     desc 'Add in the kaminari gem'
   else
     desc 'Add in the will_paginate gem'
@@ -2115,7 +2128,7 @@ section 12.3, 'Iteration G3: Pagination' do
   edit 'Gemfile' do
     msub /(\s*)\Z/, "\n\n"
     msub /\n\n()\Z/, "gem 'will_paginate', '~> 3.0'\n", :highlight
-    sub! /'will_paginate.*'/, "'kaminari'" if $rails_version =~ /^4\.0/
+    sub! /'will_paginate.*'/, "'kaminari'" if $rails_version =~ /^4\./
   end
   unless $bundle
     edit 'config/application.rb' do
@@ -2159,7 +2172,7 @@ section 12.3, 'Iteration G3: Pagination' do
     dcl 'index', :mark do
       # msub /^()/, "require 'will_paginate'\n", :highlight
       edit 'Order.all', :highlight
-      if $rails_version =~ /^4\.0/
+      if $rails_version =~ /^4\./
         msub /Order\.(all)/, 
           "order('created_at desc').page(params[:page])"
       else
@@ -2178,8 +2191,11 @@ section 12.3, 'Iteration G3: Pagination' do
       <p><%= will_paginate @orders %></p>
       <!-- END_HIGHLIGHT -->
     EOF
-    msub /,( ):?method/, "\n              "
-    gsub! 'will_','' if $rails_version =~ /^4\.0/
+    if $rails_version =~ /^4\./
+      gsub! 'will_','' 
+    else
+      msub /,( ):?data/, "\n              "
+    end
   end
 
   desc 'Show the orders'
@@ -2523,7 +2539,9 @@ section 14.1, 'Iteration I1: Adding Users' do
       msub /(.*<th>Password digest.*\n)/, ''
       msub /(.*user.password_digest.*\n)/, ''
     end
-    msub /,() :?method:?\s?=?>? :del/, "\n" + (' ' * 6)
+    unless $rails_version =~ /^4\./
+      msub /,() :?data:?\s?=?>? \{/, "\n" + (' ' * 6)
+    end
   end
 
   desc 'Update form used to both create and update users'
@@ -3135,6 +3153,14 @@ section 15.3, 'Task J3: Translating Checkout' do
     EOF
   end
 
+  if RUBY_VERSION =~ /^1\.8/ and $rails_version =~ /^3\.2/
+    desc 'Intermittent cache reloading issue'
+    restart_server
+  elsif $rails_version =~ /^4\./
+    desc 'Intermittent cache reloading issue'
+    restart_server
+  end
+
   desc 'Show validation errors'
   post '/es/orders/new', 'submit' => 'Realizar Pedido'
 
@@ -3445,7 +3471,7 @@ section 24.3, 'Active Resources' do
   end
 
   rails 'depot_client'
-  if $rails_version =~ /^4\.0/
+  if $rails_version =~ /^4\./
     desc 'Add in the activeresource gem'
     edit 'Gemfile' do
       edit "activeresource", :highlight do
@@ -3486,7 +3512,7 @@ section 24.3, 'Active Resources' do
     data[/resources :orders()/,1] = 
       " do\n      resources :line_items\n    end\n"
   end
-  if $rails_version =~ /^4\.0/
+  if $rails_version =~ /^4\./
     desc 'Disable CSRF checking'
     edit 'app/controllers/application_controller.rb' do
       clear_all_marks
@@ -3577,12 +3603,12 @@ section 25.1, 'rack' do
       require './app/store'
     EOF
     msub /do\n()/, <<-EOF.unindent(4), :highlight
-      match 'store' => StoreApp.new
+      match 'catalog' => StoreApp.new
     EOF
     self[/StoreApp.new()/, 1] = ', :via => :all' if $rails_version =~ /^4\./
   end
 
-  get '/store'
+  get '/catalog'
 end
 
 section 25.2, 'rake' do
