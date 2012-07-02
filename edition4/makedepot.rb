@@ -2193,8 +2193,10 @@ section 12.3, 'Iteration G3: Pagination' do
     EOF
     if $rails_version =~ /^4\./
       gsub! 'will_','' 
-    else
+    elsif $rails_version =~ /^3\.2/
       msub /,( ):?data/, "\n              "
+    else
+      msub /,( ):?method/, "\n              "
     end
   end
 
@@ -2539,8 +2541,10 @@ section 14.1, 'Iteration I1: Adding Users' do
       msub /(.*<th>Password digest.*\n)/, ''
       msub /(.*user.password_digest.*\n)/, ''
     end
-    unless $rails_version =~ /^4\./
+    if $rails_version =~ /^3\.2/
       msub /,() :?data:?\s?=?>? \{/, "\n" + (' ' * 6)
+    else
+      msub /,() :?method:?\s?=?>? :delete/, "\n" + (' ' * 6)
     end
   end
 
