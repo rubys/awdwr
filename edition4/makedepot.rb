@@ -293,7 +293,7 @@ section 6.3, 'Playtime' do
   # cmd 'rake db:migrate'
 
   desc 'Configure Git.'
-  cmd 'git repo-config --get-regexp user.*'
+  cmd 'git config --get-regexp user.*'
 
   desc 'Look at the .gitignore that Rails helpfully provided...'
   cmd 'cat .gitignore'
@@ -2193,10 +2193,8 @@ section 12.3, 'Iteration G3: Pagination' do
     EOF
     if $rails_version =~ /^4\./
       gsub! 'will_','' 
-    elsif $rails_version =~ /^3\.2/
-      msub /,( ):?data/, "\n              "
     else
-      msub /,( ):?method/, "\n              "
+      msub /,( ):?data/, "\n              "
     end
   end
 
@@ -2541,11 +2539,7 @@ section 14.1, 'Iteration I1: Adding Users' do
       msub /(.*<th>Password digest.*\n)/, ''
       msub /(.*user.password_digest.*\n)/, ''
     end
-    if $rails_version =~ /^3\.2/
-      msub /,() :?data:?\s?=?>? \{/, "\n" + (' ' * 6)
-    else
-      msub /,() :?method:?\s?=?>? :delete/, "\n" + (' ' * 6)
-    end
+    msub /,() :?data:?\s?=?>? \{/, "\n" + (' ' * 6)
   end
 
   desc 'Update form used to both create and update users'
@@ -2966,7 +2960,7 @@ section 15.1, 'Task J1: Selecting the locale' do
     nonadmin.gsub! /^/, '  '
     nonadmin.msub /()\s*resource/, "  scope '(:locale)' do\n", :highlight
     nonadmin.msub /root.*\n()/, "  end\n", :highlight
-    nonadmin.msub /root.*()/, ', :via => :all' if $rails_version =~ /^4\./
+    nonadmin.msub /root.*()/, ', via: :all' if $rails_version =~ /^4\./ 
 
     # append to end
     data.msub /^()end/, nonadmin

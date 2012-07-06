@@ -5,9 +5,9 @@
 <!-- START_HIGHLIGHT -->
   <title>Pragprog Books Online Store</title>
 <!-- END_HIGHLIGHT -->
-  <%= stylesheet_link_tag "application" %><!-- <label id="code.slt"/> -->
+  <%= stylesheet_link_tag    "application", :media => "all" %><!-- <label id="code.slt"/> -->
   <%= javascript_include_tag "application" %><!-- <label id="code.jlt"/> -->
-  <%= csrf_meta_tag %><!-- <label id="code.csrf"/> -->
+  <%= csrf_meta_tags %><!-- <label id="code.csrf"/> -->
 </head>
 <!-- END:head -->
 <body class="<%= controller.controller_name %>">

@@ -1,8 +1,7 @@
 require 'test_helper'
 
-class DslUserStoriesTest < ActionController::IntegrationTest
+class DslUserStoriesTest < ActionDispatch::IntegrationTest
   fixtures :products
-
 
   #START:daves_details
   DAVES_DETAILS = {
@@ -19,8 +18,6 @@ class DslUserStoriesTest < ActionController::IntegrationTest
       :email    => "mike@pragmaticstudio.com",
       :pay_type => "Credit card"
   }
-  
-  
     
   def setup
     LineItem.delete_all
