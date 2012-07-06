@@ -2542,7 +2542,7 @@ section 14.1, 'Iteration I1: Adding Users' do
       msub /(.*<th>Password digest.*\n)/, ''
       msub /(.*user.password_digest.*\n)/, ''
     end
-    unless $rails_version !~ /^3\.[01]/
+    unless $rails_version =~ /^3\.[01]/
       msub /,() :?data:?\s?=?>? \{/, "\n" + (' ' * 6)
     end
   end
