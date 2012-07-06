@@ -535,6 +535,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
     self.all = read('store/layout.html.erb')
     gsub! '"application"', '"depot"' if File.exist? 'public/images'
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    gsub! 'csrf_meta_tags', 'csrf_meta_tag' if $rails_version =~ /^3\.0/
   end
 
   desc 'Modify the stylesheet'
@@ -848,9 +849,11 @@ section 9.3, 'Iteration D3: Adding a button' do
     edit 'app/assets/stylesheets/store.css.scss', 'inline' do
       edit /^ +p, div.price_line \{.*?\n()    \}\n/m, :mark => 'inline'
       msub /^ +p, div.price_line \{.*?\n()    \}\n/m, "\n" + <<-EOF.unindent(2)
+        /* START_HIGHLIGHT */
         form, div {
           display: inline;
         }
+        /* END_HIGHLIGHT */
       EOF
     end
   else
@@ -2193,7 +2196,7 @@ section 12.3, 'Iteration G3: Pagination' do
     EOF
     if $rails_version =~ /^4\./
       gsub! 'will_','' 
-    else
+    elsif $rails_version !~ /^3\.[01]/
       msub /,( ):?data/, "\n              "
     end
   end
@@ -2539,7 +2542,9 @@ section 14.1, 'Iteration I1: Adding Users' do
       msub /(.*<th>Password digest.*\n)/, ''
       msub /(.*user.password_digest.*\n)/, ''
     end
-    msub /,() :?data:?\s?=?>? \{/, "\n" + (' ' * 6)
+    unless $rails_version !~ /^3\.[01]/
+      msub /,() :?data:?\s?=?>? \{/, "\n" + (' ' * 6)
+    end
   end
 
   desc 'Update form used to both create and update users'
