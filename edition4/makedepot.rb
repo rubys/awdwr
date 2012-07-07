@@ -1179,10 +1179,6 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
         .carts {
-          .cart_title {
-            font: 120% bold;
-          }
-
           .item_price, .total_line {
             text-align: right;
           }
@@ -1332,6 +1328,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
   desc 'Replace that portion of the view with a callout to the partial'
   edit 'app/views/carts/show.html.erb' do |data|
+    clear_highlights
     data.msub /^(  <% @cart.line_items.each do .* end %>\n)/m, 
       "  <%= render(@cart.line_items) %>\n", :highlight
   end
@@ -3205,6 +3202,7 @@ section 15.4, 'Task J4: Add a locale switcher.' do
   desc "When provided, save the locale in the session."
   edit "app/controllers/store_controller.rb", 'index' do |data|
     data.dcl 'index' do |index|
+      clear_highlights
       index.gsub! /^    /,'      '
       index.msub /def.*\n()/, <<-EOF.unindent(4), :highlight
         if params[:set_locale]

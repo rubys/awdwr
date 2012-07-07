@@ -1,12 +1,13 @@
+require 'bundler/capistrano'
+
 # be sure to change these
 set :user, 'rubys'
 set :domain, 'depot.pragprog.com'
 set :application, 'depot'
 
 # adjust if you are using RVM, remove if you are not
-$:.unshift(File.expand_path('./lib', ENV['rvm_path']))
 require "rvm/capistrano"
-set :rvm_ruby_string, '1.9.2'
+set :rvm_ruby_string, '1.9.3'
 set :rvm_type, :user
 
 # file paths
@@ -48,10 +49,4 @@ namespace :deploy do
   task :seed do
     run "cd #{current_path}; rake db:seed RAILS_ENV=#{rails_env}"
   end
-end
-
-after "deploy:update_code", :bundle_install
-desc "install the necessary prerequisites"
-task :bundle_install, :roles => :app do
-  run "cd #{release_path} && bundle install"
 end

@@ -2,22 +2,30 @@
 <p id="notice"><%= notice %></p>
 <% end %>
 
-<div class="cart_title">Your Cart</div>
+<!-- START_HIGHLIGHT -->
+<h2>Your Cart</h2>
 <table>
+<!-- END_HIGHLIGHT -->
   <% @cart.line_items.each do |item| %>
+<!-- START_HIGHLIGHT -->
     <tr>
       <td><%= item.quantity %>&times;</td>
       <td><%= item.product.title %></td>
       <td class="item_price"><%= number_to_currency(item.total_price) %></td>
     </tr>
+<!-- END_HIGHLIGHT -->
   <% end %>
 
+<!-- START_HIGHLIGHT -->
   <tr class="total_line">
     <td colspan="2">Total</td>
     <td class="total_cell"><%= number_to_currency(@cart.total_price) %></td>
   </tr>
+<!-- END_HIGHLIGHT -->
 
+<!-- START_HIGHLIGHT -->
 </table>
+<!-- END_HIGHLIGHT -->
 
 <%= button_to 'Empty cart', @cart, :method => :delete,
     :data => { :confirm => 'Are you sure?' } %>

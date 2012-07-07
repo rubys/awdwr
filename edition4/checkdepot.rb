@@ -146,7 +146,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 11.1, "Iteration F1: Moving the Cart" do
-    assert_select '.cart_title', 'Your Cart'
+    assert_select 'h2', 'Your Cart'
     assert_select '.total_cell', '$121.95'
     assert_select 'input[type=submit][value=Empty cart]'
   end
