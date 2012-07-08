@@ -314,6 +314,7 @@ if File.exist?("#{WORK}/checkdepot.html")
   # parse and normalize checkdepot output
   body = open("#{WORK}/checkdepot.html").read
   body.gsub! "src='data", "src='../data"
+  body.gsub! 'src="data', 'src="../data'
   eof = '#&lt;EOFError: end of file reached&gt;'
   body.gsub! eof, "<a href='makedepot.log'>#{eof}</a>"
 
