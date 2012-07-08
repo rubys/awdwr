@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'gorp/test'
 
+$rails_version = `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`.split(' ').last
+
 class DepotTest < Gorp::TestCase
 
   input 'makedepot'
@@ -229,9 +231,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.1, "Iteration I1: Adding Users" do
-    ticket 6614,
-      :title =>  "Remove `:confirm` in favor of `:data => { :confirm => 'Text' }` option",
-      :match => /user, confirm: /
+    unless $rails_version =~ /^3\.[01]/
+      ticket 6614, :match => /user, confirm: /,
+        :title =>  "Remove `:confirm` in favor of " +
+          "`:data => { :confirm => 'Text' }` option"
+    end
     assert_select 'legend', 'Enter User Details'
     # assert_select 'td', 'User dave was successfully created.'
     assert_select 'h1', 'Listing users'
