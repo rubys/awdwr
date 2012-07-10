@@ -316,8 +316,8 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
   EOF
 
   desc 'Various validations: required, numeric, positive, and unique'
-  edit 'app/models/product.rb' do |data|
-    data.msub /class Product.*\n()/, <<-'EOF'.unindent(6)
+  edit 'app/models/product.rb' do
+    msub /^()end/, <<-'EOF'.unindent(6)
       #START:validation
       #START:val1
         validates :title, :description, :image_url, :presence => true
@@ -336,7 +336,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
       #END:val4
       #END:validation
     EOF
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Demonstrate failures.'
@@ -778,6 +778,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
     msub /class Cart.*\n()/, <<-EOF.unindent(4), :highlight
       has_many :line_items, :dependent => :destroy
     EOF
+    gsub! /^\s+# attr_accessible.*\n/, ''
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
