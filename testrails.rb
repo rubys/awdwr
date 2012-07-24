@@ -130,7 +130,14 @@ if File.exist? template
   gems.delete_if {|gem,opts| libs.include? gem}
 end
 
-branches = Hash[*branches.flatten]
+template = File.join(HOME,'git','rails','Gemfile')
+if File.exist? template
+  gemfile = File.read(template)
+  branches += gemfile.scan(
+    /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
+end
+
+branches = Hash[branches]
 
 libs.each do |lib|
   print lib + ': '
