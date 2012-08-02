@@ -231,7 +231,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.1, "Iteration I1: Adding Users" do
-    unless $rails_version =~ /^3\.[01]/
+    unless $rails_version =~ /^3\.[012]/
       ticket 6614, :match => /user, confirm: /,
         :title =>  "Remove `:confirm` in favor of " +
           "`:data => { :confirm => 'Text' }` option"

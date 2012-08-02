@@ -2195,7 +2195,11 @@ section 12.3, 'Iteration G3: Pagination' do
     if $rails_version =~ /^4\./
       gsub! 'will_','' 
     elsif $rails_version !~ /^3\.[01]/
-      msub /,( ):?data/, "\n              "
+      if self =~ /,( ):?data/
+        msub /,( ):?data/, "\n              "
+      else
+        msub /,( ):?method/, "\n              "
+      end
     end
   end
 
@@ -2541,7 +2545,11 @@ section 14.1, 'Iteration I1: Adding Users' do
       msub /(.*user.password_digest.*\n)/, ''
     end
     unless $rails_version =~ /^3\.[01]/
-      msub /,() :?data:?\s?=?>? \{/, "\n" + (' ' * 6)
+      if self =~ /,( ):?data/
+        msub /,( ):?data/, "\n" + (' ' * 6)
+      else
+        msub /,( ):?method/, "\n" + (' ' * 6)
+      end
     end
   end
 
