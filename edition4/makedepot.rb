@@ -3303,7 +3303,7 @@ section 16, 'Deployment' do
       edit 'deploy/assets', :highlight do
         msub /^(\s*# )load/, ''
       end
-      msub /\.()each/, "\n  "
+      msub /\.()each/, "\n  " if include? '.each'
     end
     rake 'assets:precompile'
     cmd 'ls public/assets'
