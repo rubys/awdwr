@@ -2502,8 +2502,17 @@ section 14.1, 'Iteration I1: Adding Users' do
           has_secure_password
         end
       EOF
+      gsub! /^\s+attr_accessible.*\n/, '' unless $rails_version =~ /^3\./
     end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  end
+
+  unless $rails_version =~ /^3\./
+    desc 'allow new parameters through'
+    edit 'app/controllers/users_controller.rb', 'user_params' do
+      edit /^ +private.*?end\n/m, :mark => 'user_params'
+      gsub! ':password_digest', ':password, :password_confirmation'
+    end
   end
 
   desc 'Avoid redirect after create, update operations'
@@ -3123,7 +3132,7 @@ section 15.3, 'Task J3: Translating Checkout' do
   post '/es', 'product_id' => 2
 
   desc 'Show mixed validation errors'
-  post '/es/orders/new', 'submit' => 'Realizar Pedido'
+  post '/es/orders/new', 'order[name]' => '', 'submit' => 'Realizar Pedido'
 
   desc 'Translate the errors to human names.'
   edit('config/locales/es.yml', 'errors') {} 
@@ -3171,7 +3180,7 @@ section 15.3, 'Task J3: Translating Checkout' do
   end
 
   desc 'Show validation errors'
-  post '/es/orders/new', 'submit' => 'Realizar Pedido'
+  post '/es/orders/new', 'order[name]' => '', 'submit' => 'Realizar Pedido'
 
   desc 'Replace translatable text with calls out to translation functions.'
   edit 'app/controllers/orders_controller.rb', 'create' do |data|
