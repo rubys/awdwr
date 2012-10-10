@@ -112,6 +112,7 @@ if File.exist? template
 
     release=PROFILE.rvm['bin'].split('-')[1]
     gems += [['uglifier',nil]] if app_base.include? 'uglifier'
+    gems += [['turbolinks',nil]] if app_base.include? 'turbolinks'
     gems += [['json',nil]] if release < "1.9.2"
     if app_base.match(/gem ['"]turn['"]/)
       gems += [['turn',', :require => false']] unless release < "1.9.2"
