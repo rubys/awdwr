@@ -365,7 +365,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
   cmd 'rake test'
 
   desc 'Solution is simple, provide valid data.'
-  edit 'test/functional/products_controller_test.rb', 'valid' do
+  edit 'test/*/products_controller_test.rb', 'valid' do
     msub /()require/, "#START:valid\n"
     msub /class.*\n()/, <<-EOF.unindent(6)
       #END:valid
@@ -415,7 +415,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
   cmd 'ls test/unit'
 
   desc 'Add some unit tests for new function.'
-  edit "test/unit/product_test.rb" do |data|
+  edit "test/*/product_test.rb" do |data|
     data.all = read('test/product_test.rb')
     data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
@@ -442,7 +442,11 @@ section 7.2, 'Iteration B2: Unit Testing' do
   end
 
   desc 'Tests pass!'
-  cmd 'rake test:units'
+  if File.exist? 'test/unit'
+    cmd 'rake test:units'
+  else
+    cmd 'rake test:controllers'
+  end
 end
 
 section 7.3, 'Playtime' do
@@ -693,7 +697,7 @@ section 8.4, 'Iteration C4: Functional Testing' do
 
   desc 'Add tests for layout, product display, and formatting, using ' +
     'counts, string comparisons, and regular expressions.'
-  edit 'test/functional/store_controller_test.rb' do
+  edit 'test/*/store_controller_test.rb' do
     clear_highlights
     dcl 'should get index' do
       msub /^()\s+end/, <<-'EOF'.unindent(4), :highlight
@@ -710,7 +714,11 @@ section 8.4, 'Iteration C4: Functional Testing' do
   edit 'test/fixtures/products.yml'
 
   desc 'Show that the tests pass.'
-  cmd 'rake test:functionals'
+  if File.exist? 'test/functional'
+    rake 'test:functionals'
+  else
+    rake 'test:controllers'
+  end
   publish_code_snapshot :e
 end
 
@@ -928,7 +936,7 @@ section 9.4, 'Playtime' do
   cmd 'rake test'
 
   desc 'Update parameters passed as well as expected target of redirect'
-  edit 'test/functional/line_items_controller_test.rb', 'create' do
+  edit 'test/*/line_items_controller_test.rb', 'create' do
     dcl 'should create', :mark => 'create' do
       edit 'post :create', :highlight do
         if self =~ /:line_item =>/
@@ -1241,7 +1249,7 @@ section 10.4, 'Playtime' do
   end
 
   desc 'Update expected target of redirect: Cart#destroy.'
-  edit 'test/functional/carts_controller_test.rb', 'destroy' do
+  edit 'test/*/carts_controller_test.rb', 'destroy' do
     dcl 'should destroy', :mark => 'destroy' do |destroy|
       msub /().*delete :destroy/, "      session[:cart_id] = @cart.id\n", 
         :highlight
@@ -1252,7 +1260,7 @@ section 10.4, 'Playtime' do
   end
 
   desc 'Test both unique and duplicate products.'
-  edit "test/unit/cart_test.rb" do
+  edit "test/*/cart_test.rb" do
     self.all = read('test/cart_test.rb')
   end
   ruby '-I test test/unit/cart_test.rb'
@@ -1260,7 +1268,7 @@ section 10.4, 'Playtime' do
   publish_code_snapshot :i
 
   desc 'Refactor.'
-  edit "test/unit/cart_test.rb" do
+  edit "test/*/cart_test.rb" do
     self.all = read('test/cart_test1.rb')
   end
   ruby '-I test test/unit/cart_test.rb'
@@ -1269,7 +1277,7 @@ section 10.4, 'Playtime' do
   cmd 'rake test'
 
   desc "Add a test ensuring that non-empty carts can't be deleted."
-  edit 'test/functional/products_controller_test.rb', 'destroy' do
+  edit 'test/*/products_controller_test.rb', 'destroy' do
     clear_highlights
     gsub! "\n\n  # ...\n", "\n" 
     dcl 'should destroy product', :mark => 'destroy' do
@@ -1636,7 +1644,7 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
   end
 
   desc 'Update the redirect test.'
-  edit 'test/functional/line_items_controller_test.rb', 'create' do
+  edit 'test/*/line_items_controller_test.rb', 'create' do
     clear_highlights
     edit "assert_redirected_to", :highlight do
       msub /assert_redirected_to (cart_path.*)/, 'store_path'
@@ -1644,7 +1652,7 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
   end
 
   desc 'Add an XHR test.'
-  edit 'test/functional/line_items_controller_test.rb', 'ajax' do
+  edit 'test/*/line_items_controller_test.rb', 'ajax' do
     msub /^()end/, "\n"
     msub /^()end/, <<-EOF.unindent(4), :mark => 'ajax'
       test "should create line_item via ajax" do
@@ -1665,7 +1673,7 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
   end
 
   desc 'Add an test in support for the coffeescript changes.'
-  edit 'test/functional/store_controller_test.rb', 'cs' do
+  edit 'test/*/store_controller_test.rb', 'cs' do
     clear_highlights
     msub /^()end/, <<-EOF.unindent(4), :mark => 'cs'
       test "markup needed for store.js.coffee is in place" do
@@ -1718,7 +1726,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   end
 
   desc 'Modify tests to ensure that there is an item in the cart'
-  edit 'test/functional/orders_controller_test.rb', 'new' do |data|
+  edit 'test/*/orders_controller_test.rb', 'new' do |data|
     data.dcl 'should get new', :mark => 'new' do |getnew|
       empty = getnew.dup
       empty.edit 'assert_response' do |assert|
@@ -1969,7 +1977,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   end
 
   desc 'Modify the test to reflect the new redirect'
-  edit 'test/functional/orders_controller_test.rb', 'valid' do
+  edit 'test/*/orders_controller_test.rb', 'valid' do
     dcl 'should create order', :mark => 'valid' do
       edit 'order_path', :highlight do
         msub /(order_path.*)/, 'store_path'
@@ -2417,7 +2425,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   desc 'Update the test case'
-  edit 'test/functional/order_notifier_test.rb' do
+  edit 'test/*/order_notifier_test.rb' do
     2.times do
       msub /OrderNotifier.\w+()$/, '(orders(:one))'
       msub /do()\s+mail =/, "\n#START_HIGHLIGHT"
@@ -2434,7 +2442,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   rake 'db:test:load'
-  ruby '-I test test/functional/order_notifier_test.rb'
+  ruby '-I test test/*/order_notifier_test.rb'
 end
 
 section 13.2, 'Iteration H2: Integration Tests' do
@@ -2578,7 +2586,7 @@ section 14.1, 'Iteration I1: Adding Users' do
   desc 'Show how this is stored in the database'
   db 'select * from users'
 
-  edit 'test/functional/users_controller_test.rb', 'update' do |data|
+  edit 'test/*/users_controller_test.rb', 'update' do |data|
     msub /\A()/, "#START:update\n"
     msub /^  end\n()/, "#END:update\n"
     edit /^end/, :mark => 'update'
@@ -2694,7 +2702,7 @@ section 14.2, 'Iteration I2: Authenticating Users' do
     'password' => 'secret'
 
   desc 'Fix the sessions controller test'
-  edit "test/functional/sessions_controller_test.rb" do |data|
+  edit "test/*/sessions_controller_test.rb" do |data|
     dcl 'should get create' do
       self.all = <<-EOF.unindent(6)
         #START_HIGHLIGHT
@@ -2911,7 +2919,7 @@ end
 
 section 14.5, 'Playtime' do
   desc 'Verify that accessing product information requires login'
-  edit 'test/functional/products_controller_test.rb', 'logout' do
+  edit 'test/*/products_controller_test.rb', 'logout' do
     clear_all_marks
     msub /^()end/, "\n"
     msub /^()end/, <<-EOF.unindent(4), :mark => 'logout'
@@ -2924,7 +2932,11 @@ section 14.5, 'Playtime' do
   end
 
   desc 'Verify  that the test passes'
-  cmd 'rake test:functionals'
+  if File.exist? 'test/functional'
+    rake 'test:functionals'
+  else
+    rake 'test:controllers'
+  end
 
   desc 'Look at the data in the database'
   cmd 'sqlite3 db/development.sqlite3 .schema'
@@ -3365,12 +3377,14 @@ section 19, 'Active Record' do
 
 end
 
-section 20.1, 'Testing Routes' do
-  edit 'test/unit/routing_test.rb' do
-    self.all = read('test/routing_test.rb')
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+unless $rails_version =~ /^4\./
+  section 20.1, 'Testing Routes' do
+    edit 'test/unit/routing_test.rb' do
+      self.all = read('test/routing_test.rb')
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
+    rake 'test:units'
   end
-  rake 'test:units'
 end
 
 section 21.1, 'Views' do
@@ -3774,7 +3788,7 @@ if $rails_version =~ /^3\.0/
       end
     end
     rake 'test'
-    edit 'test/functional/line_items_controller_test.rb', 'ajax' do
+    edit 'test/*/line_items_controller_test.rb', 'ajax' do
       clear_all_marks
       dcl "should create line_item via ajax", :mark => 'ajax' do
         edit ':replace_html', :highlight do

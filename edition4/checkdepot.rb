@@ -320,11 +320,10 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', 'Current version: 20110711000009'
   end
 
-  section 20.1, "Testing Routing" do
-    ticket 3693,
-      :title =>  "RoutingAssertions fail on master on Ruby 1.8.7",
-      :match => /"path"=&gt;"\(:locale\)"/
-    assert_test_summary 'pre', :tests => '1\d', :assertions => '4\d'
+  if $rails_version =~ /^3\./
+    section 20.1, "Testing Routing" do
+      assert_test_summary 'pre', :tests => '1\d', :assertions => '4\d'
+    end
   end
 
   section 21.1, "Views" do
