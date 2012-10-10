@@ -412,7 +412,11 @@ section 7.2, 'Iteration B2: Unit Testing' do
   EOF
 
   desc 'Look at what files are generated'
-  cmd 'ls test/unit'
+  if File.exist? 'test/unit'
+    cmd 'ls test/unit'
+  else
+    cmd 'ls test/models'
+  end
 
   desc 'Add some unit tests for new function.'
   edit "test/*/product_test.rb" do |data|
@@ -445,7 +449,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
   if File.exist? 'test/unit'
     cmd 'rake test:units'
   else
-    cmd 'rake test:controllers'
+    cmd 'rake test:models'
   end
 end
 
