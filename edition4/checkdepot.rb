@@ -175,6 +175,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.2, "Iteration G2: Atom Feeds" do
+    ticket 7910,
+      :title =>  "Actions defined using resource get bypass the controller",
+      :match => /undefined method `title&amp;#39; for nil:NilClass/
+
     # atom
     assert_select '.stdout', /&lt;summary type="xhtml"&gt;/,
       'Missing <summary type="xhtml">'
