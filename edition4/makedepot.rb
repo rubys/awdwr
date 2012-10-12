@@ -1267,7 +1267,12 @@ section 10.4, 'Playtime' do
   edit "test/*/cart_test.rb" do
     self.all = read('test/cart_test.rb')
   end
-  ruby '-I test test/unit/cart_test.rb'
+
+  if File.exist? 'test/unit'
+    ruby '-I test test/unit/cart_test.rb'
+  else
+    ruby '-I test test/models/cart_test.rb'
+  end
 
   publish_code_snapshot :i
 
@@ -2051,6 +2056,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   desc 'Define an Atom view (using the Atom builder)'
   edit 'app/views/products/who_bought.atom.builder' do
     self.all = <<-'EOF'.unindent(6)
+      @product ||= Product.find(2) # DELETEME
       atom_feed do |feed|
         feed.title "Who bought #{@product.title}"
 
@@ -2152,9 +2158,10 @@ section 12.3, 'Iteration G3: Pagination' do
 
   cmd 'rake environment RAILS_ENV=test db:migrate' if $rails_version =~ /^4\./
   `rake environment RAILS_ENV=test db:migrate` if $rails_version =~ /^3\.0/
-  `ruby -I test test/unit/order_test.rb 2> /dev/null > /dev/null`
+  tm = (File.exist?('test/unit') ? 'unit' : 'models')
+  `ruby -I test test/#{tm}/order_test.rb 2> /dev/null > /dev/null`
   unless $?.success?
-    ruby '-I test test/unit/order_test.rb'
+    ruby "-I test test/#{tm}/order_test.rb"
     edit 'Gemfile' do
       msub /()gem '(will_paginate|kaminari)'/, '# '
     end
@@ -2249,6 +2256,7 @@ section 12.4, 'Playtime' do
   desc 'Define an HTML view'
   edit 'app/views/products/who_bought.html.erb' do |data|
     data[/(.*)/m,1] = <<-EOF.unindent(6)
+      <% @product ||= Product.find(2) # DELETEME %>
       <h3>People Who Bought <%= @product.title %></h3>
 
       <ul>
@@ -2450,6 +2458,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
 end
 
 section 13.2, 'Iteration H2: Integration Tests' do
+  Dir.chdir(File.join($WORK, 'depot')) # DELETEME
   desc 'Create an integration test'
   generate 'integration_test user_stories'
   edit "test/integration/user_stories_test.rb" do |data|
