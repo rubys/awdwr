@@ -3448,10 +3448,10 @@ section 22, 'Caching' do
 
   Dir.chdir(File.join($WORK,'depot'))
   restart_server
-  cmd 'curl --silent --head http://localhost:3000/'
+  cmd 'curl --silent --dump - --output /dev/null http://localhost:3000/'
 
   desc "add a method to return the latest product"
-  edit 'app/models/product.rb', :mark => 'latest' do
+  edit 'app/models/product.rb', 'latest' do
     clear_all_marks
     msub /\n()\s+private/, "\n"
     msub /\n()\s+private/, <<-EOF.unindent(4), :mark => 'latest'
@@ -3476,13 +3476,13 @@ section 22, 'Caching' do
     end
   end
 
-  cmd 'curl --silent --head http://localhost:3000/'
+  cmd 'curl --silent --dump - --output /dev/null http://localhost:3000/'
   response = Net::HTTP.get_response(URI.parse('http://localhost:3000/'))
 
-  cmd "curl --silent --head http://localhost:3000/ " +
+  cmd "curl --silent --dump - --output /dev/null http://localhost:3000/ " +
     "-H 'If-None-Match: #{response['Etag']}'"
 
-  cmd "curl --silent --head http://localhost:3000/ " +
+  cmd "curl --silent --dump - --output /dev/null http://localhost:3000/ " +
     "-H 'If-Modified-Since: #{response['Last-Modified']}'"
 
   unless File.exist? 'public/images'
@@ -3495,9 +3495,9 @@ section 22, 'Caching' do
   end
 
   restart_server
-  cmd 'curl --silent --head http://localhost:3000/'
+  cmd 'curl --silent --dump - --output /dev/null http://localhost:3000/'
   response = Net::HTTP.get_response(URI.parse('http://localhost:3000/'))
-  cmd 'curl --silent --head http://localhost:3000/ ' +
+  cmd 'curl --silent --dump - --output /dev/null http://localhost:3000/ ' +
     "-H 'If-None-Match: #{response['Etag']}'"
 end
 
