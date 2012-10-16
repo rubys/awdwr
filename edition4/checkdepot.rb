@@ -192,9 +192,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.4, "Playtime" do
-    ticket 3837,
-      :title =>  "to_xml fails on master",
-      :match => /undefined method `xmlschema'/
+    ticket 7910,
+      :title =>  "Actions defined using resource get bypass the controller",
+      :match => /undefined method `title&amp;#39; for nil:NilClass/
 
     # raw xml
     assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/,
@@ -264,9 +264,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.5, "Playtime" do
-    ticket 4786,
-      :title =>  "render with a partial in rjs fails ",
-      :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
+    ticket 7910,
+      :title =>  "Actions defined using resource get bypass the controller",
+      :match => /undefined method `title&amp;#39; for nil:NilClass/
 
     assert_test_summary 'pre', :tests => 48, :assertions => '[789]\d'
 
@@ -385,6 +385,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 26.1, 'Active Merchant' do
+    ticket 477,
+      :list => 'activemerchant',
+      :title =>  "prepping for Rails 4.0",
+      :match => /cannot load such file -- active_support\/core_ext\/object\/conversions/
     assert_select '.stdout', 'Is 4111111111111111 valid?  false'
   end
 
