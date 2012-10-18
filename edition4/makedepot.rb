@@ -3488,13 +3488,29 @@ section 22, 'Caching' do
   unless File.exist? 'public/images'
     desc "Turn on caching in development"
     edit 'config/environments/development.rb' do
+      clear_all_marks
       edit 'perform_caching', :highlight do
         msub /perform_caching = (false)/, 'true'
+        if $rails_version =~ /^4\./
+          self << "\n  config.action_dispatch.rack_cache = true"
+        end
       end
+    end
+
+    if $rails_version =~ /^4\./
+      desc "add 'rack-cache' to the bundle"
+      edit 'Gemfile', 'rack_cache' do
+        clear_all_marks
+        msub /(\s*)\Z/, "\n\n"
+        msub /\n\n()\Z/, "gem 'rack-cache'\n", :highlight
+        edit "rack-cache", :mark => 'rack_cache'
+      end
+      cmd 'bundle install'
     end
   end
 
   restart_server
+  rake 'middleware'
   cmd 'curl --silent --dump - --output /dev/null http://localhost:3000/'
   response = Net::HTTP.get_response(URI.parse('http://localhost:3000/'))
   cmd 'curl --silent --dump - --output /dev/null http://localhost:3000/ ' +
