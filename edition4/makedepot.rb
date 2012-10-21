@@ -419,9 +419,10 @@ section 7.2, 'Iteration B2: Unit Testing' do
   end
 
   desc 'Add some unit tests for new function.'
-  edit "test/*/product_test.rb" do |data|
-    data.all = read('test/product_test.rb')
-    data.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  edit "test/*/product_test.rb" do
+    self.all = read('test/product_test.rb')
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    gsub! 'activerecord.errors', 'errors' if $rails_version =~ /^4\./
   end
 
   desc 'Look at existing test data'
