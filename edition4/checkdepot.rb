@@ -268,7 +268,7 @@ class DepotTest < Gorp::TestCase
       :title =>  "Actions defined using resource get bypass the controller",
       :match => /undefined method `title&amp;#39; for nil:NilClass/
 
-    assert_test_summary 'pre', :tests => 48, :assertions => '[789]\d'
+    assert_test_summary 'pre', :tests => '4[68]', :assertions => '[789]\d'
 
     assert_select '.stdout', /login"&gt;redirected/
     assert_select '.stdout', /customer@example.com/
