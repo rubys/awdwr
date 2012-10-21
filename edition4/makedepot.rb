@@ -2041,8 +2041,10 @@ section 12.2, 'Iteration G2: Atom Feeds' do
 
   desc 'Define a "who_bought" member action'
   edit 'app/controllers/products_controller.rb', 'who_bought' do
-    msub /^()end/, "\n"
-    msub /^()end/, <<-EOF.unindent(4), :mark => 'who_bought'
+    insert_at = /()\n *private/
+    insert_at = /^()end/ unless self =~ insert_at
+    msub insert_at, "\n"
+    msub insert_at, <<-EOF.unindent(4), :mark => 'who_bought'
       def who_bought
         @product = Product.find(params[:id])
         respond_to do |format|
