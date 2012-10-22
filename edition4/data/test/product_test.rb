@@ -39,6 +39,8 @@ class ProductTest < ActiveSupport::TestCase
                 :price       => 1,
                 :image_url   => image_url)
   end
+  #END:test_image_url
+  #START:test_image_url2
 
   test "image url" do
     ok = %w{ fred.gif fred.jpg fred.png FRED.JPG FRED.Jpg
@@ -53,7 +55,7 @@ class ProductTest < ActiveSupport::TestCase
       assert new_product(name).invalid?, "#{name} shouldn't be valid"
     end
   end
-  #END:test_image_url
+  #END:test_image_url2
 
   #START:test_unique_title
   test "product is not valid without a unique title" do

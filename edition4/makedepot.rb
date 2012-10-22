@@ -1026,6 +1026,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
     selfup = include?('self.up')
     self.all = read('cart/combine_items_in_cart.rb')
     gsub! 'self.', '' unless selfup
+    gsub! ', :quantity=>1', '' if $rails_version =~ /^3\.2/
     gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
   end
 
