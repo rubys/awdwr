@@ -228,7 +228,7 @@ _html do
           mtime = File.stat(statfile).mtime.iso8601 rescue 'missing'
 
           attrs = {:id => job['id']}
-          attrs[:class]='odd' if %w(2.3 3.1 4.0).include? job['rails']
+          attrs[:class]='odd' if %w(3.0 3.2).include? job['rails']
 
           if @static
             link =  "#{job['work'].sub('work','checkdepot')}.html"
@@ -256,7 +256,7 @@ _html do
             _td job['book'], {:align=>'right'}.
               merge(job['book']=='4' ? {} : {:class=>'hilite'})
             _td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='1.9.3')
-            _td job['rails'], ({:class=>'hilite'} if job['rails']!='3.2')
+            _td job['rails'], ({:class=>'hilite'} if job['rails']!='4.0')
             _td :class=>color, :align=>'center' do
               if status == 'NO OUTPUT'
                 link.sub! ".html", '/'
