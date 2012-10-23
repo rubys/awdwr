@@ -321,7 +321,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 18, "Finding Your Way Around" do
-    assert_select '.stdout', 'Current version: 20110711000009'
+    assert_select '.stdout', /Current version: \d{8}000009/
   end
 
   if $rails_version =~ /^3\./

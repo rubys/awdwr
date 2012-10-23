@@ -162,6 +162,13 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
       msub /,( ):?notice/, "\n          "
       msub /,( ):?status:? ?=?>? :un/, "\n          "
     end
+
+    if self =~ /^    # Use this method.*\.( )Example/
+      msub /^    # Use this method.*\.( )Example/, "\n    # "
+    end
+    if self =~ /^    # Also, you can specialize.*checking( )of permissible/
+      msub /^    # Also, you can.*checking( )of permissible/, "\n    # "
+    end
   end
 
   edit 'app/views/products/index.html.erb' do
@@ -500,6 +507,10 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
     end
 
     edit /^end/, :mark=>'root'
+
+    if self =~ /^  # You can.* "root"( )just remember to delete/
+      msub /^  # You can.* "root"( )just remember to delete/, "\n  # "
+    end
   end
 
   desc 'Delete public/index.html, as instructed.'
@@ -2151,6 +2162,10 @@ section 12.3, 'Iteration G3: Pagination' do
     msub /(\s*)\Z/, "\n\n"
     msub /\n\n()\Z/, "gem 'will_paginate', '~> 3.0'\n", :highlight
     sub! /'will_paginate.*'/, "'kaminari'" if $rails_version =~ /^4\./
+
+    if self =~ /^# Turbolinks.*\.( )Read more:/
+      msub /^# Turbolinks.*\.( )Read more:/, "\n# "
+    end
   end
   unless $bundle
     edit 'config/application.rb' do
@@ -2214,9 +2229,8 @@ section 12.3, 'Iteration G3: Pagination' do
       <p><%= will_paginate @orders %></p>
       <!-- END_HIGHLIGHT -->
     EOF
-    if $rails_version =~ /^4\./
-      gsub! 'will_','' 
-    elsif $rails_version !~ /^3\.[01]/
+    gsub! 'will_','' if $rails_version =~ /^4\./
+    if $rails_version !~ /^3\.[01]/
       if self =~ /,( ):?data/
         msub /,( ):?data/, "\n              "
       else
