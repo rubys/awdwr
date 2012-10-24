@@ -107,12 +107,15 @@ if File.exist? template
     libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],\s+github:/)
     libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
     gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
+    app_base.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/).each do |gem, opts|
+      next if %(rails turn).include? gem
+      next if gems.find {|gname, gopts| gem == gname}
+      gems << [gem, opts]
+    end
     branches = app_base.scan(
       /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
 
     release=PROFILE.rvm['bin'].split('-')[1]
-    gems += [['uglifier',nil]] if app_base.include? 'uglifier'
-    gems += [['turbolinks',nil]] if app_base.include? 'turbolinks'
     gems += [['json',nil]] if release < "1.9.2"
     if app_base.match(/gem ['"]turn['"]/)
       gems += [['turn',', :require => false']] unless release < "1.9.2"
@@ -187,8 +190,9 @@ Dir.chdir File.join(PROFILE.source,WORK) do
         gemfile.puts "gem 'haml'"
         if $rails_version =~ /^3\./
           gemfile.puts "gem 'will_paginate'"
-        else
+        elsif $rails_version =~ /^4\./
           gemfile.puts "gem 'kaminari'"
+          gemfile.puts "gem 'rack-cache'"
         end
         gemfile.puts "gem 'bcrypt-ruby'"
       else
@@ -243,14 +247,16 @@ if source
 
     break if File.exist? "../bin/ruby-#{release}-#{rev}"
 
-    caches = Dir["#{RVM_PATH}/gems/#{PROFILE.gems}/cache"]
-    caches.reject! {|cache| cache =~ /[%:@]/}
-    cache = caches.sort.last
+    if PROFILE.gems
+      caches = Dir["#{RVM_PATH}/gems/#{PROFILE.gems}/cache"]
+      caches.reject! {|cache| cache =~ /[%:@]/}
+      cache = caches.sort.last
 
-    system "mkdir -p cache"
-    system "rm -f cache/*"
-    Dir.chdir(File.join(File.dirname(cache),'gems')) {Dir['*']}.each do |gem|
-      system "cp #{cache}/#{gem}.gem cache"
+      system "mkdir -p cache"
+      system "rm -f cache/*"
+      Dir.chdir(File.join(File.dirname(cache),'gems')) {Dir['*']}.each do |gem|
+        system "cp #{cache}/#{gem}.gem cache"
+      end
     end
     
     bash %{
