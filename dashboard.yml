@@ -1,0 +1,44 @@
+log: /home/rubys/logs
+bin: /home/rubys/bin
+
+book:
+- '4':
+    home: /home/rubys/git/awdwr/edition4
+    web:  AWDwR4
+    env:
+    - work:  'work'
+      rails: '4.0'
+      ruby:  '1.9.3'
+    - work:  'work-200'
+      rails: '4.0'
+      ruby:  '2.0.0'
+    - work:  'work-187-32'
+      rails: '3.2'
+      ruby:  '1.8.7'
+    - work:  'work-32'
+      rails: '3.2'
+      ruby:  '1.9.3'
+    - work:  'work-187-31'
+      rails: '3.1'
+      ruby:  '1.8.7'
+    - work:  'work-192-31'
+      rails: '3.1'
+      ruby:  '1.9.2'
+    - work:  'work-187-30'
+      rails: '3.0'
+      ruby:  '1.8.7'
+    - work:  'work-192-30'
+      rails: '3.0'
+      ruby:  '1.9.2'
+
+- '3':
+    home: /home/rubys/git/awdwr/edition3
+    web:  AWDwR3
+    test:
+    env:
+    - work:  'work-187-30'
+      rails: '3.0'
+      ruby:  '1.8.7'
+    - work:  'work-187-23'
+      rails: '2.3'
+      ruby:  '1.8.7'

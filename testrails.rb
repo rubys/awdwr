@@ -261,7 +261,7 @@ if source
     
     bash %{
       source #{RVM_PATH}/scripts/rvm
-      TERM=dumb rvm install ruby-#{release}-#{rev}
+      #{RVM_PATH}/bin/rvm install ruby-#{release}-#{rev}
       rvm ruby-#{release}-#{rev}
       gem env path | cut -d ':' -f 1 | xargs chmod -R 0755
       gem install --no-ri --no-rdoc cache/*
@@ -285,7 +285,7 @@ if source
 else
   bash %{
     source #{RVM_PATH}/scripts/rvm
-    rvm ruby-#{release} || TERM=dumb rvm install ruby-#{release}
+    rvm ruby-#{release} || #{RVM_PATH}/bin/rvm install ruby-#{release}
   }
 end
 

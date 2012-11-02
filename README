@@ -1,11 +1,6 @@
-Running this should only require Rails 2.2.2 or later, the command line
-interfaces for sqlite3 and curl and the will_paginate plugin.
-Tested on Ubuntu Linux 9.10 ("Karmic Koala") and Mac OSX 10.5.6 ("Leopard").
-
-Installation of all necessary dependencies from a fresh install of Ubuntu 9.10:
-
-  sudo apt-get install rails git-core sqlite3 curl erubis
-  sudo gem install gorp will_paginate rdoc test-unit htmlentities
+Installation of all necessary dependencies from a fresh install of Ubuntu:
+  
+  ruby setup.rb # see comments if dependencies aren't met
 
 Execution instructions:
 
@@ -37,7 +32,16 @@ Tests against makedepot.html can also be run separately:
 
   Output will be produced as checkdepot.html.
 
-Automation tools (still fairly rough):
+Automation tools:
 
+  testrails.rb: front end to makedepot that manages the environment
   dashboard.rb: cgi to monitor status / start jobs
-  runtests.rb:  script to set up rvms and to log output
+
+Sample configuration data:
+
+  testrails.yml: provides mappings for edition, rails, and ruby versions
+  dashboard.yml: lists test configurations
+
+Sample output:
+
+  http://intertwingly.net/projects/dashboard.html
