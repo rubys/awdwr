@@ -1,6 +1,6 @@
 default:
   script:  makedepot.rb
-  gems:    ruby-1.9.3-p*
+  # gems:    ruby-1.9.3-p*
 
   destdir: AWDwR4
   branch:  master

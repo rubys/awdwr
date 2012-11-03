@@ -5,12 +5,14 @@
 #  * apt-get install ruby1.9.3
 #  * gem install xmpp4r ruby-dbus
 #  * apt-get install apache2 curl git libmysqlclient-dev mysql-server nodejs
+#  * gem install nokogiri wunderbar
 
 # check prereqs
 require 'rubygems'
 require 'xmpp4r'
 %w(apache2ctl curl git mysql).each do |cmd| 
-  next if system "which #{cmd}"
+  next if cmd == 'apache2ctl' and not RUBY_PLATFORM.include? 'linux'
+  next if system "which #{cmd} > /dev/null"
   STDERR.puts "Unable to find #{cmd}"
   exit -1
 end
