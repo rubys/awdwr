@@ -57,36 +57,57 @@ def bash cmd
 end
 
 # update Rails
-updated = Dir.chdir($rails) do
-  system 'git checkout -q origin/master'
-  system "git checkout #{BRANCH}"
-  system "git checkout #{COMMIT.split('/').last}" if COMMIT
-  before = `git log -1 --pretty=format:%H`
-  print 'rails: '
-  system 'git pull origin'
-  `git log -1 --pretty=format:%H` != before
+if ARGV.delete('noupdate')
+  updated = true
+else
+  updated = Dir.chdir($rails) do
+    system 'git checkout -q origin/master'
+    system "git checkout #{BRANCH}"
+    system "git checkout #{COMMIT.split('/').last}" if COMMIT
+    before = `git log -1 --pretty=format:%H`
+    print 'rails: '
+    system 'git pull origin'
+    `git log -1 --pretty=format:%H` != before
+  end
 end
 
 $rails_version = (File.read("#{$rails}/RAILS_VERSION").strip rescue '2.x')
 $rails_version.sub! '3.1.0.rc1', '3.2.0.pre'
 
 # If unchanged, select next or exit now
-if !updated
-  Process.exit if ARGV.empty?
-  if ARGV.delete('next') and ARGV.empty?
-    require 'nokogiri'
+Process.exit if ARGV.empty? and not updated
 
-    dashboard=`ruby /var/www/dashboard.cgi static`.sub(/.*?</m,'<')
-    rows = Nokogiri::XML(dashboard).search('tr').to_a
-    rows.reject! {|row| !row.at('td')}
-    rows.reject! {|row| row.at('td:nth-child(4).hilite')}
-    if rows.length>0
-      stale = rows.find {|r| r.at('td:last').text !~ /^\d+(-\d+)+.\d+(:\d+)+$/}
-      stale ||= rows.min {|a,b| a.at('td:last').text <=> b.at('td:last').text}
-      stale = stale.search('td').to_a[0..2]
-      exec "#{$0} #{stale.map {|td| td.text.gsub(/\D/,'')}.join(' ')}"
-    end
+arg_was_present = (not ARGV.empty?)
+oldest = ARGV.delete('next')
+missing = ARGV.delete('missing')
+failed = ARGV.delete('fail') || ARGV.delete('failed')
+before = ARGV.find {|c| c.start_with? '<'}; ARGV.delete(before)
+if ARGV.empty? and arg_was_present
+  require 'nokogiri'
+
+  dashboard=`ruby /var/www/dashboard.cgi static`.sub(/.*?</m,'<')
+  rows = Nokogiri::XML(dashboard).search('tr').to_a
+  rows.reject! {|row| !row.at('td')}
+  rows.reject! {|row| row.at('td:nth-child(4).hilite')}
+  dated = rows.select {|r| r.at('td:last').text =~ /^\d+(-\d+)+.\d+(:\d+)+$/}
+  selected = rows - dated
+
+  if oldest
+    selected << rows.min {|a,b| a.at('td:last').text <=> b.at('td:last').text}
+    selected = selected.slice(0,1)
+  elsif before
+    before = before.gsub(/\D/, '')
+    selected += dated.select {|tr| tr.at('td:last').text.gsub(/\D/,'') < before}
+  elsif failed
+    selected = rows.select {|tr| tr.at('td.fail')}
   end
+
+  Process.exit if selected.empty?
+
+  args = selected.uniq.map {|tr| 
+    tr.search('td').to_a[0..2].map {|td| td.text.gsub('.','')}.join(' ')
+  }.join(', ')
+  exec "#{$0} #{args}"
 end
 
 # update libs
