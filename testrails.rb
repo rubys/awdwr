@@ -74,14 +74,14 @@ end
 $rails_version = (File.read("#{$rails}/RAILS_VERSION").strip rescue '2.x')
 $rails_version.sub! '3.1.0.rc1', '3.2.0.pre'
 
-# If unchanged, select next or exit now
-Process.exit if ARGV.empty? and not updated
-
+# adjust selection based on arguments
 arg_was_present = (not ARGV.empty?)
-oldest = ARGV.delete('next')
+oldest = ARGV.delete('next') unless updated
 missing = ARGV.delete('missing')
 failed = ARGV.delete('fail') || ARGV.delete('failed')
 before = ARGV.find {|c| c.start_with? '<'}; ARGV.delete(before)
+arg_was_present = false if oldest and updated
+
 if ARGV.empty? and arg_was_present
   require 'nokogiri'
 
