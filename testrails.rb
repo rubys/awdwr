@@ -268,18 +268,6 @@ if source
 
     break if File.exist? "../bin/ruby-#{release}-#{rev}"
 
-    if PROFILE.gems
-      caches = Dir["#{RVM_PATH}/gems/#{PROFILE.gems}/cache"]
-      caches.reject! {|cache| cache =~ /[%:@]/}
-      cache = caches.sort.last
-
-      system "mkdir -p cache"
-      system "rm -f cache/*"
-      Dir.chdir(File.join(File.dirname(cache),'gems')) {Dir['*']}.each do |gem|
-        system "cp #{cache}/#{gem}.gem cache"
-      end
-    end
-    
     bash %{
       source #{RVM_PATH}/scripts/rvm
       #{RVM_PATH}/bin/rvm install ruby-#{release}-#{rev}
