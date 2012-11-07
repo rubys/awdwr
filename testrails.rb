@@ -254,7 +254,7 @@ source=PROFILE.rvm['src']
 release=PROFILE.rvm['bin'].split('-')[1]
 if source
   Dir.chdir("#{RVM_PATH}/src") do
-    system "mkdir -p #{RVM_PATH}/repos/ruby"
+    system "../bin/rvm fetch ruby-head" unless File.exist? "../repos/ruby"
     rev = Dir.chdir("#{RVM_PATH}/repos/ruby") do
       `git checkout #{source} 2>/dev/null`
       `git pull`
