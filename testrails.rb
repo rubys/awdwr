@@ -205,9 +205,14 @@ Dir.chdir File.join(PROFILE.source,WORK) do
         gemfile.puts "gem 'htmlentities'"
       # end
 
+      release=PROFILE.rvm['bin'].split('-')[1]
       if File.exist? base # Rails 3.1+
         gemfile.puts "gem 'mysql2'"
-        gemfile.puts "gem 'activemerchant'"
+        if release =~ /^1\.9\./
+          gemfile.puts "gem 'activemerchant'"
+        else
+          gemfile.puts "gem 'activemerchant', '~> 1.21.0'"
+        end
         gemfile.puts "gem 'haml'"
         if $rails_version =~ /^3\./
           gemfile.puts "gem 'will_paginate'"
