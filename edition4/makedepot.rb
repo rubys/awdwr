@@ -1293,7 +1293,12 @@ section 10.4, 'Playtime' do
   edit "test/*/cart_test.rb" do
     self.all = read('test/cart_test1.rb')
   end
-  ruby '-I test test/unit/cart_test.rb'
+
+  if File.exist? 'test/unit'
+    ruby '-I test test/unit/cart_test.rb'
+  else
+    ruby '-I test test/models/cart_test.rb'
+  end
 
   desc 'Verify that the tests pass.'
   cmd 'rake test'
