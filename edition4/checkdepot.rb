@@ -315,7 +315,7 @@ class DepotTest < Gorp::TestCase
 
   section 16, "Deployment" do
     assert_select '.stderr', /depot_production('; database| already) exists/
-    assert_select '.stdout', /assume_migrated_upto_version/
+    assert_select '.stdout', /initialize_schema_migrations_table/
     assert_select '.stdout', '[done] capified!'
     assert_select '.stdout', /depot\/log\/production.log/
   end
@@ -356,21 +356,23 @@ class DepotTest < Gorp::TestCase
     # assert_select "p", 'There are a total of 4 articles.'
   end
 
-  section 24.3, "Active Resources" do
-    # assert_select '.stdout', /ActiveResource::Redirection: Failed.* 302/
-    assert_select '.stdout', '36.0'
-    assert_select '.stdout', '=&gt; true'
-    assert_select '.price', '$31.00'
-    assert_select 'p', /31\.0/
-    assert_select '.stdout', '=&gt; "Dave Thomas"'
-    assert_select '.stdout', /NoMethodError: undefined method `line_items'/
-    if File.exist? "#{$WORK}/depot/public/images"
-      assert_select '.stdout', /&lt;id type="integer"&gt;\d+&lt;\/id&gt;/
-    else
-      assert_select '.body', /[{,]"id":\d+[,}]/
+  if $rails_version =~ /^3\./
+    section 24.3, "Active Resources" do
+      # assert_select '.stdout', /ActiveResource::Redirection: Failed.* 302/
+      assert_select '.stdout', '36.0'
+      assert_select '.stdout', '=&gt; true'
+      assert_select '.price', '$31.00'
+      assert_select 'p', /31\.0/
+      assert_select '.stdout', '=&gt; "Dave Thomas"'
+      assert_select '.stdout', /NoMethodError: undefined method `line_items'/
+      if File.exist? "#{$WORK}/depot/public/images"
+        assert_select '.stdout', /&lt;id type="integer"&gt;\d+&lt;\/id&gt;/
+      else
+        assert_select '.body', /[{,]"id":\d+[,}]/
+      end
+      assert_select '.stdout', /"product_id"=&gt;2/
+      assert_select '.stdout', /=&gt; 28.8/
     end
-    assert_select '.stdout', /"product_id"=&gt;2/
-    assert_select '.stdout', /=&gt; 28.8/
   end
 
   section 25.1, 'rack' do

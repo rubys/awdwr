@@ -1074,34 +1074,31 @@ section 10.2, 'Iteration E2: Handling Errors' do
   EOF
 
   desc 'Rescue error: log, flash, and redirect.'
-  edit 'app/controllers/carts_controller.rb', 'show' do |data|
-    data[/()  # GET .carts.1/,1]= "# START:show\n"
-    data[/# GET .carts.1.*?\n  end\n()/m,1]= "# END:show\n"
-
-    dcl 'show' do
-      self.all = <<-'EOF'.unindent(6)
-        def show
-          # START_HIGHLIGHT
-          begin
-          # END_HIGHLIGHT
-            @cart = Cart.find(params[:id])
-          # START_HIGHLIGHT
-          rescue ActiveRecord::RecordNotFound
-            logger.error "Attempt to access invalid cart #{params[:id]}"
-            redirect_to store_url, :notice => 'Invalid cart'
-          else
-          # END_HIGHLIGHT
-            respond_to do |format|
-              format.html # show.html.erb
-              format.json { render :json => @cart }
-            end
-          # START_HIGHLIGHT
-          end
-          # END_HIGHLIGHT
-        end
-      EOF
-      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  edit 'app/controllers/carts_controller.rb', 'setup' do |data|
+    edit /class.*?\n\s*(\n|  #.*?\n)/m, :mark => 'setup' do
+      msub /\n(\s*)(\n|  #)/, 
+        "  rescue_from ActiveRecord::RecordNotFound, :with => :invalid_cart\n",
+        :highlight
     end
+
+    edit /^()end/, :mark => 'setup'
+
+    if include? 'private'
+      edit /^ *private\s*/, :mark => 'setup'
+      msub /^ *private\n(\s*)\n/, "  # ...\n\n"
+    else
+      msub /^()end/, "  private\n"
+    end
+
+    msub /^() *private\s*/, "  # ...\n"
+
+    msub /^()end/, <<-'EOF'.unindent(2), :highlight
+      def invalid_cart
+        logger.error "Attempt to access invalid cart #{params[:id]}"
+        redirect_to store_url, :notice => 'Invalid cart'
+      end
+    EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   if $rails_version =~ /^4\./
@@ -1139,8 +1136,10 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   desc 'Clear session and add flash notice when cart is destroyed.'
   edit 'app/controllers/carts_controller.rb', 'destroy' do
     dcl 'destroy', :mark => 'destroy' do
-      edit 'Cart.find', :highlight do
-        msub /@cart = (.*)/, 'current_cart'
+      if include? 'Cart.find'
+        edit 'Cart.find', :highlight do
+          msub /@cart = (.*)/, 'current_cart'
+        end
       end
 
       msub /@cart.destroy\n()/,<<-EOF.unindent(4), :highlight
@@ -3540,131 +3539,133 @@ section 22, 'Caching' do
     "-H 'If-None-Match: #{response['Etag']}'"
 end
 
-section 24.3, 'Active Resources' do
-  config = File.join($WORK,'depot/config/environments/development.rb')
-  if File.read(config) =~ /mass_assignment_sanitizer/
-    desc 'Turn off strict sanitization'
-    edit 'config/environments/development.rb' do
-      edit 'mass_assignment_sanitizer', :highlight do
-        msub /:(strict)/, 'logger'
+unless $rails_version =~ /^4\./
+  section 24.3, 'Active Resources' do
+    config = File.join($WORK,'depot/config/environments/development.rb')
+    if File.read(config) =~ /mass_assignment_sanitizer/
+      desc 'Turn off strict sanitization'
+      edit 'config/environments/development.rb' do
+        edit 'mass_assignment_sanitizer', :highlight do
+          msub /:(strict)/, 'logger'
+        end
       end
+      restart_server
     end
-    restart_server
-  end
 
-  rails 'depot_client'
-  if $rails_version =~ /^4\./
-    desc 'Add in the activeresource gem'
-    edit 'Gemfile' do
-      edit "activeresource", :highlight do
-        msub /(), :path/, ", :require => 'active_resource'"
+    rails 'depot_client'
+    if $rails_version =~ /^4\./
+      desc 'Add in the activeresource gem'
+      edit 'Gemfile' do
+        edit "activeresource", :highlight do
+          msub /(), :path/, ", :require => 'active_resource'"
+        end
       end
     end
-  end
-  edit 'app/models/product.rb' do |data|
-    data << <<-EOF.unindent(6)
-      class Product < ActiveResource::Base
-        self.site = 'http://dave:secret@localhost:3000/'
-      end
-    EOF
-  end
-  console 'Product.find(2).title'
-  Dir.chdir(File.join($WORK,'depot'))
-  edit 'app/controllers/line_items_controller.rb', 'create' do |data|
-    clear_all_marks
-    dcl 'create', :mark do
-      msub /\n()\s+product = Product.find/, <<-EOF.unindent(4), :highlight
-        if params[:line_item]
-          # ActiveResource
-          params[:line_item][:order_id] = params[:order_id]
-          @line_item = LineItem.new(params[:line_item])
-        else
-          # HTML forms
-      EOF
-      msub /\n()\s+product = Product.find/, '  '
-      msub /\n()\s+@line_item = @cart.add/, '  '
-      msub /@line_item = @cart.add.*\n()/, <<-EOF.unindent(4), :highlight
+    edit 'app/models/product.rb' do |data|
+      data << <<-EOF.unindent(6)
+        class Product < ActiveResource::Base
+          self.site = 'http://dave:secret@localhost:3000/'
         end
       EOF
     end
-  end
-  edit 'config/routes.rb' do |data|
-    clear_all_marks
-    edit 'resources :orders', :highlight
-    data[/resources :orders()/,1] = 
-      " do\n      resources :line_items\n    end\n"
-  end
-  if $rails_version =~ /^4\./
-    desc 'Disable CSRF checking'
-    edit 'app/controllers/application_controller.rb' do
+    console 'Product.find(2).title'
+    Dir.chdir(File.join($WORK,'depot'))
+    edit 'app/controllers/line_items_controller.rb', 'create' do |data|
       clear_all_marks
-      edit "protect_from_forgery", :highlight do
-        msub /(:exception)/, ":reset_session"
+      dcl 'create', :mark do
+        msub /\n()\s+product = Product.find/, <<-EOF.unindent(4), :highlight
+          if params[:line_item]
+            # ActiveResource
+            params[:line_item][:order_id] = params[:order_id]
+            @line_item = LineItem.new(params[:line_item])
+          else
+            # HTML forms
+        EOF
+        msub /\n()\s+product = Product.find/, '  '
+        msub /\n()\s+@line_item = @cart.add/, '  '
+        msub /@line_item = @cart.add.*\n()/, <<-EOF.unindent(4), :highlight
+          end
+        EOF
       end
     end
-  end
-  # restart_server
-  Dir.chdir(File.join($WORK,'depot_client'))
-  console 'Product.find(2).title'
-  if File.exist? 'public/images'
-    console 'p = Product.find(2)\nputs p.price\np.price -= 5\np.save'
-  else
-    console 'p = Product.find(2)\nputs p.price\n' +
-      'p.price = BigDecimal.new(p.price)-5\np.save'
-  end
-
-  desc 'expire cache'
-  cmd "rm -rf #{File.join($WORK,'depot','tmp','cache')}"
-
-  desc 'fetch storefront'
-  get '/'
-
-  desc 'fetch product (fallback in case storefront is cached)'
-  post '/login',
-    'name' => 'dave',
-    'password' => 'secret'
-  get '/products/2'
-
-  edit 'app/models/order.rb' do |data|
-    data << <<-EOF.unindent(6)
-      class Order < ActiveResource::Base
-        self.site = 'http://dave:secret@localhost:3000/'
-      end
-    EOF
-  end
-  console 'Order.find(1).name\nOrder.find(1).line_items\n'
-  edit 'app/models/line_item.rb' do |data|
-    data << <<-EOF.unindent(6)
-      class LineItem < ActiveResource::Base
-        self.site = 'http://dave:secret@localhost:3000/orders/:order_id'
-      end
-    EOF
-  end
-  post '/admin', {'submit' => 'Logout'}, {:snapget => false}
-  console 'LineItem.find(:all, :params => {:order_id=>1})'
-  if File.exist? 'public/images'
-    console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
-         'puts li.price\nli.price *= 0.8\nli.save'
-  else
-    get '/orders/1/line_items.json', :auth => ['dave', 'secret']
-    Dir.chdir(File.join($WORK,'depot')) do
-      edit 'app/controllers/line_items_controller.rb', 'index' do
-        dcl 'index', :mark => 'index' do
-          msub /format.json.*\n()/, 
-            "      format.xml { render :xml => @line_items }\n"
-        gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    edit 'config/routes.rb' do |data|
+      clear_all_marks
+      edit 'resources :orders', :highlight
+      data[/resources :orders()/,1] = 
+        " do\n      resources :line_items\n    end\n"
+    end
+    if $rails_version =~ /^4\./
+      desc 'Disable CSRF checking'
+      edit 'app/controllers/application_controller.rb' do
+        clear_all_marks
+        edit "protect_from_forgery", :highlight do
+          msub /(:exception)/, ":reset_session"
         end
       end
     end
+    # restart_server
+    Dir.chdir(File.join($WORK,'depot_client'))
+    console 'Product.find(2).title'
+    if File.exist? 'public/images'
+      console 'p = Product.find(2)\nputs p.price\np.price -= 5\np.save'
+    else
+      console 'p = Product.find(2)\nputs p.price\n' +
+        'p.price = BigDecimal.new(p.price)-5\np.save'
+    end
+
+    desc 'expire cache'
+    cmd "rm -rf #{File.join($WORK,'depot','tmp','cache')}"
+
+    desc 'fetch storefront'
+    get '/'
+
+    desc 'fetch product (fallback in case storefront is cached)'
+    post '/login',
+      'name' => 'dave',
+      'password' => 'secret'
+    get '/products/2'
+
+    edit 'app/models/order.rb' do |data|
+      data << <<-EOF.unindent(6)
+        class Order < ActiveResource::Base
+          self.site = 'http://dave:secret@localhost:3000/'
+        end
+      EOF
+    end
+    console 'Order.find(1).name\nOrder.find(1).line_items\n'
+    edit 'app/models/line_item.rb' do |data|
+      data << <<-EOF.unindent(6)
+        class LineItem < ActiveResource::Base
+          self.site = 'http://dave:secret@localhost:3000/orders/:order_id'
+        end
+      EOF
+    end
+    post '/admin', {'submit' => 'Logout'}, {:snapget => false}
+    console 'LineItem.find(:all, :params => {:order_id=>1})'
+    if File.exist? 'public/images'
+      console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
+           'puts li.price\nli.price *= 0.8\nli.save'
+    else
+      get '/orders/1/line_items.json', :auth => ['dave', 'secret']
+      Dir.chdir(File.join($WORK,'depot')) do
+        edit 'app/controllers/line_items_controller.rb', 'index' do
+          dcl 'index', :mark => 'index' do
+            msub /format.json.*\n()/, 
+              "      format.xml { render :xml => @line_items }\n"
+          gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+          end
+        end
+      end
+    end
+    get '/orders/1/line_items.xml', :auth => ['dave', 'secret']
+    console 'LineItem.format = :xml\n' +
+         'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
+         'puts li.price\nli.price *= 0.8\nli.save'
+    console 'li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, ' +
+         ':price=>0.0)\nli2.save'
+         'li2.save'
+    publish_code_snapshot nil, 'depot_client'
   end
-  get '/orders/1/line_items.xml', :auth => ['dave', 'secret']
-  console 'LineItem.format = :xml\n' +
-       'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
-       'puts li.price\nli.price *= 0.8\nli.save'
-  console 'li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, ' +
-       ':price=>0.0)\nli2.save'
-       'li2.save'
-  publish_code_snapshot nil, 'depot_client'
 end
 
 section 25.1, 'rack' do
