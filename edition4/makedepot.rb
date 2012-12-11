@@ -517,8 +517,10 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
     end
   end
 
-  desc 'Delete public/index.html, as instructed.'
-  cmd 'rm public/index.html'
+  if File.exist? 'public/index.html'
+    desc 'Delete public/index.html, as instructed.'
+    cmd 'rm public/index.html'
+  end
 
   desc 'Demonstrate that everything is wired together'
   get '/'
