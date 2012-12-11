@@ -458,11 +458,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
   end
 
   desc 'Tests pass!'
-  if File.exist? 'test/unit'
-    cmd 'rake test:units'
-  else
-    cmd 'rake test:models'
-  end
+  rake 'test:models'
 end
 
 section 7.3, 'Playtime' do
@@ -736,11 +732,7 @@ section 8.4, 'Iteration C4: Functional Testing' do
   edit 'test/fixtures/products.yml'
 
   desc 'Show that the tests pass.'
-  if File.exist? 'test/functional'
-    rake 'test:functionals'
-  else
-    rake 'test:controllers'
-  end
+  rake 'test:controllers'
 end
 
 section 8.5, 'Iteration C5 - Caching' do
@@ -928,16 +920,11 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
     end
   end
 
-  if File.exist? 'test/functional'
-    rake 'test:functionals'
-  else
-    rake 'test:controllers'
-  end
+  rake 'test:controllers'
 
   unless $rails_version =~ /^3\./
     [ %w(create post), %w(update put) ]. each do |action, method|
-      tc = (File.exist?('test/controllers') ? 'controllers' : 'functional')
-      edit "test/#{tc}/line_items_controller_test.rb", action do
+      edit 'test/*/line_items_controller_test.rb', action do
         dcl "should #{action} line_item", :mark => action do
           edit method, :highlight
           msub /\{ (.*) \}/, 'product_id: @line_item.product_id'
@@ -946,12 +933,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
     end
   end
 
-  if File.exist? 'test/functional'
-    rake 'test:functionals'
-  else
-    rake 'test:controllers'
-  end
-
+  rake 'test:controllers'
 end
 
 section 9.3, 'Iteration D3: Adding a button' do
@@ -2991,11 +2973,7 @@ section 14.5, 'Playtime' do
   end
 
   desc 'Verify  that the test passes'
-  if File.exist? 'test/functional'
-    rake 'test:functionals'
-  else
-    rake 'test:controllers'
-  end
+  rake 'test:controllers'
 
   desc 'Look at the data in the database'
   cmd 'sqlite3 db/development.sqlite3 .schema'
