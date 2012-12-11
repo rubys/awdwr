@@ -110,6 +110,11 @@ class DepotTest < Gorp::TestCase
       :failures => 0, :errors => 0
   end
 
+  section 9.2, "Connection Products to Carts" do
+    assert_select 'pre', :tests => 22, :assertions => 35,
+      :failures => 0, :errors => 0
+  end
+
   section 9.3, "Iteration D3: Adding a button" do
     assert_select 'input[type=submit][value=Add to Cart]'
     assert_select "a[href=http://localhost:#{$PORT}/carts/1]", 'redirected'
@@ -184,11 +189,10 @@ class DepotTest < Gorp::TestCase
       'Missing <summary type="xhtml">'
     assert_select '.stdout', /&lt;td&gt;CoffeeScript&lt;\/td&gt;/,
       'Missing <td>CoffeeScript</td>'
-  end
 
-  section 12.3, "Iteration G3: Pagination" do
-    assert_select 'td', 'Customer 100'
-    assert_select "a[href=http://localhost:#{$PORT}/orders?page=4]"
+    # caching
+    assert_select '.stdout', /304 Not Modified/
+    assert_select '.stdout', /Etag:/i
   end
 
   section 12.4, "Playtime" do
@@ -344,18 +348,6 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /"16.67"/
   end
 
-  section '22', 'Caching' do
-    assert_select '.stdout', /304 Not Modified/
-    assert_select '.stdout', /Etag:/i
-    assert_select '.stdout', /Cache-Control: max-age=\d+, public/i
-    unless File.exist? "#{$WORK}/depot/public/images"
-      assert_select '.stdout', /X-Rack-Cache: fresh/
-    end
-
-    # not exactly a good test of the function in question...
-    # assert_select "p", 'There are a total of 4 articles.'
-  end
-
   if $rails_version =~ /^3\./
     section 24.3, "Active Resources" do
       # assert_select '.stdout', /ActiveResource::Redirection: Failed.* 302/
@@ -395,7 +387,7 @@ class DepotTest < Gorp::TestCase
   end
 
   if File.exist? 'public/images'
-    section 26.2, 'Asset Packager' do
+    section '26.1.2', 'Asset Packager' do
       assert_select '.stdout', 'config/asset_packages.yml example file created!'
       assert_select '.stdout', '  - depot'
       assert_select '.stdout', 
@@ -403,16 +395,21 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 26.3, 'HAML' do
+  section 26.2, 'HAML' do
     assert_select 'h1', 'Your Pragmatic Catalog'
     assert_select 'span.price', /\$3[16].00/
   end
 
   if File.exist? 'public/images'
-    section 26.4, 'JQuery' do
+    section '26.1.4', 'JQuery' do
       assert_select '.logger', /force\s+public\/javascripts\/rails\.js/
       assert_select '.stdout', /No RJS statement/
       assert_select '.stdout', /4\d tests, 7\d assertions, 0 failures, 0 errors/
     end
+  end
+
+  section 26.3, "Iteration G3: Pagination" do
+    assert_select 'td', 'Customer 100'
+    assert_select "a[href=http://localhost:#{$PORT}/en/orders?page=4]"
   end
 end

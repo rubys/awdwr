@@ -273,6 +273,10 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     clear_highlights
     edit '<body>', :highlight
     msub /<body()>/, " class='<%= controller.controller_name %>'"
+
+    if self =~ /, "data-turbolinks-track"/
+      msub /,( )"data-turbolinks-track"/, "\n    "
+    end
   end
 
   desc 'Replace the scaffold generated view with some custom HTML'
@@ -735,10 +739,60 @@ section 8.4, 'Iteration C4: Functional Testing' do
   else
     rake 'test:controllers'
   end
-  publish_code_snapshot :e
 end
 
-section 8.5, 'Playtime' do
+section 8.5, 'Iteration C5 - Caching' do
+  unless File.exist? 'public/images'
+    desc "Turn on caching in development"
+    edit 'config/environments/development.rb', 'perform_caching' do
+      clear_all_marks
+      edit 'perform_caching', :mark => 'perform_caching' do
+        msub /perform_caching = (false)/, 'true'
+      end
+    end
+  end
+
+  desc "add a method to return the latest product"
+  edit 'app/models/product.rb', 'latest' do
+    clear_all_marks
+    msub /\n()end/, "\n"
+    msub /\n()end/, <<-EOF.unindent(4), :mark => 'latest'
+      def self.latest
+        Product.order('updated_at').last
+      end
+    EOF
+  end
+
+  if $rails_version =~ /^4\./
+    desc 'cache sections'
+    edit 'app/views/store/index.html.erb' do
+      # adjust indentation
+      gsub!(/<% @products.each.*/m) { |each| each.gsub! /^/, '  ' }
+      gsub!(/<div.*<\/div>/m) { |div| div.gsub! /^/, '  ' }
+
+      msub /()  <% @products.each do \|product\| %>\n/,
+        "<% cache ['store', Product.latest] do %>\n", :highlight
+      msub /<% @products.each do \|product\| %>\n()/, 
+        "    <% cache ['entry', product] do %>\n", :highlight
+      msub /<\/div>\n  <% end %>\n()/,  "<% end %>\n", :highlight
+      msub /<\/div>\n()  <% end %>\n/,  "    <% end %>\n", :highlight
+    end
+  end
+
+  publish_code_snapshot :e
+
+  unless File.exist? 'public/images'
+    desc "Turn caching back off"
+    edit 'config/environments/development.rb', 'perform_caching' do
+      msub /perform_caching = (true)/, 'false'
+    end
+    cmd 'rm -f public/assets/*'
+    cmd 'rm -rf tmp/*cache/*'
+    restart_server
+  end
+end
+
+section 8.6, 'Playtime' do
   cmd 'git tag iteration-b'
   cmd 'git commit -a -m "Prettier listings"'
   cmd 'git tag iteration-c'
@@ -794,7 +848,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
   EOF
 
   desc 'Create the model object.'
-  generate 'scaffold LineItem product_id:integer cart_id:integer'
+  generate 'scaffold LineItem product:references cart:references'
   cmd 'rake db:migrate'
 
   desc 'Cart has many line items.'
@@ -848,11 +902,54 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
        '(But slightly more to the Cart).  Also provide convenient access ' +
        "to the total price of the line item"
   edit 'app/models/line_item.rb' do
-    msub /class LineItem.*\n()/, <<-EOF.unindent(4), :highlight
-      belongs_to :product
-      belongs_to :cart
-    EOF
+    unless self =~ /belongs_to/
+      msub /class LineItem.*\n()/, <<-EOF.unindent(2), :highlight
+        belongs_to :product
+        belongs_to :cart
+      EOF
+    end
+    if $rails_version =~ /^3.2/
+      msub /^()end/, <<-EOF.unindent(2), :highlight
+        attr_accessible :cart_id, :product_id
+      EOF
+    end
   end
+
+  # limit access to product_id
+  unless $rails_version =~ /^3\./
+    edit 'app/controllers/line_items_controller.rb', 'line_item_params' do
+      dcl 'line_item_params', :mark do
+        edit 'permit', :highlight do
+          msub /require\(:line_item\)(.*)/, '.permit(:product_id)'
+        end
+      end
+    end
+  end
+
+  if File.exist? 'test/functional'
+    rake 'test:functionals'
+  else
+    rake 'test:controllers'
+  end
+
+  unless $rails_version =~ /^3\./
+    [ %w(create post), %w(update put) ]. each do |action, method|
+      tc = (File.exist?('test/controllers') ? 'controllers' : 'functional')
+      edit "test/#{tc}/line_items_controller_test.rb", action do
+        dcl "should #{action} line_item", :mark => action do
+          edit method, :highlight
+          msub /\{ (.*) \}/, 'product_id: @line_item.product_id'
+        end
+      end
+    end
+  end
+
+  if File.exist? 'test/functional'
+    rake 'test:functionals'
+  else
+    rake 'test:controllers'
+  end
+
 end
 
 section 9.3, 'Iteration D3: Adding a button' do
@@ -863,7 +960,8 @@ section 9.3, 'Iteration D3: Adding a button' do
   desc 'Add the button, connecting it to the Line Item Controller, passing ' +
        'the product id.'
   edit 'app/views/store/index.html.erb' do
-    msub /number_to_currency.*\n()/, <<-EOF, :highlight
+    clear_all_marks
+    msub /number_to_currency.*\n()/, '    ' + <<-EOF, :highlight
       <%= button_to 'Add to Cart', line_items_path(:product_id => product) %>
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -1048,15 +1146,18 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   get '/carts/1'
 
   desc 'Fill in the self.down method'
-  edit Dir['db/migrate/*combine_items_in_cart.rb'].first, 'down'
+  migration = Dir['db/migrate/*combine_items_in_cart.rb'].first
+  edit migration, 'down'
 
   desc 'Separate out individual items.'
   cmd 'rake db:rollback'
+  cmd "mv #{migration} #{migration.sub('.rb', '.bak')}"
 
   desc 'Every item should (once again) only have a quantity of one.'
   get '/carts/1'
 
   desc 'Recombine the item data.'
+  cmd "mv #{migration.sub('.rb', '.bak')} #{migration}"
   cmd 'rake db:migrate'
 
   desc 'Add a few products to the order.'
@@ -1075,23 +1176,19 @@ section 10.2, 'Iteration E2: Handling Errors' do
 
   desc 'Rescue error: log, flash, and redirect.'
   edit 'app/controllers/carts_controller.rb', 'setup' do |data|
-    edit /class.*?\n\s*(\n|  #.*?\n)/m, :mark => 'setup' do
+    edit /class.*?\n\s*(#.*?)\n/m, :mark => 'setup' do
       msub /\n(\s*)(\n|  #)/, 
         "  rescue_from ActiveRecord::RecordNotFound, :with => :invalid_cart\n",
         :highlight
     end
 
-    edit /^()end/, :mark => 'setup'
-
     if include? 'private'
       edit /^ *private\s*/, :mark => 'setup'
-      msub /^ *private\n(\s*)\n/, "  # ...\n\n"
-    else
-      msub /^()end/, "  private\n"
+      msub /^() *private\s*/, "  # ...\n"
+      msub /^ *private\n(\s*)\n/, "  # ...\n"
     end
 
-    msub /^() *private\s*/, "  # ...\n"
-
+    edit /^()end/, :mark => 'setup'
     msub /^()end/, <<-'EOF'.unindent(2), :highlight
       def invalid_cart
         logger.error "Attempt to access invalid cart #{params[:id]}"
@@ -1101,10 +1198,7 @@ section 10.2, 'Iteration E2: Handling Errors' do
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
-  if $rails_version =~ /^4\./
-    desc 'Intermittent cache reloading issue'
-    restart_server
-  elsif RUBY_VERSION =~ /^1\.8/ and $rails_version =~ /^3\.2/
+  if RUBY_VERSION =~ /^1\.8/ and $rails_version =~ /^3\.2/
     desc 'Intermittent cache reloading issue'
     restart_server
   end
@@ -1256,12 +1350,12 @@ section 10.4, 'Playtime' do
 
   desc 'Substitute names of products and carts for numbers'
   edit 'test/fixtures/line_items.yml' do
-    gsub! 'product_id: 1', 'product: ruby'
-    gsub! '_id: 1', ': one'
-    gsub! '_id: 2', ': two'
+    gsub! /product(_id)?:.*/, 'product: ruby'
+    gsub! /cart(_id)?:.*/, 'cart: one'
 
     msub /one:\n(.*?)\n\n/m, '\1', :highlight
     msub /two:\n(.*?)\n\Z/m, '\1', :highlight
+    msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
   end
 
   desc 'Update expected target of redirect: Cart#destroy.'
@@ -1292,7 +1386,6 @@ section 10.4, 'Playtime' do
   edit "test/*/cart_test.rb" do
     self.all = read('test/cart_test1.rb')
   end
-
   if File.exist? 'test/unit'
     ruby '-I test test/unit/cart_test.rb'
   else
@@ -1400,6 +1493,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
       </div>
     EOF
     gsub! /(<!-- <label id="[.\w]+"\/> -->)/, ''
+    gsub! /(# <label id="[.\w]+"\/>)/, ''
   end
 
   desc 'Insert a call in the controller to find the cart'
@@ -1479,7 +1573,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
   edit 'app/views/store/index.html.erb' do
     clear_all_marks
     edit '<%= button_to', :highlight
-    msub /<%= button_to.*() %>/, ",\n        :remote => true"
+    msub /<%= button_to.*() %>/, ",\n            :remote => true"
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
@@ -1640,7 +1734,7 @@ unless $rails_version =~ /^3\.0/
     edit 'app/assets/javascripts/store.js.coffee' do
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
-        $ -> 
+        $(document).on "page:change", ->
           $('.store .entry > img').click ->
             $(this).parent().find(':submit').click()
       EOF
@@ -2064,11 +2158,18 @@ section 12.2, 'Iteration G2: Atom Feeds' do
     msub insert_at, <<-EOF.unindent(4), :mark => 'who_bought'
       def who_bought
         @product = Product.find(params[:id])
-        respond_to do |format|
-          format.atom
+        @latest_order = @product.orders.order('updated_at').last
+        if stale?(@latest_order)
+          respond_to do |format|
+            format.atom
+          end
         end
       end
     EOF
+    if $rails_version =~ /^3\.[01]/
+      msub /stale\?\((.*)\)/, 
+        ":etag => @latest_order, :last_modified => @latest_order.created_at.utc"
+    end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
@@ -2078,8 +2179,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
       atom_feed do |feed|
         feed.title "Who bought #{@product.title}"
 
-        latest_order = @product.orders.sort_by(&:updated_at).last
-        feed.updated( latest_order && latest_order.updated_at )
+        feed.updated @latest_order.try(:updated_at) 
       
         @product.orders.each do |order|
           feed.entry(order) do |entry|
@@ -2150,101 +2250,23 @@ section 12.2, 'Iteration G2: Atom Feeds' do
     end
   end
 
+  fetch =  '--user dave:secret http://localhost:3000/products/2/who_bought.atom'
   desc 'Fetch the Atom feed'
-  cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.atom'
+  cmd "curl --silent #{fetch}"
+
+  desc 'Look at the headers'
+  cmd "curl --silent --dump - --output /dev/null #{fetch}"
+  req = Net::HTTP::Get.new('/products/2/who_bought.atom')
+  req.basic_auth 'dave', 'secret'
+  response = Net::HTTP.start('localhost', 3000) {|http| http.request(req)}
+
+  cmd "curl --silent --dump - --output /dev/null #{fetch} " +
+    "-H 'If-None-Match: #{response['Etag']}'"
+
+  cmd "curl --silent --dump - --output /dev/null #{fetch} " +
+    "-H 'If-Modified-Since: #{response['Last-Modified']}'"
 
   publish_code_snapshot :p
-end
-
-section 12.3, 'Iteration G3: Pagination' do
-  if $rails_version =~ /^4\./
-    desc 'Add in the kaminari gem'
-  else
-    desc 'Add in the will_paginate gem'
-  end
-  edit 'Gemfile' do
-    msub /(\s*)\Z/, "\n\n"
-    msub /\n\n()\Z/, "gem 'will_paginate', '~> 3.0'\n", :highlight
-    sub! /'will_paginate.*'/, "'kaminari'" if $rails_version =~ /^4\./
-
-    if self =~ /^# Turbolinks.*\.( )Read more:/
-      msub /^# Turbolinks.*\.( )Read more:/, "\n# "
-    end
-  end
-  unless $bundle
-    edit 'config/application.rb' do
-      msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n",
-      :highlight
-    end
-  end
-
-  cmd 'rake environment RAILS_ENV=test db:migrate' if $rails_version =~ /^4\./
-  `rake environment RAILS_ENV=test db:migrate` if $rails_version =~ /^3\.0/
-  tm = (File.exist?('test/unit') ? 'unit' : 'models')
-  `ruby -I test test/#{tm}/order_test.rb 2> /dev/null > /dev/null`
-  unless $?.success?
-    ruby "-I test test/#{tm}/order_test.rb"
-    edit 'Gemfile' do
-      msub /()gem '(will_paginate|kaminari)'/, '# '
-    end
-    next
-  end
-
-  restart_server
-  
-  cmd 'bundle show'
-
-  desc 'Load in a few orders'
-  edit 'script/load_orders.rb' do
-    self.all = <<-'EOF'.unindent(6)
-      Order.transaction do
-        (1..100).each do |i|
-          Order.create(:name => "Customer #{i}", :address => "#{i} Main Street",
-            :email => "customer-#{i}@example.com", :pay_type => "Check")
-        end
-      end
-    EOF
-    gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  runner 'script/load_orders.rb'
-
-  desc 'Modify the controller to do pagination'
-  edit 'app/controllers/orders_controller.rb', 'index' do
-    dcl 'index', :mark do
-      # msub /^()/, "require 'will_paginate'\n", :highlight
-      edit 'Order.all', :highlight
-      if $rails_version =~ /^4\./
-        msub /Order\.(all)/, 
-          "order('created_at desc').page(params[:page])"
-      else
-        msub /Order\.(all)/, 
-          "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
-          '      :per_page=>10'
-      end
-    end
-    gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
-  end
-
-  desc 'Add some navigational aids'
-  edit 'app/views/orders/index.html.erb' do
-    self << <<-EOF.unindent(6)
-      <!-- START_HIGHLIGHT -->
-      <p><%= will_paginate @orders %></p>
-      <!-- END_HIGHLIGHT -->
-    EOF
-    gsub! 'will_','' if $rails_version =~ /^4\./
-    if $rails_version !~ /^3\.[01]/
-      if self =~ /,( ):?data/
-        msub /,( ):?data/, "\n              "
-      else
-        msub /,( ):?method/, "\n              "
-      end
-    end
-  end
-
-  desc 'Show the orders'
-  get '/orders'
 end
 
 section 12.4, 'Playtime' do
@@ -2252,7 +2274,7 @@ section 12.4, 'Playtime' do
   edit 'app/controllers/products_controller.rb', 'who_bought' do
     clear_highlights
     dcl 'who_bought' do
-      msub /respond_to.*\n()/, <<-EOF.unindent(2), :highlight
+      msub /respond_to.*\n()/, <<-EOF, :highlight
         format.xml { render :xml => @product }
       EOF
     end
@@ -2293,7 +2315,7 @@ section 12.4, 'Playtime' do
   edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
     data.clear_highlights
     data.dcl('who_bought') do |wb|
-      wb.msub /respond_to.*\n()/, <<-EOF.unindent(2), :highlight
+      wb.msub /respond_to.*\n()/, <<-EOF, :highlight
         format.html
       EOF
     end
@@ -2796,8 +2818,9 @@ section 14.3, 'Iteration I3: Limiting Access' do
     clear_highlights
     edit /class.*\n/, :mark => 'auth' do
       msub /\n()\Z/, <<-EOF.unindent(6), :highlight
-        before_filter :authorize
+        before_action :authorize
       EOF
+      gsub! '_action', '_filter' if $rails_version =~ /^3\./
     end
 
     edit /^end\n?$/, :mark => 'auth' do
@@ -2818,10 +2841,11 @@ section 14.3, 'Iteration I3: Limiting Access' do
   desc 'whitelist the sessions and store controllers'
   %w(sessions store).each do |controller|
     edit "app/controllers/#{controller}_controller.rb", 'setup' do |data|
-      data.edit /class.*\n/, :mark => 'setup' do |top|
-        top.msub /class.*\n()/, <<-EOF.unindent(8), :highlight
-          skip_before_filter :authorize
+      data.edit /class.*\n/, :mark => 'setup' do
+        msub /class.*\n()/, <<-EOF.unindent(8), :highlight
+          skip_before_action :authorize
         EOF
+        gsub! '_action', '_filter' if $rails_version =~ /^3\./
       end
     end
   end
@@ -2838,11 +2862,12 @@ section 14.3, 'Iteration I3: Limiting Access' do
     if auth[controller]
       desc "whitelist #{controller.sub(/s$/,'')} operations"
       edit "app/controllers/#{controller}_controller.rb", 'setup' do |data|
-        data.edit /class.*\n/, :mark => 'setup' do |top|
-          top.msub /class.*\n()/, <<-EOF.unindent(8) + "\n", :highlight
-            skip_before_filter :authorize, :only => #{auth[controller].inspect}
+        data.edit /class.*\n/, :mark => 'setup' do
+          msub /class.*\n()/, <<-EOF.unindent(10), :highlight
+            skip_before_action :authorize, :only => #{auth[controller].inspect}
           EOF
-          top.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+          gsub! '_action', '_filter' if $rails_version =~ /^3\./
+          gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
         end
       end
     end
@@ -3038,11 +3063,12 @@ section 15.1, 'Task J1: Selecting the locale' do
 
     data.msub /^class.*\n()/, <<-EOF.unindent(4)
       #START_HIGHLIGHT
-      before_filter :set_i18n_locale_from_params
+      before_action :set_i18n_locale_from_params
       #END_HIGHLIGHT
       # ...
       #END:i18n
     EOF
+    data.gsub! '_action', '_filter' if $rails_version =~ /^3\./
 
     data.edit 'protected', :mark => 'i18n'
 
@@ -3328,6 +3354,10 @@ section 16, 'Deployment' do
     edit 'capistrano', :highlight
     msub /^(# )gem .capistrano/, ''
     sub! 'mysql2', 'mysql' if $rails_version =~ /^3\.0/
+
+    if self =~ /^# Turbolinks.*\.( )Read more:/
+      msub /^# Turbolinks.*\.( )Read more:/, "\n# "
+    end
   end
   cmd 'bundle install'
 
@@ -3456,91 +3486,9 @@ section 21.2, 'Form Helpers' do
   publish_code_snapshot nil, :views
 end
 
-section 22, 'Caching' do
-# Dir.chdir(File.join($WORK,'views'))
-# generate 'model article body:text'
-# cmd 'rake db:migrate'
-# cmd "cp -v #{$CODE}/e1/views/app/models/article.rb app/models"
-# cmd "cp -vr #{$CODE}/e1/views/app/views/blog app/views"
-# get '/blog/list'
-# cmd "cp -vr #{$CODE}/e1/views/app/views/blog1 app/views"
-# get '/blog1/list'
-# cmd "cp -vr #{$CODE}/e1/views/app/views/blog2 app/views"
-# get '/blog2/list'
-
-  Dir.chdir(File.join($WORK,'depot'))
-  restart_server
-  cmd 'curl --silent --dump - --output /dev/null http://localhost:3000/'
-
-  desc "add a method to return the latest product"
-  edit 'app/models/product.rb', 'latest' do
-    clear_all_marks
-    msub /\n()\s+private/, "\n"
-    msub /\n()\s+private/, <<-EOF.unindent(4), :mark => 'latest'
-      def self.latest
-        Product.order('updated_at desc').limit(1).first
-      end
-    EOF
-    msub /\n()\s+private/, "\n"
-  end
-
-  desc "set ETAG and LastModified headers on the response"
-  edit 'app/controllers/store_controller.rb' do
-    clear_all_marks
-    dcl 'index' do
-      msub /^()  end/, "\n"
-      msub /^()  end/, <<-EOF.unindent(4), :highlight
-        latest = Product.latest
-        fresh_when :etag => latest, :last_modified => latest.created_at.utc
-        expires_in 10.minutes, :public => true
-      EOF
-      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    end
-  end
-
-  cmd 'curl --silent --dump - --output /dev/null http://localhost:3000/'
-  response = Net::HTTP.get_response(URI.parse('http://localhost:3000/'))
-
-  cmd "curl --silent --dump - --output /dev/null http://localhost:3000/ " +
-    "-H 'If-None-Match: #{response['Etag']}'"
-
-  cmd "curl --silent --dump - --output /dev/null http://localhost:3000/ " +
-    "-H 'If-Modified-Since: #{response['Last-Modified']}'"
-
-  unless File.exist? 'public/images'
-    desc "Turn on caching in development"
-    edit 'config/environments/development.rb' do
-      clear_all_marks
-      edit 'perform_caching', :highlight do
-        msub /perform_caching = (false)/, 'true'
-        if $rails_version =~ /^4\./
-          self << "\n  config.action_dispatch.rack_cache = true"
-        end
-      end
-    end
-
-    if $rails_version =~ /^4\./
-      desc "add 'rack-cache' to the bundle"
-      edit 'Gemfile', 'rack_cache' do
-        clear_all_marks
-        msub /(\s*)\Z/, "\n\n"
-        msub /\n\n()\Z/, "gem 'rack-cache'\n", :highlight
-        edit "rack-cache", :mark => 'rack_cache'
-      end
-      cmd 'bundle install'
-    end
-  end
-
-  restart_server
-  rake 'middleware'
-  cmd 'curl --silent --dump - --output /dev/null http://localhost:3000/'
-  response = Net::HTTP.get_response(URI.parse('http://localhost:3000/'))
-  cmd 'curl --silent --dump - --output /dev/null http://localhost:3000/ ' +
-    "-H 'If-None-Match: #{response['Etag']}'"
-end
-
-unless $rails_version =~ /^4\./
+if $rails_version =~ /^3\./
   section 24.3, 'Active Resources' do
+    Dir.chdir(File.join($WORK,'depot'))
     config = File.join($WORK,'depot/config/environments/development.rb')
     if File.read(config) =~ /mass_assignment_sanitizer/
       desc 'Turn off strict sanitization'
@@ -3549,8 +3497,8 @@ unless $rails_version =~ /^4\./
           msub /:(strict)/, 'logger'
         end
       end
-      restart_server
     end
+    restart_server
 
     rails 'depot_client'
     if $rails_version =~ /^4\./
@@ -3651,7 +3599,7 @@ unless $rails_version =~ /^4\./
         edit 'app/controllers/line_items_controller.rb', 'index' do
           dcl 'index', :mark => 'index' do
             msub /format.json.*\n()/, 
-              "      format.xml { render :xml => @line_items }\n"
+              "        format.xml { render :xml => @line_items }\n"
           gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
           end
         end
@@ -3670,6 +3618,7 @@ end
 
 section 25.1, 'rack' do
   Dir.chdir(File.join($WORK,'depot'))
+  restart_server
 
   edit 'store.ru' do
     self.all = read('rack/store.ru')
@@ -3718,18 +3667,9 @@ section 26.1, 'Active Merchant' do
   desc 'Determine if a credit card is valid'
   edit 'Gemfile', 'plugins' do
     clear_all_marks
-    if File.exist? 'public/images'
-      edit 'will_paginate', :mark => 'plugins'
-      msub /paginate.*\n()/, <<-EOF.unindent(8), :highlight
-        gem 'activemerchant', '~> 1.10.0'
-      EOF
-    else
-      msub /()\Z/, "\n\n" + <<-EOF.unindent(8)
-        gem 'activemerchant'
-      EOF
-      edit 'activemerchant', :mark => 'plugins'
-      edit 'activemerchant', :highlight
-    end
+    msub /()\Z/, "\n\ngem 'activemerchant'\n"
+    edit 'activemerchant', :mark => 'plugins'
+    edit 'activemerchant', :highlight
   end
   cmd 'bundle install'
   edit 'script/creditcard.rb' do
@@ -3748,7 +3688,7 @@ section 26.1, 'Active Merchant' do
 end
 
 if $rails_version =~ /^3\.0/
-  section 26.2, 'Asset Packager' do
+  section '26.1.2', 'Asset Packager' do
 
     Dir.chdir(File.join($WORK,'depot'))
     overview <<-EOF
@@ -3787,7 +3727,7 @@ if $rails_version =~ /^3\.0/
   end
 end
 
-section 26.3, 'HAML' do
+section 26.2, 'HAML' do
   edit 'Gemfile', 'plugins' do
     msub /activemerchant.*\n()/, <<-EOF.unindent(6), :highlight
       gem 'haml', '~> 3.1.1'
@@ -3810,12 +3750,16 @@ section 26.3, 'HAML' do
   edit 'app/views/store/index.html.haml' do
     self.all = read('plugins/index.html.haml')
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    if $rails_version =~ /^3\./
+      sub!(/(\s*- cache.*?do)(.*)/m) {$2.gsub(/^  /,'')}
+      sub!(/(\s*- cache.*?do)(.*)/m) {$2.gsub(/^  /,'')}
+    end
   end
   get '/'
 end
 
 if $rails_version =~ /^3\.0/
-  section 26.4, 'JQuery' do
+  section '26.1.4', 'JQuery' do
     edit 'Gemfile', 'plugins' do
       msub /haml.*\n()/, <<-EOF.unindent(8), :highlight
         gem 'jquery-rails', '~> 0.2.2'
@@ -3863,18 +3807,98 @@ if $rails_version =~ /^3\.0/
   end
 end
 
-section 99, 'cleanup' do
-  publish_code_snapshot :v
-
-  unless File.exist? 'public/images'
-    desc "Turn caching back off"
-    edit 'config/environments/development.rb' do
-      msub /perform_caching = (true)/, 'false'
-    end
-    cmd 'rm -f public/assets/*'
-    cmd 'rm -rf tmp/*cache/*'
-    restart_server
+section 26.3, 'Pagination' do
+  if $rails_version =~ /^4\./
+    desc 'Add in the kaminari gem'
+  else
+    desc 'Add in the will_paginate gem'
   end
+  edit 'Gemfile' do
+    msub /(\s*)\Z/, "\n\n"
+    msub /\n\n()\Z/, "gem 'will_paginate', '~> 3.0'\n", :highlight
+    sub! /'will_paginate.*'/, "'kaminari'" if $rails_version =~ /^4\./
+  end
+  unless $bundle
+    edit 'config/application.rb' do
+      msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n",
+      :highlight
+    end
+  end
+
+  cmd 'rake environment RAILS_ENV=test db:migrate' if $rails_version =~ /^4\./
+  `rake environment RAILS_ENV=test db:migrate` if $rails_version =~ /^3\.0/
+  tm = (File.exist?('test/unit') ? 'unit' : 'models')
+  `ruby -I test test/#{tm}/order_test.rb 2> /dev/null > /dev/null`
+  unless $?.success?
+    ruby "-I test test/#{tm}/order_test.rb"
+    edit 'Gemfile' do
+      msub /()gem '(will_paginate|kaminari)'/, '# '
+    end
+    next
+  end
+
+  restart_server
+  
+  cmd 'bundle show'
+
+  desc 'Load in a few orders'
+  edit 'script/load_orders.rb' do
+    self.all = <<-'EOF'.unindent(6)
+      Order.transaction do
+        (1..100).each do |i|
+          Order.create(:name => "Customer #{i}", :address => "#{i} Main Street",
+            :email => "customer-#{i}@example.com", :pay_type => "Check")
+        end
+      end
+    EOF
+    gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
+  end
+
+  runner 'script/load_orders.rb'
+
+  desc 'Modify the controller to do pagination'
+  edit 'app/controllers/orders_controller.rb', 'index' do
+    dcl 'index', :mark do
+      # msub /^()/, "require 'will_paginate'\n", :highlight
+      edit 'Order.all', :highlight
+      if $rails_version =~ /^4\./
+        msub /Order\.(all)/, 
+          "order('created_at desc').page(params[:page])"
+      else
+        msub /Order\.(all)/, 
+          "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
+          '      :per_page=>10'
+      end
+    end
+    gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
+  end
+
+  desc 'Add some navigational aids'
+  edit 'app/views/orders/index.html.erb' do
+    self << <<-EOF.unindent(6)
+      <!-- START_HIGHLIGHT -->
+      <p><%= will_paginate @orders %></p>
+      <!-- END_HIGHLIGHT -->
+    EOF
+    gsub! 'will_','' if $rails_version =~ /^4\./
+    if $rails_version !~ /^3\.[01]/
+      if self =~ /,( ):?data/
+        msub /,( ):?data/, "\n              "
+      else
+        msub /,( ):?method/, "\n              "
+      end
+    end
+  end
+
+  desc 'Do a login'
+  post '/login',
+    'name' => 'dave',
+    'password' => 'secret'
+
+  desc 'Show the orders'
+  get '/orders'
+
+  publish_code_snapshot :v
 end
 
 required = %w(will_paginate rdoc nokogiri htmlentities)

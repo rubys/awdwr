@@ -3,12 +3,14 @@
 
 %h1= t('.title_html')
 
-- @products.each do |product|
-  .entry
-    = image_tag(product.image_url)
-    %h3= product.title
-    %p= sanitize(product.description)
-    .price_line
-      %span.price= number_to_currency(product.price)
-      = button_to t('.add_html'), line_items_path(:product_id => product),
-        :remote => true
+- cache ['store', Product.latest] do
+  - @products.each do |product|
+    - cache ['entry', product] do
+      .entry
+        = image_tag(product.image_url)
+        %h3= product.title
+        %p= sanitize(product.description)
+        .price_line
+          %span.price= number_to_currency(product.price)
+          = button_to t('.add_html'), line_items_path(:product_id => product),
+            :remote => true

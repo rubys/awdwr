@@ -5,8 +5,9 @@
 <!-- START_HIGHLIGHT -->
   <title>Pragprog Books Online Store</title>
 <!-- END_HIGHLIGHT -->
-  <%= stylesheet_link_tag    "application", :media => "all" %><!-- <label id="code.slt"/> -->
-  <%= javascript_include_tag "application" %><!-- <label id="code.jlt"/> -->
+  <%= stylesheet_link_tag    "application", :media => "all",# <label id="code.slt"/>
+    "data-turbolinks-track" => true %>
+  <%= javascript_include_tag "application", "data-turbolinks-track" => true %><!-- <label id="code.jlt"/> -->
   <%= csrf_meta_tags %><!-- <label id="code.csrf"/> -->
 </head>
 <!-- END:head -->
