@@ -3444,7 +3444,11 @@ section 21.1, 'Views' do
     end
   end
   cmd 'curl --silent --user dave:secret http://localhost:3000/products.xml'
-  irb 'helpers/date.rb'
+  if $rails_version =~ /^3\./
+    irb 'helpers/date3.rb'
+  else
+    irb 'helpers/date4.rb'
+  end
   irb 'helpers/number.rb'
   publish_code_snapshot :t
 end
