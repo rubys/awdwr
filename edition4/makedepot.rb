@@ -801,38 +801,31 @@ section 9.1, 'Iteration D1: Finding a Cart' do
   generate 'scaffold Cart'
   cmd 'rake db:migrate'
 
-  desc "Implement current_cart, which creates a new cart if it" +
+  desc "Implement set_cart, which creates a new cart if it" +
     " can't find one."
-  edit 'app/controllers/application_controller.rb' do
+  if File.exist? 'app/controllers/concerns'
+    current_cart = 'app/controllers/concerns/current_cart.rb'
+  else
+    current_cart = 'app/controllers/application_controller.rb'
+  end
+  edit current_cart do
+    if File.exist? 'app/controllers/concerns'
+      self.all = <<-EOF.unindent(8)
+        module CurrentCart
+          extend ActiveSupport::Concern
+        end
+      EOF
+    end
     msub /()^end/, "\n" + <<-EOF.unindent(4), :highlight
       private
 
-        def current_cart 
-          Cart.find(session[:cart_id])
+        def set_cart 
+          @cart = Cart.find(session[:cart_id])
         rescue ActiveRecord::RecordNotFound
-          cart = Cart.create
-          session[:cart_id] = cart.id
-          cart
+          @cart = Cart.create
+          session[:cart_id] = @cart.id
         end
     EOF
-
-    <<-IGNOREME
-    issue 'Replace with signed cookies?'
-    next
-
-    msub /()^end/, "\n" + <<-EOF.unindent(4), :highlight
-      private
-
-        def current_cart 
-          unless cart = Cart.find_by_id(cookies.signed[:cart_id])
-            cart = Cart.create
-            cookies.permanent.signed[:cart_id] = cart.id
-          end
-
-          cart
-        end
-    EOF
-    IGNOREME
   end
 end
 
@@ -978,18 +971,35 @@ section 9.3, 'Iteration D3: Adding a button' do
   desc "See the button on the page"
   get '/'
 
-  desc 'Update the LineItem.new call to use current_cart and the ' +
+  desc 'Update the LineItem.new call to use set_cart and the ' +
        'product id. Additionally change the logic so that redirection upon ' +
        'success goes to the cart instead of the line item.'
+  edit 'app/controllers/line_items_controller.rb', 'current_cart' do
+    clear_highlights
+    edit /class.*?\n\s*(#.*?)\n/m, :mark => 'current_cart' do
+      msub /class.*?\n()/, <<-EOF.unindent(6), :highlight
+        include CurrentCart
+        before_action :set_cart, :only => [:create]
+      EOF
+      sub! /\s+include CurrentCart/, '' if $rails_version =~ /^3\./
+      gsub! '_action', '_filter' if $rails_version =~ /^3\./
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
+  end
+
   edit 'app/controllers/line_items_controller.rb', 'create' do
     dcl 'create', :mark do
       edit 'LineItem.new', :highlight do
         msub /^()/, <<-EOF.unindent(6)
-          @cart = current_cart
           product = Product.find(params[:product_id])
         EOF
-        msub /(LineItem.new\(.*\))/,
-          "@cart.line_items.build\n    @line_item.product = product"
+        if $rails_version =~ /^3\./
+          msub /(LineItem.new\(.*\))/,
+            "@cart.line_items.build\n    @line_item.product = product"
+        else
+          msub /(LineItem.new\(.*\))/,
+            "@cart.line_items.build(product: product)"
+        end
         gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
       end
       msub /,( ):?notice/, "\n          "
@@ -1091,7 +1101,6 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
 
   desc 'Replace the call to LineItem.new with a call to the new method.'
   edit 'app/controllers/line_items_controller.rb', 'create' do
-    clear_highlights
     dcl 'create' do
       edit 'line_items.build', :highlight do
         msub /@line_item = (.*)/, '@cart.add_product(product.id)'
@@ -1216,7 +1225,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
     dcl 'destroy', :mark => 'destroy' do
       if include? 'Cart.find'
         edit 'Cart.find', :highlight do
-          msub /@cart = (.*)/, 'current_cart'
+          msub /(@cart = .*)/, 'set_cart'
         end
       end
 
@@ -1481,10 +1490,15 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   end
 
   desc 'Insert a call in the controller to find the cart'
-  edit 'app/controllers/store_controller.rb', 'index' do
+  edit 'app/controllers/store_controller.rb' do
     clear_highlights
-    dcl 'index', :mark => 'index'
-    msub /@products = .*\n()/, "    @cart = current_cart\n", :highlight
+    msub /class.*?\n()/, <<-EOF.unindent(4), :highlight
+      include CurrentCart
+      before_action :set_cart
+    EOF
+    sub! /\s+include CurrentCart/, '' if $rails_version =~ /^3\./
+    gsub! '_action', '_filter' if $rails_version =~ /^3\./
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Add a small bit of style.'
@@ -1817,10 +1831,21 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   end
 
   desc 'Return a notice when checking out an empty cart'
+  edit 'app/controllers/orders_controller.rb', 'current_cart' do
+    edit /class.*?\n\s*(#.*?)\n/m, :mark => 'current_cart' do
+      msub /class.*?\n()/, <<-EOF.unindent(6), :highlight
+        include CurrentCart
+        before_action :set_cart, :only => [:new, :create]
+      EOF
+      sub! /\s+include CurrentCart/, '' if $rails_version =~ /^3\./
+      gsub! '_action', '_filter' if $rails_version =~ /^3\./
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
+  end
+
   edit 'app/controllers/orders_controller.rb', 'checkout' do
     dcl 'new', :mark => 'checkout'
     msub /\n()\s+@order = Order.new\n/, <<-EOF.unindent(2) + "\n", :highlight
-      @cart = current_cart
       if @cart.line_items.empty?
         redirect_to store_url, :notice => "Your cart is empty"
         return
@@ -2040,7 +2065,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     dcl 'create', :mark => 'create' do
       msub /@order = Order.new\(.*\)\n()/, <<-EOF.unindent(4)
         #START_HIGHLIGHT
-        @order.add_line_items_from_cart(current_cart)
+        @order.add_line_items_from_cart(@cart)
         #END_HIGHLIGHT
       EOF
       msub /if @order.save\n()/, <<-EOF
@@ -2056,8 +2081,6 @@ section 12.1, 'Iteration G1: Capturing an Order' do
         "\n          'Thank you for your order.'"
       msub /,( ):?location/, "\n          "
       msub /,( ):?status:?\s=?>?\s?:un/, "\n          "
-      msub /^\s+else\n()/, "        @cart = current_cart\n"
-      edit '@cart = current_cart', :highlight
     end
   end
 
@@ -3268,19 +3291,19 @@ section 15.4, 'Task J4: Add a locale switcher.' do
   end
 
   desc "When provided, save the locale in the session."
-  edit "app/controllers/store_controller.rb", 'index' do |data|
-    data.dcl 'index' do |index|
+  edit "app/controllers/store_controller.rb", 'index' do
+    dcl 'index', :mark => 'index' do
       clear_highlights
-      index.gsub! /^    /,'      '
-      index.msub /def.*\n()/, <<-EOF.unindent(4), :highlight
+      gsub! /^    /,'      '
+      msub /def.*\n()/, <<-EOF.unindent(4), :highlight
         if params[:set_locale]
-          redirect_to store_path(:locale => params[:set_locale])
+          redirect_to store_url(:locale => params[:set_locale])
         else
       EOF
-      index.msub /^()\s+end/, <<-EOF.unindent(4), :highlight
+      msub /^()\s+end/, <<-EOF.unindent(4), :highlight
         end
       EOF
-      index.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
   end
 
