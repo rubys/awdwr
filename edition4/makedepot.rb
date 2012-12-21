@@ -816,7 +816,7 @@ section 9.1, 'Iteration D1: Finding a Cart' do
         end
       EOF
     end
-    msub /()^end/, "\n" + <<-EOF.unindent(4), :highlight
+    msub /()^end/, "\n" + <<-EOF.unindent(4)
       private
 
         def set_cart 
@@ -984,6 +984,9 @@ section 9.3, 'Iteration D3: Adding a button' do
       sub! /\s+include CurrentCart/, '' if $rails_version =~ /^3\./
       gsub! '_action', '_filter' if $rails_version =~ /^3\./
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
+    edit /^end/, :mark => 'current_cart' do
+      msub /^()end/, "  #...\n"
     end
   end
 
@@ -1473,8 +1476,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
   desc 'Keep things DRY'
   edit 'app/views/carts/show.html.erb' do
-    sub! /<div.*/m, "<%= render @cart %>\n"
-    edit 'render', :highlight
+    msub /(<h2.*)/m, "<%= render @cart %>\n", :highlight
   end
 
   desc 'Reference the partial from the layout.'
@@ -1591,7 +1593,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
   else
     edit 'app/views/line_items/create.js.erb' do |data|
       data.all =  <<-EOF.unindent(8)
-        $('#cart').html("<%=j render @cart %>");
+        $('#cart').html("<%= escape_javascript render(@cart) %>");
       EOF
     end
   end
@@ -1840,6 +1842,9 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       sub! /\s+include CurrentCart/, '' if $rails_version =~ /^3\./
       gsub! '_action', '_filter' if $rails_version =~ /^3\./
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
+    edit /^end/, :mark => 'current_cart' do
+      msub /^()end/, "  #...\n"
     end
   end
 
