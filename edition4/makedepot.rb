@@ -433,7 +433,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
   edit "test/*/product_test.rb" do
     self.all = read('test/product_test.rb')
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    gsub! 'activerecord.errors', 'errors' if $rails_version =~ /^4\./
+    gsub! 'activerecord.errors', 'errors' unless $rails_version =~ /^3\./
   end
 
   desc 'Look at existing test data'
@@ -757,7 +757,7 @@ section 8.5, 'Iteration C5 - Caching' do
     EOF
   end
 
-  if $rails_version =~ /^4\./
+  unless $rails_version =~ /^3\./
     desc 'cache sections'
     edit 'app/views/store/index.html.erb' do
       # adjust indentation
@@ -3057,7 +3057,7 @@ section 15.1, 'Task J1: Selecting the locale' do
     nonadmin.gsub! /^/, '  '
     nonadmin.msub /()\s*resource/, "  scope '(:locale)' do\n", :highlight
     nonadmin.msub /root.*\n()/, "  end\n", :highlight
-    nonadmin.msub /root.*()/, ', via: :all' if $rails_version =~ /^4\./ 
+    nonadmin.msub /root.*()/, ', via: :all' unless $rails_version =~ /^3\./ 
 
     # append to end
     data.msub /^()end/, nonadmin
@@ -3257,9 +3257,6 @@ section 15.3, 'Task J3: Translating Checkout' do
   if RUBY_VERSION =~ /^1\.8/ and $rails_version =~ /^3\.2/
     desc 'Intermittent cache reloading issue'
     restart_server
-  elsif $rails_version =~ /^4\./
-    desc 'Intermittent cache reloading issue'
-    restart_server
   end
 
   desc 'Show validation errors'
@@ -3452,7 +3449,7 @@ section 19, 'Active Record' do
 
 end
 
-unless $rails_version =~ /^4\./
+if $rails_version =~ /^3\./
   section 20.1, 'Testing Routes' do
     edit 'test/unit/routing_test.rb' do
       self.all = read('test/routing_test.rb')
@@ -3518,14 +3515,6 @@ if $rails_version =~ /^3\./
     restart_server
 
     rails 'depot_client'
-    if $rails_version =~ /^4\./
-      desc 'Add in the activeresource gem'
-      edit 'Gemfile' do
-        edit "activeresource", :highlight do
-          msub /(), :path/, ", :require => 'active_resource'"
-        end
-      end
-    end
     edit 'app/models/product.rb' do |data|
       data << <<-EOF.unindent(6)
         class Product < ActiveResource::Base
@@ -3558,15 +3547,6 @@ if $rails_version =~ /^3\./
       edit 'resources :orders', :highlight
       data[/resources :orders()/,1] = 
         " do\n      resources :line_items\n    end\n"
-    end
-    if $rails_version =~ /^4\./
-      desc 'Disable CSRF checking'
-      edit 'app/controllers/application_controller.rb' do
-        clear_all_marks
-        edit "protect_from_forgery", :highlight do
-          msub /(:exception)/, ":reset_session"
-        end
-      end
     end
     # restart_server
     Dir.chdir(File.join($WORK,'depot_client'))
@@ -3654,7 +3634,8 @@ section 25.1, 'rack' do
     msub /do\n()/, <<-EOF.unindent(4), :highlight
       match 'catalog' => StoreApp.new
     EOF
-    self[/StoreApp.new()/, 1] = ', :via => :all' if $rails_version =~ /^4\./
+    self[/StoreApp.new()/, 1] = ', :via => :all' unless $rails_version =~ /^3\./
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   get '/catalog'
@@ -3825,15 +3806,15 @@ if $rails_version =~ /^3\.0/
 end
 
 section 26.3, 'Pagination' do
-  if $rails_version =~ /^4\./
-    desc 'Add in the kaminari gem'
-  else
+  if $rails_version =~ /^3\./
     desc 'Add in the will_paginate gem'
+  else
+    desc 'Add in the kaminari gem'
   end
   edit 'Gemfile' do
     msub /(\s*)\Z/, "\n\n"
     msub /\n\n()\Z/, "gem 'will_paginate', '~> 3.0'\n", :highlight
-    sub! /'will_paginate.*'/, "'kaminari'" if $rails_version =~ /^4\./
+    sub! /'will_paginate.*'/, "'kaminari'" unless $rails_version =~ /^3\./
   end
   unless $bundle
     edit 'config/application.rb' do
@@ -3842,7 +3823,7 @@ section 26.3, 'Pagination' do
     end
   end
 
-  cmd 'rake environment RAILS_ENV=test db:migrate' if $rails_version =~ /^4\./
+  cmd 'rake environment RAILS_ENV=test db:migrate' unless $rails_version =~ /^3\./
   `rake environment RAILS_ENV=test db:migrate` if $rails_version =~ /^3\.0/
   tm = (File.exist?('test/unit') ? 'unit' : 'models')
   `ruby -I test test/#{tm}/order_test.rb 2> /dev/null > /dev/null`
@@ -3878,13 +3859,13 @@ section 26.3, 'Pagination' do
     dcl 'index', :mark do
       # msub /^()/, "require 'will_paginate'\n", :highlight
       edit 'Order.all', :highlight
-      if $rails_version =~ /^4\./
-        msub /Order\.(all)/, 
-          "order('created_at desc').page(params[:page])"
-      else
+      if $rails_version =~ /^3\./
         msub /Order\.(all)/, 
           "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
           '      :per_page=>10'
+      else
+        msub /Order\.(all)/, 
+          "order('created_at desc').page(params[:page])"
       end
     end
     gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
@@ -3897,7 +3878,7 @@ section 26.3, 'Pagination' do
       <p><%= will_paginate @orders %></p>
       <!-- END_HIGHLIGHT -->
     EOF
-    gsub! 'will_','' if $rails_version =~ /^4\./
+    gsub! 'will_','' unless $rails_version =~ /^3\./
     if $rails_version !~ /^3\.[01]/
       if self =~ /,( ):?data/
         msub /,( ):?data/, "\n              "
