@@ -3063,6 +3063,11 @@ section 15.1, 'Task J1: Selecting the locale' do
     data.msub /^()end/, nonadmin
   end
 
+  unless $rails_version =~ /^3\./
+    desc 'inspect the results'
+    get '/rails/info/routes'
+  end
+
   desc "Default locale parameter, and set locale based on locale parameter."
   edit "app/controllers/application_controller.rb", 'i18n' do |data|
     data.clear_all_marks
