@@ -162,13 +162,6 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
       msub /,( ):?notice/, "\n          "
       msub /,( ):?status:? ?=?>? :un/, "\n          "
     end
-
-    if self =~ /^    # Use this method.*\.( )Example/
-      msub /^    # Use this method.*\.( )Example/, "\n    # "
-    end
-    if self =~ /^    # Also, you can specialize.*checking( )of permissible/
-      msub /^    # Also, you can.*checking( )of permissible/, "\n    # "
-    end
   end
 
   edit 'app/views/products/index.html.erb' do
