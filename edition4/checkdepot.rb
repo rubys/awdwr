@@ -131,7 +131,11 @@ class DepotTest < Gorp::TestCase
 
   section 10.1, "Iteration E1: Creating A Smarter Cart" do
     assert_select 'li', /3 (.|&#?\w+;) Programming Ruby 1.9/u
-    assert_select 'pre', /Couldn't find Cart with ID=wibble/i
+    if $rails_version =~ /^3\./
+      assert_select 'pre', /Couldn't find Cart with ID=wibble/i
+    else
+      assert_select 'h2', /Couldn't find Cart with ID=wibble/i
+    end
   end
 
   section 10.2, "Iteration E2: Handling Errors" do
