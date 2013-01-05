@@ -311,8 +311,17 @@ unless rvm
 end
 
 if File.exist? File.join(WORK, 'Gemfile')
-  install =  <<-EOF
-    gem list bundler | grep -q bundler && gem update bundler || gem install bundler
+  install, bundler  = 'install', 'bundler'
+  gemspec = File.join(HOME, 'git', 'rails', 'rails.gemspec')
+  if File.exist?(gemspec)
+    if not File.readlines(gemspec).grep(/bundler.*\.pre\./).empty?
+      install = 'install --pre' 
+      bundler = 'bundler.*pre'
+    end
+  end
+
+  install = <<-EOF
+    gem list bundler | grep -q #{bundler} && gem update bundler || gem #{install} bundler
     gem list minitest | grep -q minitest || gem install minitest
     gem list activemerchant | grep -q activemerchant || gem install activemerchant
     gem list haml | grep -q haml || gem install haml
