@@ -908,18 +908,18 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
 
   rake 'test:controllers'
 
-# unless $rails_version =~ /^3\./
-#   [ %w(create post), %w(update patch) ]. each do |action, method|
-#     edit 'test/*/line_items_controller_test.rb', action do
-#       dcl "should #{action} line_item", :mark => action do
-#         edit method, :highlight
-#         msub /\{ (.*) \}/, 'product_id: @line_item.product_id'
-#       end
-#     end
-#   end
-# end
-#
-# rake 'test:controllers'
+  unless $rails_version =~ /^3\./
+    [ %w(create post), %w(update patch) ]. each do |action, method|
+      edit 'test/*/line_items_controller_test.rb', action do
+        dcl "should #{action} line_item", :mark => action do
+          edit method, :highlight
+          msub /\{ (.*) \}/, 'product_id: @line_item.product_id'
+        end
+      end
+    end
+  end
+ 
+  rake 'test:controllers'
 end
 
 section 9.3, 'Iteration D3: Adding a button' do
