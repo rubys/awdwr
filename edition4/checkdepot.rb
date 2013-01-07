@@ -45,10 +45,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
-    ticket 3562,
-      :list => :ruby,
-      :title =>  "regression in respond_to?",
-      :match => /I18n::UnknownFileType/
+    ticket 7372,
+      :list => :rails,
+      :title =>  "Rack HEAD CookieStore security warnings",
+      :match => /SECURITY WARNING: No secret option provided to Rack::Session::Cookie\./
     assert_select '.stderr', :minimum => 0 do |errors|
       errors.each do |err|
         assert_match /\d+ tests, \d+ assertions, 0 failures, 0 errors/, err.to_s
