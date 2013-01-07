@@ -162,6 +162,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
       msub /,( ):?notice/, "\n          "
       msub /,( ):?status:? ?=?>? :un/, "\n          "
     end
+    sub! /(, only allow the white) (list through\.)$/, "\\1\n    # \\2"
   end
 
   edit 'app/views/products/index.html.erb' do
