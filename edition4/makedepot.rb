@@ -3003,7 +3003,7 @@ section 14.5, 'Playtime' do
   desc 'Try requesting the xml... see auth failure.'
   cmd 'curl --silent http://localhost:3000/products/2/who_bought.xml'
 
-  issue 'Is this the best way to detect request format?'
+  # issue 'Is this the best way to detect request format?'
   desc 'Enable basic auth'
   edit 'app/controllers/application_controller.rb', 'auth' do
     clear_highlights
