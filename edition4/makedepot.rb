@@ -43,7 +43,7 @@ section 2, 'Instant Gratification' do
     dcl 'hello', :highlight
   end
 
-  ruby 'script/server'
+  restart_server
 
   desc 'Attempt to fetch the file - note that it is missing'
   get '/say/hello'
@@ -3663,12 +3663,13 @@ section 26.1, 'Active Merchant' do
     edit 'activemerchant', :highlight
   end
   cmd 'bundle install'
-  edit 'script/creditcard.rb' do
+  bin = 'tmp' # (File.exist?('script') ? 'script' : 'bin')
+  edit "#{bin}/creditcard.rb" do
     self.all = read('script/creditcard.rb')
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
   ENV.delete('BUNDLE_GEMFILE')
-  runner 'script/creditcard.rb'
+  runner "#{bin}/creditcard.rb"
 
   `rake about 2> /dev/null > /dev/null`
   unless $?.success?
@@ -3833,7 +3834,8 @@ section 26.3, 'Pagination' do
   cmd 'bundle show'
 
   desc 'Load in a few orders'
-  edit 'script/load_orders.rb' do
+  bin = 'tmp' # (File.exist?('script') ? 'script' : 'bin')
+  edit "#{bin}/load_orders.rb" do
     self.all = <<-'EOF'.unindent(6)
       Order.transaction do
         (1..100).each do |i|
@@ -3845,7 +3847,7 @@ section 26.3, 'Pagination' do
     gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
   end
 
-  runner 'script/load_orders.rb'
+  runner "#{bin}/load_orders.rb"
 
   desc 'Modify the controller to do pagination'
   edit 'app/controllers/orders_controller.rb', 'index' do
