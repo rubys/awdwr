@@ -3406,8 +3406,8 @@ section 16, 'Deployment' do
 end
 
 section 17, 'Retrospective' do
-  cmd 'mkdir doc' unless File.exist? 'doc'
-  edit 'doc/README_FOR_APP' do
+  readme = Dir['doc/README*', 'README*'].first
+  edit readme do
     self.all = read('README_FOR_APP')
   end
   rake 'doc:app'

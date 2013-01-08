@@ -12,7 +12,7 @@ It is divided into two main sections:
 
 * Only administrators can access stuff in the seller's side
   (product maintenance and order fulfillment).  This is implemented by the
-  LoginController, is enforced by the ApplicationController#authorize
+  SessionsController, is enforced by the ApplicationController#authorize
   method, and assisted by the Users and Carts resources.
 
 This code was produced as an example for the book {Agile Web Development with
@@ -32,6 +32,6 @@ absolutely no warranty. It should not be used in live applications.
 
 == Copyright
 
-This code is Copyright (c) 2010 The Pragmatic Programmers, LLC.
+This code is Copyright (c) 2013 The Pragmatic Programmers, LLC.
 
 It is released under the same license as Ruby.
