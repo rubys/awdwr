@@ -907,9 +907,11 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
     end
   end
 
-  rake 'test:controllers'
-
   unless $rails_version =~ /^3\./
+    rake 'test:controllers', 
+      :pass => 'UnpermittedParameters Exception not raised.',
+      :pull => 75, :repository => 'strong_parameters'
+
     [ %w(create post), %w(update patch) ]. each do |action, method|
       edit 'test/*/line_items_controller_test.rb', action do
         dcl "should #{action} line_item", :mark => action do
