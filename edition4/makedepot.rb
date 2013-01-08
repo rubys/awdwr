@@ -3406,6 +3406,7 @@ section 16, 'Deployment' do
 end
 
 section 17, 'Retrospective' do
+  cmd 'mkdir doc' unless File.exist? 'doc'
   edit 'doc/README_FOR_APP' do
     self.all = read('README_FOR_APP')
   end
@@ -3664,7 +3665,7 @@ section 26.1, 'Active Merchant' do
     edit 'activemerchant', :highlight
   end
   cmd 'bundle install'
-  cmd 'mkdir -p script' unless File.exist? 'script'
+  cmd 'mkdir script' unless File.exist? 'script'
   edit "script/creditcard.rb" do
     self.all = read('script/creditcard.rb')
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -3835,7 +3836,7 @@ section 26.3, 'Pagination' do
   cmd 'bundle show'
 
   desc 'Load in a few orders'
-  cmd 'mkdir -p script' unless File.exist? 'script'
+  cmd 'mkdir script' unless File.exist? 'script'
   edit "script/load_orders.rb" do
     self.all = <<-'EOF'.unindent(6)
       Order.transaction do
