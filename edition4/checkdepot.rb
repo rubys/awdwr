@@ -327,6 +327,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 16, "Deployment" do
+    ticket 8837,
+      :title =>  'Bring back "database already exists" messages when running rake tasks',
+      :match => /Mysql2::Error.*database exists/
+
     assert_select '.stderr', /depot_production('; database| already) exists/
     assert_select '.stdout', /initialize_schema_migrations_table/
     assert_select '.stdout', '[done] capified!'
