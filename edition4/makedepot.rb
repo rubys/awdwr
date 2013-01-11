@@ -3465,7 +3465,7 @@ section 21.1, 'Views' do
     dcl 'index', :mark => 'index' do
       if self =~ /format\.xml/
         msub /format.xml(.*)/, '  # index.xml.builder'
-      elsif self =~ /format\.xml/
+      elsif self =~ /format\.html/
         msub /format.html.*\n()/, "      format.xml\n"
       else
         msub /^()  end/, <<-EOF.unindent(6)
