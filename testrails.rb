@@ -110,6 +110,10 @@ if ARGV.empty? and arg_was_present
   exec "#{$0} #{args}"
 end
 
+# clean up mysql
+open('|mysql -u root','w') {|f| f.write "drop database depot_production;"}
+open('|mysql -u root','w') {|f| f.write "create database depot_production;"}
+
 # update libs
 libs = %w(gorp) + ARGV.grep(/^\+/).map {|arg| arg[1..-1]}
 gems = []

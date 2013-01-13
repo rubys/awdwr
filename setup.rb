@@ -22,7 +22,7 @@ unless %w(nodejs node).any? {|cmd| system "which #{cmd}"}
 end
 
 # set up mysql
-open('|mysql -u root','w') do | file|
+open('|mysql -u root','w') do |file|
   file.write "GRANT ALL PRIVILEGES ON depot_production.* TO " +
     "'username'@'localhost' IDENTIFIED BY 'password';"
 end
