@@ -113,6 +113,10 @@ class DepotTest < Gorp::TestCase
   section 9.2, "Connection Products to Carts" do
     assert_select 'pre', :tests => 22, :assertions => 35,
       :failures => 0, :errors => 0
+    unless $rails_version =~ /^3\./
+      assert_select '.hilight', 'Unpermitted parameters: cart_id'
+      assert_select '.stdout', '0'
+    end
   end
 
   section 9.3, "Iteration D3: Adding a button" do

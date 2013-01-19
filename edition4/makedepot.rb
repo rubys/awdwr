@@ -907,10 +907,12 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
     end
   end
 
+  rake 'test:controllers'
+
   unless $rails_version =~ /^3\./
-    rake 'test:controllers', 
-      :pass => 'UnpermittedParameters Exception not raised.',
-      :pull => 75, :repository => 'strong_parameters'
+    desc 'Inspect the log.'
+    cmd 'grep -B 8 -A 7 "Unpermitted parameters" log/test.log',
+      :highlight => ['Unpermitted parameters']
 
     [ %w(create post), %w(update patch) ]. each do |action, method|
       edit 'test/*/line_items_controller_test.rb', action do
@@ -920,9 +922,11 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
         end
       end
     end
-  end
  
-  rake 'test:controllers'
+    rake 'log:clear LOGS=test'
+    rake 'test:controllers'
+    cmd 'grep "Unpermitted parameters" log/test.log | wc -l'
+  end
 end
 
 section 9.3, 'Iteration D3: Adding a button' do
@@ -1366,11 +1370,7 @@ section 10.4, 'Playtime' do
     self.all = read('test/cart_test.rb')
   end
 
-  if File.exist? 'test/unit'
-    ruby '-I test test/unit/cart_test.rb'
-  else
-    ruby '-I test test/models/cart_test.rb'
-  end
+  ruby '-I test test/*/cart_test.rb'
 
   publish_code_snapshot :i
 
@@ -1378,11 +1378,7 @@ section 10.4, 'Playtime' do
   edit "test/*/cart_test.rb" do
     self.all = read('test/cart_test1.rb')
   end
-  if File.exist? 'test/unit'
-    ruby '-I test test/unit/cart_test.rb'
-  else
-    ruby '-I test test/models/cart_test.rb'
-  end
+  ruby '-I test test/*/cart_test.rb'
 
   desc 'Verify that the tests pass.'
   cmd 'rake test'
@@ -3830,10 +3826,9 @@ section 26.3, 'Pagination' do
 
   cmd 'rake environment RAILS_ENV=test db:migrate' unless $rails_version =~ /^3\./
   `rake environment RAILS_ENV=test db:migrate` if $rails_version =~ /^3\.0/
-  tm = (File.exist?('test/unit') ? 'unit' : 'models')
-  `ruby -I test test/#{tm}/order_test.rb 2> /dev/null > /dev/null`
+  `ruby -I test test/*/order_test.rb 2> /dev/null > /dev/null`
   unless $?.success?
-    ruby "-I test test/#{tm}/order_test.rb"
+    ruby "-I test test/*/order_test.rb"
     edit 'Gemfile' do
       msub /()gem '(will_paginate|kaminari)'/, '# '
     end
