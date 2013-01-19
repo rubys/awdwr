@@ -10,6 +10,12 @@ File.umask(0022)
 $rails = "#{HOME}/git/rails"
 RVM_PATH = File.expand_path(ENV['rvm_path'] || '~/.rvm')
 
+# update RVM
+rvm_stable = "https://raw.github.com/wayneeseguin/rvm/stable"
+unless File.read("#{RVM_PATH}/VERSION") == `curl -s #{rvm_stable}/VERSION`
+  system "#{RVM_PATH}/bin/rvm get stable"
+end
+
 # chaining support
 if ARGV.join(' ').include?(',')
   ARGV.join(' ').split(',').each { |args| system "#{$0} #{args.strip}" }
