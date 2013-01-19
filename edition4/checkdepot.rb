@@ -377,7 +377,7 @@ class DepotTest < Gorp::TestCase
         assert_select '.body', /[{,]"id":\d+[,}]/
       end
       assert_select '.stdout', /"product_id"=&gt;2/
-      assert_select '.stdout', /=&gt; 28.8/
+      assert_select '.stdout', /=&gt; (28\.8|#&lt;BigDecimal:\w+,'0\.288E2')/
     end
   end
 
