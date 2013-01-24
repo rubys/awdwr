@@ -2519,7 +2519,7 @@ section 13.2, 'Iteration H2: Integration Tests' do
   rake 'test:integration'
 
   desc 'Create an integration test using a DSL'
-  generate 'integration_test user_stories'
+  generate 'integration_test dsl_user_stories'
   edit "test/integration/dsl_user_stories_test.rb" do |data|
     data[/(.*)/m,1] = read('test/dsl_user_stories_test.rb')
   end
