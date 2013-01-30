@@ -896,37 +896,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
     end
   end
 
-  # limit access to product_id
-  unless $rails_version =~ /^3\./
-    edit 'app/controllers/line_items_controller.rb', 'line_item_params' do
-      dcl 'line_item_params', :mark do
-        edit 'permit', :highlight do
-          msub /require\(:line_item\)(.*)/, '.permit(:product_id)'
-        end
-      end
-    end
-  end
-
   rake 'test:controllers'
-
-  unless $rails_version =~ /^3\./
-    desc 'Inspect the log.'
-    cmd 'grep -B 8 -A 7 "Unpermitted parameters" log/test.log',
-      :highlight => ['Unpermitted parameters']
-
-    [ %w(create post), %w(update patch) ]. each do |action, method|
-      edit 'test/*/line_items_controller_test.rb', action do
-        dcl "should #{action} line_item", :mark => action do
-          edit method, :highlight
-          msub /\{ (.*) \}/, 'product_id: @line_item.product_id'
-        end
-      end
-    end
- 
-    rake 'log:clear LOGS=test'
-    rake 'test:controllers'
-    cmd 'grep "Unpermitted parameters" log/test.log | wc -l'
-  end
 end
 
 section 9.3, 'Iteration D3: Adding a button' do
@@ -1204,6 +1174,36 @@ section 10.2, 'Iteration E2: Handling Errors' do
 
   desc 'Inspect the log.'
   cmd 'tail -25 log/development.log', :highlight => ['Attempt to access']
+
+  unless $rails_version =~ /^3\./
+    desc 'Limit access to product_id'
+    edit 'app/controllers/line_items_controller.rb', 'line_item_params' do
+      edit /^ *# Never.*?end\n/m, :mark => 'line_item_params'
+      dcl 'line_item_params'  do
+        edit 'permit', :highlight do
+          msub /require\(:line_item\)(.*)/, '.permit(:product_id)'
+        end
+      end
+      sub! /(, only allow the white) (list through\.)$/, "\\1\n    # \\2"
+    end
+
+    rake 'test:controllers'
+
+    desc 'Inspect the log.'
+    cmd 'grep -B 8 -A 7 "Unpermitted parameters" log/test.log',
+      :highlight => ['Unpermitted parameters']
+
+    edit 'test/*/line_items_controller_test.rb', 'update' do
+      dcl "should update line_item", :mark => 'update' do
+        edit 'cart_id', :highlight
+        msub /(cart_id: .*?, )/, ''
+      end
+    end
+ 
+    rake 'log:clear LOGS=test'
+    rake 'test:controllers'
+    cmd 'grep "Unpermitted parameters" log/test.log | wc -l'
+  end
 end
 
 section 10.3, 'Iteration E3: Finishing the Cart' do
@@ -2107,7 +2107,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
         msub /(order_path.*)/, 'store_path'
       end
       unless match /attributes/
-        edit /^\s+post :.*\n/, :highlight do
+        edit /^\s+post :.*\n/ do
           msub /,() :?name[: =]/, "\n       "
         end
       end
@@ -2506,6 +2506,7 @@ end
 section 13.2, 'Iteration H2: Integration Tests' do
   desc 'Create an integration test'
   generate 'integration_test user_stories'
+  publish_code_snapshot :q, :depot, 'test/integration/user_stories_test.rb'
   edit "test/integration/user_stories_test.rb" do |data|
     data[/(.*)/m,1] = read('test/user_stories_test.rb')
     unless RUBY_VERSION =~ /^1\.8/
@@ -3051,8 +3052,12 @@ section 15.1, 'Task J1: Selecting the locale' do
     nonadmin.msub /root.*\n()/, "  end\n", :highlight
     nonadmin.msub /root.*()/, ', via: :all' unless $rails_version =~ /^3\./ 
 
+    admin =  nonadmin.slice! /^\s*resources :users\n/
+    admin += nonadmin.slice! /^\s*resources :products do\n.*?end\n/m
+    admin.gsub! /^  /, ''
+
     # append to end
-    data.msub /^()end/, nonadmin
+    data.msub /^()end/, "\n" + admin + "\n" + nonadmin
   end
 
   unless $rails_version =~ /^3\./
@@ -3192,8 +3197,17 @@ section 15.3, 'Task J3: Translating Checkout' do
       msub /()$/, "\n<!-- END_HIGHLIGHT -->"
       msub /^()/, "#START_HIGHLIGHT\n"
     end
+    edit ':name', :highlight do
+      msub /() %>/, ", t('.name')"
+    end
     edit ':address', :highlight do
       msub /() %>/, ", t('.address_html')"
+    end
+    edit ':pay_type', :highlight do
+      msub /() %>/, ", t('.pay_type')"
+    end
+    edit ':email', :highlight do
+      msub /() %>/, ", t('.email')"
     end
   end
 
@@ -3609,7 +3623,7 @@ if $rails_version =~ /^3\./
     console 'li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, ' +
          ':price=>0.0)\nli2.save'
          'li2.save'
-    publish_code_snapshot nil, 'depot_client'
+    publish_code_snapshot nil, :depot_client
   end
 end
 

@@ -8,7 +8,9 @@ namespace :db do
     dest   = File.join(backup_dir, "production.backup")
 
     makedirs backup_dir, :verbose => true
-    sh "sqlite3 #{source} .dump > #{dest}"
+
+    require 'shellwords'
+    sh "sqlite3 #{Shellwords.escape source} .dump > #{Shellwords.escape dest}"
   end
 
 end

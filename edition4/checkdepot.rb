@@ -113,10 +113,6 @@ class DepotTest < Gorp::TestCase
   section 9.2, "Connection Products to Carts" do
     assert_select 'pre', :tests => 22, :assertions => 35,
       :failures => 0, :errors => 0
-    unless $rails_version =~ /^3\./
-      assert_select '.hilight', 'Unpermitted parameters: cart_id'
-      assert_select '.stdout', '0'
-    end
   end
 
   section 9.3, "Iteration D3: Adding a button" do
@@ -146,6 +142,10 @@ class DepotTest < Gorp::TestCase
     assert_select "a[href=http://localhost:#{$PORT}/]", 'redirected'
     assert_select '.hilight', 'Attempt to access invalid cart wibble'
     assert_select '#notice', 'Invalid cart'
+    unless $rails_version =~ /^3\./
+      assert_select '.hilight', 'Unpermitted parameters: cart_id'
+      assert_select '.stdout', '0'
+    end
   end
 
   section 10.3, "Iteration E3: Finishing the Cart" do
