@@ -234,7 +234,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       else
         gemfile.puts "gem 'mysql'"
         gemfile.puts "gem 'activemerchant', '~> 1.10.0'"
-        gemfile.puts "gem 'haml', '~> 3.1.1'"
+        gemfile.puts "gem 'haml', '~> 4.0'"
         gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
       end
     end

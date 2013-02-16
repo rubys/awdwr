@@ -3743,7 +3743,7 @@ end
 section 26.2, 'HAML' do
   edit 'Gemfile', 'plugins' do
     msub /activemerchant.*\n()/, <<-EOF.unindent(6), :highlight
-      gem 'haml', '~> 3.1.1'
+      gem 'haml', '~> 4.0'
     EOF
   end
   cmd 'bundle install'
