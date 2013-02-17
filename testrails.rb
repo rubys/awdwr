@@ -14,6 +14,11 @@ RVM_PATH = File.expand_path(ENV['rvm_path'] || '~/.rvm')
 rvm_stable = "https://raw.github.com/wayneeseguin/rvm/stable"
 unless File.read("#{RVM_PATH}/VERSION") == `curl -s #{rvm_stable}/VERSION`
   system "#{RVM_PATH}/bin/rvm get stable"
+
+  # monkey patch
+  # https://github.com/wayneeseguin/rvm/commit/f8e14c21feea12c5a40c444e78e9bd2afa68e7bd
+  system "sed -i 's/=\"ruby_1/=\"ruby_${rvm_ruby_release_version:-1}/' " +
+    "#{RVM_PATH}/scripts/functions/manage/base"
 end
 
 # chaining support
