@@ -327,7 +327,7 @@ if File.exist? File.join(WORK, 'Gemfile')
     if not File.readlines(gemspec).grep(/bundler.*\.pre\./).empty?
       install = 'install --pre' 
       bundler = 'bundler.*pre'
-    elsif release =~ /^2/
+    elsif release =~ /^2/ or release=='head'
       install = 'install --pre' 
       bundler = 'bundler.*pre'
     end
