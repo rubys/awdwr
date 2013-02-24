@@ -228,7 +228,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   get '/products'
 
   desc "And, just to verify that we haven't broken anything"
-  cmd 'rake test'
+  test
 end
 
 section 6.2, 'Iteration A2: Making Prettier Listings' do
@@ -367,7 +367,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
   end
 
   desc 'Now run the tests... and watch them fail :-('
-  cmd 'rake test'
+  test
 
   desc 'Solution is simple, provide valid data.'
   edit 'test/*/products_controller_test.rb', 'valid' do
@@ -407,8 +407,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
   end
 
   desc 'Tests now pass again :-)'
-  cmd 'rake test'
-
+  test
 end
 
 section 7.2, 'Iteration B2: Unit Testing' do
@@ -452,7 +451,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
   end
 
   desc 'Tests pass!'
-  rake 'test:models'
+  test 'models'
 end
 
 section 7.3, 'Playtime' do
@@ -705,7 +704,7 @@ section 8.4, 'Iteration C4: Functional Testing' do
   EOF
 
   desc 'Verify that the tests still pass.'
-  cmd 'rake test'
+  test
 
   desc 'Add tests for layout, product display, and formatting, using ' +
     'counts, string comparisons, and regular expressions.'
@@ -726,7 +725,7 @@ section 8.4, 'Iteration C4: Functional Testing' do
   edit 'test/fixtures/products.yml'
 
   desc 'Show that the tests pass.'
-  rake 'test:controllers'
+  test 'controllers'
 end
 
 section 8.5, 'Iteration C5 - Caching' do
@@ -896,7 +895,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
     end
   end
 
-  rake 'test:controllers'
+  test 'controllers'
 end
 
 section 9.3, 'Iteration D3: Adding a button' do
@@ -1014,7 +1013,7 @@ section 9.4, 'Playtime' do
   EOF
 
   desc 'See that the tests fail.'
-  cmd 'rake test'
+  test
 
   desc 'Update parameters passed as well as expected target of redirect'
   edit 'test/*/line_items_controller_test.rb', 'create' do
@@ -1032,7 +1031,7 @@ section 9.4, 'Playtime' do
     end
   end
 
-  cmd 'rake test'
+  test
 end
 
 section 10.1, 'Iteration E1: Creating a Smarter Cart' do
@@ -1187,7 +1186,7 @@ section 10.2, 'Iteration E2: Handling Errors' do
       sub! /(, only allow the white) (list through\.)$/, "\\1\n    # \\2"
     end
 
-    rake 'test:controllers'
+    test 'controllers'
 
     desc 'Inspect the log.'
     cmd 'grep -B 8 -A 7 "Unpermitted parameters" log/test.log',
@@ -1201,7 +1200,7 @@ section 10.2, 'Iteration E2: Handling Errors' do
     end
  
     rake 'log:clear LOGS=test'
-    rake 'test:controllers'
+    test 'controllers'
     cmd 'grep "Unpermitted parameters" log/test.log | wc -l'
   end
 end
@@ -1342,7 +1341,7 @@ section 10.4, 'Playtime' do
   EOF
 
   desc 'See that the tests fail.'
-  cmd 'rake test'
+  test
 
   desc 'Substitute names of products and carts for numbers'
   edit 'test/fixtures/line_items.yml' do
@@ -1381,7 +1380,7 @@ section 10.4, 'Playtime' do
   ruby '-I test test/*/cart_test.rb'
 
   desc 'Verify that the tests pass.'
-  cmd 'rake test'
+  test
 
   desc "Add a test ensuring that non-empty carts can't be deleted."
   edit 'test/*/products_controller_test.rb', 'destroy' do
@@ -1397,7 +1396,7 @@ section 10.4, 'Playtime' do
   end
 
   desc 'Now the tests should pass.'
-  cmd 'rake test'
+  test
 
   desc 'Add price to line item'
   generate 'migration add_price_to_line_item price:decimal'
@@ -1736,7 +1735,7 @@ unless $rails_version =~ /^3\.0/
     get '/'
 
     desc 'Run tests... oops.'
-    cmd 'rake test'
+    test
   end
 end
 
@@ -1797,7 +1796,7 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
   end
 
   desc 'Run the tests again.'
-  cmd 'rake test'
+  test
 
   desc 'Save our progress'
   cmd 'git commit -a -m "AJAX"'
@@ -2366,7 +2365,7 @@ section 12.4, 'Playtime' do
   cmd 'curl --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
 
   desc 'Verify that the tests still pass'
-  cmd 'rake test'
+  test
 
   desc 'Commit'
   cmd 'git commit -a -m "Orders"'
@@ -2517,7 +2516,7 @@ section 13.2, 'Iteration H2: Integration Tests' do
   end
 
   desc 'Run the tests'
-  rake 'test:integration'
+  test 'integration'
 
   desc 'Create an integration test using a DSL'
   generate 'integration_test dsl_user_stories'
@@ -2526,7 +2525,7 @@ section 13.2, 'Iteration H2: Integration Tests' do
   end
 
   desc 'Run the tests'
-  rake 'test:integration'
+  test 'integration'
 end
 
 section 13.3, 'Playtime' do
@@ -2814,7 +2813,7 @@ section 14.2, 'Iteration I2: Authenticating Users' do
     end
   end
 
-  cmd 'rake test'
+  test
 end
 
 section 14.3, 'Iteration I3: Limiting Access' do
@@ -2902,7 +2901,7 @@ section 14.3, 'Iteration I3: Limiting Access' do
   end
 
   desc 'Show that the now pass'
-  cmd 'rake test'
+  test
 end
 
 section 14.4, 'Iteration I4: Adding a Sidebar' do
@@ -2944,7 +2943,7 @@ section 14.4, 'Iteration I4: Adding a Sidebar' do
   get '/users'
 
   desc 'Show that the tests fail (good!)'
-  cmd 'rake test'
+  test
 
   publish_code_snapshot :r
 
@@ -2994,7 +2993,7 @@ section 14.5, 'Playtime' do
   end
 
   desc 'Verify  that the test passes'
-  rake 'test:controllers'
+  test 'controllers'
 
   desc 'Look at the data in the database'
   cmd 'sqlite3 db/development.sqlite3 .schema'
@@ -3337,7 +3336,7 @@ section 15.4, 'Task J4: Add a locale switcher.' do
 
   desc "Try out the form"
   post '/en', 'set_locale' => 'es'
-  rake 'test'
+  test
 end
 
 section 16, 'Deployment' do
@@ -3462,7 +3461,7 @@ if $rails_version =~ /^3\./
       self.all = read('test/routing_test.rb')
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
-    rake 'test:units'
+    test 'units'
   end
 end
 
@@ -3679,9 +3678,8 @@ section 26.1, 'Active Merchant' do
   desc 'Determine if a credit card is valid'
   edit 'Gemfile', 'plugins' do
     clear_all_marks
-    msub /()\Z/, "\n\ngem 'activemerchant'\n"
+    msub /()\Z/, "\n\ngem 'activemerchant', '~> 1.31'\n"
     edit 'activemerchant', :mark => 'plugins'
-    edit 'activemerchant', :highlight
   end
   cmd 'bundle install'
   cmd 'mkdir script' unless File.exist? 'script'
@@ -3741,8 +3739,8 @@ if $rails_version =~ /^3\.0/
 end
 
 section 26.2, 'HAML' do
-  edit 'Gemfile', 'plugins' do
-    msub /activemerchant.*\n()/, <<-EOF.unindent(6), :highlight
+  edit 'Gemfile', 'haml' do
+    msub /activemerchant.*\n()/, <<-EOF.unindent(6)
       gem 'haml', '~> 4.0'
     EOF
   end
@@ -3794,7 +3792,7 @@ if $rails_version =~ /^3\.0/
         msub /"(.*)"/, "$('.locale input').hide()"
       end
     end
-    rake 'test'
+    test
     edit 'test/*/line_items_controller_test.rb', 'ajax' do
       clear_all_marks
       dcl "should create line_item via ajax", :mark => 'ajax' do
@@ -3803,7 +3801,7 @@ if $rails_version =~ /^3\.0/
         end
       end
     end
-    rake 'test'
+    test
     edit 'config/asset_packages.yml' do
       if include? 'dragdrop'
         msub /\s+- (dragdrop)\n/, 'jquery'
@@ -3826,19 +3824,16 @@ section 26.3, 'Pagination' do
   else
     desc 'Add in the kaminari gem'
   end
-  edit 'Gemfile' do
-    msub /(\s*)\Z/, "\n\n"
-    msub /\n\n()\Z/, "gem 'will_paginate', '~> 3.0'\n", :highlight
-    sub! /'will_paginate.*'/, "'kaminari'" unless $rails_version =~ /^3\./
-  end
-  unless $bundle
-    edit 'config/application.rb' do
-      msub /require 'rails\/all'\n()/,  "require 'will_paginate'\n",
-      :highlight
+  edit 'Gemfile', 'plugins' do
+    msub /haml.*\n()/, <<-EOF.unindent(6)
+      gem 'will_paginate', '~> 3.0'
+    EOF
+    unless $rails_version =~ /^3\./
+      sub! /'will_paginate.*'/, "'kaminari', '~> 0.14'" 
     end
   end
 
-  cmd 'rake environment RAILS_ENV=test db:migrate' unless $rails_version =~ /^3\./
+# cmd 'rake environment RAILS_ENV=test db:migrate' unless $rails_version =~ /^3\./
   `rake environment RAILS_ENV=test db:migrate` if $rails_version =~ /^3\.0/
   `ruby -I test test/*/order_test.rb 2> /dev/null > /dev/null`
   unless $?.success?
