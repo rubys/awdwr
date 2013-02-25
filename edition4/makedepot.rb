@@ -3368,6 +3368,7 @@ section 16, 'Deployment' do
     EOF
     edit 'capistrano', :highlight
     msub /^(# )gem .capistrano/, ''
+    msub /^gem .()capistrano/, 'rvm-'
     sub! 'mysql2', 'mysql' if $rails_version =~ /^3\.0/
 
     if self =~ /^# Turbolinks.*\.( )Read more:/
