@@ -3680,6 +3680,7 @@ section 26.1, 'Active Merchant' do
   edit 'Gemfile', 'plugins' do
     clear_all_marks
     msub /()\Z/, "\n\ngem 'activemerchant', '~> 1.31'\n"
+    msub /gem 'activemerchant'(,.*)/, '' if RUBY_VERSION =~ /^1.8/
     edit 'activemerchant', :mark => 'plugins'
   end
   cmd 'bundle install'
