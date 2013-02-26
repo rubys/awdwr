@@ -15,7 +15,7 @@ Product.create(:title => 'CoffeeScript',
   :price => 36.00)
 #START:vcc
 # . . .
-Product.create(:title => 'Programming Ruby 1.9',
+Product.create(:title => 'Programming Ruby 1.9 & 2.0',
   :description =>
     %{<p>
         Ruby is the fastest growing and most exciting dynamic language

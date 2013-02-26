@@ -119,7 +119,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'input[type=submit][value=Add to Cart]'
     assert_select "a[href=http://localhost:#{$PORT}/carts/1]", 'redirected'
     assert_select '#notice', 'Line item was successfully created.'
-    assert_select 'li', 'Programming Ruby 1.9'
+    assert_select 'li', 'Programming Ruby 1.9 &amp; 2.0'
   end
 
   section 9.4, "Playtime" do
@@ -387,7 +387,7 @@ class DepotTest < Gorp::TestCase
 
   section 25.1, 'rack' do
     assert_select 'p', '34.95'
-    assert_select 'h2', 'Programming Ruby 1.9'
+    assert_select 'h2', 'Programming Ruby 1.9 &amp; 2.0'
   end
 
   section 25.2, 'rake' do
