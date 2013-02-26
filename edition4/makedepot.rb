@@ -488,13 +488,15 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
     msub /\n()  #/, "  # ...\n# END:root\n"
 
     msub /()\s+#.+root of your site/, "\n# START:root"
-    msub /root :?to.*\n()/, <<-EOF.unindent(4)
+    to_present = match(/root :?to:? /)
+    msub /root .*\n()/, <<-EOF.unindent(4)
       # START_HIGHLIGHT
       root :to => 'store#index', :as => 'store'
       # END_HIGHLIGHT
       # ...
       # END:root
     EOF
+    gsub! ':to => ', '' unless to_present
     edit 'store#index' do
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
