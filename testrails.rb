@@ -198,7 +198,7 @@ ENV['RUBYLIB'] = libs.map {|lib| File.join(HOME,'git',lib,'lib')}.
 Dir.chdir File.join(PROFILE.source,WORK) do
   if File.exist? File.join($rails, 'Gemfile')
     open('Gemfile','w') do |gemfile|
-      gemfile.puts "source 'http://gemcutter.org'"
+      gemfile.puts "source 'http://rubygems.org'"
       gemfile.puts "gem 'rails', :path => #{$rails.inspect}"
       ENV['RUBYLIB'].split(File::PATH_SEPARATOR).each do |path|
         path.sub! /\/lib$/, ''
