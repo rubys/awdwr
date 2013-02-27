@@ -255,7 +255,7 @@ _html do
           _tr attrs do
             _td job['book'], {:align=>'right'}.
               merge(job['book']=='4' ? {} : {:class=>'hilite'})
-            _td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='1.9.3')
+            _td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='2.0.0')
             _td job['rails'], ({:class=>'hilite'} if job['rails']!='4.0')
             _td :class=>color, :align=>'center' do
               if status == 'NO OUTPUT'
