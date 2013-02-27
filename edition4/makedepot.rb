@@ -485,26 +485,18 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   desc "Route the 'root' of the site to the store"
   edit 'config/routes.rb', 'root' do
     msub /^()/, "# START:root\n"
-    msub /\n()  #/, "  # ...\n# END:root\n"
+    msub /welcome#index.*\n()/, "  # ...\n# END:root\n"
+    edit /^end/, :mark=>'root'
 
-    msub /()\s+#.+root of your site/, "\n# START:root"
-    to_present = match(/root :?to:? /)
-    msub /root .*\n()/, <<-EOF.unindent(4)
-      # START_HIGHLIGHT
-      root :to => 'store#index', :as => 'store'
-      # END_HIGHLIGHT
-      # ...
-      # END:root
-    EOF
-    gsub! ':to => ', '' unless to_present
-    edit 'store#index' do
+    edit 'welcome#index', :highlight do
+      msub /^\s+(# )root.*/, ''
+      msub /(welcome)#index/, 'store'
+      msub /()$/, ", :as => 'store'"
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
 
-    edit /^end/, :mark=>'root'
-
-    if self =~ /^  # You can.* "root"( )just remember to delete/
-      msub /^  # You can.* "root"( )just remember to delete/, "\n  # "
+    if self =~ /priority is based upon order of creation: first created/
+      msub /creation:( )first created/, "\n  # "
     end
   end
 
