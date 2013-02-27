@@ -3392,21 +3392,22 @@ section 16, 'Deployment' do
     end
     console "Depot::Application.configure { paths.log.first }", 'production'
   else
-    edit 'Capfile' do
-      edit 'deploy/assets', :highlight do
-        msub /^(\s*# )load/, ''
-      end
-      msub /\.()each/, "\n  " if include? '.each'
-    end
-    rake 'assets:precompile'
-    cmd 'ls public/assets'
-    edit 'config/environments/production.rb' do
-      msub /^()end/, "\n" + <<-EOF.unindent(4)
-        require 'active_support/core_ext/numeric/bytes'
-        config.logger = Logger.new(paths['log'].first, 2, 10.kilobytes)
-      EOF
-    end
-    console "Depot::Application.configure { paths['log'].first }", 'production'
+#   edit 'Capfile' do
+#     edit 'deploy/assets', :highlight do
+#       msub /^(\s*# )load/, ''
+#     end
+#     msub /\.()each/, "\n  " if include? '.each'
+#   end
+#   rake 'assets:precompile'
+#   cmd 'ls public/assets'
+#
+#   edit 'config/environments/production.rb' do
+#     msub /^()end/, "\n" + <<-EOF.unindent(4)
+#       require 'active_support/core_ext/numeric/bytes'
+#       config.logger = Logger.new(paths['log'].first, 2, 10.kilobytes)
+#     EOF
+#   end
+#   console "Depot::Application.configure { paths['log'].first }", 'production'
   end
   cmd 'git st'
 end
