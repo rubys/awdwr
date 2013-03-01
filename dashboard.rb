@@ -80,7 +80,7 @@ _html do
 
   active, log = status
 
-  _header do
+  _head_ do
     _title 'Depot Dashboard'
 
     _style :type => "text/css" do
@@ -124,7 +124,7 @@ _html do
     _script :src => 'jquery-ui.min.js'
     _script :src => 'jquery.tablesorter.min.js'
 
-    _script! %{
+    _script %{
       setTimeout(update, 1000);
       function update() {
         $.post("", {}, function(data) {
@@ -208,7 +208,7 @@ _html do
     _h1 'The Depot Dashboard'
     _a 'logs', :href => 'logs', :class => 'headerlink' unless @static
 
-    _table do
+    _table_ do
       _thead do
         _tr do
           _th 'Book'
@@ -219,7 +219,7 @@ _html do
         end
       end
 
-      _tbody do
+      _tbody_ do
         JOBS.flatten.each do |job|
           job['path'].untaint
           statfile = "#{job['path']}/status"
@@ -252,7 +252,7 @@ _html do
             color = 'fail'
           end
 
-          _tr attrs do
+          _tr_ attrs do
             _td job['book'], {:align=>'right'}.
               merge(job['book']=='4' ? {} : {:class=>'hilite'})
             _td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='2.0.0')
@@ -283,7 +283,7 @@ _html do
         _input :type=>'submit', :value=>'submit'
       end
 
-      _div :id=>'executing' do
+      _div_ :id=>'executing' do
         _h2 'Currently Executing'
         _pre active.join("\n"), :id => 'active'
       end
