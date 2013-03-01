@@ -160,16 +160,23 @@ _html do
       }
 
       $(document).ready(function() {
-        $('tr td:nth-child(5)').click(function() {
+        $('tr td:nth-child(5)').click(function(event) {
           var parent = $(this).parent();
           var args =
             parent.find('td:eq(0)').text().replace(/\\D/g,'') + ' ' +
             parent.find('td:eq(1)').text().replace(/\\D/g,'') + ' ' +
             parent.find('td:eq(2)').text().replace(/\\D/g,'');
           if (parent.find('td:eq(0)').text() == 'svn') args = 'svn' + args;
-          if ( $('input[name=args]').val().indexOf(',') != -1) {
-            args = $('input[name=args]').val() + ', ' + args;
-            args = args.replace(/,+\\s*/g, ', ')
+          if (event.ctrlKey) {
+            inputs = $('input[name=args]').val().split(/,\\s*/)
+            if (inputs[0] == '') inputs.shift();
+            var index = $.inArray(args, inputs);
+            if (index == -1) {
+              inputs.push(args);
+            } else {
+              inputs.splice(index, 1);
+            }
+            args = inputs.join(', ').replace(/,+\\s*/g, ', ')
           }
           $('input[name=args]').val(args);
           $(this).css({backgroundColor: '#ff0'}); 
