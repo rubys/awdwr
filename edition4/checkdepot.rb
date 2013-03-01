@@ -338,7 +338,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.stderr', /depot_production('; database| already) exists/
     assert_select '.stdout', /initialize_schema_migrations_table/
     assert_select '.stdout', '[done] capified!'
-#   assert_select '.stdout', /depot\/log\/production.log/
+    assert_select '.stdout', /depot\/log\/production.log/
     assert_select '.stderr', :text => /:\d+:in `.*'$/, :count => 0
   end
 

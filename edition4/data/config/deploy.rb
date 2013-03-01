@@ -7,7 +7,7 @@ set :application, 'depot'
 
 # adjust if you are using RVM, remove if you are not
 set :rvm_type, :user
-set :rvm_ruby_string, '2.0.0'
+set :rvm_ruby_string, '1.9.3'
 require 'rvm/capistrano'
 
 # file paths
