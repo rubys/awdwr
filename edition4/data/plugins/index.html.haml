@@ -9,7 +9,7 @@
       .entry
         = image_tag(product.image_url)
         %h3= product.title
-        %p= sanitize(product.description)
+        = sanitize(product.description)
         .price_line
           %span.price= number_to_currency(product.price)
           = button_to t('.add_html'), line_items_path(:product_id => product),
