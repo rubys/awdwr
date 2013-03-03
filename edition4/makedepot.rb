@@ -3369,7 +3369,7 @@ section 16, 'Deployment' do
       msub /^# Turbolinks.*\.( )Read more:/, "\n# "
     end
   end
-  cmd 'bundle install'
+  bundle 'install'
 
   #
   # mysql -u root
@@ -3378,7 +3378,6 @@ section 16, 'Deployment' do
   #
 
   rake 'db:setup RAILS_ENV=production'
-  cmd 'bundle pack'
   cmd 'capify .'
   edit 'config/deploy.rb' do
     self.all = read('config/deploy.rb')
@@ -3678,7 +3677,7 @@ section 26.1, 'Active Merchant' do
     msub /gem 'activemerchant'(,.*)/, '' if $rails_version =~ /^3\./
     edit 'activemerchant', :mark => 'plugins'
   end
-  cmd 'bundle install'
+  bundle 'install'
   cmd 'mkdir script' unless File.exist? 'script'
   edit "script/creditcard.rb" do
     self.all = read('script/creditcard.rb')
@@ -3741,7 +3740,7 @@ section 26.2, 'HAML' do
       gem 'haml', '~> 4.0'
     EOF
   end
-  cmd 'bundle install'
+  bundle 'install'
 
   cmd %{rails runner "require \'haml\'"}
   `rails runner "require 'haml'" 2> /dev/null > /dev/null`
@@ -3773,7 +3772,7 @@ if $rails_version =~ /^3\.0/
         gem 'jquery-rails', '~> 0.2.2'
       EOF
     end
-    cmd 'bundle install'
+    bundle 'install'
     generate 'jquery:install --ui --force'
     edit 'app/views/line_items/create.js.rjs' do
       clear_all_marks
@@ -3843,8 +3842,6 @@ section 26.3, 'Pagination' do
 
   restart_server
   
-  cmd 'bundle show'
-
   desc 'Load in a few orders'
   cmd 'mkdir script' unless File.exist? 'script'
   edit "script/load_orders.rb" do
