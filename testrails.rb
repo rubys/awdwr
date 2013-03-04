@@ -158,10 +158,6 @@ if File.exist? template
       gems.last.last.sub!(',', ', "0.8.2",') if release == '1.9.2'
       gems.last.last.sub!(',', ', "0.8.3",') if release == '1.9.3'
     end
-    gems += [['jquery-rails',nil]]
-    if not File.exist? File.join(HOME,'git','rails','activeresource')
-      libs << 'activeresource'
-    end
   else # Rails 3.0
     libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/)
     gems += [['jquery-rails',', "~> 0.2.2"']]
@@ -340,7 +336,7 @@ if File.exist? File.join(WORK, 'Gemfile')
     gem list minitest | grep -q minitest || gem install minitest
     gem list activemerchant | grep -q activemerchant || gem install activemerchant
     gem list haml | grep -q haml || gem install haml
-    cd #{WORK}; rm -f Gemfile.lock; bundle install; cd -
+    cd #{WORK}; rm -f Gemfile.lock; rm -rf vendor; bundle install; cd -
   EOF
 else
   install = <<-EOF

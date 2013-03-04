@@ -34,7 +34,7 @@ section 16.1, 'Capistrano' do
   cmd "echo 'CREATE DATABASE depot_production DEFAULT CHARACTER SET utf8;' " +
     "| mysql -u root"
 
-  system "rm -rf #{$HOME}/localhost"
+  system "rm -rf #{$HOME}/work/depot"
   system "rm -rf #{$HOME}/git/depot.git"
 
   desc 'Create code repository'
@@ -60,7 +60,6 @@ section 16.1, 'Capistrano' do
   desc 'Initial capistrano setup'
   cmd 'cap deploy:setup'
   cmd 'cap deploy:check'
-# cmd 'cap deploy:migrations'
   cmd 'cap deploy:seed'
 
   desc 'Deploy'
