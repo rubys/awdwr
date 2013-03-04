@@ -259,7 +259,6 @@ status_file = File.join(WORK, 'checkdepot.status')
 if not File.exist?(status_file) and File.exist?(File.join(WORK, 'status'))
   File.rename File.join(WORK, 'status'), status_file
 end
-status_file = File.join(WORK, 'status') unless File.exist? status_file
 OLDSTAT = open(status_file) {|file| file.read} rescue ''
 OLDSTAT.gsub! /, 0 (pendings|omissions|notifications)/, ''
 
