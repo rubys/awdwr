@@ -252,7 +252,7 @@ _html do
             end
           end
 
-          if File.exist?(statfile+'.run')
+          if File.exist?(statfile.sub('checkdepot.','')+'.run')
             color = 'hilite'
           elsif status =~ / 0 failures, 0 errors/
             color = 'pass'
@@ -311,7 +311,7 @@ _json do
     status = open(statfile) {|file| file.read.chomp} rescue 'missing'
     status.gsub! /, 0 (pendings|omissions|notifications)/, ''
     mtime = File.stat(statfile).mtime.iso8601 rescue 'missing'
-    running = File.exist?(statfile+'.run')
+    running = File.exist?(statfile.sub('checkdepot.','')+'.run')
 
     config[job['id']] = {
       'status'  => status,
