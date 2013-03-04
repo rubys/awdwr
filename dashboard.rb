@@ -229,7 +229,8 @@ _html do
       _tbody_ do
         JOBS.flatten.each do |job|
           job['path'].untaint
-          statfile = "#{job['path']}/status"
+          statfile = "#{job['path']}/checkdepot.status"
+          statfile = "#{job['path']}/status" unless File.exist? statfile
           status = open(statfile) {|file| file.read.chomp} rescue 'missing'
           status.gsub! /, 0 (pendings|omissions|notifications)/, ''
           mtime = File.stat(statfile).mtime.iso8601 rescue 'missing'
@@ -304,7 +305,8 @@ _json do
 
   config={}
   JOBS.each do |job|
-    statfile = "#{job['path']}/status".untaint
+    statfile = "#{job['path']}/checkdepot.status".untaint
+    statfile = "#{job['path']}/status".untaint unless File.exist? statfile
 
     status = open(statfile) {|file| file.read.chomp} rescue 'missing'
     status.gsub! /, 0 (pendings|omissions|notifications)/, ''
