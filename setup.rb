@@ -16,9 +16,12 @@ require 'xmpp4r'
   STDERR.puts "Unable to find #{cmd}"
   exit -1
 end
-unless %w(nodejs node).any? {|cmd| system "which #{cmd}"}
-  STDERR.puts "Unable to find nodejs"
-  exit -1
+
+unless RUBY_PLATFORM.include? 'darwin'
+  unless %w(nodejs node).any? {|cmd| system "which #{cmd}"}
+    STDERR.puts "Unable to find nodejs"
+    exit -1
+  end
 end
 
 # set up mysql
