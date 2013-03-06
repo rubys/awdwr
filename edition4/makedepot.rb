@@ -2570,8 +2570,10 @@ section 14.1, 'Iteration I1: Adding Users' do
   unless $rails_version =~ /^3\./
     desc 'allow new parameters through'
     edit 'app/controllers/users_controller.rb', 'user_params' do
-      edit /^ +private.*?end\n/m, :mark => 'user_params'
-      gsub! ':password_digest', ':password, :password_confirmation'
+      dcl 'user_params', :mark => 'user_params' do
+        edit ':password_digest', :highlight
+        gsub! ':password_digest', ':password, :password_confirmation'
+      end
     end
   end
 
