@@ -3381,6 +3381,7 @@ section 16, 'Deployment' do
   cmd 'capify .'
   edit 'config/deploy.rb' do
     self.all = read('config/deploy.rb')
+    msub /set :rvm_ruby_string, '(\d+\.\d+\.\d+)'/, RUBY_VERSION
   end
   if File.exist? 'public/images'
     edit 'config/environments/production.rb' do
