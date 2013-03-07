@@ -8,7 +8,8 @@ ENV['LANG']='en_US.UTF-8'
 ENV['USER'] ||= HOME.split(File::Separator).last
 File.umask(0022)
 $rails = "#{HOME}/git/rails"
-RVM_PATH = File.expand_path(ENV['rvm_path'] || '~/.rvm')
+rvm_homes = [ENV['rvm_path'], '~/.rvm', '/usr/local/rvm']
+RVM_PATH = File.expand_path(rvm_homes.find {|path| path and File.exist? path})
 
 # update RVM
 rvm_stable = "https://raw.github.com/wayneeseguin/rvm/stable"
