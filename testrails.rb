@@ -145,8 +145,8 @@ if File.exist? template
     libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],\s+github:/)
     libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
     gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
-    app_base.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/).each do |gem, opts|
-      next if %(rails turn).include? gem
+    app_base.scan(/^\s*"?gem ['"]([-\w]+)['"](,.*)?/).each do |gem, opts|
+      next if %(rails turn ruby-debug debugger therubyrhino).include? gem
       next if gems.find {|gname, gopts| gem == gname}
       gems << [gem, opts]
     end
