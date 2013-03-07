@@ -139,6 +139,7 @@ if File.exist? template
   gemfile = File.read(template)
   if File.exist? base # Rails 3.1
     app_base = File.read(base)
+    app_base.gsub! '#{options[:javascript]}', 'jquery'
     libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
     libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],\s+github:/)
     libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
