@@ -144,7 +144,7 @@ class DepotTest < Gorp::TestCase
     assert_select '#notice', 'Invalid cart'
     unless $rails_version =~ /^3\./
       assert_select '.hilight', 'Unpermitted parameters: cart_id'
-      assert_select '.stdout', '0'
+      assert_select '.stdout', /^\s*0$/
     end
   end
 

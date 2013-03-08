@@ -1133,6 +1133,8 @@ section 10.2, 'Iteration E2: Handling Errors' do
     Log errors and show them on the screen.
   EOF
 
+  sleep 1 if RUBY_PLATFORM =~ /darwin/i
+
   desc 'Rescue error: log, flash, and redirect.'
   edit 'app/controllers/carts_controller.rb', 'setup' do |data|
     edit /class.*?\n\s*(#.*?)\n/m, :mark => 'setup' do
