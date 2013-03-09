@@ -6,6 +6,9 @@
 #  * gem install xmpp4r ruby-dbus
 #  * apt-get install apache2 curl git libmysqlclient-dev mysql-server nodejs
 #  * gem install nokogiri wunderbar
+#
+#  * sudo apt-get install postgresql
+#  * sudo -u postgres createuser --superuser $USER
 
 # check prereqs
 require 'rubygems'
@@ -29,6 +32,11 @@ open('|mysql -u root','w') do |file|
   file.write "GRANT ALL PRIVILEGES ON depot_production.* TO " +
     "'username'@'localhost' IDENTIFIED BY 'password';"
 end
+
+# set up postgres
+# open('|psql postgres','w') do |file|
+#   file.write "alter user username password 'password';"
+# end
 
 # fetch code
 repositories = %w(

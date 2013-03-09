@@ -3356,6 +3356,9 @@ section 16, 'Deployment' do
         host: localhost
     EOF
     sub! 'mysql2', 'mysql' if $rails_version =~ /^3\.0/
+    # msub /adapter: (.*)/, 'postgresql'
+    # msub /encoding: (.*)/, 'unicode'
+    # msub /(reconnect: .*)/, 'host: localhost'
   end
   edit 'Gemfile' do
     clear_all_marks

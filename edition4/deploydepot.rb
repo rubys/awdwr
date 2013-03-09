@@ -25,14 +25,20 @@ section 16.1, 'Capistrano' do
     Deploying our application locally using Capistrano
   EOF
 
-  open('|mysql -u root','w') do |file|
-    file.puts "DROP DATABASE IF EXISTS depot_production;"
+  desc 'Create database'
+  db_config = File.read('config/database.yml')
+  if db_config.include? 'mysql'
+    open('|mysql -u root','w') do |file|
+      file.puts "DROP DATABASE IF EXISTS depot_production;"
+    end
+
+    cmd "mysql --version"
+  elsif 
+    system 'dropdb depot_production 2>/dev/null'
+    cmd "psql --version"
   end
 
-  desc 'Create database'
-  cmd "mysql --version"
-  cmd "echo 'CREATE DATABASE depot_production DEFAULT CHARACTER SET utf8;' " +
-    "| mysql -u root"
+  rake "db:create RAILS_ENV=production"
 
   system "rm -rf #{$HOME}/work/depot"
   system "rm -rf #{$HOME}/git/depot.git"
