@@ -1025,7 +1025,7 @@ section 9.4, 'Playtime' do
     end
   end
 
-  test
+  test 'test/*/line_items_controller_test.rb'
 end
 
 section 10.1, 'Iteration E1: Creating a Smarter Cart' do
@@ -1365,7 +1365,7 @@ section 10.4, 'Playtime' do
     self.all = read('test/cart_test.rb')
   end
 
-  ruby '-I test test/*/cart_test.rb'
+  test 'test/*/cart_test.rb'
 
   publish_code_snapshot :i
 
@@ -1373,7 +1373,7 @@ section 10.4, 'Playtime' do
   edit "test/*/cart_test.rb" do
     self.all = read('test/cart_test1.rb')
   end
-  ruby '-I test test/*/cart_test.rb'
+  test 'test/*/cart_test.rb'
 
   desc 'Verify that the tests pass.'
   test
@@ -2268,6 +2268,55 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   publish_code_snapshot :p
 end
 
+if false and $rails_version =~ /^4\./
+section 12.3, 'Downloading an ebook' do
+  overview <<-EOF
+    demonstrate streaming with ActionController::Live
+  EOF
+
+  
+  desc 'Switch to puma as a server, install faker gem'
+  edit 'Gemfile', 'plugins' do
+    clear_all_marks
+    msub /()\Z/, <<-EOF.unindent(6), :mark=>'puma'
+      gem 'puma'
+      gem 'faker'
+    EOF
+  end
+
+  restart_server
+
+  desc 'add a route for downloading a product'
+  edit 'config/routes.rb', 'root' do
+    msub /resources :products do\n()/, <<-EOF.unindent(2), :highlight
+      get :download, :on => :member
+    EOF
+  end
+
+  desc 'mock streaming implementation for download'
+  edit 'app/controllers/products_controller.rb', 'download' do
+    insert_at = /()\n *private/
+    msub insert_at, "\n"
+    msub insert_at, <<-'EOF'.unindent(4), :mark => 'download'
+      include ActionController::Live
+      def download
+        response.headers['Content-Type'] = 'text/plain'
+        40.times {
+          response.stream.write "#{Faker::Lorem.paragraph}\n\n"
+          # sleep 1
+        }
+        response.stream.write "Fini.\n"
+      ensure
+        response.stream.close
+      end
+    EOF
+  end
+
+  desc 'test download'
+  get '/products/1/download'
+end
+end
+
 section 12.4, 'Playtime' do
   desc 'Add the xml format to the controller'
   edit 'app/controllers/products_controller.rb', 'who_bought' do
@@ -2495,7 +2544,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   rake 'db:test:load'
-  ruby '-I test test/*/order_notifier_test.rb'
+  test 'test/*/order_notifier_test.rb'
 end
 
 section 13.2, 'Iteration H2: Integration Tests' do
@@ -3839,9 +3888,13 @@ section 26.3, 'Pagination' do
 
 # cmd 'rake environment RAILS_ENV=test db:migrate' unless $rails_version =~ /^3\./
   `rake environment RAILS_ENV=test db:migrate` if $rails_version =~ /^3\.0/
-  `ruby -I test test/*/order_test.rb 2> /dev/null > /dev/null`
+  if File.exist? 'test/unit'
+    `ruby -I test test/unit/order_test.rb 2> /dev/null > /dev/null`
+  else
+    `rails test test/models/order_test.rb 2> /dev/null > /dev/null`
+  end
   unless $?.success?
-    ruby "-I test test/*/order_test.rb"
+    test "test/*/order_test.rb"
     edit 'Gemfile' do
       msub /()gem '(will_paginate|kaminari)'/, '# '
     end

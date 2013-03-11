@@ -10,21 +10,21 @@ class DepotTest < Gorp::TestCase
 
   turn = File.read("#{$WORK}/Gemfile.lock").scan(/turn \((.*?)\)/).flatten.first
   if turn.to_s > '0.8.2'
-    def assert_test_summary(selector, hash)
+    def assert_test_summary(hash)
       hash[:pass] = hash[:tests]
       hash[:pass] -= hash[:fail] if hash[:fail]
       hash.default = 0
       test="pass: #{hash[:pass]}, fail: #{hash[:fail]}, error: #{hash[:error]}"
-      assert_select selector, Regexp.new(test.gsub(' ', '\s+')), test
+      assert_select 'pre', Regexp.new(test.gsub(' ', '\s+')), test
       test="total: #{hash[:tests]} tests with #{hash[:assertions]} assertions"
-      assert_select selector, Regexp.new(test.gsub(' ', '\s+')), test
+      assert_select 'pre', Regexp.new(test.gsub(' ', '\s+')), test
     end
   else
-    def assert_test_summary(selector, hash)
+    def assert_test_summary(hash)
       hash.default = 0
       test = "#{hash[:tests]} tests, #{hash[:assertions]} assertions, " +
         "#{hash[:fail]} failures, #{hash[:error]} errors"
-      assert_select selector, Regexp.new(test), test
+      assert_select 'pre', Regexp.new(test), test
     end
   end
 
@@ -58,8 +58,12 @@ class DepotTest < Gorp::TestCase
     assert_select 'th', 'Image url'
     assert_select 'input#product_title[value=CoffeeScript]'
     assert_select "a[href=http://localhost:#{$PORT}/products/1]", 'redirected'
-    assert_test_summary 'pre', :tests => '[01]', :assertions => '[01]'
-    assert_test_summary 'pre', :tests => 7, :assertions => '1[03]'
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => '[01]', :assertions => '[01]'
+      assert_test_summary :tests => 7, :assertions => '1[03]'
+    else
+      assert_test_summary :tests => 7, :assertions => 13
+    end
   end
 
   section 6.2, "Iteration A2: Prettier Listings" do
@@ -79,12 +83,16 @@ class DepotTest < Gorp::TestCase
     assert_select 'li', "Image url can't be blank"
     assert_select 'li', 'Price is not a number'
     assert_select '.field_with_errors input[id=product_price]'
-    assert_test_summary 'pre', :tests => '[01]', :assertions => '[01]'
-    assert_test_summary 'pre', :tests => 7, :assertions => '1[03]'
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => '[01]', :assertions => '[01]'
+      assert_test_summary :tests => 7, :assertions => '1[03]'
+    else
+      assert_test_summary :tests => 7, :assertions => 13
+    end
   end
 
   section 7.2, 'Iteration B2: Unit Testing' do
-    assert_test_summary 'pre', :tests => 5, :assertions => 23
+    assert_test_summary :tests => 5, :assertions => 23
   end
 
   section 8.1, "Iteration C1: Create the Catalog Listing" do
@@ -102,17 +110,21 @@ class DepotTest < Gorp::TestCase
   end
 
   section 8.4, "Iteration C4: Functional Testing" do
-    assert_select 'pre', :tests => 5, :assertions => 23,
-      :failures => 0, :errors => 0
-    assert_select 'pre', :tests => 8, :assertions => 11,
-      :failures => 0, :errors => 0
-    assert_select 'pre', :tests => 8, :assertions => 15,
-      :failures => 0, :errors => 0
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => 5, :assertions => 23
+      assert_test_summary :tests => 8, :assertions => 11
+      assert_test_summary :tests => 8, :assertions => 15
+    else
+      assert_test_summary :tests => 13, :assertions => 37
+    end
   end
 
   section 9.2, "Connection Products to Carts" do
-    assert_select 'pre', :tests => 22, :assertions => 35,
-      :failures => 0, :errors => 0
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => 22, :assertions => 35
+    else
+      assert_test_summary :tests => 22, :assertions => 44
+    end
   end
 
   section 9.3, "Iteration D3: Adding a button" do
@@ -123,10 +135,12 @@ class DepotTest < Gorp::TestCase
   end
 
   section 9.4, "Playtime" do
-    assert_select 'pre', :tests => 5, :assertions => 23,
-      :failures => 0, :errors => 0
-    assert_select 'pre', :tests => 22, :assertions => 35,
-      :failures => 0, :errors => 0
+    if $rails_version =~ /^3\./
+      assert_test_summary :tests => '[57]', :assertions => '2\d'
+      assert_test_summary :tests => 7, :assertions => 10
+    else
+      assert_test_summary :tests => 7, :assertions => 13
+    end
   end
 
   section 10.1, "Iteration E1: Creating A Smarter Cart" do
@@ -155,8 +169,13 @@ class DepotTest < Gorp::TestCase
   end
 
   section 10.4, "Playtime" do
-    assert_test_summary 'pre', :tests => '\d', :assertions => '2\d'
-    assert_test_summary 'pre', :tests => 23, :assertions => '[34]7'
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => '\d', :assertions => '2\d'
+      assert_test_summary :tests => 23, :assertions => '[34]7'
+    else
+      assert_test_summary :tests => 2, :assertions => 5
+      assert_test_summary :tests => 30, :assertions => 75
+    end
     assert_select '.stdout', /AddPriceToLineItem: migrated/
   end
 
@@ -176,9 +195,14 @@ class DepotTest < Gorp::TestCase
       :title =>  "render with a partial in rjs fails ",
       :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
 
-    assert_test_summary 'pre', :tests => '[78]', :assertions => '2\d'
     assert_select 'code', "undefined method `line_items' for nil:NilClass"
-    assert_test_summary 'pre', :tests => '2\d', :assertions => '[45]\d'
+
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => '[78]', :assertions => '2\d'
+      assert_test_summary :tests => '2\d', :assertions => '[45]\d'
+    else
+      assert_test_summary :tests => 32, :assertions => 80
+    end
   end
 
   section 12.1, "Iteration G1: Capturing an Order" do
@@ -227,12 +251,20 @@ class DepotTest < Gorp::TestCase
       'Missing <order_list for_product=.*>'
 
     # test clean
-    assert_test_summary 'pre', :tests => '[79]', :assertions => '[23]\d'
-    assert_test_summary 'pre', :tests => '3\d', :assertions => '[456]\d'
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => '[79]', :assertions => '[23]\d'
+      assert_test_summary :tests => '3\d', :assertions => '[456]\d'
+    else
+      assert_test_summary :tests => 40, :assertions => 96
+    end
   end
 
   section 13.1, "Iteration H1: Email Notifications" do
-    assert_test_summary 'pre', :tests => 2, :assertions => '(8|10)'
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => 2, :assertions => '(8|10)'
+    else
+      assert_test_summary :tests => 2, :assertions => 10
+    end
   end
 
   section 13.2, "Iteration H2: Integration Tests" do
@@ -243,7 +275,11 @@ class DepotTest < Gorp::TestCase
     ticket 4213,
       :title =>  "undefined method `named_routes' in integration test",
       :match => /NoMethodError: undefined method `named_routes' for nil:NilClass/
-    assert_test_summary 'pre', :tests => 3, :assertions => '\d+'
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => 3, :assertions => '\d+'
+    else
+      assert_test_summary :tests => 3, :assertions => 47
+    end
   end
 
   section 14.1, "Iteration I1: Adding Users" do
@@ -260,11 +296,19 @@ class DepotTest < Gorp::TestCase
 
   section 14.2, "Iteration I2: Authenticating Users" do
     assert_select 'h1', 'Welcome'
-    assert_test_summary 'pre', :tests => 47, :assertions => '[789]\d'
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => 47, :assertions => '[789]\d'
+    else
+      assert_test_summary :tests => 57, :assertions => 172
+    end
   end
 
   section 14.3, "Iteration I3: Limiting Access" do
-    assert_test_summary 'pre', :tests => 47, :assertions => '[789]\d'
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => 47, :assertions => '[789]\d'
+    else
+      assert_test_summary :tests => 57, :assertions => 172
+    end
   end
 
   section 14.4, "Iteration I4: Adding a Sidebar" do
@@ -280,7 +324,7 @@ class DepotTest < Gorp::TestCase
       :title =>  "Actions defined using resource get bypass the controller",
       :match => /undefined method `title&amp;#39; for nil:NilClass/
 
-    assert_test_summary 'pre', :tests => '4[68]', :assertions => '[789]\d'
+    assert_test_summary :tests => '4[68]', :assertions => '[789]\d'
 
     assert_select '.stdout', /login"&gt;redirected/
     assert_select '.stdout', /customer@example.com/
@@ -325,9 +369,13 @@ class DepotTest < Gorp::TestCase
     assert_select 'option[value=es]'
     assert_select 'h1', 'Your Pragmatic Catalog'
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
-    assert_test_summary 'pre', :tests => '1?\d', :assertions => '[23]\d'
-    assert_test_summary 'pre', :tests => 48, :assertions => '[789]\d'
-    assert_test_summary 'pre', :tests => 3, :assertions => '\d+'
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => '1?\d', :assertions => '[23]\d'
+      assert_test_summary :tests => 48, :assertions => '[789]\d'
+      assert_test_summary :tests => 3, :assertions => '\d+'
+    else
+      assert_test_summary :tests => 58, :assertions => 174
+    end
   end
 
   section 16, "Deployment" do
@@ -348,7 +396,7 @@ class DepotTest < Gorp::TestCase
 
   if $rails_version =~ /^3\./
     section 20.1, "Testing Routing" do
-      assert_test_summary 'pre', :tests => '1\d', :assertions => '4\d'
+      assert_test_summary :tests => '1\d', :assertions => '4\d'
     end
   end
 
