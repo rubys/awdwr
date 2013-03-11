@@ -232,7 +232,8 @@ Dir.chdir File.join(PROFILE.source,WORK) do
           gemfile.puts "gem 'will_paginate'"
         elsif $rails_version =~ /^4\./
           gemfile.puts "gem 'kaminari'"
-          gemfile.puts "gem 'rack-cache'"
+          # gemfile.puts "gem 'puma'"
+          # gemfile.puts "gem 'faker'"
         end
         gemfile.puts "gem 'bcrypt-ruby'"
       else
