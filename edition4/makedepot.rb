@@ -1025,6 +1025,7 @@ section 9.4, 'Playtime' do
     end
   end
 
+  desc 'Rerun the previously failing test to verify the fix.'
   test 'test/*/line_items_controller_test.rb'
 end
 
@@ -1721,7 +1722,7 @@ unless $rails_version =~ /^3\.0/
     edit 'app/assets/javascripts/store.js.coffee' do
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
-        $(document).on "page:change", ->
+        $(document).on "ready page:change", ->
           $('.store .entry > img').click ->
             $(this).parent().find(':submit').click()
       EOF
