@@ -2584,7 +2584,11 @@ section 14.1, 'Iteration I1: Adding Users' do
   if File.exist? 'public/images'
     generate 'scaffold User name:string hashed_password:string salt:string'
   else
-    generate 'scaffold User name:string password_digest:string'
+    if $rails_version =~ /^3/
+      generate 'scaffold User name:string password_digest:string'
+    else
+      generate 'scaffold User name:string password:digest'
+    end
 
     if File.read('Gemfile') =~ /^#\sgem\s+['"]bcrypt-ruby['"]/
       desc 'uncomment out bcrypt-ruby'
@@ -2619,16 +2623,6 @@ section 14.1, 'Iteration I1: Adding Users' do
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
-  unless $rails_version =~ /^3\./
-    desc 'allow new parameters through'
-    edit 'app/controllers/users_controller.rb', 'user_params' do
-      dcl 'user_params', :mark => 'user_params' do
-        edit ':password_digest', :highlight
-        gsub! ':password_digest', ':password, :password_confirmation'
-      end
-    end
-  end
-
   desc 'Avoid redirect after create, update operations'
   %w(create update).each do |action|
     edit 'app/controllers/users_controller.rb', action do
@@ -2653,7 +2647,7 @@ section 14.1, 'Iteration I1: Adding Users' do
 
   desc 'Add Notice, and remove password digest from view'
   edit 'app/views/users/index.html.erb' do
-    msub /<\/h1>\n()/, <<-EOF.unindent(4), :highlight
+    msub /<\/h1>\n()/, <<-EOF.unindent(6), :highlight
       <% if notice %>
       <p id="notice"><%= notice %></p>
       <% end %>
@@ -2663,13 +2657,13 @@ section 14.1, 'Iteration I1: Adding Users' do
       msub /(.*<th>Salt.*\n)/, ''
       msub /(.*user.hashed_password.*\n)/, ''
       msub /(.*user.salt.*\n)/, ''
-    else
+    elsif self =~ /password/i
       msub /(.*<th>Password digest.*\n)/, ''
       msub /(.*user.password_digest.*\n)/, ''
     end
     unless $rails_version =~ /^3\.[01]/
       if self =~ /,( ):?data/
-        msub /,( ):?data/, "\n" + (' ' * 6)
+        msub /,( ):?data/, "\n" + (' ' * 8)
       else
         msub /,( ):?method/, "\n" + (' ' * 6)
       end
@@ -2692,38 +2686,56 @@ section 14.1, 'Iteration I1: Adding Users' do
   desc 'Show how this is stored in the database'
   db 'select * from users'
 
-  edit 'test/*/users_controller_test.rb', 'update' do |data|
-    msub /\A()/, "#START:update\n"
-    msub /^  end\n()/, "#END:update\n"
-    edit /^end/, :mark => 'update'
+  edit 'test/*/users_controller_test.rb', 'update' do
+    if $rails_version =~ /^3\./
+      msub /\A()/, "#START:update\n"
+      msub /^  end\n()/, "#END:update\n"
+      edit /^end/, :mark => 'update'
 
-    data.msub /setup do\n()/, <<-EOF.unindent(2) + "\n"
-      #START_HIGHLIGHT
-      @input_attributes = {
-        :name                  => "sam",
-        :password              => "private",
-        :password_confirmation => "private"
-      }
-      #END_HIGHLIGHT
-    EOF
+      msub /setup do\n()/, <<-EOF.unindent(4) + "\n"
+        #START_HIGHLIGHT
+        @input_attributes = {
+          :name                  => "sam",
+          :password              => "private",
+          :password_confirmation => "private"
+        }
+        #END_HIGHLIGHT
+      EOF
 
-    %w(update create).each do |test|
-      data.dcl "should #{test} user", :mark => 'update' do
-        msub /\A()/, "  #...\n"
-        if match /attributes/
-          edit 'attributes', :highlight
-          sub! '@user.attributes', '@input_attributes'
-        else
-          edit /^\s+(put|post|patch) :.*\n/, :highlight do
-            sub! /\{.*\}/, "@input_attributes"
+      %w(update create).each do |test|
+        dcl "should #{test} user", :mark => 'update' do
+          msub /\A()/, "  #...\n"
+          if match /attributes/
+            edit 'attributes', :highlight
+            sub! '@user.attributes', '@input_attributes'
+          else
+            edit /^\s+(put|post|patch) :.*\n/, :highlight do
+              sub! /\{.*\}/, "@input_attributes"
+            end
           end
+          edit 'user_path', :highlight
+          msub /(user_path.*)/, 'users_path'
         end
+      end
+
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    else
+      dcl "should create user", :mark => 'create' do
+        edit 'post :create', :highlight
+        sub! '@user.name', "'sam'"
+        msub /,( )password_confirmation/, "\n" + (' ' * 8)
+
+        edit 'user_path', :highlight
+        msub /(user_path.*)/, 'users_path'
+      end
+
+      dcl "should update user", :mark => 'update' do
+        msub /,( )password_confirmation/, "\n" + (' ' * 8)
+
         edit 'user_path', :highlight
         msub /(user_path.*)/, 'users_path'
       end
     end
-
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 end
 
