@@ -2617,7 +2617,7 @@ section 14.1, 'Iteration I1: Adding Users' do
       if $rails_version =~ /^3\./
         msub /class.*\n()/, 
           "    attr_accessible :name, :password, :password_confirmation\n"
-        msub /()end/, "    has_secure_passwordk\n"
+        msub /()end/, "    has_secure_password\n"
       end
     end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
