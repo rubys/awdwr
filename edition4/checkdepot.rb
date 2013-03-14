@@ -289,9 +289,12 @@ class DepotTest < Gorp::TestCase
           "`:data => { :confirm => 'Text' }` option"
     end
     assert_select 'legend', 'Enter User Details'
-    # assert_select 'td', 'User dave was successfully created.'
     assert_select 'h1', 'Listing users'
     assert_select 'td', 'dave'
+    unless $rails_version =~ /^3/
+      assert_select 'p', 'User dave was successfully created.'
+      assert_test_summary :tests => 52, :assertions => 166
+    end
   end
 
   section 14.2, "Iteration I2: Authenticating Users" do

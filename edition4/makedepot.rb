@@ -2611,14 +2611,14 @@ section 14.1, 'Iteration I1: Adding Users' do
     if File.exist? 'public/images'
       self.all = read('users/user.rb')
     else
-      self.all = <<-EOF.unindent(8)
-        class User < ActiveRecord::Base
-          attr_accessible :name, :password, :password_confirmation
-          validates :name, :presence => true, :uniqueness => true
-          has_secure_password
-        end
-      EOF
-      gsub! /^\s+attr_accessible.*\n/, '' unless $rails_version =~ /^3\./
+      msub /class.*\n()/, 
+      "  validates :name, :presence => true, :uniqueness => true\n", :highlight
+
+      if $rails_version =~ /^3\./
+        msub /class.*\n()/, 
+          "    attr_accessible :name, :password, :password_confirmation\n"
+        msub /()end/, "    has_secure_passwordk\n"
+      end
     end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
@@ -2645,7 +2645,7 @@ section 14.1, 'Iteration I1: Adding Users' do
     end
   end
 
-  desc 'Add Notice, and remove password digest from view'
+  desc 'Add Notice'
   edit 'app/views/users/index.html.erb' do
     msub /<\/h1>\n()/, <<-EOF.unindent(6), :highlight
       <% if notice %>
@@ -2686,8 +2686,9 @@ section 14.1, 'Iteration I1: Adding Users' do
   desc 'Show how this is stored in the database'
   db 'select * from users'
 
-  edit 'test/*/users_controller_test.rb', 'update' do
-    if $rails_version =~ /^3\./
+  desc 'Update tests to reflect the changes in redirection and uniqueness'
+  if $rails_version =~ /^3\./
+    edit 'test/*/users_controller_test.rb', 'update' do
       msub /\A()/, "#START:update\n"
       msub /^  end\n()/, "#END:update\n"
       edit /^end/, :mark => 'update'
@@ -2719,7 +2720,9 @@ section 14.1, 'Iteration I1: Adding Users' do
       end
 
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    else
+    end
+  else
+    edit 'test/*/users_controller_test.rb', 'create' do
       dcl "should create user", :mark => 'create' do
         edit 'post :create', :highlight
         sub! '@user.name', "'sam'"
@@ -2728,7 +2731,9 @@ section 14.1, 'Iteration I1: Adding Users' do
         edit 'user_path', :highlight
         msub /(user_path.*)/, 'users_path'
       end
+    end
 
+    edit 'test/*/users_controller_test.rb', 'create' do
       dcl "should update user", :mark => 'update' do
         msub /,( )password_confirmation/, "\n" + (' ' * 8)
 
@@ -2737,6 +2742,33 @@ section 14.1, 'Iteration I1: Adding Users' do
       end
     end
   end
+
+  desc 'Make sure that all test names are unique'
+  edit "test/fixtures/users.yml" do
+    if File.exist? 'public/images'
+      msub /(#.*)/, '<% SALT = "NaCl" unless defined?(SALT) %>'
+      edit /one:.*?\n\n/m do
+        msub  /name: (.*)/, 'dave'
+        msub  /salt: (.*)/, '<%= SALT %>'
+        msub  /hashed_password: (.*)/, 
+          "<%= User.encrypt_password('secret', SALT) %>"
+      end
+    else
+      edit /one:.*?\n\n/m do
+        edit 'name:', :highlight
+        msub /^  name: (.*)\n/, 'dave'
+        msub /password_digest: (.*)/, 
+          "<%= BCrypt::Password.create('secret') %>" if $rails_version =~ /^3\./
+      end
+      edit /two:.*\Z/m do
+        edit 'name:', :highlight
+        msub /^  name: (.*)\n/, 'susannah'
+      end
+      msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
+    end
+  end
+
+  test
 end
 
 section 14.2, 'Iteration I2: Authenticating Users' do
@@ -2852,25 +2884,6 @@ section 14.2, 'Iteration I2: Authenticating Users' do
       EOF
     end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  edit "test/fixtures/users.yml" do
-    if File.exist? 'public/images'
-      msub /(#.*)/, '<% SALT = "NaCl" unless defined?(SALT) %>'
-      edit /one:.*?\n\n/m do
-        msub  /name: (.*)/, 'dave'
-        msub  /salt: (.*)/, '<%= SALT %>'
-        msub  /hashed_password: (.*)/, 
-          "<%= User.encrypt_password('secret', SALT) %>"
-      end
-    else
-      edit /one:.*?\n\n/m do
-        msub  /name: (.*)/, 'dave'
-        msub  /password_digest: (.*)/, 
-          "<%= BCrypt::Password.create('secret') %>"
-      end
-      msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
-    end
   end
 
   test
