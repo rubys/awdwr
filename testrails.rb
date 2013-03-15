@@ -12,14 +12,18 @@ rvm_homes = [ENV['rvm_path'], File.expand_path('~/.rvm'), '/usr/local/rvm']
 RVM_PATH = rvm_homes.find {|path| path and File.exist? path}
 
 # update RVM
-rvm_stable = "https://raw.github.com/wayneeseguin/rvm/stable"
-unless File.read("#{RVM_PATH}/VERSION") == `curl -s #{rvm_stable}/VERSION`
-  system "#{RVM_PATH}/bin/rvm get stable"
+if RVM_PATH
+  rvm_stable = "https://raw.github.com/wayneeseguin/rvm/stable"
+  unless File.read("#{RVM_PATH}/VERSION") == `curl -s #{rvm_stable}/VERSION`
+    system "#{RVM_PATH}/bin/rvm get stable"
 
-  # monkey patch
-  # https://github.com/wayneeseguin/rvm/commit/f8e14c21feea12c5a40c444e78e9bd2afa68e7bd
-  system "sed -i 's/=\"ruby_1/=\"ruby_${rvm_ruby_release_version:-1}/' " +
-    "#{RVM_PATH}/scripts/functions/manage/base"
+    # monkey patch
+    # https://github.com/wayneeseguin/rvm/commit/f8e14c21feea12c5a40c444e78e9bd2afa68e7bd
+    system "sed -i 's/=\"ruby_1/=\"ruby_${rvm_ruby_release_version:-1}/' " +
+      "#{RVM_PATH}/scripts/functions/manage/base"
+  end
+elsif `which brew` != '' and `brew outdated`.include? 'ruby-build'
+  system "brew upgrade ruby-build"
 end
 
 # chaining support
@@ -315,18 +319,31 @@ if source
       end
     end
   end
-else
+elsif RVM_PATH
   bash %{
     source #{RVM_PATH}/scripts/rvm
     rvm ruby-#{release} || #{RVM_PATH}/bin/rvm install ruby-#{release}
   }
+else
+  bin = PROFILE.rvm['bin'].sub('ruby-','')
+  release = `rbenv install --list | grep #{bin.sub(/\*$/,'\d').inspect}`.
+    lines.sort_by(&rvmid).last.strip
+  unless `rbenv versions --bare`.lines.map(&:strip).include? release
+    system "rbenv install #{release}"
+  end
 end
 
 # find the rvm
-rvm = Dir[File.join(RVM_PATH,'rubies',PROFILE.rvm['bin'])].sort_by(&rvmid).last
-unless rvm
-  puts "Unable to locate #{File.join(RVM_PATH,'rubies',PROFILE.rvm['bin'])}"
-  exit
+if RVM_PATH
+  rvm = Dir[File.join(RVM_PATH,'rubies',PROFILE.rvm['bin'])].sort_by(&rvmid).last
+  unless rvm
+    puts "Unable to locate #{File.join(RVM_PATH,'rubies',PROFILE.rvm['bin'])}"
+    exit
+  end
+else
+  bin = PROFILE.rvm['bin'].sub('ruby-','')
+  rvm = `rbenv install --list | grep #{bin.sub(/\*$/,'\d').inspect}`.
+    lines.sort_by(&rvmid).last.strip
 end
 
 if File.exist? File.join(WORK, 'Gemfile')
@@ -357,12 +374,20 @@ end
 system "rm -f #{WORK}/checkdepot.html"
 
 # run the script
-bash %{
-  source #{RVM_PATH}/scripts/rvm
-  rvm #{rvm.gsub(/.*\/ruby-/,'ruby-')}
-  #{install}
-  ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1
-}
+if RVM_PATH
+  bash %{
+    source #{RVM_PATH}/scripts/rvm
+    rvm #{rvm.gsub(/.*\/ruby-/,'ruby-')}
+    #{install}
+    ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1
+  }
+else
+  bash %{
+    rbenv global #{rvm}
+    #{install}
+    ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1
+  }
+end
 
 status = $?
 
