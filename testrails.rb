@@ -344,6 +344,10 @@ else
   bin = PROFILE.rvm['bin'].sub('ruby-','')
   rvm = `rbenv install --list | grep #{bin.sub(/\*$/,'\d').inspect}`.
     lines.sort_by(&rvmid).last.strip
+  if ENV['RBENV_ROOT'] and not ENV['PATH'].include? ENV['RBENV_ROOT']
+    ENV['PATH'] = "#{ENV['RBENV_ROOT']}/shims:#{ENV['PATH']}"
+  end
+  system "rbenv global #{rvm}"
 end
 
 if File.exist? File.join(WORK, 'Gemfile')
@@ -383,7 +387,6 @@ if RVM_PATH
   }
 else
   bash %{
-    rbenv global #{rvm}
     #{install}
     ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1
   }
