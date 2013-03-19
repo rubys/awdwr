@@ -22,8 +22,10 @@ if RVM_PATH
     system "sed -i 's/=\"ruby_1/=\"ruby_${rvm_ruby_release_version:-1}/' " +
       "#{RVM_PATH}/scripts/functions/manage/base"
   end
-elsif `which brew` != '' and `brew outdated`.include? 'ruby-build'
-  system "brew upgrade ruby-build"
+elsif `which brew` != ''
+  system 'brew update'
+  system 'brew upgrade rbenv' if `brew outdated`.include? 'rbenv'
+  system 'brew upgrade ruby-build' if `brew outdated`.include? 'ruby-build'
 end
 
 # chaining support
