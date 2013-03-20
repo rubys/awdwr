@@ -283,42 +283,69 @@ rvmid = Proc.new {|n| n.split(/-[a-z]/).last.to_i}
 source=PROFILE.rvm['src']
 release=PROFILE.rvm['bin'].split('-')[1]
 if source
-  Dir.chdir("#{RVM_PATH}/src") do
-    system "../bin/rvm fetch ruby-head" unless File.exist? "../repos/ruby"
-    rev = Dir.chdir("#{RVM_PATH}/repos/ruby") do
-      `git checkout #{source} 2>/dev/null`
-      `git pull`
-      log = `git log -n 1`
-      if source == 'trunk'
-        "n#{log[/git-svn-id: .*@(\d*)/,1]}"
-      else
-        "s#{log[/commit ([a-f0-9]{8})/,1]}-n#{log[/git-svn-id: .*@(\d*)/,1]}"
+  # keep the last three, and anything built in a week; remove the rest
+  horizon = Time.now - 7 * 86400
+  keep    = 3
+
+  if RVM_PATH
+    Dir.chdir("#{RVM_PATH}/src") do
+      system "../bin/rvm fetch ruby-head" unless File.exist? "../repos/ruby"
+      rev = Dir.chdir("#{RVM_PATH}/repos/ruby") do
+        `git checkout #{source} 2>/dev/null`
+        `git pull`
+        log = `git log -n 1`
+        if source == 'trunk'
+          "n#{log[/git-svn-id: .*@(\d*)/,1]}"
+        else
+          "s#{log[/commit ([a-f0-9]{8})/,1]}-n#{log[/git-svn-id: .*@(\d*)/,1]}"
+        end
+      end
+
+      break if File.exist? "../bin/ruby-#{release}-#{rev}"
+
+      bash %{
+        source #{RVM_PATH}/scripts/rvm
+        #{RVM_PATH}/bin/rvm install ruby-#{release}-#{rev}
+        rvm ruby-#{release}-#{rev}
+        gem env path | cut -d ':' -f 1 | xargs chmod -R 0755
+        gem install --no-ri --no-rdoc cache/*
+      }
+
+      Dir.chdir(RVM_PATH) do
+        vms = Dir.chdir('rubies') { Dir[PROFILE.rvm['bin']].sort_by(&rvmid) }
+        vms.slice! -keep..-1
+        vms.delete_if {|vm| File.stat("rubies/#{vm}").mtime >= horizon}
+
+        vms.each do |vm|
+          system "find . -name #{vm} -exec rm -rf {} \\;"
+          system "find . -name #{vm}@global -exec rm -rf {} \\;"
+        end
       end
     end
-
-    break if File.exist? "../bin/ruby-#{release}-#{rev}"
-
-    bash %{
-      source #{RVM_PATH}/scripts/rvm
-      #{RVM_PATH}/bin/rvm install ruby-#{release}-#{rev}
-      rvm ruby-#{release}-#{rev}
-      gem env path | cut -d ':' -f 1 | xargs chmod -R 0755
-      gem install --no-ri --no-rdoc cache/*
-    }
-
-    # keep the last three, and anything built in a week; remove the rest
-    horizon = Time.now - 7 * 86400
-    keep    = 3
-
-    Dir.chdir(RVM_PATH) do
-      vms = Dir.chdir('rubies') { Dir[PROFILE.rvm['bin']].sort_by(&rvmid) }
-      vms.slice! -keep..-1
-      vms.delete_if {|vm| File.stat("rubies/#{vm}").mtime >= horizon}
-
-      vms.each do |vm|
-        system "find . -name #{vm} -exec rm -rf {} \\;"
-        system "find . -name #{vm}@global -exec rm -rf {} \\;"
+  elsif `which rbenv` != ''
+    Dir.chdir ENV['RBENV_ROOT'] do
+      rev = nil
+      if File.exist? "sources/#{source}/ruby-#{source}"
+        rev = Dir.chdir "sources/#{source}/ruby-#{source}" do
+          `git pull`
+          log = `git log -n 1`
+          "#{source[/.*-/]}r#{log[/git-svn-id: .*@(\d*)/,1]}"
+        end
+        versions = `rbenv versions --bare`.lines.map(&:strip)
+        break if versions.include? rev
       end
+      system "rm -rf sources/#{source} versions/#{source}"
+      bash %{
+        export PATH=#{File.dirname PROFILE.env['AUTOCONF']}:$PATH
+        rbenv global system
+        rbenv install -k #{source}
+      }
+      rev ||= Dir.chdir "sources/#{source}/ruby-#{source}" do
+        log = `git log -n 1`
+        "#{source[/.*-/]}r#{log[/git-svn-id: .*@(\d*)/,1]}"
+      end
+      system "mv versions/#{source} versions/#{rev}"
+      system "ln -s #{File.expand_path 'versions/'+rev} versions/#{source}"
     end
   end
 elsif RVM_PATH
@@ -344,7 +371,7 @@ if RVM_PATH
   end
 else
   bin = PROFILE.rvm['bin'].sub('ruby-','')
-  rvm = `rbenv install --list | grep #{bin.sub(/\*$/,'\d').inspect}`.
+  rvm = `rbenv versions --bare | grep #{bin.sub(/\*$/,'\d').inspect}`.
     lines.sort_by(&rvmid).last.strip
   if ENV['RBENV_ROOT'] and not ENV['PATH'].include? ENV['RBENV_ROOT']
     ENV['PATH'] = "#{ENV['RBENV_ROOT']}/shims:#{ENV['PATH']}"
