@@ -335,17 +335,19 @@ if source
         break if versions.include? rev
       end
       system "rm -rf sources/#{source} versions/#{source}"
+      system "rbenv global system"
       bash %{
         export PATH=#{File.dirname PROFILE.env['AUTOCONF']}:$PATH
-        rbenv global system
         rbenv install -k #{source}
       }
       rev ||= Dir.chdir "sources/#{source}/ruby-#{source}" do
         log = `git log -n 1`
         "#{source[/.*-/]}r#{log[/git-svn-id: .*@(\d*)/,1]}"
       end
-      system "mv versions/#{source} versions/#{rev}"
-      system "ln -s #{File.expand_path 'versions/'+rev} versions/#{source}"
+      if File.exist? "versions/#{source}"
+        system "mv versions/#{source} versions/#{rev}"
+        system "ln -s #{rev} versions/#{source}"
+      end
     end
   end
 elsif RVM_PATH
