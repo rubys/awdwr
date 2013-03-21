@@ -739,7 +739,7 @@ section 8.5, 'Iteration C5 - Caching' do
     msub /\n()end/, "\n"
     msub /\n()end/, <<-EOF.unindent(4), :mark => 'latest'
       def self.latest
-        Product.order('updated_at').last
+        Product.order(:updated_at).last
       end
     EOF
   end
@@ -822,7 +822,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
   EOF
 
   desc 'Create the model object.'
-  generate 'scaffold LineItem product:references cart:references'
+  generate 'scaffold LineItem product:references cart:belongs_to'
   cmd 'rake db:migrate'
 
   desc 'Cart has many line items.'
@@ -1802,8 +1802,12 @@ end
 
 section 12.1, 'Iteration G1: Capturing an Order' do
   desc 'Create a model to contain orders'
-  generate :scaffold, :Order,
-    'name:string address:text email:string pay_type:string'
+  if $rails_version =~ /^3\.[01]/
+    generate :scaffold, :Order,
+      'name:string address:text email:string pay_type:string'
+  else
+    generate :scaffold, :Order, 'name address:text email pay_type'
+  end
 
   desc 'Create a migration to add an order_id column to line_items'
   generate 'migration add_order_id_to_line_item order_id:integer'
@@ -2158,7 +2162,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
     msub insert_at, <<-EOF.unindent(4), :mark => 'who_bought'
       def who_bought
         @product = Product.find(params[:id])
-        @latest_order = @product.orders.order('updated_at').last
+        @latest_order = @product.orders.order(:updated_at).last
         if stale?(@latest_order)
           respond_to do |format|
             format.atom
