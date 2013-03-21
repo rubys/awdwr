@@ -334,16 +334,20 @@ if source
         versions = `rbenv versions --bare`.lines.map(&:strip)
         break if versions.include? rev
       end
+
+      if PROFILE.path
+        ENV['PATH'] = (PROFILE.path + ENV['PATH'].split(':')).join(':')
+      end
+
       system "rm -rf sources/#{source} versions/#{source}"
       system "rbenv global system"
-      bash %{
-        export PATH=#{File.dirname PROFILE.env['AUTOCONF']}:$PATH
-        rbenv install -k #{source}
-      }
+      system "rbenv install -k #{source}"
+
       rev ||= Dir.chdir "sources/#{source}/ruby-#{source}" do
         log = `git log -n 1`
         "#{source[/.*-/]}r#{log[/git-svn-id: .*@(\d*)/,1]}"
       end
+
       if File.exist? "versions/#{source}"
         system "mv versions/#{source} versions/#{rev}"
         system "ln -s #{rev} versions/#{source}"
