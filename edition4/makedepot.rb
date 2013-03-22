@@ -4041,8 +4041,7 @@ begin
     end
   end
 rescue Exception => e
-  puts "MySQL: #{e}"
-  Process.exit!
+  STDERR.puts "MySQL: #{e}"
 end
 
 
