@@ -2,31 +2,26 @@
 require 'rubygems'
 require 'yaml'
 require 'ostruct'
+require_relative 'clerk/rvm'
+require_relative 'clerk/rbenv'
 
 HOME = ENV['HOME']
 ENV['LANG']='en_US.UTF-8'
 ENV['USER'] ||= HOME.split(File::Separator).last
 File.umask(0022)
 $rails = "#{HOME}/git/rails"
-rvm_homes = [ENV['rvm_path'], File.expand_path('~/.rvm'), '/usr/local/rvm']
-RVM_PATH = rvm_homes.find {|path| path and File.exist? path}
 
-# update RVM
-if RVM_PATH
-  rvm_stable = "https://raw.github.com/wayneeseguin/rvm/stable"
-  unless File.read("#{RVM_PATH}/VERSION") == `curl -s #{rvm_stable}/VERSION`
-    system "#{RVM_PATH}/bin/rvm get stable"
-
-    # monkey patch
-    # https://github.com/wayneeseguin/rvm/commit/f8e14c21feea12c5a40c444e78e9bd2afa68e7bd
-    system "sed -i 's/=\"ruby_1/=\"ruby_${rvm_ruby_release_version:-1}/' " +
-      "#{RVM_PATH}/scripts/functions/manage/base"
-  end
-elsif `which brew` != ''
-  system 'brew update'
-  system 'brew upgrade rbenv' if `brew outdated`.include? 'rbenv'
-  system 'brew upgrade ruby-build' if `brew outdated`.include? 'ruby-build'
+if RVM.available?
+  clerk = RVM.new
+elsif RBenv.available?
+  clerk = RBenv.new
+else
+  STDERR.puts "Either rvm or rbenv are required"
+  exit 1
 end
+
+# update build definitions
+clerk.update
 
 # chaining support
 if ARGV.join(' ').include?(',')
@@ -67,12 +62,6 @@ end
 BRANCH = PROFILE.branch
 DESTDIR = PROFILE.destdir
 SCRIPT  = File.join(File.expand_path(File.dirname(__FILE__)), PROFILE.script)
-
-def bash cmd
-  cmd = cmd.strip.gsub(/^\s+/,'').gsub(/\n/,'; ')
-  puts   cmd
-  system 'bash -c ' + cmd.inspect
-end
 
 # update Rails
 if ARGV.delete('noupdate')
@@ -276,114 +265,24 @@ OLDSTAT.gsub! /, 0 (pendings|omissions|notifications)/, ''
 args = ARGV.grep(/^(\d+(\.\d+)?-\d+(\.\d+)?|\d+\.\d+?|save|restore)$/)
 args << "--work=#{WORK}"
 
-# extract id from rvm names, useful for sorting
-rvmid = Proc.new {|n| n.split(/-[a-z]/).last.to_i}
-
-# build a new rvm, if necessary
+# build a new ruby, if necessary
 source=PROFILE.rvm['src']
-release=PROFILE.rvm['bin'].split('-')[1]
-if source
-  # keep the last three, and anything built in a week; remove the rest
-  horizon = Time.now - 7 * 86400
-  keep    = 3
-
-  if RVM_PATH
-    Dir.chdir("#{RVM_PATH}/src") do
-      system "../bin/rvm fetch ruby-head" unless File.exist? "../repos/ruby"
-      rev = Dir.chdir("#{RVM_PATH}/repos/ruby") do
-        `git checkout #{source} 2>/dev/null`
-        `git pull`
-        log = `git log -n 1`
-        if source == 'trunk'
-          "n#{log[/git-svn-id: .*@(\d*)/,1]}"
-        else
-          "s#{log[/commit ([a-f0-9]{8})/,1]}-n#{log[/git-svn-id: .*@(\d*)/,1]}"
-        end
-      end
-
-      break if File.exist? "../bin/ruby-#{release}-#{rev}"
-
-      bash %{
-        source #{RVM_PATH}/scripts/rvm
-        #{RVM_PATH}/bin/rvm install ruby-#{release}-#{rev}
-        rvm ruby-#{release}-#{rev}
-        gem env path | cut -d ':' -f 1 | xargs chmod -R 0755
-        gem install --no-ri --no-rdoc cache/*
-      }
-
-      Dir.chdir(RVM_PATH) do
-        vms = Dir.chdir('rubies') { Dir[PROFILE.rvm['bin']].sort_by(&rvmid) }
-        vms.slice! -keep..-1
-        vms.delete_if {|vm| File.stat("rubies/#{vm}").mtime >= horizon}
-
-        vms.each do |vm|
-          system "find . -name #{vm} -exec rm -rf {} \\;"
-          system "find . -name #{vm}@global -exec rm -rf {} \\;"
-        end
-      end
-    end
-  elsif `which rbenv` != ''
-    Dir.chdir ENV['RBENV_ROOT'] do
-      rev = nil
-      if File.exist? "sources/#{source}/ruby-#{source}"
-        rev = Dir.chdir "sources/#{source}/ruby-#{source}" do
-          `git pull`
-          log = `git log -n 1`
-          "#{source[/.*-/]}r#{log[/git-svn-id: .*@(\d*)/,1]}"
-        end
-        versions = `rbenv versions --bare`.lines.map(&:strip)
-        break if versions.include? rev
-      end
-
-      if PROFILE.path
-        ENV['PATH'] = (PROFILE.path + ENV['PATH'].split(':')).join(':')
-      end
-
-      system "rm -rf sources/#{source} versions/#{source}"
-      system "rbenv global system"
-      system "rbenv install -k #{source}"
-
-      rev ||= Dir.chdir "sources/#{source}/ruby-#{source}" do
-        log = `git log -n 1`
-        "#{source[/.*-/]}r#{log[/git-svn-id: .*@(\d*)/,1]}"
-      end
-
-      if File.exist? "versions/#{source}"
-        system "mv versions/#{source} versions/#{rev}"
-        system "ln -s #{rev} versions/#{source}"
-      end
-    end
-  end
-elsif RVM_PATH
-  bash %{
-    source #{RVM_PATH}/scripts/rvm
-    rvm ruby-#{release} || #{RVM_PATH}/bin/rvm install ruby-#{release}
-  }
+version = if source
+  release=PROFILE.rvm['bin'].split('-')[1]
+  clerk.install_from_source(source, release)
 else
-  bin = PROFILE.rvm['bin'].sub('ruby-','')
-  release = `rbenv install --list | grep #{bin.sub(/\*$/,'\d').inspect}`.
-    lines.sort_by(&rvmid).last.strip
-  unless `rbenv versions --bare`.lines.map(&:strip).include? release
-    system "rbenv install #{release}"
-  end
+  clerk.install_latest(PROFILE.rvm['bin'])
 end
 
-# find the rvm
-if RVM_PATH
-  rvm = Dir[File.join(RVM_PATH,'rubies',PROFILE.rvm['bin'])].sort_by(&rvmid).last
-  unless rvm
-    puts "Unable to locate #{File.join(RVM_PATH,'rubies',PROFILE.rvm['bin'])}"
-    exit
-  end
-else
-  bin = PROFILE.rvm['bin'].sub('ruby-','')
-  rvm = `rbenv versions --bare | grep #{bin.sub(/\*$/,'\d').inspect}`.
-    lines.sort_by(&rvmid).last.strip
-  if ENV['RBENV_ROOT'] and not ENV['PATH'].include? ENV['RBENV_ROOT']
-    ENV['PATH'] = "#{ENV['RBENV_ROOT']}/shims:#{ENV['PATH']}"
-  end
-  system "rbenv global #{rvm}"
+unless version
+  STDERR.puts "#{PROFILE.rvm['bin']} installation failed, exiting..."
+  exit 1
 end
+
+version = File.basename(version)
+
+# keep the last three, and anything built in a week; remove the rest
+clerk.prune(PROFILE.rvm['bin'], 3, Time.now - 7 * 86400)
 
 if File.exist? File.join(WORK, 'Gemfile')
   install, bundler  = 'install', 'bundler'
@@ -400,7 +299,7 @@ if File.exist? File.join(WORK, 'Gemfile')
     gem list minitest | grep -q minitest || gem install minitest
     gem list activemerchant | grep -q activemerchant || gem install activemerchant
     gem list haml | grep -q haml || gem install haml
-    cd #{WORK}; rm -f Gemfile.lock; rm -rf vendor; bundle install; cd -
+    (cd #{WORK}; rm -rf Gemfile.lock vendor; bundle install)
   EOF
 else
   install = <<-EOF
@@ -413,19 +312,9 @@ end
 system "rm -f #{WORK}/checkdepot.html"
 
 # run the script
-if RVM_PATH
-  bash %{
-    source #{RVM_PATH}/scripts/rvm
-    rvm #{rvm.gsub(/.*\/ruby-/,'ruby-')}
-    #{install}
-    ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1
-  }
-else
-  bash %{
-    #{install}
-    ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1
-  }
-end
+clerk.run(version, install)
+clerk.run(version, 
+    "ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1")
 
 status = $?
 
