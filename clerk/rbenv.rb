@@ -34,7 +34,7 @@ class RBenv < Clerk
           "#{release}-r#{log[/git-svn-id: .*@(\d*)/,1]}"
         end
         versions = `rbenv versions --bare`.lines.map(&:strip)
-        break if versions.include? rev
+        return rev if versions.include? rev
       end
 
       system "rm -rf sources/#{source} versions/#{source}"
@@ -50,15 +50,15 @@ class RBenv < Clerk
         system "mv versions/#{source} versions/#{rev}"
         system "ln -s #{rev} versions/#{source}"
       end
+      rev
     end
-    rev
   end
 
   # install (if necessary) the latest patch level of a release and return it
   def install_latest(pattern)
     bin = pattern.sub('ruby-','')
     release = `rbenv install --list | grep #{bin.sub(/\*$/,'\d').inspect}`.
-    lines.sort_by(&RELEASE_COMPARE).last.strip
+      lines.map(&:strip).sort(&RELEASE_COMPARE).last
     unless `rbenv versions --bare`.lines.map(&:strip).include? release
       system "rbenv install #{release}"
     end
@@ -67,13 +67,13 @@ class RBenv < Clerk
 
   # prune old releases
   def prune(pattern, keep, horizon)
-    Dir.chdir("#{RBENV.root}/versions") do
+    Dir.chdir("#{RBenv.root}/versions") do
       vers = Dir[pattern.sub('ruby-','')].sort(&RELEASE_COMPARE)
-      vms.pop(keep)
+      vers.pop(keep)
       vers.delete_if {|ver| File.stat(ver).mtime >= horizon}
 
       vers.each do |ver|
-        FileUtils.rm_rf ver if File.exist? ver
+        FileUtils.rm_rf ver unless File.symlink? ver
       end
     end
   end

@@ -20,18 +20,6 @@ ENV['USER'] ||= HOME.split(File::Separator).last
 File.umask(0022)
 $rails = "#{HOME}/git/rails"
 
-if RVM.available?
-  clerk = RVM.new
-elsif RBenv.available?
-  clerk = RBenv.new
-else
-  STDERR.puts "Either rvm or rbenv are required"
-  exit 1
-end
-
-# update build definitions
-clerk.update
-
 # chaining support
 if ARGV.join(' ').include?(',')
   ARGV.join(' ').split(',').each { |args| system "#{$0} #{args.strip}" }
@@ -273,6 +261,23 @@ OLDSTAT.gsub! /, 0 (pendings|omissions|notifications)/, ''
 # select arguments to pass through
 args = ARGV.grep(/^(\d+(\.\d+)?-\d+(\.\d+)?|\d+\.\d+?|save|restore)$/)
 args << "--work=#{WORK}"
+
+if PROFILE.path
+  ENV['PATH'] = (PROFILE.path + ENV['PATH'].split(':')).uniq.join(':')
+end
+
+# select rvm or rbenv
+if RVM.available?
+  clerk = RVM.new
+elsif RBenv.available?
+  clerk = RBenv.new
+else
+  STDERR.puts "Either rvm or rbenv are required"
+  exit 1
+end
+
+# update build definitions
+clerk.update
 
 # build a new ruby, if necessary
 source=PROFILE.rvm['src']

@@ -69,7 +69,7 @@ class RVM < Clerk
         dirs = `find . -name #{vm}`
         dirs += `find . -name #{vm}@global`
         dirs.chomp.split("\n").each do |dir|
-          FileUtils.rm_rf dir if File.exist? dir
+          FileUtils.rm_rf dir
         end
       end
     end
