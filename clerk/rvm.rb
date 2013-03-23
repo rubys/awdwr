@@ -28,27 +28,26 @@ class RVM < Clerk
 
   # install (if necessary) a release from source
   def install_from_source(source, release)
-    Dir.chdir("#{RVM.path}/src") do
-      system "../bin/rvm fetch ruby-head" unless File.exist? "../repos/ruby"
-      rev = Dir.chdir("#{RVM.path}/repos/ruby") do
-        `git checkout #{source} 2>/dev/null`
-        `git pull`
-        log = `git log -n 1`
-        if source == 'trunk'
-          "n#{log[/git-svn-id: .*@(\d*)/,1]}"
-        else
-          "s#{log[/commit ([a-f0-9]{8})/,1]}-n#{log[/git-svn-id: .*@(\d*)/,1]}"
-        end
-      end
-
-      release=PROFILE.rvm['bin'].split('-')[1]
-
-      unless File.exist? "../bin/ruby-#{release}-#{rev}"
-        shell "rvm install ruby-#{release}-#{rev}"
-      end
-
-      "ruby-#{release}-#{rev}"
+    system "rvm fetch ruby-head" unless File.exist? "../repos/ruby"
+    Dir.chdir("#{RVM.path}/repos/ruby") do
+      `git checkout #{source} 2>/dev/null`
+      `git pull`
     end
+
+    log = gitlog("#{RVM.path}/repos/ruby")
+    rev = if source == 'trunk'
+      "n#{log.svnid}"
+    else
+      "s#{log.commit}-n#{log.svnid}"
+    end
+
+    release=PROFILE.rvm['bin'].split('-')[1]
+
+    unless File.exist? "#{RVM.path}/bin/ruby-#{release}-#{rev}"
+      shell "rvm install ruby-#{release}-#{rev}"
+    end
+
+    "ruby-#{release}-#{rev}"
   end
 
   # install (if necessary) the latest patch level of a release and return it
@@ -69,7 +68,7 @@ class RVM < Clerk
         dirs = `find . -name #{vm}`
         dirs += `find . -name #{vm}@global`
         dirs.chomp.split("\n").each do |dir|
-          FileUtils.rm_rf dir
+          FileUtils.rm_rf dir if File.exist? dir
         end
       end
     end

@@ -16,4 +16,21 @@ protected
       a <=> b
     end
   end
+
+  # parse svn revision and git commit hash from log
+  def gitlog(path='.')
+    Dir.chdir path do
+      log = `git log -n 1`
+
+      def log.svnid
+        self[/git-svn-id: .*@(\d*)/,1]
+      end
+
+      def log.commit
+        self [/commit ([a-f0-9]+)/,1]
+      end
+
+      log
+    end
+  end
 end

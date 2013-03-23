@@ -26,13 +26,12 @@ class RBenv < Clerk
   # install (if necessary) a release from source and return it
   def install_from_source(source, release)
     Dir.chdir ENV['RBENV_ROOT'] do
+      ruby_source = "sources/#{source}/ruby-#{source}"
       rev = nil
-      if File.exist? "sources/#{source}/ruby-#{source}"
-        rev = Dir.chdir "sources/#{source}/ruby-#{source}" do
-          `git pull`
-          log = `git log -n 1`
-          "#{release}-r#{log[/git-svn-id: .*@(\d*)/,1]}"
-        end
+
+      if File.exist? ruby_source
+        Dir.chdir(ruby_source) { `git pull` }
+        rev = "#{release}-r#{gitlog(ruby_source).svnid}"
         versions = `rbenv versions --bare`.lines.map(&:strip)
         return rev if versions.include? rev
       end
@@ -41,15 +40,13 @@ class RBenv < Clerk
       system "rbenv global system"
       system "rbenv install -k #{source}"
 
-      rev ||= Dir.chdir "sources/#{source}/ruby-#{source}" do
-        log = `git log -n 1`
-        "#{source[/.*-/]}r#{log[/git-svn-id: .*@(\d*)/,1]}"
-      end
+      rev ||= "#{release}-r#{gitlog(ruby_source).svnid}"
 
       if File.exist? "versions/#{source}"
         system "mv versions/#{source} versions/#{rev}"
         system "ln -s #{rev} versions/#{source}"
       end
+
       rev
     end
   end
@@ -58,7 +55,7 @@ class RBenv < Clerk
   def install_latest(pattern)
     bin = pattern.sub('ruby-','')
     release = `rbenv install --list | grep #{bin.sub(/\*$/,'\d').inspect}`.
-      lines.map(&:strip).sort(&RELEASE_COMPARE).last
+    lines.sort_by(&RELEASE_COMPARE).last.strip
     unless `rbenv versions --bare`.lines.map(&:strip).include? release
       system "rbenv install #{release}"
     end
@@ -67,13 +64,13 @@ class RBenv < Clerk
 
   # prune old releases
   def prune(pattern, keep, horizon)
-    Dir.chdir("#{RBenv.root}/versions") do
+    Dir.chdir("#{RBENV.root}/versions") do
       vers = Dir[pattern.sub('ruby-','')].sort(&RELEASE_COMPARE)
-      vers.pop(keep)
+      vms.pop(keep)
       vers.delete_if {|ver| File.stat(ver).mtime >= horizon}
 
       vers.each do |ver|
-        FileUtils.rm_rf ver unless File.symlink? ver
+        FileUtils.rm_rf ver if File.exist? ver
       end
     end
   end
