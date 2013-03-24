@@ -137,12 +137,15 @@ if File.exist? template
     libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],\s+github:/)
     libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
     gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
+
     app_base.scan(/^\s*"?gem ['"]([-\w]+)['"](,.*)?/).each do |gem, opts|
       next if %(rails turn therubyrhino).include? gem
       next if %(ruby-debug ruby-debug19 debugger).include? gem
       next if gems.find {|gname, gopts| gem == gname}
-      gems << [gem, opts]
+      libs << gem if opts.nil?
+      gems << [gem, opts] unless opts.nil?
     end
+
     branches = app_base.scan(
       /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
 
@@ -164,8 +167,12 @@ end
 template = File.join(HOME,'git','rails','Gemfile')
 if File.exist? template
   gemfile = File.read(template)
+  gemfile.sub! /platforms :jruby.*\nend/m, ''
+  gemfile.sub! /group :doc.*\nend/m, ''
+
   branches += gemfile.scan(
     /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
+  libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github:/).flatten
 end
 
 branches = Hash[branches]
