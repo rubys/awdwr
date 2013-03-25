@@ -177,6 +177,8 @@ end
 
 branches = Hash[branches]
 
+libs.delete 'turbolinks'
+
 libs.each do |lib|
   print lib + ': '
   if not File.exist? File.join(HOME,'git',lib)
