@@ -118,68 +118,12 @@ end
 open('|mysql -u root','w') {|f| f.write "drop database depot_production;"}
 open('|mysql -u root','w') {|f| f.write "create database depot_production;"}
 
-# update libs
-libs = %w(gorp) + ARGV.grep(/^\+/).map {|arg| arg[1..-1]}
-gems = []
-branches = []
+require_relative 'bootstrap'
+gems, libs = dependencies(File.join(HOME, 'git', 'rails'),
+  PROFILE.rvm['bin'].split('-')[1])
 
-# add in any 'edge' gems
-template = File.join(HOME,'git','rails',
-  'railties/lib/rails/generators/rails/app/templates/Gemfile')
-base = File.join(HOME,'git','rails',
-  'railties/lib/rails/generators/app_base.rb')
-if File.exist? template
-  gemfile = File.read(template)
-  if File.exist? base # Rails 3.1
-    app_base = File.read(base)
-    app_base.gsub! '#{options[:javascript]}', 'jquery'
-    libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
-    libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],\s+github:/)
-    libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
-    gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
-
-    app_base.scan(/^\s*"?gem '([-\w]+)'(,.*)?"/).each do |gem, opts|
-      next if %(rails turn therubyrhino).include? gem
-      next if %(ruby-debug ruby-debug19 debugger).include? gem
-      next if gems.find {|gname, gopts| gem == gname}
-      libs << gem if opts.nil?
-      gems << [gem, opts] unless opts.nil?
-    end
-
-    branches = app_base.scan(
-      /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
-
-    release=PROFILE.rvm['bin'].split('-')[1]
-    gems += [['json',nil]] if release < "1.9.2"
-    if app_base.match(/gem ['"]turn['"]/)
-      gems += [['turn',', :require => false']] unless release < "1.9.2"
-      gems.last.last.sub!(',', ', "0.8.2",') if release == '1.9.2'
-      gems.last.last.sub!(',', ', "0.8.3",') if release == '1.9.3'
-    end
-  else # Rails 3.0
-    libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/)
-    gems += [['jquery-rails',', "~> 0.2.2"']]
-  end
-  libs = libs.flatten.uniq - %w(rails)
-  gems.delete_if {|gem,opts| libs.include? gem}
-end
-
-template = File.join(HOME,'git','rails','Gemfile')
-if File.exist? template
-  gemfile = File.read(template)
-  gemfile.sub! /platforms :jruby.*\nend/m, ''
-  gemfile.sub! /group :doc.*\nend/m, ''
-
-  branches += gemfile.scan(
-    /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
-  libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github:/).flatten
-end
-
-branches = Hash[branches]
-
-libs.delete 'turbolinks'
-
-libs.each do |lib|
+# checkout/update libs
+libs.each do |lib, branch|
   print lib + ': '
   if not File.exist? File.join(HOME,'git',lib)
     Dir.chdir(File.join(HOME,'git')) do 
@@ -187,11 +131,11 @@ libs.each do |lib|
     end
   end
   Dir.chdir(File.join(HOME,'git',lib)) do 
-    system "git checkout #{branches[lib] or 'master'}"
+    system "git checkout #{branch}"
     system 'git pull'
   end
 end
-ENV['RUBYLIB'] = libs.map {|lib| File.join(HOME,'git',lib,'lib')}.
+ENV['RUBYLIB'] = libs.keys.map {|lib| File.join(HOME,'git',lib,'lib')}.
   join(File::PATH_SEPARATOR)
 
 # update gems
@@ -221,6 +165,8 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       # end
 
       release=PROFILE.rvm['bin'].split('-')[1]
+      base = File.join(HOME, 'git', 'rails', 
+        'railties/lib/rails/generators/app_base.rb')
       if File.exist? base # Rails 3.1+
         gemfile.puts "gem 'mysql2'"
         if release =~ /^1\.8\./ or $rails_version =~ /^3\.0/
@@ -428,8 +374,8 @@ Dir.chdir($rails) do
   system 'git checkout master' unless BRANCH=='master'
 end
 
-libs.each do |lib|
-  if branches[lib]
+libs.each do |lib, branch|
+  if branch != 'master'
     Dir.chdir(File.join(HOME,'git',lib)) do
       print lib + ': '
       system 'git checkout master'
