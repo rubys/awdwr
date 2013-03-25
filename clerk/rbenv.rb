@@ -55,7 +55,7 @@ class RBenv < Clerk
   def install_latest(pattern)
     bin = pattern.sub('ruby-','')
     release = `rbenv install --list | grep #{bin.sub(/\*$/,'\d').inspect}`.
-    lines.sort_by(&RELEASE_COMPARE).last.strip
+      lines.sort(&RELEASE_COMPARE).last.strip
     unless `rbenv versions --bare`.lines.map(&:strip).include? release
       system "rbenv install #{release}"
     end
@@ -64,9 +64,9 @@ class RBenv < Clerk
 
   # prune old releases
   def prune(pattern, keep, horizon)
-    Dir.chdir("#{RBENV.root}/versions") do
+    Dir.chdir("#{RBenv.root}/versions") do
       vers = Dir[pattern.sub('ruby-','')].sort(&RELEASE_COMPARE)
-      vms.pop(keep)
+      vers.pop(keep)
       vers.delete_if {|ver| File.stat(ver).mtime >= horizon}
 
       vers.each do |ver|
