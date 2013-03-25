@@ -7,7 +7,14 @@
 # Running bundle install against that Gem ensures that you have everything
 # you need.  The problem comes in when you have a new machine, or are
 # testing a new, or even different, version of Rails.  You may not have
-# what you need to get started.
+# what you need to get started.  For example, the ideal way would be to
+# run a command like:
+#
+#  $RAILS/railties/bin/rails new dummy_app --skip-bundle --dev
+#
+# ... and then parse the generated Gemfile.  But to get this working with
+# the current Rails, you need thread_safe, i18n, thor, ...  As I said,
+# a bootstrapping problem.
 #
 # Then there is performance.  Bundle update or install when there is a
 # source Gem repository involved is both time consuming and susceptible
