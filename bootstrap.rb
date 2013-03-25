@@ -44,19 +44,24 @@ def dependencies(rails, ruby)
     if File.exist? base # Rails 3.1
       app_base = File.read(base)
       app_base.gsub! '#{options[:javascript]}', 'jquery'
-      libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
-      libs += app_base.scan(/^\s*gem ['"]([-\w]+)['"],\s+github:/)
       libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
       gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
 
-      app_base.scan(/^\s*"?gem '([-\w]+)'(,.*)?"/).each do |gem, opts|
-        next if %(rails turn therubyrhino).include? gem
-        next if %(ruby-debug ruby-debug19 debugger).include? gem
-        next if gems.find {|gname, gopts| gem == gname}
-        if opts =~ / :?github(:|\s*=>)/
-          libs << gem
-        else
-          gems << [gem, opts]
+      patterns = [
+        /^\s*gem\s+'([-\w]+)'(,.*)/,
+        /^\s*"gem\s+'([-\w]+)'(,.*)"/
+      ]
+
+      patterns.each do |pattern|
+        app_base.scan(pattern).each do |gem, opts|
+          next if %(rails turn therubyrhino).include? gem
+          next if %(ruby-debug ruby-debug19 debugger).include? gem
+          next if gems.find {|gname, gopts| gem == gname}
+          if opts =~ / :?git(hub)?(:|\s*=>)/
+            libs << gem
+          else
+            gems << [gem, opts]
+          end
         end
       end
 
