@@ -3760,8 +3760,10 @@ section 26.1, 'Active Merchant' do
   desc 'Determine if a credit card is valid'
   edit 'Gemfile', 'plugins' do
     clear_all_marks
-    msub /()\Z/, "\n\ngem 'activemerchant', '~> 1.31'\n"
-    msub /gem 'activemerchant'(,.*)/, '' if $rails_version =~ /^3\./
+    version = '1.31'
+    version = '1.21.0' if RUBY_VERSION =~ /^1\.8/
+    version = '1.10.0' if $rails_version =~ /^3\.0/
+    msub /()\Z/, "\n\ngem 'activemerchant', '~> #{version}'\n"
     edit 'activemerchant', :mark => 'plugins'
   end
   bundle 'install'

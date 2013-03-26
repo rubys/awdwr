@@ -48,7 +48,7 @@ def dependencies(rails, ruby)
       gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
 
       patterns = [
-        /^\s*gem\s+'([-\w]+)'(,.*)/,
+        /^\s*gem\s+'([-\w]+)'(,.*)?/,
         /^\s*"gem\s+'([-\w]+)'(,.*)"/
       ]
 
@@ -94,8 +94,10 @@ def dependencies(rails, ruby)
     libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github:/).flatten
   end
 
+  gems = Hash[gems]
   branches = Hash[branches]
   libs.each {|lib| branches[lib] ||= 'master'}
+  branches.keys.each {|lib| gems.delete lib}
 
   [gems, branches]
 end
