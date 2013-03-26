@@ -21,7 +21,7 @@ require 'xmpp4r'
 end
 
 unless RUBY_PLATFORM.include? 'darwin'
-  unless %w(nodejs node).any? {|cmd| system "which #{cmd}"}
+  unless %w(nodejs node).any? {|cmd| not `which #{cmd}`.empty?}
     STDERR.puts "Unable to find nodejs"
     exit -1
   end
@@ -50,6 +50,7 @@ FileUtils.mkdir_p git_path
 Dir.chdir git_path do
   repositories.each do |repository|
     next if File.exist? File.basename(repository, '.git')
+    repository.sub! '@github.com:', '://github.com/' unless ENV['USER']=='rubys'
     system "git clone #{repository}"
   end
 end

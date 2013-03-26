@@ -34,6 +34,7 @@ Tests against makedepot.html can also be run separately:
 
 Automation tools:
 
+  setup.rb:     initial setup and verification
   testrails.rb: front end to makedepot that manages the environment
   dashboard.rb: cgi to monitor status / start jobs
 
