@@ -48,12 +48,9 @@ def status
   unless active.empty?
     start = Time.parse(active.first.split.first)
 
-    require 'fileutils'
-    mkdir_p LOGDIR
-
     logs = Dir["#{LOGDIR}/makedepot*.log"]
     latest = logs.sort_by {|file| File.stat(file.untaint).mtime}.last
-    if File.stat(latest).mtime >= start
+    if latest and File.stat(latest).mtime >= start
       log.push *open(latest) {|file| file.readlines.grep(/====>/)[-3..-1] or []}
     end
 

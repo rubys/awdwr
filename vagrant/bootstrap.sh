@@ -8,12 +8,7 @@ apt-get install -y apache2 curl git libmysqlclient-dev mysql-server nodejs \
 
 # configure apache
 chown vagrant:vagrant /var/www
-export DEFAULT=/etc/apache2/sites-available/default
-sed -i.bak '/\/var\/www\/>/ {n;s/MultiViews/MultiViews +ExecCGI/}' $DEFAULT
-sed -i '/\/var\/www\/>/ a\
-                AddHandler cgi-script .cgi' $DEFAULT
-sed -i '3 i\
-        SuexecUserGroup vagrant vagrant' $DEFAULT
+sed -i.bak -f /vagrant/apache_default.sed /etc/apache2/sites-available/default
 a2enmod suexec
 echo "ServerName $(hostname)" > /etc/apache2/conf.d/servername
 service apache2 restart
@@ -53,5 +48,11 @@ su --login vagrant << 'eof'
   cp /vagrant/www/* /var/www
   sed "s'/home/rubys'$HOME'" < ~/git/awdwr/dashboard.yml > /var/www/dashboard.yml
   ln -s /home/vagrant/git/awdwr/edition4 /var/www/AWDwR4
+  mkdir /home/vagrant/logs/
   ln -s /home/vagrant/logs/ /var/www/logs
+  cp /home/vagrant/log.htaccess /home/vagrant/logs
 eof
+
+ip=$(ifconfig eth1|grep inet|head -1|sed 's/\:/ /'|awk '{print $3}')
+echo
+echo "Configuration complete.  Dashboard available at http://$ip/dashboard.cgi"
