@@ -7,7 +7,7 @@ require 'yaml'
 
 HOME = $HOME.sub(/\/?$/, '/')
 
-config = YAML.load(open('dashboard.yml'))
+config = YAML.load(open($dashboard || 'dashboard.yml'))
 LOGDIR = config.delete('log').sub('$HOME/',HOME).untaint
 BINDIR = config.delete('bin').sub('$HOME/',HOME).untaint
 
@@ -47,6 +47,9 @@ def status
   log = []
   unless active.empty?
     start = Time.parse(active.first.split.first)
+
+    require 'fileutils'
+    mkdir_p LOGDIR
 
     logs = Dir["#{LOGDIR}/makedepot*.log"]
     latest = logs.sort_by {|file| File.stat(file.untaint).mtime}.last
@@ -323,3 +326,5 @@ _json do
   _config config
   _active active + log
 end
+__END__
+$dashboard = File.join(ENV['DOCUMENT_ROOT'], 'dashboard.yml')
