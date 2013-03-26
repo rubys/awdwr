@@ -40,6 +40,7 @@ config.each do |keyword,overrides|
   end
 end
 PROFILE = OpenStruct.new(profile)
+release=PROFILE.rvm['bin'].split('-')[1]
 
 COMMIT = ARGV.find {|arg| arg =~ /http:\/\/github.com\/rails\/rails\/commit\//}
 
@@ -122,6 +123,35 @@ require_relative 'bootstrap'
 gems, libs = dependencies(File.join(HOME, 'git', 'rails'),
   PROFILE.rvm['bin'].split('-')[1])
 
+# adjust gems
+%w(
+  htmlentities 
+  rdoc minitest test-unit
+  bcrypt-ruby rvm-capistrano activemerchant haml sqlite3 jquery-rails
+).each do |name|
+  gems[name] ||= nil unless libs[name]
+end
+
+if $rails_version =~ /^3\./
+  gems['will_paginate'] ||= nil
+else
+  gems['kaminari'] ||= nil
+end
+
+if $rails_version =~ /^3\.0/
+  gems['mysql'] ||= nil
+  gems['activemerchant'] ||= ", '~> 1.10.0'"
+  gems['haml'] ||= ", '~> 4.0'"
+  gems['will_paginate'] ||= ", '>= 3.0.pre'"
+else
+  gems['mysql2'] ||= nil
+  gems['bcrypt-ruby'] ||= nil
+end
+
+if release =~ /^1\.8\./
+  gems['activemerchant'] ||= ", '~> 1.21.0'"
+end
+
 # checkout/update libs
 libs.each do |lib, branch|
   print lib + ': '
@@ -153,42 +183,6 @@ Dir.chdir File.join(PROFILE.source,WORK) do
         end
       end
       gems.each {|gem,opts| gemfile.puts "gem #{gem.inspect}#{opts}"}
-      gemfile.puts "gem 'sqlite3'"
-      gemfile.puts "gem 'rvm-capistrano'"
-      gemfile.puts "gem 'test-unit'"
-      gemfile.puts "gem 'minitest'"
-      gemfile.puts "gem 'rdoc'"
-      # begin
-      #   require 'nokogiri'
-      # rescue LoadError
-        gemfile.puts "gem 'htmlentities'"
-      # end
-
-      release=PROFILE.rvm['bin'].split('-')[1]
-      base = File.join(HOME, 'git', 'rails', 
-        'railties/lib/rails/generators/app_base.rb')
-      if File.exist? base # Rails 3.1+
-        gemfile.puts "gem 'mysql2'"
-        if release =~ /^1\.8\./ or $rails_version =~ /^3\.0/
-          gemfile.puts "gem 'activemerchant', '~> 1.21.0'"
-        else
-          gemfile.puts "gem 'activemerchant'"
-        end
-        gemfile.puts "gem 'haml'"
-        if $rails_version =~ /^3\./
-          gemfile.puts "gem 'will_paginate'"
-        elsif $rails_version =~ /^4\./
-          gemfile.puts "gem 'kaminari'"
-          # gemfile.puts "gem 'puma'"
-          # gemfile.puts "gem 'faker'"
-        end
-        gemfile.puts "gem 'bcrypt-ruby'"
-      else
-        gemfile.puts "gem 'mysql'"
-        gemfile.puts "gem 'activemerchant', '~> 1.10.0'"
-        gemfile.puts "gem 'haml', '~> 4.0'"
-        gemfile.puts "gem 'will_paginate', '>= 3.0.pre'"
-      end
     end
   else
     system 'rm -f Gemfile'
@@ -237,7 +231,6 @@ clerk.update
 # build a new ruby, if necessary
 source=PROFILE.rvm['src']
 version = if source
-  release=PROFILE.rvm['bin'].split('-')[1]
   clerk.install_from_source(source, release)
 else
   clerk.install_latest(PROFILE.rvm['bin'])
@@ -265,9 +258,6 @@ if File.exist? File.join(WORK, 'Gemfile')
 
   install = <<-EOF
     gem list bundler | grep -q #{bundler} && gem update bundler || gem #{install} bundler
-    gem list minitest | grep -q minitest || gem install minitest
-    gem list activemerchant | grep -q activemerchant || gem install activemerchant
-    gem list haml | grep -q haml || gem install haml
     (cd #{WORK}; rm -rf Gemfile.lock vendor; bundle install)
   EOF
 else
