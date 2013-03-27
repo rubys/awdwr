@@ -32,6 +32,7 @@ def dependencies(rails, ruby)
   libs = %w(gorp)
   gems = []
   branches = []
+  repos = []
 
   # add in any 'edge' gems
   template = File.join(rails, 
@@ -91,6 +92,7 @@ def dependencies(rails, ruby)
 
     branches += gemfile.scan(
       /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
+    repos += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github: '(.*?)'/)
     libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github:/).flatten
   end
 
@@ -99,7 +101,10 @@ def dependencies(rails, ruby)
   libs.each {|lib| branches[lib] ||= 'master'}
   branches.keys.each {|lib| gems.delete lib}
 
-  [gems, branches]
+  repos = Hash[repos]
+  libs.each {|lib| repos[lib] ||= "rails/#{lib}"}
+
+  [gems, branches, repos]
 end
 
 if __FILE__ == $0
@@ -109,7 +114,7 @@ if __FILE__ == $0
   puts "# Ruby #{ruby}"
   puts "# Rails #{File.read("#{rails}/RAILS_VERSION")}"
 
-  gems, libs = dependencies(rails, ruby)
+  gems, libs, repos = dependencies(rails, ruby)
 
   puts "\ngems"
   gems.each do |gem, option|
@@ -118,6 +123,6 @@ if __FILE__ == $0
 
   puts "\nlibs"
   libs.each do |lib, branch|
-    puts " * #{lib} => #{branch}"
+    puts " * #{lib} => #{repos[lib]} #{branch}"
   end
 end

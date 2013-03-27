@@ -120,7 +120,7 @@ open('|mysql -u root','w') {|f| f.write "drop database depot_production;"}
 open('|mysql -u root','w') {|f| f.write "create database depot_production;"}
 
 require_relative 'bootstrap'
-gems, libs = dependencies(File.join(HOME, 'git', 'rails'),
+gems, libs, repos = dependencies(File.join(HOME, 'git', 'rails'),
   PROFILE.rvm['bin'].split('-')[1])
 
 # adjust gems
@@ -157,7 +157,7 @@ libs.each do |lib, branch|
   print lib + ': '
   if not File.exist? File.join(HOME,'git',lib)
     Dir.chdir(File.join(HOME,'git')) do 
-      system "git clone https://github.com/rails/#{lib}"
+      system "git clone https://github.com/#{repos[lib]}"
     end
   end
   Dir.chdir(File.join(HOME,'git',lib)) do 
