@@ -1,6 +1,5 @@
 default:
   script:  makedepot.rb
-  # gems:    ruby-1.9.3-p*
 
   destdir: AWDwR4
   branch:  master
@@ -8,7 +7,7 @@ default:
   output:  []
   message: []
   rvm:
-    bin:   ruby-1.9.3-p*
+    bin:   ruby-2.0.0-p*
 
 187:
   output:  1.8.7
@@ -22,19 +21,25 @@ default:
   rvm:
     bin:   ruby-1.9.2-p*
 
-194:
-  output:  1.9.4
-  message: 'Ruby 1.9.4'
+193:
+  output:  1.9.3
+  message: 'Ruby 1.9.3'
   rvm:
-    src:   ruby_1_9_4
-    bin:   ruby-1.9.4-s*
+    bin:   ruby-1.9.3-p*
 
-200:
-  output:  2.0.0
-  message: 'Ruby 2.0.0'
-  rvm:
-    src:   trunk
-    bin:   ruby-head-n*
+210:
+    output:  2.1.0
+    message: 'Ruby 2.1.0'
+    rvm:
+#     bin:   ruby-2.1.0-p*
+#
+      src:   trunk
+      bin:   ruby-head-n*
+#
+#     src:   ruby_2_1_0
+#     bin:   ruby-2.1.0-s*
+#
+#     bin:   ruby-2.1.0-rc*
 
 23:
   output:  '2.3'
@@ -47,17 +52,14 @@ default:
   message: '3-0-stable'
 
 31:
-  output:  '3.1'
   branch:  3-1-stable
+  output:  '3.1'
   message: '3-1-stable'
 
 32:
-  output:  '3.2'
   branch:  3-2-stable
+  output:  '3.2'
   message: '3-2-stable'
-
-40:
-  branch:  master
 
 3:
   source:  /home/rubys/git/awdwr/edition3
