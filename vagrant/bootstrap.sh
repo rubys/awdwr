@@ -49,7 +49,7 @@ su --login vagrant << 'eof'
   sed "s'/home/rubys'$HOME'" < ~/git/awdwr/dashboard.yml > /var/www/dashboard.yml
   ln -s /home/vagrant/git/awdwr/edition4 /var/www/AWDwR4
   ln -s /home/vagrant/logs/ /var/www/logs
-  cp /vagrant/log.htaccess /home/vagrant/logs
+  cp /vagrant/log.htaccess /home/vagrant/logs/.htaccess
 eof
 
 ip=$(ifconfig eth1|grep inet|head -1|sed 's/\:/ /'|awk '{print $3}')
