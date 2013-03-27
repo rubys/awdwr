@@ -167,7 +167,7 @@ _html do
             parent.find('td:eq(1)').text().replace(/\\D/g,'') + ' ' +
             parent.find('td:eq(2)').text().replace(/\\D/g,'');
           if (parent.find('td:eq(0)').text() == 'svn') args = 'svn' + args;
-          if (event.ctrlKey) {
+          if (event.ctrlKey || event.shiftKey || event.metaKey) {
             inputs = $('input[name=args]').val().split(/,\\s*/)
             if (inputs[0] == '') inputs.shift();
             var index = $.inArray(args, inputs);
