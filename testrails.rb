@@ -165,8 +165,6 @@ libs.each do |lib, branch|
     system 'git pull'
   end
 end
-ENV['RUBYLIB'] = libs.keys.map {|lib| File.join(HOME,'git',lib,'lib')}.
-  join(File::PATH_SEPARATOR)
 
 # update gems
 Dir.chdir File.join(PROFILE.source,WORK) do
@@ -174,12 +172,11 @@ Dir.chdir File.join(PROFILE.source,WORK) do
     open('Gemfile','w') do |gemfile|
       gemfile.puts "source 'http://rubygems.org'"
       gemfile.puts "gem 'rails', :path => #{$rails.inspect}"
-      ENV['RUBYLIB'].split(File::PATH_SEPARATOR).each do |path|
-        path.sub! /\/lib$/, ''
-        name = path.split(File::SEPARATOR).last
-        next if name == 'gorp'
-        if File.exist?(File.join(path, "/#{name}.gemspec"))
-          gemfile.puts "gem #{name.inspect}, :path => #{path.inspect}"
+      libs.each do |lib|
+        next if lib == 'gorp'
+        path = File.join(HOME,'git',lib)
+        if File.exist?(File.join(path, "/#{lib}.gemspec"))
+          gemfile.puts "gem #{lib.inspect}, :path => #{path.inspect}"
         end
       end
       gems.each {|gem,opts| gemfile.puts "gem #{gem.inspect}#{opts}"}
@@ -269,6 +266,9 @@ else
 end
 
 system "rm -f #{WORK}/checkdepot.html"
+
+ENV['RUBYLIB'] = libs.keys.map {|lib| File.join(HOME,'git',lib,'lib')}.
+  join(File::PATH_SEPARATOR)
 
 # run the script
 clerk.run(version, install)

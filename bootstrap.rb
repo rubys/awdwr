@@ -101,6 +101,8 @@ def dependencies(rails, ruby)
   libs.each {|lib| branches[lib] ||= 'master'}
   branches.keys.each {|lib| gems.delete lib}
 
+  gems['sass'] ||= nil if branches.include? 'sass-rails'
+  
   repos = Hash[repos]
   libs.each {|lib| repos[lib] ||= "rails/#{lib}"}
 

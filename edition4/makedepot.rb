@@ -4054,11 +4054,18 @@ $cleanup = Proc.new do
       File.open(css) {|file| $style.text! file.read}
     end
   else
-    require 'sass'
+    begin
+      require 'sass'
+    rescue LoadError
+    end
+
     Dir[File.join($WORK,'depot/app/assets/stylesheets/*.css*')].each do |css|
       text = File.read(css)
       next if text =~ /\A\/\*[^*]*\*\/\s*\Z/ # nothing but a single comment
-      text = Sass::Engine.new(text, :syntax => :scss).render if css =~ /\.scss/
+      if css =~ /\.scss/
+        next unless defined? Sass
+        text = Sass::Engine.new(text, :syntax => :scss).render
+      end
       $style.text! text
     end
   end
