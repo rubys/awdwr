@@ -39,8 +39,8 @@ su --login vagrant << 'eof'
   mkdir bin
   sed "s'/home/rubys'$HOME'" < ~/git/awdwr/testrails.yml > bin/testrails.yml
   cp /vagrant/bin/* bin
-  echo 'PATH=$PATH:$HOME/bin' >> ~/.bashrc 
-  echo "alias work='source ~/bin/work'" >> ~/.bashrc 
+  echo 'PATH=$PATH:$HOME/bin' >> ~/.bash_profile
+  echo "alias work='source ~/bin/work'" >> ~/.bash_profile
 
   # web interface
   cp /vagrant/www/* /var/www
