@@ -1,5 +1,3 @@
-cp /vagrant/02proxy /etc/apt/apt.conf.d
-
 # install system dependencies
 apt-get update
 export DEBIAN_FRONTEND=noninteractive
@@ -34,7 +32,7 @@ su --login vagrant << 'eof'
   git clone git://github.com/rubys/awdwr.git
   PATH=$PATH:/usr/sbin ruby ~/git/awdwr/setup.rb
   ruby ~/git/awdwr/dashboard.rb --install=/var/www
-  cd -
+  cd $HOME
   mkdir logs
 
   # command line interface
