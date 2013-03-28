@@ -48,8 +48,13 @@ su --login vagrant << 'eof'
   ln -s /home/vagrant/git/awdwr/edition4 /var/www/AWDwR4
   ln -s /home/vagrant/logs/ /var/www/logs
   cp /vagrant/log.htaccess /home/vagrant/logs/.htaccess
-eof
 
-ip=$(ifconfig eth1|grep inet|head -1|sed 's/\:/ /'|awk '{print $3}')
-echo
-echo "Configuration complete.  Dashboard available at http://$ip/dashboard.cgi"
+  # customize welcome message
+  {
+    ip="/sbin/ifconfig eth1|grep inet|head -1|sed 's/\:/ /'|awk '{print \$3}'"
+    echo "ip=\$($ip)"
+    echo "echo"
+    echo "echo Depot Dashboard is available at http://\$ip/dashboard"
+  } >> .bash_profile
+  source .bash_profile
+eof

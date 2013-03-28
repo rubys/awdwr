@@ -8,5 +8,6 @@
         n
         s/None/All/
         a\
+		MultiViewsMatch Any\
 		AddHandler cgi-script .cgi
 }
