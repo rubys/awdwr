@@ -172,7 +172,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
     open('Gemfile','w') do |gemfile|
       gemfile.puts "source 'http://rubygems.org'"
       gemfile.puts "gem 'rails', :path => #{$rails.inspect}"
-      libs.each do |lib|
+      libs.each do |lib, branch|
         next if lib == 'gorp'
         path = File.join(HOME,'git',lib)
         if File.exist?(File.join(path, "/#{lib}.gemspec"))
@@ -267,11 +267,12 @@ end
 
 system "rm -f #{WORK}/checkdepot.html"
 
+# run the script
+clerk.run(version, install)
+
 ENV['RUBYLIB'] = libs.keys.map {|lib| File.join(HOME,'git',lib,'lib')}.
   join(File::PATH_SEPARATOR)
 
-# run the script
-clerk.run(version, install)
 clerk.run(version, 
     "ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1")
 
