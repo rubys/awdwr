@@ -25,20 +25,19 @@ Vagrant::Config.run do |config|
   # Assign this VM to a bridged network, allowing you to connect directly to a
   # network using the host's network device. This makes the VM appear as another
   # physical device on your network.
-  config.vm.network :bridged, :bridge => 'eth1'
+  # config.vm.network :bridged, :bridge => 'eth1'
 
   # Forward a port from the guest to the host, which allows for outside
   # computers to access the VM, whereas host only networking does not.
   # config.vm.forward_port 80, 8080
 
-  # If available, configure an Apt Cacher Server
-  proxy = '/etc/apt/apt.conf.d/02proxy'
-  if File.exist? proxy
-    require 'shellwords'
-    cmd = "echo #{Shellwords.escape(File.read(proxy).strip)} > #{proxy}"
-    config.vm.provision :shell, :inline => cmd
-  end
-
   # Run bootstrap script
   config.vm.provision :shell, :path => 'bootstrap.sh'
+
+  # Speed up gem install
+  # config.vm.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+  # config.vm.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+
+  # Adjust amount of memory
+  # config.vm.customize ["modifyvm", :id, "--memory", 1024]
 end

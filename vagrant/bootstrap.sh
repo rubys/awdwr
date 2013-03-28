@@ -1,3 +1,6 @@
+#quick exit if already set up
+[ -e /var/www/dashboard.cgi ] && exit 0
+
 # install system dependencies
 apt-get update
 export DEBIAN_FRONTEND=noninteractive
@@ -52,6 +55,7 @@ su --login vagrant << 'eof'
   # customize welcome message
   {
     ip="/sbin/ifconfig eth1|grep inet|head -1|sed 's/\:/ /'|awk '{print \$3}'"
+    echo 'PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"'
     echo "ip=\$($ip)"
     echo "echo"
     echo "echo Depot Dashboard is available at http://\$ip/dashboard"
