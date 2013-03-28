@@ -18,11 +18,6 @@ class RVM < Clerk
   def update
     unless File.read("#{RVM.path}/VERSION") == `curl -s #{RVM::STABLE}/VERSION`
       system "#{RVM.path}/bin/rvm get stable"
-
-      # monkey patch
-      # https://github.com/wayneeseguin/rvm/commit/f8e14c21feea12c5a40c444e78e9bd2afa68e7bd
-      system "sed -i 's/=\"ruby_1/=\"ruby_${rvm_ruby_release_version:-1}/' " +
-        "#{RVM.path}/scripts/functions/manage/base"
     end
   end
 
