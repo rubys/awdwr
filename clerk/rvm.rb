@@ -23,7 +23,10 @@ class RVM < Clerk
 
   # install (if necessary) a release from source
   def install_from_source(source, release)
-    system "rvm fetch ruby-head" unless File.exist? "#{RVM.path}/repos/ruby"
+    unless File.exist? "#{RVM.path}/repos/ruby"
+      system "#{RVM.path}/bin/rvm fetch ruby-head" 
+    end
+
     Dir.chdir("#{RVM.path}/repos/ruby") do
       `git checkout #{source} 2>/dev/null`
       `git pull`
