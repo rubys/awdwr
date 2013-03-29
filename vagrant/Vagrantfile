@@ -31,14 +31,13 @@ Vagrant::Config.run do |config|
   # computers to access the VM, whereas host only networking does not.
   # config.vm.forward_port 80, 8080
 
-  # Run bootstrap script
-  # config.vm.provision :shell, :path => 'bootstrap.sh'
+  # Provision VM using chef
   config.vm.provision :chef_solo do |chef|
     chef.cookbooks_path = "cookbooks"
     chef.add_recipe "awdwr"
   end
 
-  # Speed up gem install
+  # Speed up network access
   # config.vm.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
   # config.vm.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
 
