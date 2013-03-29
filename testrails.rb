@@ -49,6 +49,12 @@ log=config.find_all {|k,v| v['output'] and ARGV.include? k.to_s}.
 LOG = "#{HOME}/logs/makedepot#{log}.log"
 system "mkdir -p #{File.dirname(LOG)}"
 
+def log(message)
+  open(LOG, 'a') do |file| 
+    file.puts Time.now.strftime("[%Y-%m-%d %H:%M:%S] ====> #{message}")
+  end
+end
+
 OUTPUT = PROFILE.output.map {|token| '-'+token.gsub('.','')}.sort.join
 OUTMIN = OUTPUT.gsub('.','')
 WORK   = 'work' + OUTMIN
@@ -60,6 +66,12 @@ end
 BRANCH = PROFILE.branch
 DESTDIR = PROFILE.destdir
 SCRIPT  = File.join(File.expand_path(File.dirname(__FILE__)), PROFILE.script)
+
+RUNFILE = File.join(PROFILE.source, WORK, 'status.run')
+open(RUNFILE,'w') {|running| running.puts(Process.pid)}
+at_exit { system "rm -f #{RUNFILE}" }
+system "rm #{LOG}"
+log 'Updating git repositories'
 
 # update Rails
 if ARGV.delete('noupdate')
@@ -226,6 +238,7 @@ end
 clerk.update
 
 # build a new ruby, if necessary
+log "Updating ruby #{release}"
 source=PROFILE.rvm['src']
 version = if source
   clerk.install_from_source(source, release)
@@ -242,6 +255,8 @@ version = File.basename(version)
 
 # keep the last three, and anything built in a week; remove the rest
 clerk.prune(PROFILE.rvm['bin'], 3, Time.now - 7 * 86400)
+
+log "Updating gems"
 
 if File.exist? File.join(WORK, 'Gemfile')
   install, bundler  = 'install', 'bundler'
@@ -274,7 +289,7 @@ ENV['RUBYLIB'] = libs.keys.map {|lib| File.join(HOME,'git',lib,'lib')}.
   join(File::PATH_SEPARATOR)
 
 clerk.run(version, 
-    "ruby #{PROFILE.script} #{$rails} #{args.join(' ')} > #{LOG} 2>&1")
+    "ruby #{PROFILE.script} #{$rails} #{args.join(' ')} >> #{LOG} 2>&1")
 
 status = $?
 

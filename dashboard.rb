@@ -51,7 +51,7 @@ def status
     logs = Dir["#{LOGDIR}/makedepot*.log"]
     latest = logs.sort_by {|file| File.stat(file.untaint).mtime}.last
     if latest and File.stat(latest).mtime >= start
-      log.push *open(latest) {|file| file.readlines.grep(/====>/)[-3..-1] or []}
+      log.push *open(latest) {|file| file.readlines.grep(/====>/).pop(3)}
     end
 
     log.map! {|line| line.chomp}
