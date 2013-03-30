@@ -28,6 +28,34 @@
 #   gems: required gems, possibly with version information
 #   libs: repositories that need to be checked out locally, with branch info
 
+def config(config, *args)
+  require 'yaml'
+  config = YAML.load_file(config) if String === config
+  args = args.first.split(' ') if args.length == 1
+
+  profile = config['default'].dup
+  config.each do |keyword,overrides|
+    next unless args.include? keyword.to_s
+    overrides.each do |key, value|
+      if profile[key].respond_to? :push
+        profile[key].push(value)
+      else
+        profile[key] = value
+      end
+    end
+  end
+
+  profile['work'] = 'work'+
+    profile['output'].map {|token| '-'+token.gsub('.','')}.sort.join
+
+  profile['ruby'] ||= profile['rvm'] || profile['rbenv']
+
+  profile['log'] = config.find_all {|k,v| v['output'] and ARGV.include? k.to_s}.
+    map {|k,v| k}.join('-')
+
+  profile
+end
+
 def dependencies(rails, ruby)
   libs = %w(gorp)
   gems = []

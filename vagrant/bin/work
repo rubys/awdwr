@@ -1,135 +1,84 @@
-bin='2.0.0-p*'
-cd ~/git/awdwr/edition4
-export GORP_RAILS=$HOME/git/rails
+#
+# Change directory, ruby version, and checkout the branches associated
+# with the specified version of [book, ruby, rails].
+#
 
-book=''
-rails=''
-ruby=''
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+export GORP_RAILS=$HOME/git/rails
 
 if [[ "$@" = "book" ]]; then
   set book 40 200
 fi
 
-if [[ "$@" = "libs" ]]; then
+if [[ "$@" = "gems" ]]; then
   ruby $HOME/git/awdwr/bootstrap.rb
   return 0
 fi
 
-for arg in $*; do
-  case $arg in
-    3) 
-      cd ~/git/awdwr/edition3
-      book='-3'
-      ;;
-
-    book)
-      cd ~/svn/rails4/Book/util
-      ;;
-
-    187) 
-      bin='1.8.7-p*'
-      ruby='-187'
-      ;;
-
-    192)
-      bin='1.9.2-p*'
-      ruby='-192'
-      ;;
-
-    193)
-      bin='1.9.3-p*'
-      ruby='-193'
-      ;;
-
-    200)
-      bin='2.0.0-p*'
-      ruby=''
-      ;;
-
-    210)
-      bin='head-n*'
-      ruby='-210'
-      ;;
-
-    23) 
-      pushd $GORP_RAILS > /dev/null
-      git checkout 2-3-stable
-      popd > /dev/null
-      rails='-23'
-      ;;
-
-    30) 
-      (cd $GORP_RAILS; git checkout 3-0-stable)
-      rails='-30'
-      ;;
-
-    31) 
-      (cd $GORP_RAILS; git checkout 3-1-stable)
-      rails='-31'
-      ;;
-
-    32)
-      (cd $GORP_RAILS; git checkout 3-2-stable)
-      rails='-32'
-      ;;
-
-    40)
-      (cd $GORP_RAILS; git checkout master)
-      rails=''
-      ;;
-  esac
-done
-
 if [[ -n "$rvm_path" ]]; then
-  unset rvm_ruby_sha
-  [[ -e ~/.rvm/scripts/rvm ]] && source ~/.rvm/scripts/rvm
-  cd ~/.rvm/rubies/
-  rvm use `ls -d ruby-$bin | tail -1`
-  cd - > /dev/null
+  rvm use system > /dev/null
 else
-  cd /usr/local/var/rbenv/versions
-  rbenv global `ls -d $bin | tail -1`
-  cd - > /dev/null
+  export RBENV_VERSION=system
 fi
 
-# if [[ "$rails" = "" ]]; then
-#   if grep -q master $GORP_RAILS/.git/HEAD; then
-#     :
-#   else
-#     pushd $GORP_RAILS > /dev/null
-#     git checkout master
-#     popd > /dev/null
-#   fi
-# fi
+eval $(ruby <<__return
+  require 'yaml'
+  testrails = YAML.load_file('$dir/testrails.yml')
+  git = testrails['git'] || '$HOME/git'
 
-export GORP_WORK="work$ruby$rails"
-export GORP_HOME=`pwd`
-if [[ -e $GORP_RAILS/bin/rails ]]; then
-  alias rails="ruby -rubygems $GORP_RAILS/bin/rails"
-elif [[ -e $GORP_RAILS/railties/bin/rails ]]; then
-  alias rails="ruby -rubygems $GORP_RAILS/railties/bin/rails"
-fi
+  require 'shellwords'
+  require "#{git}/awdwr/bootstrap"
 
-cd $GORP_WORK
+  # read configuration
+  profile = config(testrails, %($@))
+  puts "ruby=#{Shellwords.escape(profile['ruby']['bin'])};"
 
-if [[ -e Gemfile ]]; then
-  export RUBYLIB=$(ruby -e "print ['$HOME/git/gorp'].concat(
-    File.read('Gemfile').scan(/:path\\s*=>\\s*['\"](.*?)['\"]/)).flatten.
-    reject {|path| path =~ /\\/rails$/}.map {|path| path+'/lib'}.join(':')")
-  if [[ -e $HOME/git/rails/railties/lib/rails/generators/app_base.rb ]]; then
-    ruby <<____EOF
-      HOME=ENV['HOME']
-      require "#{HOME}/git/awdwr/bootstrap"
-      gems, libs, repos = dependencies("#{HOME}/git/rails", RUBY_VERSION)
-      libs.each do |lib, branch|
-        print lib + ': '
-        Dir.chdir "#{HOME}/git/#{lib}" do
-          libs.delete Dir.pwd + "/lib"
-          system "git checkout #{branch}"
-        end
-      end
-____EOF
+  # change to the target directory
+  puts "cd #{profile['source']}/#{profile['work']};"
+  puts 'export GORP_WORK=`pwd`;'
+
+  # set up an alias for rails
+  if File.exist? "$GORP_RAILS/railties/bin/rails"
+    puts 'alias rails="ruby -rubygems $GORP_RAILS/railties/bin/rails";'
+  elsif File.exist? "$GORP_RAILS/bin/rails"
+    puts 'alias rails="ruby -rubygems $GORP_RAILS/bin/rails";'
+  end
+
+  # change to the desired rails branch
+  Dir.chdir '$GORP_RAILS' do
+    STDERR.write "\033[34mrails\033[00m: "
+    system "git checkout #{profile['branch']} > /dev/null"
+  end
+
+  # infer dependencies
+  require "#{git}/awdwr/bootstrap"
+  gems, libs, repos = dependencies("#{git}/rails", RUBY_VERSION)
+
+  # fetch the desired branch for each dependency
+  libs.sort.each do |lib, branch|
+    next if lib == 'rails'
+    STDERR.write "\033[34m#{lib}\033[00m: "
+    Dir.chdir "#{git}/#{lib}" do
+      system "git checkout #{branch} > /dev/null"
+    end
+  end
+
+  # set up rubylibs
+  puts "export RUBYLIB=#{libs.keys.map {|lib| "#{git}/#{lib}"}.join(':')}"
+__return
+)
+
+# select desired ruby
+if [[ -n "$ruby" ]]; then
+  if [[ -n "$rvm_path" ]]; then
+    unset rvm_ruby_sha
+    [[ -e $rvm_path/rvm/scripts/rvm ]] && source $rvm_path/rvm/scripts/rvm
+    ruby=$(cd $rvm_path/rubies; ls -d $ruby | tail -1)
+    rvm use $ruby
+  else
+    export RBENV_VERSION=$(cd $RBENV_ROOT/versions; ls -d $ruby | tail -1)
   fi
-else
-  source ~/bin/rubylibs $rails
 fi
+
+unset ruby dir

@@ -27,26 +27,13 @@ if ARGV.join(' ').include?(',')
 end
 
 # parse ARGV based on configuration
-config = YAML.load(open('testrails.yml'))
-profile = config['default'].dup
-config.each do |keyword,overrides| 
-  next unless ARGV.include? keyword.to_s
-  overrides.each do |key, value|
-    if profile[key].respond_to? :push
-      profile[key].push(value)
-    else
-      profile[key] = value
-    end
-  end
-end
-PROFILE = OpenStruct.new(profile)
-release=PROFILE.rvm['bin'].split('-')[1]
+require_relative 'bootstrap'
+PROFILE = OpenStruct.new(config('testrails.yml', *ARGV))
+release=PROFILE.ruby['bin'].split('-')[1]
 
 COMMIT = ARGV.find {|arg| arg =~ /http:\/\/github.com\/rails\/rails\/commit\//}
 
-log=config.find_all {|k,v| v['output'] and ARGV.include? k.to_s}.
-  map {|k,v| k}.join('-')
-LOG = "#{HOME}/logs/makedepot#{log}.log"
+LOG = "#{HOME}/logs/makedepot#{PROFILE.log}.log"
 system "mkdir -p #{File.dirname(LOG)}"
 
 def log(message)
@@ -131,9 +118,8 @@ end
 open('|mysql -u root','w') {|f| f.write "drop database depot_production;"}
 open('|mysql -u root','w') {|f| f.write "create database depot_production;"}
 
-require_relative 'bootstrap'
 gems, libs, repos = dependencies(File.join(HOME, 'git', 'rails'),
-  PROFILE.rvm['bin'].split('-')[1])
+  PROFILE.ruby['bin'].split('-')[1])
 
 # adjust gems
 %w(
@@ -239,22 +225,22 @@ clerk.update
 
 # build a new ruby, if necessary
 log "Updating ruby #{release}"
-source=PROFILE.rvm['src']
+source=PROFILE.ruby['src']
 version = if source
   clerk.install_from_source(source, release)
 else
-  clerk.install_latest(PROFILE.rvm['bin'])
+  clerk.install_latest(PROFILE.ruby['bin'])
 end
 
 unless version
-  STDERR.puts "#{PROFILE.rvm['bin']} installation failed, exiting..."
+  STDERR.puts "#{PROFILE.ruby['bin']} installation failed, exiting..."
   exit 1
 end
 
 version = File.basename(version)
 
 # keep the last three, and anything built in a week; remove the rest
-clerk.prune(PROFILE.rvm['bin'], 3, Time.now - 7 * 86400)
+clerk.prune(PROFILE.ruby['bin'], 3, Time.now - 7 * 86400)
 
 log "Updating gems"
 
