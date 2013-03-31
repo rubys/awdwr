@@ -226,6 +226,15 @@ end
 OLDSTAT = open(status_file) {|file| file.read} rescue ''
 OLDSTAT.gsub! /, 0 (pendings|omissions|notifications)/, ''
 
+# dead man's switch
+system "rm -f #{WORK}/checkdepot.html"
+at_exit do
+  Dir.chdir PROFILE.source
+  if not File.exist? "#{WORK}/checkdepot.html"
+    open("#{WORK}/checkdepot.status", 'w') {|file| file.puts 'NO OUTPUT'}
+  end
+end
+
 # select arguments to pass through
 args = ARGV.grep(/^(\d+(\.\d+)?-\d+(\.\d+)?|\d+\.\d+?|save|restore)$/)
 args << "--work=#{WORK}"
@@ -290,8 +299,6 @@ else
     gem list activesupport | grep -q 3.0 && gem uninstall activesupport -I -a
   EOF
 end
-
-system "rm -f #{WORK}/checkdepot.html"
 
 # run the script
 clerk.run(version, install)
@@ -379,8 +386,6 @@ if File.exist?("#{WORK}/checkdepot.html")
       open(page(section),'w') {|file| file.write(head+body+tail)}
     end
   end
-else
-  open(File.join(WORK, 'status'), 'w') {|file| file.puts 'NO OUTPUT'}
 end
 
 # copy the log
