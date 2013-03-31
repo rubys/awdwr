@@ -36,7 +36,7 @@ JOBS = config['book'].map do |editions|
       if testrails
         rails = info['rails'].gsub('.', '')
         ruby  = info['ruby'].gsub('.', '')
-        info.merge! config(testrails, book, rails, ruby)
+        info = config(testrails, book, rails, ruby).merge(info)
       else
         info['source'] = book_info['home'].sub('$HOME/',HOME)
       end
