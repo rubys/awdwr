@@ -11,6 +11,9 @@ config = YAML.load(open($dashboard || 'dashboard.yml'))
 LOGDIR = config.delete('log').sub('$HOME/',HOME).untaint
 BINDIR = config.delete('bin').sub('$HOME/',HOME).untaint
 
+testrails = config.delete('testrails')
+testrails = YAML.load(testrails) if testrails
+
 # set up symbolic links
 if ARGV == ['--symlink']
   config['book'].each do |edition|
@@ -23,16 +26,23 @@ if ARGV == ['--symlink']
   exit
 end
 
+require "#{HOME}/git/awdwr/bootstrap"
+
 # identify the unique jobs
 JOBS = config['book'].map do |editions|
   editions = [editions] if editions.respond_to? :push
   editions.map do |book, book_info|
     book_info['env'].map do |info|
-      home = book_info['home'].sub('$HOME/',HOME)
-      work=info['work']
+      if testrails
+        rails = info['rails'].gsub('.', '')
+        ruby  = info['ruby'].gsub('.', '')
+        info.merge! config(testrails, book, rails, ruby)
+      else
+        info['source'] = book_info['home'].sub('$HOME/',HOME)
+      end
       info['book']=book
-      info['path']=File.join(home,work)
-      info['id']=work.gsub('.','') + '-' + book.to_s
+      info['path']=File.join(info['source'], info['work'])
+      info['id']=info['work'].gsub('.','') + '-' + book.to_s
       info.update(book_info)
     end
   end
