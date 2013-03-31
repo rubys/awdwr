@@ -85,6 +85,7 @@ def dependencies(rails, ruby)
         app_base.scan(pattern).each do |gem, opts|
           next if %(rails turn therubyrhino).include? gem
           next if %(ruby-debug ruby-debug19 debugger).include? gem
+          opts = $1 if opts =~ /\? "(.*?)" :/
           next if gems.find {|gname, gopts| gem == gname}
           if opts =~ / :?git(hub)?(:|\s*=>)/
             libs << gem
@@ -129,14 +130,16 @@ def dependencies(rails, ruby)
     if opts
       hash[:version] = eval($1) if opts.sub!(/^,\s*(".*?")/, '') 
       hash[:version] = eval($1) if opts.sub!(/^,\s*('.*?')/, '') 
-      hash[$1] = eval($2) while opts.sub!(/(\w+)\s*=?>?:?\s*(.*?)(,\s*|$)/, '') 
+      while opts.sub!(/(\w+)\s*=?>?:?\s*(.*?)(,\s*|$)/, '')  do
+        hash[$1.to_sym] = eval($2)
+      end
       opts.sub! /,\s*/, ''
     end
     gems[gem] = hash
   end
 
   # merge in lib, branches, repository information
-  libs.each do |lib|
+  libs.flatten.uniq.each do |lib|
     gems[lib] ||= {}
     gems[lib][:github] ||= "rails/#{lib}"
   end

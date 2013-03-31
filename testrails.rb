@@ -124,10 +124,10 @@ open('|mysql -u root','w') {|f| f.write "create database depot_production;"}
 $gems = gems = dependencies(File.join(HOME, 'git', 'rails'), release)
 
 def gem name, version=nil, opts={}
-  options[:version] = version if String === version
-  options.merge version       if Hash === version
+  opts[:version] = version if String === version
+  opts.merge version       if Hash === version
   $gems[name] ||= {}
-  $gems[name].merge opts
+  $gems[name].merge! opts
 end
 
 # adjust gems
@@ -147,6 +147,7 @@ end
 
 if release =~ /^1\.8\./
   gem 'activemerchant', '~> 1.21.0'
+  gem 'money', '~> 3.7.1'
 end
 
 if $rails_version =~ /^3\.0/
@@ -161,6 +162,7 @@ end
 
 # checkout/update git repositories
 gems.each do |lib, opts|
+  next if lib == 'rails'
   opts[:git] = "https://github.com/#{opts[:github]}.git" if opts[:github]
   next unless opts[:git]
   print lib + ': '
@@ -194,7 +196,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       args.push options.delete(:version).inspect if options[:version]
 
       options.each do |name, value|
-        if RUBY_VERSION =~ /^1.8/
+        if release =~ /^1.8/
           args.push ":#{name} => #{value.inspect}"
         else
           args.push "#{name}: #{value.inspect}"
