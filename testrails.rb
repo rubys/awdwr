@@ -220,11 +220,12 @@ else
   exit 1
 end
 
+log "Updating ruby #{release}"
+
 # update build definitions
 clerk.update
 
 # build a new ruby, if necessary
-log "Updating ruby #{release}"
 source=PROFILE.ruby['src']
 version = if source
   clerk.install_from_source(source, release)
