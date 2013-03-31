@@ -64,10 +64,24 @@ eval $(ruby <<__return
     end
   end
 
+  # reload rvm if necessary
+  if ENV['rvm_version']
+    disk_version = File.read("#{ENV['rvm_path']}/VERSION").chomp
+    disk_version += ' (' + File.read("#{ENV['rvm_path']}/RELEASE").chomp + ')'
+    puts "export rvm_reload=1" if ENV['rvm_version'] != disk_version
+  end
+
   # set up rubylibs
   puts "export RUBYLIB=#{libs.keys.map {|lib| "#{git}/#{lib}"}.join(':')}"
 __return
 )
+
+# reload RVM if necessary
+if [[ -n "$rvm_reload" ]]; then
+  echo -n -e "\033[35;1m"
+  rvm reload
+  echo -n -e "\033[0m"
+fi
 
 # select desired ruby
 if [[ -n "$ruby" ]]; then
@@ -81,4 +95,4 @@ if [[ -n "$ruby" ]]; then
   fi
 fi
 
-unset ruby dir
+unset ruby dir rvm_reload
