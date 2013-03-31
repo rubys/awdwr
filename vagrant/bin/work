@@ -53,14 +53,15 @@ eval $(ruby <<__return
 
   # infer dependencies
   require "#{git}/awdwr/bootstrap"
-  gems, libs, repos = dependencies("#{git}/rails", RUBY_VERSION)
+  gems = dependencies("#{git}/rails", RUBY_VERSION)
 
   # fetch the desired branch for each dependency
-  libs.sort.each do |lib, branch|
+  gems.sort.each do |lib, options|
+    next unless options[:github] || options[:git]
     next if lib == 'rails'
     STDERR.write "\033[34m#{lib}\033[00m: "
     Dir.chdir "#{git}/#{lib}" do
-      system "git checkout #{branch} > /dev/null"
+      system "git checkout #{options[:branch] || 'master'} > /dev/null"
     end
   end
 
@@ -72,7 +73,8 @@ eval $(ruby <<__return
   end
 
   # set up rubylibs
-  puts "export RUBYLIB=#{libs.keys.map {|lib| "#{git}/#{lib}"}.join(':')}"
+  libs = gems.select {|gem, options| options[:git] || options[:github]}
+  puts "export RUBYLIB=#{libs.keys.map {|lib| "#{git}/#{lib}/lib"}.join(':')}"
 __return
 )
 

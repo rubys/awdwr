@@ -121,8 +121,14 @@ end
 open('|mysql -u root','w') {|f| f.write "drop database depot_production;"}
 open('|mysql -u root','w') {|f| f.write "create database depot_production;"}
 
-gems, libs, repos = dependencies(File.join(HOME, 'git', 'rails'),
-  PROFILE.ruby['bin'].split('-')[1])
+$gems = gems = dependencies(File.join(HOME, 'git', 'rails'), release)
+
+def gem name, version=nil, opts={}
+  options[:version] = version if String === version
+  options.merge version       if Hash === version
+  $gems[name] ||= {}
+  $gems[name].merge opts
+end
 
 # adjust gems
 %w(
@@ -130,60 +136,73 @@ gems, libs, repos = dependencies(File.join(HOME, 'git', 'rails'),
   rdoc minitest test-unit
   bcrypt-ruby rvm-capistrano activemerchant haml sqlite3 jquery-rails
 ).each do |name|
-  gems[name] ||= nil unless libs[name]
+  gem name
 end
 
 if $rails_version =~ /^3\./
-  gems['will_paginate'] ||= nil
+  gem 'will_paginate'
 else
-  gems['kaminari'] ||= nil
-end
-
-if $rails_version =~ /^3\.0/
-  gems['mysql'] ||= nil
-  gems['activemerchant'] ||= ", '~> 1.10.0'"
-  gems['haml'] ||= ", '~> 4.0'"
-  gems['will_paginate'] ||= ", '>= 3.0.pre'"
-else
-  gems['mysql2'] ||= nil
-  gems['bcrypt-ruby'] ||= nil
+  gem 'kaminari'
 end
 
 if release =~ /^1\.8\./
-  gems['activemerchant'] ||= ", '~> 1.21.0'"
+  gem 'activemerchant', '~> 1.21.0'
 end
 
-# checkout/update libs
-libs.each do |lib, branch|
+if $rails_version =~ /^3\.0/
+  gem 'mysql'
+  gem 'activemerchant', '~> 1.10.0'
+  gem 'haml', '~> 4.0'
+  gem 'will_paginate', '>= 3.0.pre'
+else
+  gem 'mysql2'
+  gem 'bcrypt-ruby'
+end
+
+# checkout/update git repositories
+gems.each do |lib, opts|
+  opts[:git] = "https://github.com/#{opts[:github]}.git" if opts[:github]
+  next unless opts[:git]
   print lib + ': '
   if not File.exist? File.join(HOME,'git',lib)
     Dir.chdir(File.join(HOME,'git')) do 
-      system "git clone https://github.com/#{repos[lib]}"
+      system "git clone opts[:git]"
     end
   end
   Dir.chdir(File.join(HOME,'git',lib)) do 
-    system "git checkout #{branch}"
+    system "git checkout #{opts[:branch] || 'master'}"
     system 'git pull'
   end
 end
 
 # update gems
 Dir.chdir File.join(PROFILE.source,WORK) do
-  if File.exist? File.join($rails, 'Gemfile')
-    open('Gemfile','w') do |gemfile|
-      gemfile.puts "source 'http://rubygems.org'"
-      gemfile.puts "gem 'rails', :path => #{$rails.inspect}"
-      libs.each do |lib, branch|
-        next if lib == 'gorp'
-        path = File.join(HOME,'git',lib)
-        if File.exist?(File.join(path, "/#{lib}.gemspec"))
-          gemfile.puts "gem #{lib.inspect}, :path => #{path.inspect}"
+  open('Gemfile','w') do |gemfile|
+    gemfile.puts "source 'https://rubygems.org'"
+    gems.sort.each do |gem, options|
+      next if gem == 'gorp'
+
+      # override with local clones
+      if options[:git] or options[:github]
+        path = File.join(HOME,'git',gem)
+        if File.exist?(File.join(path, "/#{gem}.gemspec"))
+          options = {:path => path}
         end
       end
-      gems.each {|gem,opts| gemfile.puts "gem #{gem.inspect}#{opts}"}
+
+      args = []
+      args.push options.delete(:version).inspect if options[:version]
+
+      options.each do |name, value|
+        if RUBY_VERSION =~ /^1.8/
+          args.push ":#{name} => #{value.inspect}"
+        else
+          args.push "#{name}: #{value.inspect}"
+        end
+      end
+
+      gemfile.puts "gem '#{gem}'#{args.map{|s| ", #{s}"}.join}"
     end
-  else
-    system 'rm -f Gemfile'
   end
 end
 
@@ -275,6 +294,7 @@ system "rm -f #{WORK}/checkdepot.html"
 # run the script
 clerk.run(version, install)
 
+libs = gems.select {|gem, options| options[:git] || options[:github]}
 ENV['RUBYLIB'] = libs.keys.map {|lib| File.join(HOME,'git',lib,'lib')}.
   join(File::PATH_SEPARATOR)
 
@@ -365,13 +385,9 @@ end
 system "mkdir -p #{WORK}/checkdepot"
 system "cp #{LOG} #{WORK}/checkdepot/makedepot.log"
 
-# restore rails to master
-Dir.chdir($rails) do
-  system 'git checkout master' unless BRANCH=='master'
-end
-
-libs.each do |lib, branch|
-  if branch != 'master'
+# restore git repositories to master
+gems.each do |lib, opts|
+  if opts[:branch] and opts[:branch] != 'master'
     Dir.chdir(File.join(HOME,'git',lib)) do
       print lib + ': '
       system 'git checkout master'

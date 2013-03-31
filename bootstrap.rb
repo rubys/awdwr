@@ -57,10 +57,10 @@ def config(config, *args)
 end
 
 def dependencies(rails, ruby)
-  libs = %w(gorp)
+  libs = %w(rails)
   gems = []
   branches = []
-  repos = []
+  repos = [['gorp', 'rubys/gorp']]
 
   # add in any 'edge' gems
   template = File.join(rails, 
@@ -107,8 +107,6 @@ def dependencies(rails, ruby)
       libs += gemfile[/edge\? -%>(.*?)<%/m,1].scan(/['"](\w+)['"],\s+:git/)
       gems += [['jquery-rails',', "~> 0.2.2"']]
     end
-    libs = libs.flatten.uniq - %w(rails)
-    gems.delete_if {|gem,opts| libs.include? gem}
   end
 
   # add Rails dependencies
@@ -124,15 +122,36 @@ def dependencies(rails, ruby)
     libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github:/).flatten
   end
 
+  # convert options into a hash
   gems = Hash[gems]
-  branches = Hash[branches]
-  libs.each {|lib| branches[lib] ||= 'master'}
-  branches.keys.each {|lib| gems.delete lib}
-  
-  repos = Hash[repos]
-  libs.each {|lib| repos[lib] ||= "rails/#{lib}"}
+  gems.each do |gem, opts|
+    hash = {}
+    if opts
+      hash[:version] = eval($1) if opts.sub!(/^,\s*(".*?")/, '') 
+      hash[:version] = eval($1) if opts.sub!(/^,\s*('.*?')/, '') 
+      hash[$1] = eval($2) while opts.sub!(/(\w+)\s*=?>?:?\s*(.*?)(,\s*|$)/, '') 
+      opts.sub! /,\s*/, ''
+    end
+    gems[gem] = hash
+  end
 
-  [gems, branches, repos]
+  # merge in lib, branches, repository information
+  libs.each do |lib|
+    gems[lib] ||= {}
+    gems[lib][:github] ||= "rails/#{lib}"
+  end
+
+  branches.each do |lib, branch|
+    gems[lib] ||= {}
+    gems[lib][:branch] = branch
+  end
+
+  repos.each do |lib, repos|
+    gems[lib] ||= {}
+    gems[lib][:github] = repos
+  end
+
+  gems
 end
 
 if __FILE__ == $0
@@ -142,15 +161,20 @@ if __FILE__ == $0
   puts "# Ruby #{ruby}"
   puts "# Rails #{File.read("#{rails}/RAILS_VERSION")}"
 
-  gems, libs, repos = dependencies(rails, ruby)
+  gems = dependencies(rails, ruby)
 
-  puts "\ngems"
-  gems.each do |gem, option|
-    puts " * gem '#{gem}'#{option}"
-  end
-
-  puts "\nlibs"
-  libs.each do |lib, branch|
-    puts " * #{lib} => #{repos[lib]} #{branch}"
+  gems.sort.each do |gem, options|
+    next if gem == 'gorp'
+    args = []
+    args.push options.delete(:version).inspect if options[:version]
+    options.delete :branch if options[:branch] == 'master'
+    options.each do |name, value|
+      if RUBY_VERSION =~ /^1.8/
+        args.push ":#{name} => #{value.inspect}"
+      else
+        args.push "#{name}: #{value.inspect}"
+      end
+    end
+    puts "gem '#{gem}'#{args.map{|s| ", #{s}"}.join}"
   end
 end
