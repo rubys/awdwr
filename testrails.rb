@@ -58,7 +58,7 @@ RUNFILE = File.join(PROFILE.source, WORK, 'status.run')
 open(RUNFILE,'w') {|running| running.puts(Process.pid)}
 at_exit { system "rm -f #{RUNFILE}" }
 
-system "rm #{LOG}"
+system "rm -f #{LOG}"
 log 'Updating git repositories'
 
 # update Rails
@@ -166,7 +166,7 @@ gems.each do |lib, opts|
   print lib + ': '
   if not File.exist? File.join(HOME,'git',lib)
     Dir.chdir(File.join(HOME,'git')) do 
-      system "git clone opts[:git]"
+      system "git clone #{opts[:git]}"
     end
   end
   Dir.chdir(File.join(HOME,'git',lib)) do 
