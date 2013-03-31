@@ -57,6 +57,7 @@ SCRIPT  = File.join(File.expand_path(File.dirname(__FILE__)), PROFILE.script)
 RUNFILE = File.join(PROFILE.source, WORK, 'status.run')
 open(RUNFILE,'w') {|running| running.puts(Process.pid)}
 at_exit { system "rm -f #{RUNFILE}" }
+
 system "rm #{LOG}"
 log 'Updating git repositories'
 
@@ -111,6 +112,8 @@ if ARGV.empty? and arg_was_present
   args = selected.uniq.map {|tr| 
     tr.search('td').to_a[0..2].map {|td| td.text.gsub('.','')}.join(' ')
   }.join(', ')
+
+  system "rm -f #{RUNFILE}"
   exec "#{$0} #{args}"
 end
 
