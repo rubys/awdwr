@@ -1,2 +1,2 @@
-cd $GORP_HOME
-ruby makedepot.rb $HOME/git $*
+cd $GORP_WORK
+ruby ../makedepot.rb $HOME/git $*
