@@ -12,7 +12,7 @@ if [[ "$@" = "book" ]]; then
 fi
 
 if [[ "$@" = "gems" ]]; then
-  ruby $HOME/git/awdwr/bootstrap.rb
+  ruby $HOME/git/awdwr/environment.rb
   return 0
 fi
 
@@ -28,10 +28,10 @@ eval $(ruby <<__return
   git = testrails['git'] || '$HOME/git'
 
   require 'shellwords'
-  require "#{git}/awdwr/bootstrap"
+  require "#{git}/awdwr/environment"
 
   # read configuration
-  profile = config(testrails, %($@))
+  profile = AWDWR::config(testrails, %($@))
   puts "ruby=#{Shellwords.escape(profile['ruby']['bin'])};"
 
   # change to the target directory
@@ -52,8 +52,7 @@ eval $(ruby <<__return
   end
 
   # infer dependencies
-  require "#{git}/awdwr/bootstrap"
-  gems = dependencies("#{git}/rails", RUBY_VERSION)
+  gems = AWDWR::dependencies("#{git}/rails", RUBY_VERSION)
 
   # fetch the desired branch for each dependency
   gems.sort.each do |lib, options|

@@ -27,8 +27,8 @@ if ARGV.join(' ').include?(',')
 end
 
 # parse ARGV based on configuration
-require_relative 'bootstrap'
-PROFILE = OpenStruct.new(config('testrails.yml', *ARGV))
+require_relative 'environment'
+PROFILE = OpenStruct.new(AWDWR::config('testrails.yml', *ARGV))
 release=PROFILE.ruby['bin'].split('-')[1]
 
 COMMIT = ARGV.find {|arg| arg =~ /http:\/\/github.com\/rails\/rails\/commit\//}
@@ -121,7 +121,7 @@ end
 open('|mysql -u root','w') {|f| f.write "drop database depot_production;"}
 open('|mysql -u root','w') {|f| f.write "create database depot_production;"}
 
-$gems = gems = dependencies(File.join(HOME, 'git', 'rails'), release)
+$gems = gems = AWDWR::dependencies(File.join(HOME, 'git', 'rails'), release)
 
 def gem name, version=nil, opts={}
   opts[:version] = version if String === version

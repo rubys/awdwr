@@ -26,7 +26,7 @@ if ARGV == ['--symlink']
   exit
 end
 
-require "#{HOME}/git/awdwr/bootstrap"
+require "#{HOME}/git/awdwr/environment"
 
 # identify the unique jobs
 JOBS = config['book'].map do |editions|
@@ -36,7 +36,7 @@ JOBS = config['book'].map do |editions|
       if testrails
         rails = info['rails'].gsub('.', '')
         ruby  = info['ruby'].gsub('.', '')
-        info = config(testrails, book, rails, ruby).merge(info)
+        info = AWDWR::config(testrails, book, rails, ruby).merge(info)
       else
         info['source'] = book_info['home'].sub('$HOME/',HOME)
       end
