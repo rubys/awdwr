@@ -28,7 +28,7 @@ section 16.1, 'Capistrano' do
   if ENV['USER'] == 'vagrant'
     desc 'Configure passenger'
     if not `which lsb_release`.empty? and `lsb_release -i`.include? 'Ubuntu'
-      if `dpkg -s libapr1-dev`.include? 'not installed'
+      if `dpkg -s libapr1-dev 2>&1`.include? 'not installed'
         cmd 'sudo apt-get install -y build-essential zlib1g-dev ' +
           'libcurl4-openssl-dev apache2-prefork-dev libapr1-dev libaprutil1-dev'
       end
