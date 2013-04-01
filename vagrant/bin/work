@@ -73,8 +73,8 @@ eval $(ruby <<__return
   end
 
   # set up rubylibs
-  libs = gems.select {|gem, options| options[:git] || options[:github]}
-  puts "export RUBYLIB=#{libs.keys.map {|lib| "#{git}/#{lib}/lib"}.join(':')}"
+  libs = gems.select {|gem, opts| opts[:git] || opts[:github]}
+  puts "export RUBYLIB=#{libs.map {|lib, opts| "#{git}/#{lib}/lib"}.join(':')}"
 __return
 )
 
