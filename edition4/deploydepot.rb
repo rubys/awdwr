@@ -25,6 +25,66 @@ section 16.1, 'Capistrano' do
     Deploying our application locally using Capistrano
   EOF
 
+  if ENV['USER'] == 'vagrant'
+    desc 'Configure passenger'
+    if not `which lsb_release`.empty? and `lsb_release -i`.include? 'Ubuntu'
+      if `dpkg -s libapr1-dev`.include? 'not installed'
+        cmd 'sudo apt-get install -y build-essential zlib1g-dev ' +
+          'libcurl4-openssl-dev apache2-prefork-dev libapr1-dev libaprutil1-dev'
+      end
+    end
+
+    apache_needs_restarted = false
+
+    begin
+      save = {}
+      ENV.keys.dup.each {|key| save[key]=ENV.delete(key) if key =~ /^BUNDLE_/}
+      save['RUBYOPT'] = ENV.delete('RUBYOPT') if ENV['RUBYOPT']
+
+      if `gem list passenger | grep passenger`.strip.empty?
+        cmd 'gem install passenger --version 4.0.0.rc4'
+        cmd 'yes | passenger-install-apache2-module'
+      end
+
+      if not File.exist? '/etc/apache2/conf.d/passenger'
+        cmd 'passenger-install-apache2-module --snippet | ' +
+          'sudo tee /etc/apache2/conf.d/passenger'
+
+        apache_needs_restarted = true
+      end
+    ensure
+      save.each {|key, value| ENV[key] = value}
+    end
+
+    if not File.exist? '/etc/apache2/sites-available/depot'
+      edit 'tmp/site-depot' do
+        self.all = <<-EOF.unindent(10)
+          <VirtualHost *:80>
+             ServerName depot.pragprog.com
+             DocumentRoot #{$HOME}/work/depot/current/public/
+             <Directory #{$HOME}/work/depot/current/public>
+                AllowOverride all
+                Options -MultiViews   
+                Order allow,deny
+                Allow from all
+             </Directory>
+          </VirtualHost>
+        EOF
+      end
+      cmd 'sudo mv tmp/site-depot /etc/apache2/sites-available/depot'
+      cmd 'sudo a2ensite depot'
+      apache_needs_restarted = true
+    end
+
+    cmd 'sudo apachectl restart' if apache_needs_restarted
+
+    if not File.exist? "#{$HOME}/.ssh/id_dsa.pub"
+      desc 'enable ssh access to localhost'
+      cmd "ssh-keygen -t dsa -N '' -f ~/.ssh/id_dsa"
+      cmd "cat ~/.ssh/id_dsa.pub >> ~/.ssh/authorized_keys"
+    end
+  end
+
   desc 'Create database'
   db_config = File.read('config/database.yml')
   if db_config.include? 'mysql'
