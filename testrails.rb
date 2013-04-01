@@ -304,7 +304,7 @@ end
 clerk.run(version, install)
 
 libs = gems.select {|gem, options| options[:git] || options[:github]}
-ENV['RUBYLIB'] = libs.keys.map {|lib| File.join(HOME,'git',lib,'lib')}.
+ENV['RUBYLIB'] = libs.map {|lib, options| File.join(HOME,'git',lib,'lib')}.
   join(File::PATH_SEPARATOR)
 
 clerk.run(version, 
