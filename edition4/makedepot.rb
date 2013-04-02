@@ -1063,11 +1063,13 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
         current_item
       end
     EOF
+    gsub! 'by_product_id(', 'by(product_id: ' unless $rails_version =~ /^3/
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Replace the call to LineItem.new with a call to the new method.'
   edit 'app/controllers/line_items_controller.rb', 'create' do
+    clear_highlights
     dcl 'create' do
       edit 'line_items.build', :highlight do
         msub /@line_item = (.*)/, '@cart.add_product(product.id)'
@@ -2792,6 +2794,7 @@ section 14.2, 'Iteration I2: Authenticating Users' do
           redirect_to login_url, :alert => "Invalid user/password combination"
         end
       EOF
+      gsub! 'by_name(', 'by(name: ' unless $rails_version =~ /^3/
       if File.exist? 'public/images'
         msub /user = (.*)/, 
           'User.authenticate(params[:name], params[:password])'
@@ -2916,6 +2919,7 @@ section 14.3, 'Iteration I3: Limiting Access' do
           end
       EOF
     end
+    gsub! 'by_id(', 'by(id: ' unless $rails_version =~ /^3/
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
@@ -3095,6 +3099,7 @@ section 14.5, 'Playtime' do
           end
         end
       EOF
+      gsub! 'by_name(', 'by(name: ' unless $rails_version =~ /^3/
       if File.exist? 'public/images'
         msub /user = (.*\n.*)/, 'User.authenticate(username, password)'
       end
