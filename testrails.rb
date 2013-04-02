@@ -307,8 +307,15 @@ libs = gems.select {|gem, options| options[:git] || options[:github]}
 ENV['RUBYLIB'] = libs.map {|lib, options| File.join(HOME,'git',lib,'lib')}.
   join(File::PATH_SEPARATOR)
 
-clerk.run(version, 
-    "ruby #{PROFILE.script} #{$rails} #{args.join(' ')} >> #{LOG} 2>&1")
+cmd = "ruby #{PROFILE.script} #{$rails} #{args.join(' ')}"
+system 'tty -s'
+if $? == 0
+  cmd += " 2>&1 | tee #{LOG}"
+else
+  cmd += " >> #{LOG} 2>&1"
+end
+
+clerk.run(version,  cmd)
 
 status = $?
 
