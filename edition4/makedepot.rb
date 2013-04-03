@@ -3444,20 +3444,27 @@ section 16, 'Deployment' do
     # msub /encoding: (.*)/, 'unicode'
     # msub /(reconnect: .*)/, 'host: localhost'
   end
-  edit 'Gemfile' do
+
+  edit 'Gemfile', 'mysql' do
     clear_all_marks
-    msub /sqlite.*\n()/, <<-EOF.unindent(6), :highlight
+    msub /sqlite.*\n()/, <<-EOF.unindent(6), :mark => 'mysql'
       group :production do
         gem 'mysql2'
       end
     EOF
-    edit 'capistrano', :highlight
-    msub /^(# )gem .capistrano/, ''
-    msub /^gem .()capistrano/, 'rvm-'
+
     sub! 'mysql2', 'mysql' if $rails_version =~ /^3\.0/
 
     if self =~ /^# Turbolinks.*\.( )Read more:/
       msub /^# Turbolinks.*\.( )Read more:/, "\n# "
+    end
+  end
+
+  edit 'Gemfile', 'capistrano' do
+    edit /#.*\n# gem .capistrano.*/, :mark => 'capistrano' do
+      edit 'gem', :highlight
+      msub /^(# )gem .capistrano/, ''
+      msub /^gem .()capistrano/, 'rvm-'
     end
   end
   bundle 'install'
