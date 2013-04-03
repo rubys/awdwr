@@ -17,6 +17,9 @@ if [[ "$@" = "gems" ]]; then
 fi
 
 if [[ -n "$rvm_path" ]]; then
+  if test -f $rvm_path/scripts/rvm; then
+    [ "$(type -t rvm)" = "function" ] || source $rvm_path/scripts/rvm
+  fi
   rvm use system > /dev/null
 else
   export RBENV_VERSION=system
