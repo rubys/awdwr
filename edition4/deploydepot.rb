@@ -26,6 +26,9 @@ section 16.1, 'Capistrano' do
   EOF
 
   if ENV['USER'] == 'vagrant'
+    system "rm -f /var/www/checkdeploy.html"
+    system "ln -s #{$WORK}/checkdeploy.html /var/www"
+
     desc 'Configure passenger'
     if not `which lsb_release`.empty? and `lsb_release -i`.include? 'Ubuntu'
       if `dpkg -s libapr1-dev 2>&1`.include? 'not installed'
@@ -44,12 +47,14 @@ section 16.1, 'Capistrano' do
       if `gem list passenger | grep passenger`.strip.empty?
         cmd 'gem install passenger --version 4.0.0.rc4'
         cmd 'yes | passenger-install-apache2-module'
+        system 'sudo rm -f /etc/apache2/conf.d/passenger'
       end
 
       if not File.exist? '/etc/apache2/conf.d/passenger'
         cmd 'passenger-install-apache2-module --snippet | ' +
           'sudo tee /etc/apache2/conf.d/passenger'
 
+        system 'sudo rm -f /etc/apache2/sites-available/depot'
         apache_needs_restarted = true
       end
     ensure
