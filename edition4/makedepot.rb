@@ -3446,7 +3446,7 @@ section 16, 'Deployment' do
   end
   edit 'Gemfile' do
     clear_all_marks
-    msub /sqlite.*\n()/, <<-EOF.unindent(6), :mark => 'mysql'
+    msub /sqlite.*\n()/, <<-EOF.unindent(6), :highlight
       group :production do
         gem 'mysql2'
       end

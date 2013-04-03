@@ -61,8 +61,8 @@ section 16.1, 'Capistrano' do
         self.all = <<-EOF.unindent(10)
           <VirtualHost *:80>
              ServerName depot.pragprog.com
-             DocumentRoot #{$HOME}/work/depot/current/public/
-             <Directory #{$HOME}/work/depot/current/public>
+             DocumentRoot #{$HOME}/deploy/depot/current/public/
+             <Directory #{$HOME}/deploy/depot/current/public>
                 AllowOverride all
                 Options -MultiViews   
                 Order allow,deny
