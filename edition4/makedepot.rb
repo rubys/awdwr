@@ -2464,7 +2464,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
 
       You ordered the following items:
 
-      <%= render @order.line_items %>
+      <%= render @order.line_items -%>
 
       We'll send you a separate e-mail when your order ships.
     EOF
@@ -2523,7 +2523,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
 
       <table>
         <tr><th colspan="2">Qty</th><th>Description</th></tr>
-      <%= render @order.line_items %>
+      <%= render @order.line_items -%>
       </table>
     EOF
   end
