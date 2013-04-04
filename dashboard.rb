@@ -7,7 +7,7 @@ require 'yaml'
 
 HOME = $HOME.sub(/\/?$/, '/')
 
-$dashboard ||= File.join(File.dirname(__FILE__, 'dashboard.yml'))
+$dashboard ||= File.join(File.dirname(__FILE__), 'dashboard.yml')
 config = YAML.load(open($dashboard))
 LOGDIR = config.delete('log').sub('$HOME/',HOME).untaint
 BINDIR = config.delete('bin').sub('$HOME/',HOME).untaint
