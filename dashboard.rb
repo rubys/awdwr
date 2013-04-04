@@ -8,12 +8,12 @@ require 'yaml'
 HOME = $HOME.sub(/\/?$/, '/')
 
 $dashboard ||= File.join(File.dirname(__FILE__), 'dashboard.yml')
-config = YAML.load(open($dashboard))
+config = YAML.load_file($dashboard)
 LOGDIR = config.delete('log').sub('$HOME/',HOME).untaint
 BINDIR = config.delete('bin').sub('$HOME/',HOME).untaint
 
 testrails = config.delete('testrails')
-testrails = YAML.load(testrails) if testrails
+testrails = YAML.load_file(testrails) if testrails
 
 # set up symbolic links
 if ARGV == ['--symlink']
