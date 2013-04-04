@@ -92,10 +92,14 @@ if [[ -n "$ruby" ]]; then
   if [[ -n "$rvm_path" ]]; then
     unset rvm_ruby_sha
     [[ -e $rvm_path/rvm/scripts/rvm ]] && source $rvm_path/rvm/scripts/rvm
-    ruby=$(cd $rvm_path/rubies; ls -d $ruby | tail -1)
+    ruby=$(cd $rvm_path/rubies; ls -trd $ruby | tail -1)
     rvm use $ruby
   else
-    export RBENV_VERSION=$(cd $RBENV_ROOT/versions; ls -d $ruby | tail -1)
+    ruby=$(echo $ruby | sed s/^ruby-//)
+    export RBENV_VERSION=$(cd $RBENV_ROOT/versions; ls -trd $ruby | tail -1)
+    echo -n -e "\033[32mUsing "
+    ruby -v
+    echo -n -e "\033[0m"
   fi
 fi
 
