@@ -259,7 +259,7 @@ _html do
     unless @static
       deploy = File.join(File.dirname($dashboard), 'checkdeploy.html')
       _a 'deploy', :href => 'checkdeploy', :class => 'deploylink',
-        :style => ('display: none' unless File.exist? deploy)
+        :style => ('display: none' unless File.exist? deploy.untaint)
       _a 'logs', :href => 'logs', :class => 'headerlink'
     end
 
