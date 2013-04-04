@@ -35,7 +35,7 @@ module AWDWR
       next unless args.include? keyword.to_s
       overrides.each do |key, value|
         if profile[key].respond_to? :push
-          profile[key].push(value)
+          profile[key] += [value]
         else
           profile[key] = value
         end
