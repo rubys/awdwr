@@ -121,6 +121,8 @@ _html do
         tfoot th:last-child { border-radius: 0 0 1em 0 }
       EOF
       _ <<-'EOF' unless @static
+        .deploylink {float: left; margin-top: -4em; margin-left: 1em}
+        .deploylink {color: #282; text-decoration: none}
         .headerlink {float: right; margin-top: -4em; margin-right: 1em}
         .headerlink {color: #282; text-decoration: none}
         #executing pre {margin-left: 5em}
@@ -223,7 +225,13 @@ _html do
 
   _body do
     _h1 'The Depot Dashboard'
-    _a 'logs', :href => 'logs', :class => 'headerlink' unless @static
+    unless @static
+      webdir = File.dirname(ENV['SCRIPT_FILENAME'])
+      if File.exist? File.join(webdir, 'checkdeploy.html').untaint
+        _a 'deploy', :href => 'checkdeploy', :class => 'deploylink'
+      end
+      _a 'logs', :href => 'logs', :class => 'headerlink'
+    end
 
     _table_ do
       _thead do

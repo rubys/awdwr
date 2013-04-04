@@ -79,6 +79,22 @@ This can be used in combination with `git bisect`:
 Other possibilities include pulling or directly applying changes to rails or
 other dependencies and restarting the tests at any point.
 
+Testing Deployment
+----
+
+Deployment using Apache, Phusion Passenger and Capistrano can be initiated
+using the command line:
+
+    work
+    ruby ../deploydepot.rb
+
+Results are self checking.  Output can be seen by refreshing the dashboard
+and clicking on the `deploy` link in the top left.
+
+The deployed application can be accessed by adding a `depot.pragprog.com`
+entry in the `/etc/hosts` file on your host machine with the ip address
+of your vagrant box.
+
 Cleaning up
 ===
 
