@@ -90,7 +90,7 @@ arg_was_present = false if oldest and updated
 if ARGV.empty? and arg_was_present
   require 'nokogiri'
 
-  dashboard=`ruby /var/www/dashboard.cgi static`.sub(/.*?</m,'<')
+  dashboard=`ruby /var/www/dashboard.cgi static=true`.sub(/.*?</m,'<')
   rows = Nokogiri::XML(dashboard).search('tr').to_a
   rows.reject! {|row| !row.at('td')}
   rows.reject! {|row| row.at('td:nth-child(4).hilite')}

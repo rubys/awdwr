@@ -7,7 +7,8 @@ require 'yaml'
 
 HOME = $HOME.sub(/\/?$/, '/')
 
-config = YAML.load(open($dashboard || 'dashboard.yml'))
+$dashboard ||= File.join(File.dirname(__FILE__, 'dashboard.yml'))
+config = YAML.load(open($dashboard))
 LOGDIR = config.delete('log').sub('$HOME/',HOME).untaint
 BINDIR = config.delete('bin').sub('$HOME/',HOME).untaint
 
@@ -41,7 +42,7 @@ JOBS = config['book'].map do |editions|
         info['source'] = book_info['home'].sub('$HOME/',HOME)
       end
       info['book']=book
-      info['path']=File.join(info['source'], info['work'])
+      info['path']=File.join(info['source'], info['work']).untaint
       info['id']=info['work'].gsub('.','') + '-' + book.to_s
       info.update(book_info)
     end
@@ -69,6 +70,29 @@ def status
   end
 
   [active, log]
+end
+
+# checkdepot link for a given job
+def checkdepot(job, status, static=false)
+  if static
+    link = "#{job['work'].sub('work','checkdepot')}.html"
+  else
+    link = "#{job['work']}/checkdepot.html"
+  end
+
+  checkdir = "#{job['path']}/checkdepot/"
+  checkfile = checkdir.sub(/\/$/,'.html')
+  if File.directory?(checkdir) and File.exist?(checkfile)
+    if File.stat(checkdir).mtime >= File.stat(checkfile).mtime
+      link.sub! ".html", '/'
+    end
+  end
+
+  if status == 'NO OUTPUT'
+    link= "#{link.sub('.html','/')}makedepot.log"
+  end
+
+  "#{job['web']}/#{link}"
 end
 
 # main output
@@ -142,6 +166,7 @@ _html do
         $.post("", {}, function(data) {
           for (var id in data.config) {
             var line = data.config[id];
+            $('#'+id+' td:eq(3) a').attr('href', line.link);
             $('#'+id+' td:eq(3) a').text(line.status);
             $('#'+id+' td:eq(4)').text(line.mtime);
 
@@ -155,6 +180,12 @@ _html do
               $('#'+id+' td:eq(3)').addClass('fail').
                 removeClass('hilite').removeClass('pass');
             }
+          }
+
+          if (data.deploy) {
+            $('.deploylink').show();
+          } else {
+            $('.deploylink').hide();
           }
 
           if (data.active.length == 0) {
@@ -226,10 +257,9 @@ _html do
   _body do
     _h1 'The Depot Dashboard'
     unless @static
-      webdir = File.dirname(ENV['SCRIPT_FILENAME'])
-      if File.exist? File.join(webdir, 'checkdeploy.html').untaint
-        _a 'deploy', :href => 'checkdeploy', :class => 'deploylink'
-      end
+      deploy = File.join(File.dirname($dashboard), 'checkdeploy.html')
+      _a 'deploy', :href => 'checkdeploy', :class => 'deploylink',
+        :style => ('display: none' unless File.exist? deploy)
       _a 'logs', :href => 'logs', :class => 'headerlink'
     end
 
@@ -246,7 +276,6 @@ _html do
 
       _tbody_ do
         JOBS.flatten.each do |job|
-          job['path'].untaint
           statfile = "#{job['path']}/checkdepot.status"
           statfile = "#{job['path']}/status" unless File.exist? statfile
           status = open(statfile) {|file| file.read.chomp} rescue 'missing'
@@ -255,20 +284,6 @@ _html do
 
           attrs = {:id => job['id']}
           attrs[:class]='odd' if %w(3.0 3.2).include? job['rails']
-
-          if @static
-            link =  "#{job['work'].sub('work','checkdepot')}.html"
-          else
-            link =  "#{job['work']}/checkdepot.html"
-          end
-
-          checkdir = "#{job['path']}/checkdepot/"
-          checkfile = checkdir.sub(/\/$/,'.html')
-          if File.directory?(checkdir) and File.exist?(checkfile)
-            if File.stat(checkdir).mtime >= File.stat(checkfile).mtime
-              link.sub! ".html", '/'
-            end
-          end
 
           if File.exist?(statfile.sub('checkdepot.','')+'.run')
             color = 'hilite'
@@ -284,12 +299,7 @@ _html do
             _td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='2.0.0')
             _td job['rails'], ({:class=>'hilite'} if job['rails']!='4.0')
             _td :class=>color, :align=>'center' do
-              if status == 'NO OUTPUT'
-                link.sub! ".html", '/'
-                _a status, :href => "#{job['web']}/#{link}makedepot.log"
-              else
-                _a status, :href => "#{job['web']}/#{link}" #todos"
-              end
+              _a status, :href => checkdepot(job, status, @static)
             end
             _td mtime.sub('T',' ').sub(/[+-]\d\d:\d\d$/,'')
           end
@@ -323,8 +333,8 @@ _json do
 
   config={}
   JOBS.each do |job|
-    statfile = "#{job['path']}/checkdepot.status".untaint
-    statfile = "#{job['path']}/status".untaint unless File.exist? statfile
+    statfile = "#{job['path']}/checkdepot.status"
+    statfile = "#{job['path']}/status" unless File.exist? statfile
 
     status = open(statfile) {|file| file.read.chomp} rescue 'missing'
     status.gsub! /, 0 (pendings|omissions|notifications)/, ''
@@ -334,10 +344,13 @@ _json do
     config[job['id']] = {
       'status'  => status,
       'mtime'   => mtime.sub('T',' ').sub(/[+-]\d\d:\d\d$/,''),
-      'running' => running
+      'running' => running,
+      'link'    => checkdepot(job, status)
     }
   end
 
+  webdir = File.dirname($dashboard)
+  _deploy File.exist? File.join(webdir, 'checkdeploy.html').untaint
   _config config
   _active active + log
 end
