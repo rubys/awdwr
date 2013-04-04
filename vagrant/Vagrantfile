@@ -6,6 +6,9 @@ Vagrant::Config.run do |config|
   # options are documented and commented below. For a complete reference,
   # please see the online documentation at vagrantup.com.
 
+  # host name to use for the guest machine
+  config.vm.host_name = 'awdwr'
+
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "precise32"
 
