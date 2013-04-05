@@ -132,8 +132,7 @@ end
 
 # adjust gems
 %w(
-  htmlentities 
-  rdoc minitest test-unit
+  htmlentities test-unit
   bcrypt-ruby rvm-capistrano activemerchant haml sqlite3 jquery-rails
 ).each do |name|
   gem name
