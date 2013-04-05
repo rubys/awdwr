@@ -68,6 +68,10 @@ file '/etc/apache2/conf.d/servername' do
   content "ServerName #{`hostname`}"
 end
 
+file '/etc/apache2/conf.d/log' do
+  content "AddType text/plain .log"
+end
+
 directory '/var/www' do
   user 'vagrant'
   group 'vagrant'
