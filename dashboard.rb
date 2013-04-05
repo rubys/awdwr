@@ -65,7 +65,7 @@ def status
       log.push *open(latest) {|file| file.readlines.grep(/====>/).pop(3)}
     end
 
-    log.map! {|line| line.chomp}
+    log.map! {|line| line.chomp.sub('====> ','')}
     log.unshift '' unless log.empty?
   end
 
