@@ -42,7 +42,8 @@ class RVM < Clerk
     release=PROFILE.rvm['bin'].split('-')[1]
 
     unless File.exist? "#{RVM.path}/bin/ruby-#{release}-#{rev}"
-      shell "rvm install ruby-#{release}-#{rev}"
+      shell "#{RVM.path}/bin/rvm --autolibs=fail install ruby-#{release}-#{rev}"
+      exit unless File.exist? "#{RVM.path}/bin/ruby-#{release}-#{rev}"
     end
 
     "ruby-#{release}-#{rev}"
