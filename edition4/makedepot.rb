@@ -3937,7 +3937,7 @@ section 26.3, 'Pagination' do
   if File.exist? 'test/unit'
     `ruby -I test test/unit/order_test.rb 2> /dev/null > /dev/null`
   else
-    `rails test test/models/order_test.rb 2> /dev/null > /dev/null`
+    `rake test test/models/order_test.rb 2> /dev/null > /dev/null`
   end
   unless $?.success?
     test "test/*/order_test.rb"
