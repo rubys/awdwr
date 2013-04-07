@@ -83,4 +83,17 @@ class RBenv < Clerk
       system line.chomp
     end
   end
+
+  # find latest version for a given ruby release
+  def find(testrails, ruby)
+    bin = AWDWR::config(testrails, ruby.gsub('.',''))['ruby']['bin']
+    pattern = Regexp.new(bin.sub(/^ruby-/,'').sub(/\*$/,'\d'))
+    ruby = `rbenv versions --bare`.lines.map(&:strip).grep(pattern).
+      sort(&RELEASE_COMPARE).last
+  end
+
+  # capture output from a command
+  def capture(ruby, command)
+    `bash -c #{Shellwords.escape "RBENV_VERSION=#{ruby} #{command}"}`
+  end
 end

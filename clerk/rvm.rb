@@ -79,6 +79,20 @@ class RVM < Clerk
     shell "rvm #{release}\n#{command}"
   end
 
+  # capture output from a command
+  def find(testrails, ruby)
+    bin = AWDWR::config(testrails, ruby.gsub('.',''))['ruby']['bin']
+    Dir.chdir "#{RVM.path}/rubies" do
+      `ls -d #{bin}`.lines.map(&:strip).sort(&RELEASE_COMPARE).last
+    end
+  end
+
+  # find latest version for a given ruby release
+  def capture(release, command)
+    command = "source #{RVM.path}/scripts/rvm; rvm #{ruby}; #{command}"
+    `bash -c #{Shellwords.escape command}`
+  end
+
 protected
 
   # where to find the stable release

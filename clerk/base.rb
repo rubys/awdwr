@@ -5,6 +5,34 @@
 
 class Clerk
 
+  # find a clerk
+  def self.select
+    if RVM.available?
+      RVM.new
+    elsif RBenv.available?
+      RBenv.new
+    end
+  end
+
+  # look in all of the normal places where a dashboard might be found
+  def find_dashboard
+    roots = %W(
+      /var/www
+      /Library/WebServer/Documents
+      #{ENV['HOME']}/public_html
+      #{ENV['HOME']}/Sites
+    )
+
+    roots.each do |root|
+       return "#{root}/dashboard.yml" if File.exist? "#{root}/dashboard.yml"
+    end
+  end
+
+  # sort a list of versions numerically
+  def sort(versions)
+    versions.sort(&:RELEASE_COMPARE)
+  end
+
 protected
 
   # compare source releases by patch number
