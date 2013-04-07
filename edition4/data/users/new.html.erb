@@ -16,22 +16,22 @@
   <fieldset>
   <legend>Enter User Details</legend>
 
-  <div>
+  <div class="field">
     <%= f.label :name, 'Name:' %>
     <%= f.text_field :name, :size => 40 %>
   </div>
 
-  <div>
+  <div class="field">
     <%= f.label :password, 'Password:' %>
     <%= f.password_field :password, :size => 40 %>
   </div>
 
-  <div>
+  <div class="field">
     <%= f.label :password_confirmation, 'Confirm:' %>
     <%= f.password_field :password_confirmation, :size => 40 %>
   </div>
 
-  <div>
+  <div class="actions">
     <%= f.submit %>
   </div>
 

@@ -1113,6 +1113,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
 
   desc 'Separate out individual items.'
   cmd 'rake db:rollback'
+  cmd 'rake db:migrate:status'
   cmd "mv #{migration} #{migration.sub('.rb', '.bak')}"
 
   desc 'Every item should (once again) only have a quantity of one.'
