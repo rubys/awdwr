@@ -30,7 +30,7 @@ class Clerk
 
   # sort a list of versions numerically
   def sort(versions)
-    versions.sort(&:RELEASE_COMPARE)
+    versions.sort(&RELEASE_COMPARE)
   end
 
 protected

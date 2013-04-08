@@ -88,7 +88,7 @@ class RVM < Clerk
   end
 
   # find latest version for a given ruby release
-  def capture(release, command)
+  def capture(ruby, command)
     command = "source #{RVM.path}/scripts/rvm; rvm #{ruby}; #{command}"
     `bash -c #{Shellwords.escape command}`
   end
