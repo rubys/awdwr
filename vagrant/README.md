@@ -12,6 +12,11 @@ with Rails tests using Vagrant:
 Upon completion, the installation will report the address of the web
 interface.
 
+A complete run, including deployment, of the default versions of Ruby and
+Rails can be accomplished with the following command:
+
+    vagrant ssh -c "testrails; source bin/work; ruby ../deploydepot.rb"
+
 Using the Web Interface
 ===
 
@@ -46,8 +51,9 @@ each repository.
     vagrant ssh
 
 The command run by the web interface is `testrails` and it can be run directly
-from the command line.  This does all of the necessary setup, steps that don't
-generally need to be repeated.
+from the command line.  This does all of the necessary setup, including
+updating RVM, installing Ruby, updating bundler, and updating gems; steps that
+generally do not need to be repeated.
 
 More commonly, what is needed when running interactively is to make use of the
 existing repositories and directories.  This involves a number of `git`

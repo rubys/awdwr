@@ -308,7 +308,7 @@ ENV['RUBYLIB'] = libs.map {|lib, options| File.join(HOME,'git',lib,'lib')}.
 
 cmd = "ruby #{PROFILE.script} #{$rails} #{args.join(' ')}"
 system 'tty -s'
-if $? == 0
+if $? == 0 or ENV['TERM']
   cmd += " 2>&1 | tee #{LOG}"
 else
   cmd += " >> #{LOG} 2>&1"
