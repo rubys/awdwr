@@ -102,7 +102,6 @@ protected
   def shell cmd
     cmd = "source #{RVM.path}/scripts/rvm\n#{cmd}"
     cmd = cmd.strip.gsub(/^\s+/,'').gsub(/\n/,'; ')
-    puts cmd
     system "bash -c #{Shellwords.escape cmd}"
   end
 end

@@ -53,6 +53,11 @@ environments.group_by(&:last).sort.each do |ruby, rows|
   end
   gems = Hash[gems]
 
+  if RVM.available?
+    clerk.run(release, 
+      'rvm gemset list | grep -q global && rvm --force gemset delete global')
+  end
+
   found = clerk.capture(release, 'gem list').scan(/([-\w]+) \((.*?)\)/)
 
   cmds = []
