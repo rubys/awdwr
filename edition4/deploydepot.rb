@@ -45,7 +45,7 @@ section 16.1, 'Capistrano' do
       save['RUBYOPT'] = ENV.delete('RUBYOPT') if ENV['RUBYOPT']
 
       if `gem list passenger | grep passenger`.strip.empty?
-        cmd 'gem install passenger --version 4.0.0.rc4'
+        cmd 'gem install passenger --version 4.0.0.rc6'
         cmd 'yes | passenger-install-apache2-module'
         system 'sudo rm -f /etc/apache2/conf.d/passenger'
       end
