@@ -3549,7 +3549,12 @@ section 19, 'Active Record' do
       end
     EOF
   end
+end
 
+section 19, 'Action Controller' do
+  edit 'config/initializers/session_store.rb' do
+    edit 'cookie_store', :highlight
+  end
 end
 
 if $rails_version =~ /^3\./
@@ -3720,6 +3725,16 @@ if $rails_version =~ /^3\./
          ':price=>0.0)\nli2.save'
          'li2.save'
     publish_code_snapshot nil, :depot_client
+  end
+else
+  section 24.3, 'Managing Dependencies with Bundler' do
+    Dir.chdir(File.join($WORK,'depot'))
+    edit 'Gemfile' do
+      clear_highlights
+      edit /^gem 'rails'.*/, :highlight
+      edit /^gem 'sass-rails'.*/, :highlight
+      edit /^gem 'coffee-rails'.*/, :highlight
+    end
   end
 end
 
