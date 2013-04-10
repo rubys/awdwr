@@ -8,7 +8,7 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export GORP_RAILS=$HOME/git/rails
 
 if [[ "$@" = "book" ]]; then
-  set book 40 200
+  set svn 40 200
 fi
 
 if [[ "$@" = "gems" ]]; then
