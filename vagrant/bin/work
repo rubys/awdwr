@@ -39,7 +39,7 @@ eval $(ruby <<__return
 
   # change to the target directory
   puts "cd #{profile['source']}/#{profile['work']};"
-  puts 'export GORP_WORK=$' + '(pwd)'
+  puts 'export GORP_WORK=$' + '(pwd);'
 
   # set up an alias for rails
   if File.exist? "$GORP_RAILS/railties/bin/rails"
