@@ -3448,7 +3448,7 @@ section 16, 'Deployment' do
 
   edit 'Gemfile', 'mysql' do
     clear_all_marks
-    msub /sqlite.*\n()/, <<-EOF.unindent(6), :mark => 'mysql'
+    msub /'sqlite.*\n()/, <<-EOF.unindent(6), :mark => 'mysql'
       group :production do
         gem 'mysql2'
       end
@@ -3481,8 +3481,11 @@ section 16, 'Deployment' do
   edit 'config/deploy.rb' do
     self.all = read('config/deploy.rb')
     msub /set :user, '(\w+)'/, ENV['USER'] || 'rubys'
+
     msub /set :rvm_ruby_string, '(\d+\.\d+\.\d+)'/,
-      ENV['RUBY_VERSION'] || RUBY_VERSION
+      ENV['RUBY_VERSION'] ||
+      ("ruby-#{ENV['RBENV_VERSION']}" if ENV['RBENV_VERSION']) ||
+      RUBY_VERSION
   end
   if File.exist? 'public/images'
     edit 'config/environments/production.rb' do
