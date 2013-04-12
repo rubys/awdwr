@@ -2277,11 +2277,10 @@ section 12.2, 'Iteration G2: Atom Feeds' do
 end
 
 if false and $rails_version =~ /^4\./
-section 12.3, 'Downloading an ebook' do
+section 12.3, 'Iteration G3: Downloading an eBook' do
   overview <<-EOF
     demonstrate streaming with ActionController::Live
   EOF
-
   
   desc 'Switch to puma as a server, install faker gem'
   edit 'Gemfile', 'plugins' do
@@ -2311,7 +2310,7 @@ section 12.3, 'Downloading an ebook' do
         response.headers['Content-Type'] = 'text/plain'
         40.times {
           response.stream.write "#{Faker::Lorem.paragraph}\n\n"
-          # sleep 1
+          sleep 0.10
         }
         response.stream.write "Fini.\n"
       ensure
@@ -2320,8 +2319,53 @@ section 12.3, 'Downloading an ebook' do
     EOF
   end
 
-  desc 'test download'
-  get '/products/1/download'
+  desc 'add order to the session'
+  edit 'app/controllers/orders_controller.rb', 'create' do
+    dcl 'create' do
+      msub /\n()\s+format/, <<-EOF, :highlight
+        session[:order_id] = @order.id
+      EOF
+    end
+  end
+
+  desc 'render order in the side bar'
+  edit 'app/views/layouts/application.html.erb' do
+    clear_all_marks
+    msub /()\n +<ul>/, "\n" + <<-EOF, :highlight
+      <%= render Order.find(session[:order_id]) if session[:order_id] -%>
+    EOF
+  end
+
+  desc 'implement order partial'
+  edit 'app/views/orders/_order.html.erb' do
+    self.all = read('orders/_order.html.erb')
+  end
+
+  desc 'css tweaks'
+  edit DEPOT_CSS, 'side' do
+    clear_highlights
+    edit '#cart', :highlight do
+      msub /#cart()/, ', #order'
+    end
+
+    msub /^() +table/, <<-EOF + "\n", :highlight
+      a, a:hover {
+        color: white;
+        background-color: #141;
+      }
+    EOF
+  end
+
+  desc 'place an order'
+  post '/', 'product_id' => 2
+  post '/orders/new',
+    'order[name]' => 'Dave Thomas',
+    'order[address]' => '123 Main St',
+    'order[email]' => 'customer@example.com',
+    'order[pay_type]' => 'Check'
+
+  desc 'click download'
+  get '/products/2/download'
 end
 end
 

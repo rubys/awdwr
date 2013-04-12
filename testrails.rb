@@ -157,6 +157,8 @@ if $rails_version =~ /^3\.0/
 else
   gem 'mysql2'
   gem 'bcrypt-ruby'
+  # gem 'faker'
+  # gem 'puma'
 end
 
 # checkout/update git repositories
