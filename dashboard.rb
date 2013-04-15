@@ -134,6 +134,7 @@ _html do
         th {color: #000; background-color: #99C; border: solid #000 1px}
         .odd {background-color: #CCC}
         th, td {border: solid 1px; padding: 0.5em} 
+        .selected td:nth-child(5) {border: 3px solid #d2691e} 
         .hilite {background-color: #FF9}
         .pass {background-color: #9C9}
         .fail {background-color: #F99}
@@ -216,10 +217,15 @@ _html do
             var index = $.inArray(args, inputs);
             if (index == -1) {
               inputs.push(args);
+              parent.addClass('selected');
             } else {
               inputs.splice(index, 1);
+              parent.removeClass('selected');
             }
             args = inputs.join(', ').replace(/,+\\s*/g, ', ')
+          } else {
+            $('tr').removeClass('selected');
+            parent.addClass('selected');
           }
           $('input[name=args]').val(args);
           $(this).css({backgroundColor: '#ff0'}); 
