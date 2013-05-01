@@ -61,6 +61,11 @@ default:
   output:  '3.2'
   message: '3-2-stable'
 
+40:
+  output:  '4.0'
+  branch:  4-0-stable
+  message: '4-0-stable'
+
 3:
   source:  /home/rubys/git/awdwr/edition3
   destdir: AWDwR3
