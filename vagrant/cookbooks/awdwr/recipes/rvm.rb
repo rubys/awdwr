@@ -7,11 +7,32 @@
 package 'curl'
 package 'git'
 
-execute "install rvm" do
+bash "install rvm" do
   user 'vagrant'
   group 'vagrant'
   environment 'HOME' => '/home/vagrant'
-  command '\curl -L https://get.rvm.io | bash -s stable'
+  code %{
+    if [[ -e /vagrant/cache/rvm-src ]]; then
+      cd /vagrant/cache/rvm-src
+      ./install
+      if [[ $(curl -s https://raw.github.com/wayneeseguin/rvm/stable/VERSION) != $(cat /home/vagrant/.rvm/VERSION) ]]; then
+        source /home/vagrant/.rvm/scripts/rvm
+        rvm get stable
+        cp -Lr /home/vagrant/.rvm/src/rvm /vagrant/cache/rvm-src
+      fi
+    else
+      curl -L https://get.rvm.io | bash -s stable
+
+      cp -Lr /home/vagrant/.rvm/src/rvm /vagrant/cache/rvm-src
+      cp -Lr /home/vagrant/.rvm/archives /vagrant/cache/rvm-archives
+    fi
+
+    rm -rf /home/vagrant/.rvm/archives
+    ln -s /vagrant/cache/rvm-archives /home/vagrant/.rvm/archives
+
+    rm -rf /home/vagrant/.rvm/repos
+    ln -s /vagrant/cache/rvm-repos /home/vagrant/.rvm/repos
+  }
   creates '/home/vagrant/.rvm'
 end
 
@@ -19,6 +40,6 @@ bash "install compiler dependencies" do
   environment 'rvm_path' => '/home/vagrant/.rvm'
   code %{
     source $rvm_path/scripts/rvm
-    rvm --autolibs=enable requirements ruby-2.0.0
+    rvm requirements --autolibs=enable
   }
 end
