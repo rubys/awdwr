@@ -3540,12 +3540,12 @@ section 16, 'Deployment' do
     end
     console "Depot::Application.configure { paths.log.first }", 'production'
   else
-#   edit 'Capfile' do
-#     edit 'deploy/assets', :highlight do
-#       msub /^(\s*# )load/, ''
-#     end
-#     msub /\.()each/, "\n  " if include? '.each'
-#   end
+    edit 'Capfile' do
+      edit 'deploy/assets', :highlight do
+        msub /^(\s*# )load/, ''
+      end
+      msub /\.()each/, "\n  " if include? '.each'
+    end
 #   rake 'assets:precompile'
 #   cmd 'ls public/assets'
 #

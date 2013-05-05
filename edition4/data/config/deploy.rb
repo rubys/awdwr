@@ -52,16 +52,3 @@ namespace :deploy do
     run "cd #{current_path}; rake db:seed RAILS_ENV=#{rails_env}"
   end
 end
-
-after 'deploy:update_code', 'assets:precompile'
-
-namespace :assets do
-  task :precompile, :roles => :app do
-    run "mkdir -p #{shared_path}/tmp/cache && " +
-      "ln -nfs #{shared_path}/tmp/cache #{release_path}/tmp/cache"
-    run "mkdir -p #{shared_path}/assets && " +
-      "ln -nfs #{shared_path}/assets #{release_path}/public/assets"
-    run "cd #{release_path} && RAILS_ENV=#{rails_env} RAILS_GROUPS=assets " +
-      "#{rake} assets:precompile --trace"
-  end
-end
