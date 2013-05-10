@@ -157,7 +157,9 @@ if $rails_version =~ /^3\.0/
 else
   gem 'mysql2'
   gem 'bcrypt-ruby'
-  # gem 'faker'
+end
+
+unless $rails_version =~ /^3\./
   gem 'puma'
   gem 'devise', '~> 3.0.0.rc'
 end
