@@ -2276,7 +2276,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   publish_code_snapshot :p
 end
 
-if false and $rails_version =~ /^4\./
+unless $rails_version =~ /^3\./
 section 12.3, 'Iteration G3: Downloading an eBook' do
   overview <<-EOF
     demonstrate streaming with ActionController::Live
@@ -2287,7 +2287,6 @@ section 12.3, 'Iteration G3: Downloading an eBook' do
     clear_all_marks
     msub /()\Z/, <<-EOF.unindent(6), :mark=>'puma'
       gem 'puma'
-      gem 'faker'
     EOF
   end
 
@@ -2308,10 +2307,10 @@ section 12.3, 'Iteration G3: Downloading an eBook' do
       include ActionController::Live
       def download
         response.headers['Content-Type'] = 'text/plain'
-        40.times {
-          response.stream.write "#{Faker::Lorem.paragraph}\n\n"
+        40.times do |i|
+          response.stream.write "Line #{i}\n\n"
           sleep 0.10
-        }
+        end
         response.stream.write "Fini.\n"
       ensure
         response.stream.close
@@ -4149,4 +4148,76 @@ $cleanup = Proc.new do
 
   # Link static files
   system "ln -f -s #{$DATA} #{$WORK}"
+end
+
+unless $rails_version =~ /^3\./
+  section 26.4, 'Devise' do
+    edit 'Gemfile', 'devise' do
+      msub /activemerchant.*\n()/, <<-EOF.unindent(8), :mark => 'devise'
+        gem 'devise', '~> 3.0.0.rc'
+     EOF
+    end
+    bundle 'install'
+
+    desc 'install devise'
+    generate 'devise:install'
+
+    unless File.exist? 'config/initializers/devise.rb'
+      edit 'Gemfile', 'plugins' do
+        msub /()gem 'devise'/, '# '
+      end
+      next
+    end
+
+    desc 'define default url options for development and production'
+    edit 'config/environments/development.rb', 'default_url_options' do
+      msub /^()end/, "\n" + <<-EOF.unindent(6), :mark => 'default_url_options'
+        # define default url options for devise
+        config.action_mailer.default_url_options = { :host => 'localhost:3000' }
+      EOF
+    end
+
+    edit 'config/environments/production.rb', 'default_url_options' do
+      msub /^()end/, "\n" + <<-EOF.unindent(6), :mark => 'default_url_options'
+        # define default url options for devise
+        config.action_mailer.default_url_options = { :host => 'depot.pragprog.com' }
+      EOF
+    end
+
+    desc 'add flash messages to the layout'
+    edit 'app/views/layouts/application.html.erb', 'main' do
+      clear_all_marks
+      gsub! /(\n\s+)(<%= yield %>)/, 
+        '\1<% if notice %>\1<p id="notice"><%= notice %></p>\1<% end %>' +
+        '\1<% if alert %>\1<p id="alert"><%= alert %></p>\1<% end %>' +
+        "\n\\1\\2"
+      edit /^ +<% if notice %>.*?\n\n/m, :highlight
+      edit /^ +<div id="main">.*?<\/div>\n/m, :mark => 'main'
+    end
+
+    desc 'remove flash messages from the views'
+    edit 'app/views/store/index.html.*' do
+      gsub! /^- if notice.*?\n\n/m, ''
+      gsub! /<% if notice %>.*?\n\n/m, ''
+    end
+
+    edit 'app/views/sessions/new.html.erb' do
+      gsub! /^ +<% if flash.*?\n\n/m, ''
+    end
+
+    edit 'app/views/users/index.html.erb' do
+      clear_all_marks
+      gsub! /^<% if notice.*?\n\n/m, "\n"
+    end
+    
+    Dir['app/views/*/show.html.erb'].each do |view|
+      edit view do
+        clear_all_marks
+        gsub! /^<p id="notice">.*\n\n/, ''
+      end
+    end
+
+    desc 'generate a devise model for administrators'
+    generate 'devise Admin'
+  end
 end

@@ -158,7 +158,8 @@ else
   gem 'mysql2'
   gem 'bcrypt-ruby'
   # gem 'faker'
-  # gem 'puma'
+  gem 'puma'
+  gem 'devise', '~> 3.0.0.rc'
 end
 
 # checkout/update git repositories
