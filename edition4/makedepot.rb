@@ -4219,5 +4219,8 @@ unless $rails_version =~ /^3\./
 
     desc 'generate a devise model for administrators'
     generate 'devise Admin'
+
+    desc 'Apply the migration'
+    cmd 'rake db:migrate'
   end
 end
