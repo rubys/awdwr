@@ -2282,12 +2282,11 @@ section 12.3, 'Iteration G3: Downloading an eBook' do
     demonstrate streaming with ActionController::Live
   EOF
   
-  desc 'Switch to puma as a server, install faker gem'
-  edit 'Gemfile', 'plugins' do
+  desc 'Switch to puma as a server'
+  edit 'Gemfile', 'puma' do
     clear_all_marks
-    msub /()\Z/, <<-EOF.unindent(6), :mark=>'puma'
-      gem 'puma'
-    EOF
+    self << "\ngem 'puma'\n"
+    edit 'puma', :mark => 'puma'
   end
 
   restart_server
@@ -2365,6 +2364,13 @@ section 12.3, 'Iteration G3: Downloading an eBook' do
 
   desc 'click download'
   get '/products/2/download'
+
+  desc 'Switch back to WEBRick'
+  edit 'Gemfile', 'puma' do
+    msub /()gem 'puma'/, '# '
+  end
+
+  restart_server
 end
 end
 
