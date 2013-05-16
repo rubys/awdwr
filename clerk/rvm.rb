@@ -42,7 +42,7 @@ class RVM < Clerk
     release=PROFILE.rvm['bin'].split('-')[1]
 
     unless File.exist? "#{RVM.path}/bin/ruby-#{release}-#{rev}"
-      shell "#{RVM.path}/bin/rvm --autolibs=fail install ruby-#{release}-#{rev}"
+      shell "#{RVM.path}/bin/rvm --autolibs=read install ruby-#{release}-#{rev}"
       exit unless File.exist? "#{RVM.path}/bin/ruby-#{release}-#{rev}"
     end
 
@@ -52,7 +52,7 @@ class RVM < Clerk
   # install (if necessary) the latest patch level of a release and return it
   def install_latest(pattern)
     release = pattern[/^(ruby-)?(.*?)(-\w+\*)?$/,2]
-    shell "rvm ruby-#{release} || rvm install #{release}"
+    shell "rvm ruby-#{release} || rvm --autolibs=read install #{release}"
     Dir[File.join(RVM.path,'rubies',pattern)].sort(&RELEASE_COMPARE).last
   end
 
