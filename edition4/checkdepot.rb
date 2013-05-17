@@ -22,7 +22,8 @@ class DepotTest < Gorp::TestCase
   else
     def assert_test_summary(hash)
       hash.default = 0
-      test = "#{hash[:tests]} tests, #{hash[:assertions]} assertions, " +
+      test = "#{hash[:tests]} (tests|runs), " +
+        "#{hash[:assertions]} assertions, " +
         "#{hash[:fail]} failures, #{hash[:error]} errors"
       assert_select 'pre', Regexp.new(test), test
     end
@@ -51,7 +52,8 @@ class DepotTest < Gorp::TestCase
       :match => /SECURITY WARNING: No secret option provided to Rack::Session::Cookie\./
     assert_select '.stderr', :minimum => 0 do |errors|
       errors.each do |err|
-        assert_match /\d+ tests, \d+ assertions, 0 failures, 0 errors/, err.to_s
+        assert_match /\d+ (test|run)s, \d+ assertions, 0 failures, 0 errors/,
+          err.to_s
       end
     end
 
