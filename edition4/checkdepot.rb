@@ -273,13 +273,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 13.2, "Iteration H2: Integration Tests" do
-    ticket 4786,
-      :title =>  "render with a partial in rjs fails ",
-      :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
+    ticket 10674,
+      :title =>  "assert_template w/ open_session in an integration test",
+      :match => /DslUserStoriesTest.*\n.*NoMethodError: undefined method `keys' for nil:NilClass/
 
-    ticket 4213,
-      :title =>  "undefined method `named_routes' in integration test",
-      :match => /NoMethodError: undefined method `named_routes' for nil:NilClass/
     if $rails_version =~ /^3/
       assert_test_summary :tests => 3, :assertions => '\d+'
     else
@@ -288,6 +285,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.1, "Iteration I1: Adding Users" do
+    ticket 10674,
+      :title =>  "assert_template w/ open_session in an integration test",
+      :match => /DslUserStoriesTest.*\n.*NoMethodError: undefined method `keys' for nil:NilClass/
+
     unless $rails_version =~ /^3\.[012]/
       ticket 6614, :match => /user, confirm: /,
         :title =>  "Remove `:confirm` in favor of " +
@@ -303,6 +304,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.2, "Iteration I2: Authenticating Users" do
+    ticket 10674,
+      :title =>  "assert_template w/ open_session in an integration test",
+      :match => /DslUserStoriesTest.*\n.*NoMethodError: undefined method `keys' for nil:NilClass/
+
     assert_select 'h1', 'Welcome'
     if $rails_version =~ /^3/
       assert_test_summary :tests => 47, :assertions => '[789]\d'
@@ -312,6 +317,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.3, "Iteration I3: Limiting Access" do
+    ticket 10674,
+      :title =>  "assert_template w/ open_session in an integration test",
+      :match => /DslUserStoriesTest.*\n.*NoMethodError: undefined method `keys' for nil:NilClass/
+
     if $rails_version =~ /^3/
       assert_test_summary :tests => 47, :assertions => '[789]\d'
     else
@@ -370,9 +379,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 15.4, "Task J4: Add a locale switcher" do
-    ticket 4786,
-      :title =>  "render with a partial in rjs fails ",
-      :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
+    ticket 10674,
+      :title =>  "assert_template w/ open_session in an integration test",
+      :match => /DslUserStoriesTest.*\n.*NoMethodError: undefined method `keys' for nil:NilClass/
 
     assert_select 'option[value=es]'
     assert_select 'h1', 'Your Pragmatic Catalog'
