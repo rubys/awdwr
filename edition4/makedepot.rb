@@ -1630,6 +1630,16 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
       EOF
     end
 
+    edit 'Gemfile', 'jquery' do
+      clear_all_marks
+      edit /#.*jquery.*\ngem.*\n/, :mark => 'jquery'
+      msub /jquery-rails.*?\n()/, <<-EOF.unindent(8), :highlight
+        gem 'jquery-ui-rails'
+      EOF
+    end
+
+    restart_server
+
     desc 'Pull in the jquery-ui libraries'
     edit 'app/assets/javascripts/application.js' do
       # reflow comments
@@ -1640,7 +1650,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
 
       msub /()\/\/= require jquery_ujs/, <<-EOF.unindent(8)
         //#START_HIGHLIGHT
-        //= require jquery-ui
+        //= require jquery.ui.effect-blind
         //#END_HIGHLIGHT
       EOF
     end
