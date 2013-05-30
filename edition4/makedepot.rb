@@ -2269,18 +2269,18 @@ section 12.2, 'Iteration G2: Atom Feeds' do
 
   fetch =  '--user dave:secret http://localhost:3000/products/2/who_bought.atom'
   desc 'Fetch the Atom feed'
-  cmd "curl --max-time 5 --silent #{fetch}"
+  cmd "curl --max-time 15 --silent #{fetch}"
 
   desc 'Look at the headers'
-  cmd "curl --max-time 5 --silent --dump - --output /dev/null #{fetch}"
+  cmd "curl --max-time 15 --silent --dump - --output /dev/null #{fetch}"
   req = Net::HTTP::Get.new('/products/2/who_bought.atom')
   req.basic_auth 'dave', 'secret'
   response = Net::HTTP.start('localhost', 3000) {|http| http.request(req)}
 
-  cmd "curl --max-time 5 --silent --dump - --output /dev/null #{fetch} " +
+  cmd "curl --max-time 15 --silent --dump - --output /dev/null #{fetch} " +
     "-H 'If-None-Match: #{response['Etag']}'"
 
-  cmd "curl --max-time 5 --silent --dump - --output /dev/null #{fetch} " +
+  cmd "curl --max-time 15 --silent --dump - --output /dev/null #{fetch} " +
     "-H 'If-Modified-Since: #{response['Last-Modified']}'"
 
   publish_code_snapshot :p
@@ -2396,7 +2396,7 @@ section 12.4, 'Playtime' do
   end
 
   desc 'Fetch the XML, see that there are no orders there'
-  cmd 'curl --max-time 5 --silent --user dave:secret http://localhost:3000/products/2/who_bought.atom'
+  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought.atom'
 
   desc 'Include "orders" in the response'
   edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
@@ -2409,7 +2409,7 @@ section 12.4, 'Playtime' do
   end
 
   desc 'Fetch the xml, see that the orders are included'
-  cmd 'curl --max-time 5 --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
+  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
 
   desc 'Define an HTML view'
   edit 'app/views/products/who_bought.html.erb' do |data|
@@ -2437,7 +2437,7 @@ section 12.4, 'Playtime' do
   end
 
   desc 'See the (raw) HTML'
-  cmd 'curl --max-time 5 --silent --user dave:secret http://localhost:3000/products/2/who_bought'
+  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought'
 
   desc 'Anything that XML can do, JSON can too...'
   edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
@@ -2448,7 +2448,7 @@ section 12.4, 'Playtime' do
   end
 
   desc 'Fetch the data in JSON format'
-  cmd 'curl --max-time 5 --silent --user dave:secret http://localhost:3000/products/2/who_bought.json'
+  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought.json'
 
   desc 'Customize the xml'
   edit 'app/views/products/who_bought.xml.builder' do |data|
@@ -2474,7 +2474,7 @@ section 12.4, 'Playtime' do
   end
 
   desc 'Fetch the (much streamlined) XML'
-  cmd 'curl --max-time 5 --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
+  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
 
   desc 'Verify that the tests still pass'
   test
@@ -3140,7 +3140,7 @@ section 14.5, 'Playtime' do
   cmd 'sqlite3 db/development.sqlite3 .schema'
 
   desc 'Try requesting the xml... see auth failure.'
-  cmd 'curl --max-time 5 --silent http://localhost:3000/products/2/who_bought.xml'
+  cmd 'curl --max-time 15 --silent http://localhost:3000/products/2/who_bought.xml'
 
   # issue 'Is this the best way to detect request format?'
   desc 'Enable basic auth'
@@ -3167,7 +3167,7 @@ section 14.5, 'Playtime' do
   end
 
   desc 'Try requesting the xml... see auth succeed.'
-  cmd 'curl --max-time 5 --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
+  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
 end
 
 section 15.1, 'Task J1: Selecting the locale' do
@@ -3650,7 +3650,7 @@ section 21.1, 'Views' do
       end
     end
   end
-  cmd 'curl --max-time 5 --silent --user dave:secret http://localhost:3000/products.xml'
+  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products.xml'
   if $rails_version =~ /^3\./
     irb 'helpers/date3.rb'
   else
