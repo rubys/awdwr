@@ -1632,7 +1632,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
 
     edit 'Gemfile', 'jquery' do
       clear_all_marks
-      edit /#.*jquery.*\ngem.*\n/, :mark => 'jquery'
+      edit /^(#.*\n)*gem.*jquery.*\n/, :mark => 'jquery'
       msub /jquery-rails.*?\n()/, <<-EOF.unindent(8), :highlight
         gem 'jquery-ui-rails'
       EOF
