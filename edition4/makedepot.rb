@@ -1630,6 +1630,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
       EOF
     end
 
+    desc 'Make the jquery-ui libraries available to the application'
     edit 'Gemfile', 'jquery' do
       clear_all_marks
       edit /^(#.*\n)*gem.*jquery.*\n/, :mark => 'jquery'
@@ -1638,9 +1639,12 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
       EOF
     end
 
+    desc 'Install the gem'
+    bundle 'install'
+
     restart_server
 
-    desc 'Pull in the jquery-ui libraries'
+    desc 'Pull in the blind effect from the jquery-ui libraries'
     edit 'app/assets/javascripts/application.js' do
       # reflow comments
       gsub! /^\/\/ [^\n]{76}.*?\n\/\/\n/m do |paragraph|
