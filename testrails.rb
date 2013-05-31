@@ -133,7 +133,7 @@ end
 # adjust gems
 %w(
   htmlentities test-unit
-  bcrypt-ruby sqlite3 jquery-rails jquery-ui-rails
+  bcrypt-ruby sqlite3 jquery-rails
   rvm-capistrano activemerchant haml
 ).each do |name|
   gem name
@@ -158,6 +158,7 @@ if $rails_version =~ /^3\.0/
 else
   gem 'mysql2'
   gem 'bcrypt-ruby'
+  gem 'jquery-ui-rails'
 end
 
 unless $rails_version =~ /^3\./
