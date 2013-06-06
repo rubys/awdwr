@@ -8,7 +8,9 @@ class DepotTest < Gorp::TestCase
   input 'makedepot'
   output 'checkdepot'
 
-  turn = File.read("#{$WORK}/Gemfile.lock").scan(/turn \((.*?)\)/).flatten.first
+  turn = (File.read("#{$WORK}/Gemfile.lock") rescue '').
+    scan(/turn \((.*?)\)/).flatten.first 
+
   if turn.to_s > '0.8.2'
     def assert_test_summary(hash)
       hash[:pass] = hash[:tests]
