@@ -11,9 +11,7 @@ package "nodejs"
 package "libmysqlclient-dev"
 package "mysql-server"
 package "ruby1.9.3"
-gem_package "nokogiri" do
-  gem_binary "/usr/bin/gem"
-end
+package "ruby-nokogiri"
 
 directory "/home/vagrant/git" do
   user "vagrant"
