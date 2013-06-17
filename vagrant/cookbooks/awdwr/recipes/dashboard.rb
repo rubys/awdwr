@@ -144,13 +144,17 @@ ruby_block 'welcome' do
     if not File.read(profile).include? ip
       open(profile, 'a') do |file|
         file.puts "\nip=$(#{ip})"
-        file.write <<-'EOF'.gsub(/^\s+/, '')
-          echo
-          echo "Depot Dashboard is available at http://$ip/dashboard"
+        file.write <<-'EOF'.gsub(/^ {10}/, '')
+          if [[ "${TERM:-dumb}" != "dumb" ]]; then
+            echo
+            echo "Depot Dashboard is available at http://$ip/dashboard"
 
-          PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+            PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+          fi
         EOF
       end
+
+      Chef::ShellOut.new("chown vagrant:vagrant #{profile}").run_command
     end
 
     Chef::Log.info "Depot Dashboard is available at http://" + `#{ip}`.chomp +
