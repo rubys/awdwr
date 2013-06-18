@@ -235,9 +235,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.4, "Playtime" do
-    ticket 7910,
-      :title =>  "Actions defined using resource get bypass the controller",
-      :match => /undefined method `title&amp;#39; for nil:NilClass/
+    ticket 10984,
+      :title =>  "Live streaming doesn't work with basic authentication or builder",
+      :match => /<pre class="stdin">curl.*<\/pre>\s+<p class="note">/
 
     # raw xml
     assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/,
@@ -331,6 +331,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.4, "Iteration I4: Adding a Sidebar" do
+    ticket 10984,
+      :title =>  "Live streaming doesn't work with basic authentication or builder",
+      :match => /Errno::ECONNREFUSED: Connection refused/
+
     assert_select 'legend', 'Please Log In'
     assert_select 'input[type=submit][value=Login]'
     assert_select 'h1', 'Welcome'
@@ -420,6 +424,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 21.1, "Views" do
+    ticket 10984,
+      :title =>  "Live streaming doesn't work with basic authentication or builder",
+      :match => /<pre class="stdin">curl.*<\/pre>\s+<pre class="stdin">/
+
     assert_select '.stdout', /&lt;price currency="USD"&gt;49.95&lt;\/price&gt;/
     assert_select '.stdout', /"1 minute"/
     assert_select '.stdout', /"half a minute"/
