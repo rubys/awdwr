@@ -343,9 +343,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.5, "Playtime" do
-    ticket 7910,
-      :title =>  "Actions defined using resource get bypass the controller",
-      :match => /undefined method `title&amp;#39; for nil:NilClass/
+    ticket 10984,
+      :title =>  "Live streaming doesn't work with basic authentication or builder",
+      :match => /<pre class="stdin">curl.*<\/pre>\s*\Z/
 
     assert_test_summary :tests => '4[68]', :assertions => '[789]\d'
 
