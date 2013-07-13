@@ -133,7 +133,7 @@ end
 # adjust gems
 %w(
   htmlentities test-unit
-  bcrypt-ruby sqlite3 jquery-rails
+  sqlite3 jquery-rails
   rvm-capistrano activemerchant haml
 ).each do |name|
   gem name
@@ -157,7 +157,7 @@ if $rails_version =~ /^3\.0/
   gem 'will_paginate', '>= 3.0.pre'
 else
   gem 'mysql2'
-  gem 'bcrypt-ruby'
+  gem 'bcrypt-ruby', '~> 3.0.0'
   gem 'jquery-ui-rails'
 end
 
