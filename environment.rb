@@ -73,6 +73,7 @@ module AWDWR
         app_base.gsub! '#{options[:javascript]}', 'jquery'
         libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
         gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
+        gems += gemfile.scan(/^\s*# gem ['"]([-\w]+)['"](, ['"].*)/)
 
         patterns = [
           /^\s*gem\s+'([-\w]+)'(,.*)?/,

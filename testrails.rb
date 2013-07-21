@@ -157,7 +157,6 @@ if $rails_version =~ /^3\.0/
   gem 'will_paginate', '>= 3.0.pre'
 else
   gem 'mysql2'
-  gem 'bcrypt-ruby', '~> 3.0.0'
   gem 'jquery-ui-rails'
 end
 
