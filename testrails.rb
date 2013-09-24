@@ -162,7 +162,7 @@ end
 
 unless $rails_version =~ /^3\./
   gem 'puma'
-  gem 'devise', '~> 3.0.0.rc'
+  gem 'devise', '~> 3.1'
 end
 
 # checkout/update git repositories
