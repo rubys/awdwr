@@ -127,6 +127,7 @@ class DepotTest < Gorp::TestCase
     ticket 12343,
       :title =>  "assign_attributes should return if arguments are blank",
       :match => /ActiveModel::ForbiddenAttributesError/
+
     if $rails_version =~ /^3/
       assert_test_summary :tests => 22, :assertions => 35
     else
@@ -179,6 +180,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 10.4, "Playtime" do
+    ticket 12343,
+      :title =>  "assign_attributes should return if arguments are blank",
+      :match => /ActiveModel::ForbiddenAttributesError/
+
     if $rails_version =~ /^3/
       assert_test_summary :tests => '\d', :assertions => '2\d'
       assert_test_summary :tests => 23, :assertions => '[34]7'
@@ -201,9 +206,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 11.6, "Testing AJAX changes" do
-    ticket 4786,
-      :title =>  "render with a partial in rjs fails ",
-      :match => /Template::Error: Missing partial.* with.* :formats=&gt;\[:js\]/
+    ticket 12343,
+      :title =>  "assign_attributes should return if arguments are blank",
+      :match => /ActiveModel::ForbiddenAttributesError/
 
     assert_select 'code', "undefined method `line_items' for nil:NilClass"
 
@@ -238,9 +243,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.4, "Playtime" do
-    ticket 10984,
-      :title =>  "Live streaming doesn't work with basic authentication or builder",
-      :match => /<pre class="stdin">curl.*<\/pre>\s+<p class="note">/
+    ticket 12343,
+      :title =>  "assign_attributes should return if arguments are blank",
+      :match => /ActiveModel::ForbiddenAttributesError/
 
     # raw xml
     assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/,
@@ -290,15 +295,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.1, "Iteration I1: Adding Users" do
-    ticket 10674,
-      :title =>  "assert_template w/ open_session in an integration test",
-      :match => /DslUserStoriesTest.*\n.*NoMethodError: undefined method `keys' for nil:NilClass/
+    ticket 12343,
+      :title =>  "assign_attributes should return if arguments are blank",
+      :match => /ActiveModel::ForbiddenAttributesError/
 
-    unless $rails_version =~ /^3\.[012]/
-      ticket 6614, :match => /user, confirm: /,
-        :title =>  "Remove `:confirm` in favor of " +
-          "`:data => { :confirm => 'Text' }` option"
-    end
     assert_select 'legend', 'Enter User Details'
     assert_select 'h1', 'Listing users'
     assert_select 'td', 'dave'
@@ -309,9 +309,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.2, "Iteration I2: Authenticating Users" do
-    ticket 10674,
-      :title =>  "assert_template w/ open_session in an integration test",
-      :match => /DslUserStoriesTest.*\n.*NoMethodError: undefined method `keys' for nil:NilClass/
+    ticket 12343,
+      :title =>  "assign_attributes should return if arguments are blank",
+      :match => /ActiveModel::ForbiddenAttributesError/
 
     assert_select 'h1', 'Welcome'
     if $rails_version =~ /^3/
@@ -322,9 +322,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.3, "Iteration I3: Limiting Access" do
-    ticket 10674,
-      :title =>  "assert_template w/ open_session in an integration test",
-      :match => /DslUserStoriesTest.*\n.*NoMethodError: undefined method `keys' for nil:NilClass/
+    ticket 12343,
+      :title =>  "assign_attributes should return if arguments are blank",
+      :match => /ActiveModel::ForbiddenAttributesError/
 
     if $rails_version =~ /^3/
       assert_test_summary :tests => 47, :assertions => '[789]\d'
@@ -334,10 +334,6 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.4, "Iteration I4: Adding a Sidebar" do
-    ticket 10984,
-      :title =>  "Live streaming doesn't work with basic authentication or builder",
-      :match => /Errno::ECONNREFUSED: Connection refused/
-
     assert_select 'legend', 'Please Log In'
     assert_select 'input[type=submit][value=Login]'
     assert_select 'h1', 'Welcome'
@@ -346,9 +342,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.5, "Playtime" do
-    ticket 10984,
-      :title =>  "Live streaming doesn't work with basic authentication or builder",
-      :match => /<pre class="stdin">curl.*<\/pre>\s*\Z/
+    ticket 12343,
+      :title =>  "assign_attributes should return if arguments are blank",
+      :match => /ActiveModel::ForbiddenAttributesError/
 
     assert_test_summary :tests => '4[68]', :assertions => '[789]\d'
 
@@ -388,9 +384,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 15.4, "Task J4: Add a locale switcher" do
-    ticket 10674,
-      :title =>  "assert_template w/ open_session in an integration test",
-      :match => /DslUserStoriesTest.*\n.*NoMethodError: undefined method `keys' for nil:NilClass/
+    ticket 12343,
+      :title =>  "assign_attributes should return if arguments are blank",
+      :match => /ActiveModel::ForbiddenAttributesError/
 
     assert_select 'option[value=es]'
     assert_select 'h1', 'Your Pragmatic Catalog'
