@@ -124,6 +124,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 9.2, "Connection Products to Carts" do
+    ticket 12343,
+      :title =>  "assign_attributes should return if arguments are blank",
+      :match => /ActiveModel::ForbiddenAttributesError/
     if $rails_version =~ /^3/
       assert_test_summary :tests => 22, :assertions => 35
     else
