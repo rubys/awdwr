@@ -3540,7 +3540,7 @@ section 16, 'Deployment' do
   #
 
   rake 'db:setup RAILS_ENV=production'
-  cmd 'capify .'
+  unbundle { cmd 'capify .' }
   edit 'config/deploy.rb' do
     self.all = read('config/deploy.rb')
     msub /set :user, '(\w+)'/, ENV['USER'] || 'rubys'
