@@ -3528,7 +3528,7 @@ section 16, 'Deployment' do
     edit /#.*\n# gem .capistrano.*/, :mark => 'capistrano' do
       edit 'gem', :highlight
       msub /^(# )gem .capistrano/, ''
-      msub /^gem .()capistrano/, 'rvm-'
+      msub /^gem .(capistrano[-\w]*)/, 'rvm-capistrano'
     end
   end
   bundle 'install'
