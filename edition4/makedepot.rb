@@ -4092,7 +4092,7 @@ section 26.3, 'Pagination' do
   publish_code_snapshot :v
 end
 
-required = %w(will_paginate rdoc nokogiri htmlentities)
+required = %w(will_paginate nokogiri htmlentities)
 required.push 'rails' if $rails == 'rails'
 required.push 'test-unit' if RUBY_VERSION =~ /^1\.9/
 required -= `gem list`.scan(/(^[-_\w]+)\s\(/).flatten
