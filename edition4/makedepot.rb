@@ -4152,7 +4152,8 @@ $cleanup = Proc.new do
   else
     begin
       require 'sass'
-    rescue LoadError
+    rescue LoadError => error
+      $style.text! '/* ' + error.to_s + " */\n"
     end
 
     Dir[File.join($WORK,'depot/app/assets/stylesheets/*.css*')].each do |css|

@@ -161,6 +161,7 @@ else
 end
 
 unless $rails_version =~ /^3\./
+  gem 'sass'
   gem 'puma'
   gem 'devise', '~> 3.1'
 end
