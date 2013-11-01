@@ -75,14 +75,21 @@ module AWDWR
         gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
         gems += gemfile.scan(/^\s*# gem ['"]([-\w]+)['"](, ['"].*)/)
 
-        patterns = [
-          /^\s*gem\s+'([-\w]+)'(,.*)?/,
-          /^\s*"gem\s+'([-\w]+)'(,.*)"/
-        ]
+        exclude = %(
+          rails turn 
+          therubyrhino therubyracer 
+          ruby-debug ruby-debug19 debugger
+        )
 
         pattern = /GemfileEntry\.github[ (]'([-\w]+)',\s*'([-\/\w]+)'/
         app_base.scan(pattern) do |gem, repos|
           libs << gem
+        end
+
+        pattern = /GemfileEntry\.(new|version)[ (]['"]([-\w]+)['"], (nil)/
+        app_base.scan(pattern) do |method, gem, version|
+          next if exclude.include? gem
+          gems << [gem, nil]
         end
 
         pattern = /GemfileEntry\.version[ (]'([-\w]+)',\s*'([^']+)'/
@@ -90,10 +97,14 @@ module AWDWR
           gems << [gem, ', ' + opts.inspect]
         end
 
+        patterns = [
+          /^\s*gem\s+'([-\w]+)'(,.*)?/,
+          /^\s*"gem\s+'([-\w]+)'(,.*)"/
+        ]
+
         patterns.each do |pattern|
           app_base.scan(pattern).each do |gem, opts|
-            next if %(rails turn therubyrhino).include? gem
-            next if %(ruby-debug ruby-debug19 debugger).include? gem
+            next if exclude.include? gem
             opts = $1 if opts =~ /\? "(.*?)" :/
             next if gems.find {|gname, gopts| gem == gname}
             if opts =~ / :?git(hub)?(:|\s*=>)/
