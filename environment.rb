@@ -80,6 +80,16 @@ module AWDWR
           /^\s*"gem\s+'([-\w]+)'(,.*)"/
         ]
 
+        pattern = /GemfileEntry\.github\('([-\w]+)',\s*'([-\/\w]+)'/
+        app_base.scan(pattern) do |gem, repos|
+          libs << gem
+        end
+
+        pattern = /GemfileEntry\.version\('([-\w]+)',\s*'([^']+)'/
+        app_base.scan(pattern) do |gem, opts|
+          gems << [gem, ', ' + opts.inspect]
+        end
+
         patterns.each do |pattern|
           app_base.scan(pattern).each do |gem, opts|
             next if %(rails turn therubyrhino).include? gem
