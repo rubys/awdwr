@@ -3,7 +3,7 @@
 <table data-no-turbolink>
   <% order.line_items.each do |item| %>
   <tr>
-    <td><%= link_to item.product.title, download_product_path(item.product) %></li>
+    <td><%= link_to item.product.title, download_product_path(item.product) %></td>
   </tr>
   <% end %>
 </table>
