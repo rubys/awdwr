@@ -117,6 +117,10 @@ if ARGV.empty? and arg_was_present
   exec "#{$0} #{args}"
 end
 
+if PROFILE.path
+  ENV['PATH'] = (PROFILE.path + ENV['PATH'].split(':')).uniq.join(':')
+end
+
 # clean up mysql
 open('|mysql -u root','w') {|f| f.write "drop database depot_production;"}
 open('|mysql -u root','w') {|f| f.write "create database depot_production;"}
@@ -244,10 +248,6 @@ end
 # select arguments to pass through
 args = ARGV.grep(/^(\d+(\.\d+)?-\d+(\.\d+)?|\d+\.\d+?|save|restore)$/)
 args << "--work=#{WORK}"
-
-if PROFILE.path
-  ENV['PATH'] = (PROFILE.path + ENV['PATH'].split(':')).uniq.join(':')
-end
 
 # select rvm or rbenv
 if RVM.available?
