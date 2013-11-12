@@ -147,7 +147,7 @@ module AWDWR
     gems = Hash[gems]
     gems.each do |gem, opts|
       hash = {}
-      if opts
+      if opts and not opts.include? ':mswin'
         hash[:version] = eval($1) if opts.sub!(/^,\s*(".*?")/, '') 
         hash[:version] = eval($1) if opts.sub!(/^,\s*('.*?')/, '') 
         while opts.sub!(/(\w+)\s*=?>?:?\s*(.*?)(,\s*|$)/, '')  do
