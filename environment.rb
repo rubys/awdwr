@@ -79,6 +79,7 @@ module AWDWR
           rails turn 
           therubyrhino therubyracer 
           ruby-debug ruby-debug19 debugger
+          rubysl
         )
 
         pattern = /GemfileEntry\.github[ (]'([-\w]+)',\s*'([-\/\w]+)'/
