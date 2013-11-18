@@ -118,6 +118,8 @@ module AWDWR
 
         branches = app_base.scan(
           /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
+        branches += app_base.scan(
+          /^\s*gem ['"]([-\w]+)['"],.* github:.*branch: ['"]([-\w]+)['"]/)
 
         gems += [['json',nil]] if ruby < "1.9.2"
         if app_base.match(/gem ['"]turn['"]/)
@@ -140,6 +142,8 @@ module AWDWR
 
       branches += gemfile.scan(
         /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
+      branches += gemfile.scan(
+        /^\s*gem ['"]([-\w]+)['"],.*github:.*branch: ['"]([-\w]+)['"]/)
       repos += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github: '(.*?)'/)
       libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github:/).flatten
     end
