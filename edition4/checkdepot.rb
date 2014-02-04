@@ -159,7 +159,7 @@ class DepotTest < Gorp::TestCase
     if $rails_version =~ /^3\./
       assert_select 'pre', /Couldn't find Cart with ID=wibble/i
     else
-      assert_select 'h2', /Couldn't find Cart with ID=wibble/i
+      assert_select 'h2', /Couldn't find Cart with '?id'?=wibble/i
     end
   end
 
