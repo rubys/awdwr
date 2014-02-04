@@ -43,7 +43,7 @@ class RVM < Clerk
 
     unless File.exist? "#{RVM.path}/bin/ruby-#{release}-#{rev}"
       shell "#{RVM.path}/bin/rvm --autolibs=read install ruby-#{release}-#{rev}"
-      exit unless File.exist? "#{RVM.path}/bin/ruby-#{release}-#{rev}"
+      exit unless File.exist? "#{RVM.path}/wrappers/ruby-#{release}-#{rev}"
     end
 
     "ruby-#{release}-#{rev}"
