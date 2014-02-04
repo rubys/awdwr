@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
 require 'rubygems'
-require 'wunderbar'
+require 'wunderbar/job-control'
 require 'time'
 require 'yaml'
 
