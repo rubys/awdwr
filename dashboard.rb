@@ -289,7 +289,7 @@ _html do
           mtime = File.stat(statfile).mtime.iso8601 rescue 'missing'
 
           attrs = {:id => job['id']}
-          attrs[:class]='odd' if %w(4.1 3.0 3.2).include? job['rails']
+          attrs[:class]='odd' if %w(4.0 3.2).include? job['rails']
 
           if File.exist?(statfile.sub('checkdepot.','')+'.run')
             color = 'hilite'
@@ -303,7 +303,7 @@ _html do
             _td job['book'], {:align=>'right'}.
               merge(job['book']=='4' ? {} : {:class=>'hilite'})
             _td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='2.0.0')
-            _td job['rails'], ({:class=>'hilite'} if job['rails']!='4.0')
+            _td job['rails'], ({:class=>'hilite'} if job['rails']!='4.1')
             _td :class=>color, :align=>'center' do
               _a status, :href => checkdepot(job, status, @static)
             end

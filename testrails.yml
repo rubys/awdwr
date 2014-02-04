@@ -31,10 +31,11 @@ default:
     output:  2.1.0
     message: 'Ruby 2.1.0'
     rvm:
+      bin:   ruby-2.1.0
 #     bin:   ruby-2.1.0-p*
 #
-      src:   trunk
-      bin:   ruby-head-n*
+#     src:   trunk
+#     bin:   ruby-head-n*
 #
 #     src:   ruby_2_1_0
 #     bin:   ruby-2.1.0-s*
