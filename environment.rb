@@ -93,8 +93,8 @@ module AWDWR
           gems << [gem, nil]
         end
 
-        pattern = /GemfileEntry\.version[ (]'([-\w]+)',\s*'([^']+)'/
-        app_base.scan(pattern) do |gem, opts|
+        pattern = /GemfileEntry\.(new|version)[ (]'([-\w]+)',\s*'([^']+)'/
+        app_base.scan(pattern) do |method, gem, opts|
           gems << [gem, ', ' + opts.inspect]
         end
 
