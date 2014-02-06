@@ -48,10 +48,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
-    ticket 7372,
-      :list => :rails,
-      :title =>  "Rack HEAD CookieStore security warnings",
-      :match => /SECURITY WARNING: No secret option provided to Rack::Session::Cookie\./
+    ticket 13944, title: "JSON session serializer broke flash notice" do |raw|
+      not raw.include? '<p id="notice">'
+    end
+
     assert_select '.stderr', :minimum => 0 do |errors|
       errors.each do |err|
         assert_match /\d+ (test|run)s, \d+ assertions, 0 failures, 0 errors/,
