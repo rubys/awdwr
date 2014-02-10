@@ -48,7 +48,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
-    ticket 13944, title: "JSON session serializer broke flash notice" do |raw|
+    ticket 13944, :title=>"JSON session serializer broke flash notice" do |raw|
       not raw.include? '<p id="notice">'
     end
 
