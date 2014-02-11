@@ -49,7 +49,7 @@ class DepotTest < Gorp::TestCase
 
   section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
     ticket 13944, :title=>"JSON session serializer broke flash notice" do |raw|
-      not raw.include? '<p id="notice">'
+      raw !~ %r{<p id=["']notice["']>}
     end
 
     assert_select '.stderr', :minimum => 0 do |errors|
