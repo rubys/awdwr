@@ -2520,6 +2520,11 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   desc 'Tailor the confirm receipt email'
+
+  if File.exist? 'app/views/order_notifier/received.html.erb'
+    cmd 'rm app/views/order_notifier/received.html.erb'
+  end
+
   edit 'app/views/order_notifier/received.text.erb' do
     self.all = <<-EOF.unindent(6)
       Dear <%= @order.name %>
