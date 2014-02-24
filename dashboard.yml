@@ -6,6 +6,12 @@ book:
 - '4':
     web:  AWDwR4
     env:
+    - rails: '4.2'
+      ruby:  '2.2.0'
+    - rails: '4.2'
+      ruby:  '2.1.0'
+    - rails: '4.2'
+      ruby:  '2.0.0'
     - rails: '4.1'
       ruby:  '2.1.0'
     - rails: '4.1'

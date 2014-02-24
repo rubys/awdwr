@@ -289,7 +289,7 @@ _html do
           mtime = File.stat(statfile).mtime.iso8601 rescue 'missing'
 
           attrs = {:id => job['id']}
-          attrs[:class]='odd' if %w(4.0 3.2).include? job['rails']
+          attrs[:class]='odd' if %w(4.0 4.2).include? job['rails']
 
           if File.exist?(statfile.sub('checkdepot.','')+'.run')
             color = 'hilite'
