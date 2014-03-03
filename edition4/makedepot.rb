@@ -2665,12 +2665,12 @@ section 14.1, 'Iteration I1: Adding Users' do
       generate 'scaffold User name:string password:digest'
     end
 
-    if File.read('Gemfile') =~ /^#\sgem\s+['"]bcrypt-ruby['"]/
-      desc 'uncomment out bcrypt-ruby'
+    if File.read('Gemfile') =~ /^#\sgem\s+['"]bcrypt(-ruby)?['"]/
+      desc 'uncomment out bcrypt'
       edit 'Gemfile', 'bcrypt' do
         clear_all_marks
         edit /^.*has_secure_password\n.*\n/, :mark => 'bcrypt'
-        edit 'bcrypt-ruby', :highlight do
+        edit /# gem ['"]bcrypt.*\n/, :highlight do
           msub /^(#\s)/, ''
         end
       end
