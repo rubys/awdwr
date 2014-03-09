@@ -1189,8 +1189,8 @@ section 10.2, 'Iteration E2: Handling Errors' do
     test 'controllers'
 
     desc 'Inspect the log.'
-    cmd 'grep -B 8 -A 7 "Unpermitted parameters" log/test.log',
-      :highlight => ['Unpermitted parameters']
+    cmd 'grep -B 8 -A 7 "Unpermitted parameter" log/test.log',
+      :highlight => ['Unpermitted parameter']
 
     edit 'test/*/line_items_controller_test.rb', 'update' do
       dcl "should update line_item", :mark => 'update' do
