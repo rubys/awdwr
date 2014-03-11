@@ -124,10 +124,6 @@ class DepotTest < Gorp::TestCase
   end
 
   section 9.2, "Connection Products to Carts" do
-    ticket 12343,
-      :title =>  "assign_attributes should return if arguments are blank",
-      :match => /ActiveModel::ForbiddenAttributesError/
-
     if $rails_version =~ /^3/
       assert_test_summary :tests => 22, :assertions => 35
     else
@@ -243,9 +239,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.4, "Playtime" do
-    ticket 12343,
-      :title =>  "assign_attributes should return if arguments are blank",
-      :match => /ActiveModel::ForbiddenAttributesError/
+    ticket 14352,
+      :title =>  "ActionController::Live is broken",
+      :match => /ActionDispatch::IllegalStateError: header already sent/
 
     # raw xml
     assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/,
@@ -295,9 +291,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.1, "Iteration I1: Adding Users" do
-    ticket 12343,
-      :title =>  "assign_attributes should return if arguments are blank",
-      :match => /ActiveModel::ForbiddenAttributesError/
+    ticket 14352,
+      :title =>  "ActionController::Live is broken",
+      :match => /ActionDispatch::IllegalStateError: header already sent/
 
     assert_select 'legend', 'Enter User Details'
     assert_select 'h1', 'Listing users'
@@ -309,9 +305,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.2, "Iteration I2: Authenticating Users" do
-    ticket 12343,
-      :title =>  "assign_attributes should return if arguments are blank",
-      :match => /ActiveModel::ForbiddenAttributesError/
+    ticket 14352,
+      :title =>  "ActionController::Live is broken",
+      :match => /ActionDispatch::IllegalStateError: header already sent/
 
     assert_select 'h1', 'Welcome'
     if $rails_version =~ /^3/
@@ -322,9 +318,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.3, "Iteration I3: Limiting Access" do
-    ticket 12343,
-      :title =>  "assign_attributes should return if arguments are blank",
-      :match => /ActiveModel::ForbiddenAttributesError/
+    ticket 14352,
+      :title =>  "ActionController::Live is broken",
+      :match => /ActionDispatch::IllegalStateError: header already sent/
 
     if $rails_version =~ /^3/
       assert_test_summary :tests => 47, :assertions => '[789]\d'
@@ -342,9 +338,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.5, "Playtime" do
-    ticket 12343,
-      :title =>  "assign_attributes should return if arguments are blank",
-      :match => /ActiveModel::ForbiddenAttributesError/
+    ticket 14352,
+      :title =>  "ActionController::Live is broken",
+      :match => /ActionDispatch::IllegalStateError: header already sent/
 
     assert_test_summary :tests => '4[68]', :assertions => '[789]\d'
 
@@ -384,9 +380,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 15.4, "Task J4: Add a locale switcher" do
-    ticket 12343,
-      :title =>  "assign_attributes should return if arguments are blank",
-      :match => /ActiveModel::ForbiddenAttributesError/
+    ticket 14352,
+      :title =>  "ActionController::Live is broken",
+      :match => /ActionDispatch::IllegalStateError: header already sent/
 
     assert_select 'option[value=es]'
     assert_select 'h1', 'Your Pragmatic Catalog'
