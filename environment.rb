@@ -82,6 +82,9 @@ module AWDWR
           rubysl
         )
 
+        # ignore dev-only instructions
+        app_base.gsub! /^\s+if options\.dev\?\s+\[.*?\]/m, ''
+
         pattern = /GemfileEntry\.github[ (]'([-\w]+)',\s*'([-\/\w]+)'/
         app_base.scan(pattern) do |gem, repos|
           libs << gem
