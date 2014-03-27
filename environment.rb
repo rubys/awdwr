@@ -123,6 +123,8 @@ module AWDWR
           /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
         branches += app_base.scan(
           /^\s*gem ['"]([-\w]+)['"],.* github:.*branch: ['"]([-\w]+)['"]/)
+        branches += app_base.scan(
+          /GemfileEntry\.github[ (]'([-\w]+)',\s*'[-\/\w]+', '(.*?)'/)
 
         gems += [['json',nil]] if ruby < "1.9.2"
         if app_base.match(/gem ['"]turn['"]/)
