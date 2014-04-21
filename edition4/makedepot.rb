@@ -3378,7 +3378,7 @@ section 15.3, 'Task J3: Translating Checkout' do
 
   desc 'Display messages in raw form, and translate error messages'
   edit 'app/views/orders/_form.html.erb' do
-    edit '<%= msg %>', :highlight do
+    edit "<%= #{include?('msg') ? 'msg' : 'message'} %>", :highlight do
       msub /<%=() /, 'raw'
     end
 
