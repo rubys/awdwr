@@ -74,10 +74,10 @@ default:
 
 41:
   output:  '4.1'
-  branch:  4-1-0
-  message: '4-1-0'
-# branch:  4-1-stable
-# message: '4-1-stable'
+# branch:  4-1-0
+# message: '4-1-0'
+  branch:  4-1-stable
+  message: '4-1-stable'
 
 3:
   source:  /home/rubys/git/awdwr/edition3
