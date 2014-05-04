@@ -1222,7 +1222,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
-  desc 'Clear session and add flash notice when cart is destroyed.'
+  desc 'Clear session and change flash notice when cart is destroyed.'
   edit 'app/controllers/carts_controller.rb', 'destroy' do
     dcl 'destroy', :mark => 'destroy' do
       if include? 'Cart.find'
@@ -1236,8 +1236,8 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
       EOF
 
       edit 'carts_url', :highlight do
-        sub! 'carts_url', 
-          "store_url,\n        :notice => 'Your cart is currently empty'"
+        sub! /carts_url.*?}/, 
+          "store_url,\n        :notice => 'Your cart is currently empty' }"
       end
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
