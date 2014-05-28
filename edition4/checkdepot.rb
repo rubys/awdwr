@@ -1,4 +1,4 @@
-require 'rubygems'
+require 'minitest'
 require 'gorp/test'
 
 $rails_version = `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`.split(' ').last
