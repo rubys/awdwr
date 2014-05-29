@@ -1,4 +1,10 @@
-require 'minitest'
+require 'bundler/setup'
+
+begin
+  require 'minitest'
+rescue LoadError
+end
+
 require 'gorp/test'
 
 $rails_version = `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`.split(' ').last
