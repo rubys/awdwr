@@ -54,10 +54,6 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
-    ticket 13944, :title=>"JSON session serializer broke flash notice" do |raw|
-      raw !~ %r{<p id=["']notice["']>}
-    end
-
     assert_select '.stderr', :minimum => 0 do |errors|
       errors.each do |err|
         assert_match /\d+ (test|run)s, \d+ assertions, 0 failures, 0 errors/,
