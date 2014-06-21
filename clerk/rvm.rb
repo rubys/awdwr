@@ -96,7 +96,7 @@ class RVM < Clerk
 protected
 
   # where to find the stable release
-  STABLE = "https://raw.github.com/wayneeseguin/rvm/stable"
+  STABLE = "https://raw.githubusercontent.com/wayneeseguin/rvm/stable"
 
   # execute a series of commands in one shell invocation
   def shell cmd
