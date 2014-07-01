@@ -54,6 +54,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
+    ticket 15998,
+      :title =>  "ArgumentError: prepare called on a closed database",
+      :match => /ArgumentError: prepare called on a closed database/
+
     assert_select '.stderr', :minimum => 0 do |errors|
       errors.each do |err|
         assert_match /\d+ (test|run)s, \d+ assertions, 0 failures, 0 errors/,
