@@ -302,7 +302,7 @@ class DepotTest < Gorp::TestCase
       :match => /ActionDispatch::IllegalStateError: header already sent/
 
     assert_select 'legend', 'Enter User Details'
-    assert_select 'h1', 'Listing users'
+    assert_select 'h1', /Listing Users/i
     assert_select 'td', 'dave'
     unless $rails_version =~ /^3/
       assert_select 'p', 'User dave was successfully created.'
