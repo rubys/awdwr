@@ -1652,9 +1652,21 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
           gsub(/(.{1,76})(\s+|$)/, "\\1\n").gsub(/^/,'// ') + "//\n"
       end
 
+      spec = Gem::Specification.find_by_name('jquery-ui-rails')
+      if spec
+        assets = "#{spec.gem_dir}/app/assets/javascripts"
+        if File.exist?("#{assets}/jquery-ui/effect-blind.js")
+          effect = 'jquery-ui/effect-blind'
+        elsif File.exist?("#{assets}/jquery.ui.effect-blind.js")
+          effect = 'jquery.ui.effect-blind'
+        end
+      end
+
+      raise "can't find jquery-ui/effect-blind" unless effect
+
       msub /()\/\/= require jquery_ujs/, <<-EOF.unindent(8)
         //#START_HIGHLIGHT
-        //= require jquery.ui.effect-blind
+        //= require #{effect}
         //#END_HIGHLIGHT
       EOF
     end
