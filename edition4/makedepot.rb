@@ -1232,9 +1232,13 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
         edit 'Cart.find', :highlight do
           msub /(@cart = .*)/, 'set_cart'
         end
+      else
+        edit '@cart.destroy', :highlight do
+          msub /()$/, ' if @cart.id == session[:cart_id]'
+        end
       end
 
-      msub /@cart.destroy\n()/,<<-EOF.unindent(4), :highlight
+      msub /@cart.destroy.*\n()/,<<-EOF.unindent(4), :highlight
         session[:cart_id] = nil
       EOF
 
@@ -3256,7 +3260,7 @@ section 15.1, 'Task J1: Selecting the locale' do
       #START_HIGHLIGHT
       def set_i18n_locale_from_params
         if params[:locale]
-          if I18n.available_locales.include?(params[:locale].to_sym)
+          if I18n.available_locales.map(&:to_s).include?(params[:locale])
             I18n.locale = params[:locale]
           else
             flash.now[:notice] = 
