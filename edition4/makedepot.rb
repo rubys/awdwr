@@ -162,6 +162,9 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
       msub /,( ):?notice/, "\n          "
       msub /,( ):?status:? ?=?>? :un/, "\n          "
     end
+    dcl 'destroy' do
+      msub /,( ):?notice/, "\n          " if self =~ /notice/
+    end
     sub! /(, only allow the white) (list through\.)$/, "\\1\n    # \\2"
   end
 
@@ -268,8 +271,8 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     edit '<body>', :highlight
     msub /<body()>/, " class='<%= controller.controller_name %>'"
 
-    if self =~ /, "data-turbolinks-track"/
-      msub /,( )"data-turbolinks-track"/, "\n    "
+    if self =~ /, ['"]data-turbolinks-track['"]/
+      msub /,( )['"]data-turbolinks-track['"]/, "\n    "
     end
   end
 
@@ -2171,7 +2174,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     edit 'app/views/line_items/create.js.erb' do
       clear_highlights
       msub /()/, <<-EOF.unindent(8) + "\n", :highlight
-        $("#notice").hide();
+        $('#notice').hide();
       EOF
     end
   end
@@ -2302,7 +2305,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   publish_code_snapshot :p
 end
 
-unless $rails_version =~ /^3\./
+unless $PUB or $rails_version =~ /^3\./
 section 12.3, 'Iteration G3: Downloading an eBook' do
   overview <<-EOF
     demonstrate streaming with ActionController::Live
@@ -3132,11 +3135,15 @@ section 14.4, 'Iteration I4: Adding a Sidebar' do
       begin
         @user.destroy
         flash[:notice] = "User #{@user.name} deleted"
-      rescue Exception => e
+      rescue StandardError => e
         flash[:notice] = e.message
       end
       #END_HIGHLIGHT
     EOF
+
+    if data =~ /, notice/
+      data.msub /redirect_to users_url,( )notice:/, "\n" + (' ' * 8)
+    end
   end
 end
 
@@ -3817,6 +3824,10 @@ else
       edit /^gem 'rails'.*/, :highlight
       edit /^gem 'sass-rails'.*/, :highlight
       edit /^gem 'coffee-rails'.*/, :highlight
+      edit /^gem 'jquery-ui-rails'.*/, :highlight
+
+      # insert line break
+      sub! /in the background/, "in the\n# background"
     end
   end
 end
@@ -4188,7 +4199,7 @@ $cleanup = Proc.new do
   system "ln -f -s #{$DATA} #{$WORK}"
 end
 
-unless $rails_version =~ /^3\./
+unless $PUB or $rails_version =~ /^3\./
   section 26.4, 'Devise' do
     edit 'Gemfile', 'devise' do
       msub /activemerchant.*\n()/, <<-EOF.unindent(8), :mark => 'devise'
