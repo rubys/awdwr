@@ -364,6 +364,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 15.2, "Task J2: i18n for the cart" do
+    ticket 275,
+      :list => 'i18n',
+      :title => "Can't set locale to something other than the default",
+      :match =>  /"es" is not a valid locale/
+
     assert_select '.price', /49,95(.|&#?\w+;)\$US/u
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
     assert_select 'input[type=submit][value$=dir al Carrito]'
@@ -372,12 +377,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 15.3, "Task J3: i18n for the order page" do
-    # ticket 5971,
-    #   :title =>  "labels don't treat I18n name_html as html_safe",
-    #   :match => /Direcci&amp;oacute;n/
-    # ticket 5971,
-    #   :title =>  "labels don't treat I18n name_html as html_safe",
-    #   :match => /&lt;span class=&quot;translation_missing&quot;&gt;/
+    ticket 275,
+      :list => 'i18n',
+      :title => "Can't set locale to something other than the default",
+      :match =>  /"es" is not a valid locale/
 
     assert_select 'input[type=submit][value$=Comprar]'
     assert_select '#error_explanation',
@@ -386,9 +389,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 15.4, "Task J4: Add a locale switcher" do
-    ticket 14352,
-      :title =>  "ActionController::Live is broken",
-      :match => /ActionDispatch::IllegalStateError: header already sent/
+    ticket 275,
+      :list => 'i18n',
+      :title => "Can't set locale to something other than the default",
+      :match =>  /"es" is not a valid locale/
 
     assert_select 'option[value=es]'
     assert_select 'h1', 'Your Pragmatic Catalog'
