@@ -393,6 +393,9 @@ class DepotTest < Gorp::TestCase
       :list => 'i18n',
       :title => "Can't set locale to something other than the default",
       :match =>  /"es" is not a valid locale/
+    ticket 16272,
+      :title =>  "assert_template w/ open_session in an integration test",
+      :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
 
     assert_select 'option[value=es]'
     assert_select 'h1', 'Your Pragmatic Catalog'
