@@ -285,9 +285,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 13.2, "Iteration H2: Integration Tests" do
-    ticket 10674,
+    ticket 16272,
       :title =>  "assert_template w/ open_session in an integration test",
-      :match => /DslUserStoriesTest.*\n.*NoMethodError: undefined method `keys' for nil:NilClass/
+      :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
 
     if $rails_version =~ /^3/
       assert_test_summary :tests => 3, :assertions => '\d+'
@@ -297,9 +297,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.1, "Iteration I1: Adding Users" do
-    ticket 14352,
-      :title =>  "ActionController::Live is broken",
-      :match => /ActionDispatch::IllegalStateError: header already sent/
+    ticket 16272,
+      :title =>  "assert_template w/ open_session in an integration test",
+      :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
 
     assert_select 'legend', 'Enter User Details'
     assert_select 'h1', /Listing Users/i
@@ -311,9 +311,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.2, "Iteration I2: Authenticating Users" do
-    ticket 14352,
-      :title =>  "ActionController::Live is broken",
-      :match => /ActionDispatch::IllegalStateError: header already sent/
+    ticket 16272,
+      :title =>  "assert_template w/ open_session in an integration test",
+      :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
 
     assert_select 'h1', 'Welcome'
     if $rails_version =~ /^3/
@@ -324,9 +324,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.3, "Iteration I3: Limiting Access" do
-    ticket 14352,
-      :title =>  "ActionController::Live is broken",
-      :match => /ActionDispatch::IllegalStateError: header already sent/
+    ticket 16272,
+      :title =>  "assert_template w/ open_session in an integration test",
+      :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
 
     if $rails_version =~ /^3/
       assert_test_summary :tests => 47, :assertions => '[789]\d'
