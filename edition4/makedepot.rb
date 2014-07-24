@@ -3604,7 +3604,7 @@ section 16, 'Deployment' do
     end
     console "Depot::Application.configure { paths['log'].first }", 'production'
   end
-  cmd 'git st'
+  cmd 'git status'
 end
 
 section 17, 'Retrospective' do
