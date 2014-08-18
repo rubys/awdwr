@@ -143,7 +143,7 @@ module AWDWR
     if File.exist? template
       gemfile = File.read(template)
       gemfile.sub! /platforms :jruby.*\nend/m, ''
-      gemfile.sub! /group :doc.*\nend/m, ''
+      gemfile.sub! /group :doc.*?\nend/m, ''
 
       branches += gemfile.scan(
         /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
