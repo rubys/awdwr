@@ -173,7 +173,12 @@ end
 # checkout/update git repositories
 gems.each do |lib, opts|
   next if lib == 'rails'
-  opts[:git] = "https://github.com/#{opts[:github]}.git" if opts[:github]
+
+  if opts[:github]
+    opts[:git] = "https://github.com/#{opts[:github]}.git" 
+    opts[:git] += " #{lib}"if opts[:github] =~ /^\w+\/(\w+)$/ and lib != $1
+  end
+
   next unless opts[:git]
   print lib + ': '
   if not File.exist? File.join(HOME,'git',lib)
