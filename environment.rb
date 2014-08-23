@@ -149,7 +149,7 @@ module AWDWR
         /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
       branches += gemfile.scan(
         /^\s*gem ['"]([-\w]+)['"],.*github:.*branch: ['"]([-\w]+)['"]/)
-      repos += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github: '(.*?)'/)
+      repos += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github: ['"](.*?)['"]/)
       libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github:/).flatten
     end
 
