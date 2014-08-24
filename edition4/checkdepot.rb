@@ -209,9 +209,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 11.6, "Testing AJAX changes" do
-    ticket 12343,
-      :title =>  "assign_attributes should return if arguments are blank",
-      :match => /ActiveModel::ForbiddenAttributesError/
+    ticket 167,
+      :list => 'jquery-rails',
+      :title =>  "SelectorAssertions moved in Rails 4.2",
+      :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
 
     assert_select 'h2, code', "undefined method `line_items' for nil:NilClass"
 
@@ -235,9 +236,9 @@ class DepotTest < Gorp::TestCase
       :match => /undefined method `title&amp;#39; for nil:NilClass/
 
     # atom
-    assert_select '.stdout', /&lt;summary type="xhtml"&gt;/,
+    assert_select '.stdout', /(<|&lt;)summary type="xhtml"(>|&gt;)/,
       'Missing <summary type="xhtml">'
-    assert_select '.stdout', /&lt;td&gt;CoffeeScript&lt;\/td&gt;/,
+    assert_select '.stdout', /(<|&lt;)td(>|&gt;)CoffeeScript(<|&lt;)\/td(>|&gt;)/,
       'Missing <td>CoffeeScript</td>'
 
     # caching
@@ -246,18 +247,19 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.4, "Playtime" do
-    ticket 14352,
-      :title =>  "ActionController::Live is broken",
-      :match => /ActionDispatch::IllegalStateError: header already sent/
+    ticket 167,
+      :list => 'jquery-rails',
+      :title =>  "SelectorAssertions moved in Rails 4.2",
+      :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
 
     # raw xml
-    assert_select '.stdout', /&lt;email&gt;customer@example.com&lt;\/email&gt;/,
+    assert_select '.stdout', /(<|&lt;)email(>|&gt;)customer@example.com(<|&lt;)\/email(>|&gt;)/,
       'Missing <email>customer@example.com</email>'
-    assert_select '.stdout', /&lt;id type="integer"&gt;1&lt;\/id&gt;/,
+    assert_select '.stdout', /(<|&lt;)id type="integer"(>|&gt;)1(<|&lt;)\/id(>|&gt;)/,
       'Missing <id type="integer">2</id>'
 
     # html
-    assert_select '.stdout', /&lt;a href="mailto:customer@example.com"&gt;/,
+    assert_select '.stdout', /(<|&lt;)a href="mailto:customer@example.com"(>|&gt;)/,
       'Missing <a href="mailto:customer@example.com">'
 
     # json
@@ -265,7 +267,7 @@ class DepotTest < Gorp::TestCase
       'Missing "title": "CoffeeScript"'
 
     # custom xml
-    assert_select '.stdout', /&lt;order_list for_product=.*&gt;/,
+    assert_select '.stdout', /(<|&lt;)order_list for_product=.*(>|&gt;)/,
       'Missing <order_list for_product=.*>'
 
     # test clean
@@ -298,9 +300,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.1, "Iteration I1: Adding Users" do
-    ticket 16272,
-      :title =>  "assert_template w/ open_session in an integration test",
-      :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
+    ticket 167,
+      :list => 'jquery-rails',
+      :title =>  "SelectorAssertions moved in Rails 4.2",
+      :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
 
     assert_select 'legend', 'Enter User Details'
     assert_select 'h1', /Listing Users/i
@@ -312,9 +315,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.2, "Iteration I2: Authenticating Users" do
-    ticket 16272,
-      :title =>  "assert_template w/ open_session in an integration test",
-      :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
+    ticket 167,
+      :list => 'jquery-rails',
+      :title =>  "SelectorAssertions moved in Rails 4.2",
+      :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
 
     assert_select 'h1', 'Welcome'
     if $rails_version =~ /^3/
@@ -325,9 +329,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.3, "Iteration I3: Limiting Access" do
-    ticket 16272,
-      :title =>  "assert_template w/ open_session in an integration test",
-      :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
+    ticket 167,
+      :list => 'jquery-rails',
+      :title =>  "SelectorAssertions moved in Rails 4.2",
+      :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
 
     if $rails_version =~ /^3/
       assert_test_summary :tests => 47, :assertions => '[789]\d'
@@ -345,9 +350,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.5, "Playtime" do
-    ticket 14352,
-      :title =>  "ActionController::Live is broken",
-      :match => /ActionDispatch::IllegalStateError: header already sent/
+    ticket 167,
+      :list => 'jquery-rails',
+      :title =>  "SelectorAssertions moved in Rails 4.2",
+      :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
 
     assert_test_summary :tests => '4[68]', :assertions => '[789]\d'
 
@@ -390,13 +396,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 15.4, "Task J4: Add a locale switcher" do
-    ticket 275,
-      :list => 'i18n',
-      :title => "Can't set locale to something other than the default",
-      :match =>  /"es" is not a valid locale/
-    ticket 16272,
-      :title =>  "assert_template w/ open_session in an integration test",
-      :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
+    ticket 167,
+      :list => 'jquery-rails',
+      :title =>  "SelectorAssertions moved in Rails 4.2",
+      :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
+
 
     assert_select 'option[value=es]'
     assert_select 'h1', 'Your Pragmatic Catalog'
@@ -437,7 +441,7 @@ class DepotTest < Gorp::TestCase
       :title =>  "Live streaming doesn't work with basic authentication or builder",
       :match => /<pre class="stdin">curl.*<\/pre>\s+<pre class="stdin">/
 
-    assert_select '.stdout', /&lt;price currency="USD"&gt;49.95&lt;\/price&gt;/
+    assert_select '.stdout', /(<|&lt;)price currency="USD"(>|&gt;)49.95(<|&lt;)\/price(>|&gt;)/
     assert_select '.stdout', /"1 minute"/
     assert_select '.stdout', /"half a minute"/
     assert_select '.stdout', /"CAN\$235"/
@@ -471,13 +475,13 @@ class DepotTest < Gorp::TestCase
 
   section 25.1, 'rack' do
     assert_select 'p', '34.95'
-    assert_select 'h2', 'Programming Ruby 1.9 &amp; 2.0'
+    assert_select 'h2', /^Programming Ruby 1\.9 &(amp;)? 2\.0$/
   end
 
   section 25.2, 'rake' do
     assert_select '.stderr', /^mkdir -p .*db\/backup$/
     assert_select '.stderr', 
-      /^sqlite3 .*?db\/production\.db \.dump &gt; .*\/production.backup$/
+      /^sqlite3 .*?db\/production\.db \.dump (>|&gt;) .*\/production.backup$/
   end
 
   section 26.1, 'Active Merchant' do
