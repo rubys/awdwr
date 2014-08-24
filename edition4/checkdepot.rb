@@ -44,8 +44,8 @@ class DepotTest < Gorp::TestCase
 
     assert_select 'h1', 'Hello from Rails!'
     assert_select "p", 'Find me in app/views/say/hello.html.erb'
-    assert_select "a[href=http://localhost:#{$PORT}/say/goodbye]"
-    assert_select "a[href=http://localhost:#{$PORT}/say/hello]"
+    assert_select "a[href='http://localhost:#{$PORT}/say/goodbye']"
+    assert_select "a[href='http://localhost:#{$PORT}/say/hello']"
     if RUBY_VERSION =~ /^1.8/
       assert_select 'p', /^It is now \w+ \w+ \d\d \d\d:\d\d:\d\d [+-]\d+ \d+/
     else
@@ -67,7 +67,7 @@ class DepotTest < Gorp::TestCase
 
     assert_select 'th', 'Image url'
     assert_select 'input#product_title[value=CoffeeScript]'
-    assert_select "a[href=http://localhost:#{$PORT}/products/1]", 'redirected'
+    assert_select "a[href='http://localhost:#{$PORT}/products/1']", 'redirected'
     if $rails_version =~ /^3/
       assert_test_summary :tests => '[01]', :assertions => '[01]'
       assert_test_summary :tests => 7, :assertions => '1[03]'
@@ -138,8 +138,8 @@ class DepotTest < Gorp::TestCase
   end
 
   section 9.3, "Iteration D3: Adding a button" do
-    assert_select 'input[type=submit][value=Add to Cart]'
-    assert_select "a[href=http://localhost:#{$PORT}/carts/1]", 'redirected'
+    assert_select 'input[type=submit][value="Add to Cart"]'
+    assert_select "a[href='http://localhost:#{$PORT}/carts/1']", 'redirected'
     assert_select '#notice', 'Line item was successfully created.'
 
     assert_select 'li', /^Programming Ruby 1\.9 &(amp;)? 2\.0$/
@@ -167,7 +167,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 10.2, "Iteration E2: Handling Errors" do
-    assert_select "a[href=http://localhost:#{$PORT}/]", 'redirected'
+    assert_select "a[href='http://localhost:#{$PORT}/']", 'redirected'
     assert_select '.hilight', 'Attempt to access invalid cart wibble'
     assert_select '#notice', 'Invalid cart'
     unless $rails_version =~ /^3\./
@@ -179,7 +179,7 @@ class DepotTest < Gorp::TestCase
   section 10.3, "Iteration E3: Finishing the Cart" do
     assert_select '#notice', 'Your cart is currently empty'
     assert_select '.total_cell', '$121.95'
-    assert_select 'input[type=submit][value=Empty cart]'
+    assert_select 'input[type=submit][value="Empty cart"]'
   end
 
   section 10.4, "Playtime" do
@@ -200,11 +200,11 @@ class DepotTest < Gorp::TestCase
   section 11.1, "Iteration F1: Moving the Cart" do
     assert_select 'h2', 'Your Cart'
     assert_select '.total_cell', '$121.95'
-    assert_select 'input[type=submit][value=Empty cart]'
+    assert_select 'input[type=submit][value="Empty cart"]'
   end
 
   section 11.4, "Iteration F4: Hide an Empty Cart" do
-    assert_select '#cart[style=display: none]'
+    assert_select '#cart[style="display: none"]'
     assert_select '.total_cell', '$171.90'
   end
 
@@ -225,7 +225,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.1, "Iteration G1: Capturing an Order" do
-    assert_select 'input[type=submit][value=Place Order]'
+    assert_select 'input[type=submit][value="Place Order"]'
     assert_select 'h2', /4 errors\s+prohibited this order from being saved/
     assert_select '#notice', 'Thank you for your order.'
   end
@@ -345,7 +345,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'legend', 'Please Log In'
     assert_select 'input[type=submit][value=Login]'
     assert_select 'h1', 'Welcome'
-    assert_select "a[href=http://localhost:#{$PORT}/login]", 'redirected'
+    assert_select "a[href='http://localhost:#{$PORT}/login']", 'redirected'
     assert_select 'h1', 'Listing products'
   end
 
@@ -378,7 +378,7 @@ class DepotTest < Gorp::TestCase
 
     assert_select '.price', /49,95(.|&#?\w+;)\$US/u
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
-    assert_select 'input[type=submit][value$=dir al Carrito]'
+    assert_select 'input[type=submit][value$="dir al Carrito"]'
     assert_select 'td', /1(.|&#?\w+;)/u
     assert_select 'td', 'CoffeeScript'
   end
@@ -516,6 +516,6 @@ class DepotTest < Gorp::TestCase
 
   section 26.3, "Iteration G3: Pagination" do
     assert_select 'td', 'Customer 100'
-    assert_select "a[href=http://localhost:#{$PORT}/en/orders?page=4]"
+    assert_select "a[href='http://localhost:#{$PORT}/en/orders?page=4']"
   end
 end
