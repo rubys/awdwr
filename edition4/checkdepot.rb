@@ -141,7 +141,8 @@ class DepotTest < Gorp::TestCase
     assert_select 'input[type=submit][value=Add to Cart]'
     assert_select "a[href=http://localhost:#{$PORT}/carts/1]", 'redirected'
     assert_select '#notice', 'Line item was successfully created.'
-    assert_select 'li', 'Programming Ruby 1.9 &amp; 2.0'
+
+    assert_select 'li', /^Programming Ruby 1\.9 &(amp;)? 2\.0$/
   end
 
   section 9.4, "Playtime" do
@@ -212,7 +213,7 @@ class DepotTest < Gorp::TestCase
       :title =>  "assign_attributes should return if arguments are blank",
       :match => /ActiveModel::ForbiddenAttributesError/
 
-    assert_select 'code', "undefined method `line_items' for nil:NilClass"
+    assert_select 'h2, code', "undefined method `line_items' for nil:NilClass"
 
     if $rails_version =~ /^3/
       assert_test_summary :tests => '[78]', :assertions => '2\d'
