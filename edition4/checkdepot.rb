@@ -362,6 +362,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 15.1, "Task J1: i18n for the store front" do
+    ticket 16679,
+      :title => "Missing partial routes/_route",
+      :match => %r{Missing partial routes/_route}
+
     unless $rails_version =~ /^3\./
       assert_select 'td', /store_path/
       assert_select 'td', /\(:locale\)\(\.:format\)/
