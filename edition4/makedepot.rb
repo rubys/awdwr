@@ -2638,7 +2638,10 @@ section 13.1, 'Iteration H1: Email Notifications' do
       '/<td>1&times;<\/td>\s*<td>Programming Ruby 1.9<\/td>/'
   end
 
-  rake 'db:test:load'
+  if $rails_version =~ /^3/ or $rails_version =~ /^4\.0/
+    rake 'db:test:load'
+  end
+
   test 'test/*/order_notifier_test.rb'
 end
 
