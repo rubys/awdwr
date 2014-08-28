@@ -75,7 +75,7 @@ module AWDWR
         gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
         gems += gemfile.scan(/^\s*# gem ['"]([-\w]+)['"](, ['"].*)/)
 
-        exclude = %(
+        exclude = %w(
           rails turn 
           therubyrhino therubyracer 
           ruby-debug ruby-debug19 debugger
@@ -182,6 +182,10 @@ module AWDWR
     repos.each do |lib, repos|
       gems[lib] ||= {}
       gems[lib][:github] = repos
+    end
+
+    exclude.each do |lib|
+      gems.delete(lib)
     end
 
     gems
