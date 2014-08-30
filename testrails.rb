@@ -126,6 +126,7 @@ open('|mysql -u root','w') {|f| f.write "drop database depot_production;"}
 open('|mysql -u root','w') {|f| f.write "create database depot_production;"}
 
 $gems = gems = AWDWR::dependencies(File.join(HOME, 'git', 'rails'), release)
+gems['rails'] ||= {:github => 'rails/rails'}
 
 def gem name, version=nil, opts={}
   opts[:version] = version if String === version
