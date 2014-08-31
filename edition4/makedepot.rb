@@ -2596,8 +2596,11 @@ section 13.1, 'Iteration H1: Email Notifications' do
     clear_highlights
     dcl 'create' do
       msub /\n()\s+format/, <<-EOF, :highlight
-        OrderNotifier.received(@order).deliver
+        OrderNotifier.received(@order).deliver_later
       EOF
+      if $rails_version =~ /^3\./ or $rails_version =~ /^4\.[01]/
+        gsub! 'deliver_later', 'deliver'
+      end
     end
   end
 
