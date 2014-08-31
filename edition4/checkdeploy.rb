@@ -14,7 +14,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', 
       "You appear to have all necessary dependencies installed"
     assert_select '.stderr', /executing `deploy:migrations'/
-    assert_select '.stderr', /==  CreateUsers: migrated/
+    assert_select '.stderr', /CreateUsers: migrated/
     assert_select '.stderr', /executing `deploy:assets:precompile'/
     assert_select '.stderr', /Writing.*public\/assets\/rails-[0-9a-f]+\.png/
     assert_select '.stderr', /executing "touch.*restart.txt"/

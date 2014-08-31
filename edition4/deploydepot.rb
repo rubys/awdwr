@@ -18,6 +18,8 @@ end
 $HOME = ENV['HOME']
 $HOME ||= "/home/#{ENV['USER']}" if File.exist? "/home/#{ENV['USER']}"
 
+system "rm -rf #{$HOME}/deploy/depot"
+
 section 16.1, 'Capistrano' do
   Dir.chdir(File.join($WORK, 'depot'))
 
@@ -117,7 +119,7 @@ section 16.1, 'Capistrano' do
   system 'git remote rm origin' if `git remote` =~ /^origin$/
 
   desc 'Initial code drop'
-  cmd 'git add .'
+  cmd 'git add --all .'
   cmd 'git commit -m "prep for deploy"'
   bundle 'package'
 
