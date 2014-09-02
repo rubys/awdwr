@@ -357,7 +357,7 @@ class DepotTest < Gorp::TestCase
 
     assert_test_summary :tests => '4[68]', :assertions => '[789]\d'
 
-    assert_select '.stdout', /login"&gt;redirected/
+    assert_select '.stdout', /login"(>|&gt;)redirected/
     assert_select '.stdout', /customer@example.com/
   end
 
