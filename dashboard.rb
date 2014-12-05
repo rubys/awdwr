@@ -302,8 +302,8 @@ _html do
           _tr_ attrs do
             _td job['book'], {:align=>'right'}.
               merge(job['book']=='4' ? {} : {:class=>'hilite'})
-            _td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='2.0.0')
-            _td job['rails'], ({:class=>'hilite'} if job['rails']!='4.1')
+            _td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='2.1.5')
+            _td job['rails'], ({:class=>'hilite'} if job['rails']!='5.0')
             _td :class=>color, :align=>'center' do
               _a status, :href => checkdepot(job, status, @static)
             end

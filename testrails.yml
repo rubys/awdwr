@@ -2,12 +2,12 @@ default:
   script:  makedepot.rb
 
   destdir: AWDwR4
-  branch:  master
+  branch:  master # v5.0
   source:  /home/rubys/git/awdwr/edition4
   output:  []
   message: []
   rvm:
-    bin:   ruby-2.0.0-p*
+    bin:   ruby-2.1.5
 
 187:
   output:  1.8.7
@@ -27,25 +27,19 @@ default:
   rvm:
     bin:   ruby-1.9.3-p*
 
-210:
-    output:  2.1.0
-    message: 'Ruby 2.1.0'
-    rvm:
-      bin:   ruby-2.1.0
-
 220:
-    output:  2.2.0
-    message: 'Ruby 2.2.0'
-    rvm:
-      src:   trunk
-      bin:   ruby-head-n*
+  output:  2.2.0
+  message: 'Ruby 2.2.0'
+  rvm:
+    src:   trunk
+    bin:   ruby-head-n*
 #
-#     bin:   ruby-2.2.0
+#   bin:   ruby-2.2.0
 #
-#     src:   ruby_2_2_0
-#     bin:   ruby-2.2.0-s*
+#   src:   ruby_2_2_0
+#   bin:   ruby-2.2.0-s*
 #
-#     bin:   ruby-2.2.0-rc*
+#   bin:   ruby-2.2.0-rc*
 
 23:
   output:  '2.3'
@@ -74,10 +68,15 @@ default:
 
 41:
   output:  '4.1'
-# branch:  4-1-0
-# message: '4-1-0'
   branch:  4-1-stable
   message: '4-1-stable'
+
+42:
+  output:  '4.2'
+# branch:  4-2-0
+# message: '4-2-0'
+  branch:  4-2-stable
+  message: '4-2-stable'
 
 3:
   source:  /home/rubys/git/awdwr/edition3
