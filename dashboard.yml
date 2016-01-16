@@ -7,9 +7,9 @@ book:
     web:  AWDwR4
     env:
     - rails: '5.0'
-      ruby:  '2.2.0'
+      ruby:  '2.3.0'
     - rails: '5.0'
-      ruby:  '2.1.5'
+      ruby:  '2.2.3'
     - rails: '4.2'
       ruby:  '2.1.5'
     - rails: '4.1'
