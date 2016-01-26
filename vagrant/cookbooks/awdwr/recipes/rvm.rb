@@ -21,8 +21,11 @@ bash "install rvm" do
         cp -Lr /home/vagrant/.rvm/src/rvm /vagrant/cache/rvm-src
       fi
     else
-      curl -L https://get.rvm.io | bash -s stable
+      gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+      curl -sSL https://get.rvm.io | bash -s $1
 
+      mkdir -p /vagrant/cache/rvm-src
+      mkdir -p /vagrant/cache/rvm-archives
       cp -Lr /home/vagrant/.rvm/src/rvm /vagrant/cache/rvm-src
       cp -Lr /home/vagrant/.rvm/archives /vagrant/cache/rvm-archives
     fi
