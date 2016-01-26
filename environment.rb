@@ -146,6 +146,7 @@ module AWDWR
       gemfile.sub! /platforms :jruby.*\nend/m, ''
       gemfile.sub! /group :doc.*?\nend/m, ''
 
+      gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
       branches += gemfile.scan(
         /^\s*gem ['"]([-\w]+)['"],.*:git.*:branch => ['"]([-\w]+)['"]/)
       branches += gemfile.scan(
