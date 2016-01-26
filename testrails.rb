@@ -301,7 +301,7 @@ if File.exist? File.join(WORK, 'Gemfile')
   end
 
   install = <<-EOF
-    gem list bundler | grep -q #{bundler} && gem update bundler || gem #{install} bundler
+    gem list -i ^bundler$ | grep -q #{bundler} && gem update bundler || gem #{install} bundler
     (cd #{WORK}; rm -rf Gemfile.lock vendor; bundle install)
   EOF
 else
