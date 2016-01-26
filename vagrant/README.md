@@ -1,5 +1,5 @@
 Quick Start
-=========
+===========
 
 Install [vagrant](http://www.vagrantup.com/).
 
@@ -15,10 +15,10 @@ interface.
 A complete run, including deployment, of the default versions of Ruby and
 Rails can be accomplished with the following command:
 
-    vagrant ssh -c "testrails; source bin/work; ruby ../deploydepot.rb"
+    vagrant ssh -c "bin/testrails; source bin/work; ruby ../deploydepot.rb"
 
 Using the Web Interface
-===
+=======================
 
 At the bottom of the table is an input field.  Enter any combination of:
 
@@ -40,7 +40,7 @@ In the top right is a link to the `logs` directory, which can be useful when
 things go wrong.
 
 Using the Command interface
-----
+---------------------------
 
 Before proceeding, a bit of knowledge as to how the directories are laid out
 is in order.  As Rails is commonly used, one may have multiple applications
@@ -86,7 +86,7 @@ Other possibilities include pulling or directly applying changes to rails or
 other dependencies and restarting the tests at any point.
 
 Testing Deployment
-----
+------------------
 
 Deployment using Apache, Phusion Passenger and Capistrano can be initiated
 using the command line:
@@ -102,7 +102,7 @@ entry in the `/etc/hosts` file on your host machine with the ip address
 of your vagrant box.
 
 Cleaning up
-===
+===========
 
 The entire vm can be removed using the following command:
 

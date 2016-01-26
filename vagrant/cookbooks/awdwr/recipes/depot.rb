@@ -78,3 +78,10 @@ ruby_block 'create mysql depot_production' do
     end
   end
 end
+
+file '/home/vagrant/.gemrc' do
+  content 'gem: --no-rdoc --no-ri'
+  user 'vagrant'
+  group 'vagrant'
+  mode '0755'
+end
