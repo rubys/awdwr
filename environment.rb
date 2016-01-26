@@ -74,6 +74,7 @@ module AWDWR
         libs += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],.*:git/)
         gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
         gems += gemfile.scan(/^\s*# gem ['"]([-\w]+)['"](, ['"].*)/)
+        repos += gemfile.scan(/^\s*gem ['"]([-\w]+)['"],\s*github: ['"](.*?)['"]/)
 
         exclude = %w(
           rails turn 

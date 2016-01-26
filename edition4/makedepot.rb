@@ -151,21 +151,23 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   generate :scaffold, :Product,
     'title:string description:text image_url:string price:decimal'
 
-  desc 'Break lines for formatting reasons'
-  edit 'app/controllers/products_controller.rb' do
-    dcl 'create' do
-      msub /,( ):?notice/, "\n          "
-      msub /,( ):?location/, "\n          "
-      msub /,( ):?status:? ?=?>? :un/, "\n          "
+  if File.read('app/controllers/products_controller.rb').include? 'location'
+    desc 'Break lines for formatting reasons'
+    edit 'app/controllers/products_controller.rb' do
+      dcl 'create' do
+        msub /,( ):?notice/, "\n          "
+        msub /,( ):?location/, "\n          "
+        msub /,( ):?status:? ?=?>? :un/, "\n          "
+      end
+      dcl 'update' do
+        msub /,( ):?notice/, "\n          "
+        msub /,( ):?status:? ?=?>? :un/, "\n          "
+      end
+      dcl 'destroy' do
+        msub /,( ):?notice/, "\n          " if self =~ /notice/
+      end
+      sub! /(, only allow the white) (list through\.)$/, "\\1\n    # \\2"
     end
-    dcl 'update' do
-      msub /,( ):?notice/, "\n          "
-      msub /,( ):?status:? ?=?>? :un/, "\n          "
-    end
-    dcl 'destroy' do
-      msub /,( ):?notice/, "\n          " if self =~ /notice/
-    end
-    sub! /(, only allow the white) (list through\.)$/, "\\1\n    # \\2"
   end
 
   edit 'app/views/products/index.html.erb' do

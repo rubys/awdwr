@@ -11,6 +11,8 @@ $rails_version = `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`.split(' ').last
 
 class DepotTest < Gorp::TestCase
 
+  self.test_order ||= :sorted
+
   input 'makedepot'
   output 'checkdepot'
 
