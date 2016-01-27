@@ -251,6 +251,11 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     desc 'Copy some images'
     cmd "cp -v #{$DATA}/assets/* app/assets/images/"
 
+    unless $rails_version =~ /^[34]/
+      desc 'Workaround for sprockets-rails issue 321'
+      restart_server 
+    end
+
     desc 'Add some style'
     DEPOT_CSS =  "app/assets/stylesheets/application.css.scss"
     edit "app/assets/stylesheets/products.css.scss" do

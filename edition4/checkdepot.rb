@@ -80,6 +80,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.2, "Iteration A2: Prettier Listings" do
+    ticket 321,
+      list:  'sprockets-rails',
+      title: 'Adding new images requires a server restart in development',
+      match: /Workaround for sprockets-rails issue 321/
+
     assert_select '.list_line_even'
   end
 
