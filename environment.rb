@@ -203,7 +203,7 @@ module AWDWR
     end
 
     # avoid busted version of rubyprof
-    if gems['ruby-prof'] == {:version=>"~> 0.11.2"}
+    if gems['ruby-prof'] == {version: ["~> 0.11.2"]}
       gems['ruby-prof'] = {}
     end
 
