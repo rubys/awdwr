@@ -1,6 +1,6 @@
-testrails: /home/rubys/bin/testrails.yml
-log: /home/rubys/logs
-bin: /home/rubys/bin
+testrails: ~/bin/testrails.yml
+log: ~/logs
+bin: ~/bin
 
 book:
 - '4':

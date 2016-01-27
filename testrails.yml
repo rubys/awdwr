@@ -3,23 +3,11 @@ default:
 
   destdir: AWDwR4
   branch:  master # v5.0
-  source:  /home/rubys/git/awdwr/edition4
+  source:  ~/git/awdwr/edition4
   output:  []
   message: []
   rvm:
     bin:   ruby-2.2.3
-
-187:
-  output:  1.8.7
-  message: 'Ruby 1.8.7'
-  rvm:
-    bin:   ruby-1.8.7-p*
-
-192:
-  output:  1.9.2
-  message: 'Ruby 1.9.2'
-  rvm:
-    bin:   ruby-1.9.2-p*
 
 193:
   output:  1.9.3
@@ -27,19 +15,30 @@ default:
   rvm:
     bin:   ruby-1.9.3-p*
 
-220:
+215:
+  output:  2.1.5
+  message: 'Ruby 2.1.5'
+  rvm:
+    bin:   ruby-2.1.5
+
+223:
+  output:  2.2.3
+  message: 'Ruby 2.2.3'
+  rvm:
+    bin:   ruby-2.2.3
+
+230:
+  output:  2.3.0
+  message: 'Ruby 2.3.0'
+  rvm:
+    bin:   ruby-2.3.0
+
+240:
   output:  2.2.0
   message: 'Ruby 2.2.0'
   rvm:
     src:   trunk
     bin:   ruby-head-n*
-#
-#   bin:   ruby-2.2.0
-#
-#   src:   ruby_2_2_0
-#   bin:   ruby-2.2.0-s*
-#
-#   bin:   ruby-2.2.0-rc*
 
 23:
   output:  '2.3'

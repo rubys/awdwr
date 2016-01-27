@@ -5,15 +5,16 @@ require 'wunderbar/job-control'
 require 'time'
 require 'yaml'
 
-HOME = $HOME.sub(/\/?$/, '/')
+$home = $HOME.sub(/\/?$/, '/')
+home_re = /(\$HOME|\~)\//
 
-$dashboard ||= File.join(File.dirname(__FILE__), 'dashboard.yml')
+$dashboard = File.join(File.dirname(__FILE__), 'dashboard.yml')
 config = YAML.load_file($dashboard)
-LOGDIR = config.delete('log').sub('$HOME/',HOME).untaint
-BINDIR = config.delete('bin').sub('$HOME/',HOME).untaint
+$logdir = config.delete('log').sub(home_re, $home).untaint
+$bindir = config.delete('bin').sub(home_re, $home).untaint
 
-testrails = config.delete('testrails')
-testrails = YAML.load_file(testrails) if testrails
+testrails = config.delete('testrails').to_s.sub /^\~\//, ENV['HOME'] + '/'
+testrails = YAML.load_file(testrails.untaint) if testrails
 
 # set up symbolic links
 if ARGV == ['--symlink']
@@ -27,10 +28,10 @@ if ARGV == ['--symlink']
   exit
 end
 
-require "#{HOME}/git/awdwr/environment"
+require "#{$home}/git/awdwr/environment".untaint
 
 # identify the unique jobs
-JOBS = config['book'].map do |editions|
+$jobs = config['book'].map do |editions|
   editions = [editions] if editions.respond_to? :push
   editions.map do |book, book_info|
     book_info['env'].map do |info|
@@ -39,7 +40,7 @@ JOBS = config['book'].map do |editions|
         ruby  = info['ruby'].gsub('.', '')
         info = AWDWR::config(testrails, book, rails, ruby).merge(info)
       else
-        info['source'] = book_info['home'].sub('$HOME/',HOME)
+        info['source'] = book_info['home'].sub(home_re ,HOME)
       end
       info['book']=book
       info['path']=File.join(info['source'], info['work']).untaint
@@ -49,50 +50,52 @@ JOBS = config['book'].map do |editions|
   end
 end.flatten
 
-def status
-  # determine if any processes are active
-  active = `ps xo start,args`.
-    scan(/^(?:\d\d:\d\d:\d\d|.\d:\d\d[AP]M) .*/).
-    grep(/(\d |\/)testrails/)
+module Dashboard
+  def self.status
+    # determine if any processes are active
+    active = `ps xo start,args`.
+      scan(/^(?:\d\d:\d\d:\d\d|.\d:\d\d[AP]M) .*/).
+      grep(/(\d |\/)testrails/)
 
-  log = []
-  unless active.empty?
-    start = Time.parse(active.first.split.first)
+    log = []
+    unless active.empty?
+      start = Time.parse(active.first.split.first)
 
-    logs = Dir["#{LOGDIR}/makedepot*.log"]
-    latest = logs.sort_by {|file| File.stat(file.untaint).mtime}.last
-    if latest and File.stat(latest).mtime >= start
-      log.push *open(latest) {|file| file.readlines.grep(/====>/).pop(3)}
+      logs = Dir["#{$logdir}/makedepot*.log"]
+      latest = logs.sort_by {|file| File.stat(file.untaint).mtime}.last
+      if latest and File.stat(latest).mtime >= start
+        log.push *open(latest) {|file| file.readlines.grep(/====>/).pop(3)}
+      end
+
+      log.map! {|line| line.chomp.sub('====> ','')}
+      log.unshift '' unless log.empty?
     end
 
-    log.map! {|line| line.chomp.sub('====> ','')}
-    log.unshift '' unless log.empty?
+    [active, log]
   end
 
-  [active, log]
-end
-
-# checkdepot link for a given job
-def checkdepot(job, status, static=false)
-  if static
-    link = "#{job['work'].sub('work','checkdepot')}.html"
-  else
-    link = "#{job['work']}/checkdepot.html"
-  end
-
-  checkdir = "#{job['path']}/checkdepot/"
-  checkfile = checkdir.sub(/\/$/,'.html')
-  if File.directory?(checkdir) and File.exist?(checkfile)
-    if File.stat(checkdir).mtime >= File.stat(checkfile).mtime
-      link.sub! ".html", '/'
+  # checkdepot link for a given job
+  def self.checkdepot(job, status, static=false)
+    if static
+      link = "#{job['work'].sub('work','checkdepot')}.html"
+    else
+      link = "#{job['work']}/checkdepot.html"
     end
-  end
 
-  if status == 'NO OUTPUT'
-    link= "#{link.sub('.html','/')}makedepot.log"
-  end
+    checkdir = "#{job['path']}/checkdepot/"
+    checkfile = checkdir.sub(/\/$/,'.html')
+    if File.directory?(checkdir) and File.exist?(checkfile)
+      if File.stat(checkdir).mtime >= File.stat(checkfile).mtime
+        link.sub! ".html", '/'
+      end
+    end
 
-  "#{job['web']}/#{link}"
+    if status == 'NO OUTPUT'
+      link= "#{link.sub('.html','/')}makedepot.log"
+    end
+
+    "#{job['web']}/#{link}"
+  end
 end
 
 # main output
@@ -106,13 +109,13 @@ _html do
 
     require 'shellwords'
     @args = Shellwords.join(@args.split).untaint
-    _.submit "ruby #{BINDIR}/testrails #{@args} " +
-	     "> #{LOGDIR}/post.out 2> #{LOGDIR}/post.err "
+    _.submit "ruby #{$bindir}/testrails #{@args} " +
+	     "> #{$logdir}/post.out 2> #{$logdir}/post.err "
 
     sleep 2
   end
 
-  active, log = status
+  active, log = Dashboard.status
 
   _head_ do
     _title 'Depot Dashboard'
@@ -281,7 +284,7 @@ _html do
       end
 
       _tbody_ do
-        JOBS.flatten.each do |job|
+        $jobs.flatten.each do |job|
           statfile = "#{job['path']}/checkdepot.status"
           statfile = "#{job['path']}/status" unless File.exist? statfile
           status = open(statfile) {|file| file.read.chomp} rescue 'missing'
@@ -305,7 +308,7 @@ _html do
             _td job['ruby'],  ({:class=>'hilite'} if job['ruby']!='2.1.5')
             _td job['rails'], ({:class=>'hilite'} if job['rails']!='5.0')
             _td :class=>color, :align=>'center' do
-              _a status, :href => checkdepot(job, status, @static)
+              _a status, :href => Dashboard.checkdepot(job, status, @static)
             end
             _td mtime.sub('T',' ').sub(/[+-]\d\d:\d\d$/,'')
           end
@@ -335,10 +338,10 @@ end
 
 # dynamic status updates
 _json do
-  active, log = status
+  active, log = Dashboard.status
 
   config={}
-  JOBS.each do |job|
+  $jobs.each do |job|
     statfile = "#{job['path']}/checkdepot.status"
     statfile = "#{job['path']}/status" unless File.exist? statfile
 
@@ -351,7 +354,7 @@ _json do
       'status'  => status,
       'mtime'   => mtime.sub('T',' ').sub(/[+-]\d\d:\d\d$/,''),
       'running' => running,
-      'link'    => checkdepot(job, status)
+      'link'    => Dashboard.checkdepot(job, status)
     }
   end
 

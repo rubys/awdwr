@@ -31,6 +31,13 @@ module AWDWR
     args = args.first.split(' ') if args.length == 1
 
     profile = config['default'].dup
+
+    profile.each do |key, value|
+      if profile[key].instance_of? String
+        profile[key] = value.sub /^\~\//, ENV['HOME'] + '/'
+      end
+    end
+
     config.each do |keyword,overrides|
       next unless args.include? keyword.to_s
       overrides.each do |key, value|
