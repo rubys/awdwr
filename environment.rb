@@ -201,6 +201,11 @@ module AWDWR
       gems.delete(lib)
     end
 
+    # avoid busted version of rubyprof
+    if gems['ruby-prof'] == {:version=>"~> 0.11.2"}
+      gems['ruby-prof'] = {}
+    end
+
     gems
   end
 end
