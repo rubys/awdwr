@@ -56,9 +56,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
-    ticket 15998,
-      :title =>  "ArgumentError: prepare called on a closed database",
-      :match => /ArgumentError: prepare called on a closed database/
+    ticket 628,
+      list:  'turbolinks',
+      title: 'Turbolinks: why is v3.0 not out yet?',
+      match: /DEPRECATION WARNING: alias_method_chain is deprecated./
 
     assert_select '.stderr', :minimum => 0 do |errors|
       errors.each do |err|
