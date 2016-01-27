@@ -4212,8 +4212,16 @@ $cleanup = Proc.new do
     end
   end
 
-  # Link static files
-  system "ln -f -s #{$DATA} #{$WORK}"
+  if $rails_version =~ /^[34]/
+    # Link static files
+    system "ln -f -s #{$DATA} #{$WORK}"
+  else
+    desc "cleanup - precompile assets for inclusion in results"
+    cmd "rails assets:precompile"
+    system "rm -rf #{$WORK}/data"
+    system "cp -rp #{$DATA} #{$WORK}"
+    system "cp -rp #{$WORK}/depot/public/assets #{$WORK}/data"
+  end
 end
 
 unless $PUB or $rails_version =~ /^3\./
