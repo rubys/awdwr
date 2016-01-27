@@ -171,8 +171,9 @@ module AWDWR
     gems.each do |gem, opts|
       hash = {}
       if opts and not opts.include? ':mswin'
-        hash[:version] = eval($1) if opts.sub!(/^,\s*(".*?")/, '') 
-        hash[:version] = eval($1) if opts.sub!(/^,\s*('.*?')/, '') 
+        hash[:version] = []
+        hash[:version] << eval($1) while opts.sub!(/^,\s*(".*?")/, '') 
+        hash[:version] << eval($1) while opts.sub!(/^,\s*('.*?')/, '') 
         while opts.sub!(/(\w+)\s*=?>?:?\s*(.*?)(,\s*|$)/, '')  do
           hash[$1.to_sym] = eval($2)
         end
@@ -222,7 +223,9 @@ if __FILE__ == $0
   gems.sort.each do |gem, options|
     next if gem == 'gorp'
     args = []
-    args.push options.delete(:version).inspect if options[:version]
+    if options[:version]
+      args.push options.delete(:version).map(&:inspect).join(', ')
+    end
     options.delete :branch if options[:branch] == 'master'
     options.each do |name, value|
       if RUBY_VERSION =~ /^1.8/
