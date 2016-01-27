@@ -498,6 +498,7 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
 
   desc "Route the 'root' of the site to the store"
   edit 'config/routes.rb', 'root' do
+    if match /welcome/
     msub /^()/, "# START:root\n"
     msub /welcome#index.*\n()/, "  # ...\n# END:root\n"
     edit /^end/, :mark=>'root'
@@ -507,6 +508,12 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
       msub /(welcome)#index/, 'store'
       msub /()$/, ", :as => 'store'"
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
+    else
+      msub /(\s*)\Z/, "\n\n"
+      msub /\n\n()\Z/, <<-EOF.unindent(2), :highlight
+      root 'store#index', as: 'store'
+      EOF
     end
 
     if self =~ /priority is based upon order of creation: first created/
