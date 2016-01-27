@@ -189,7 +189,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   end
 
   desc 'Apply the migration'
-  cmd 'rake db:migrate'
+  db :migrate
 
   restart_server
 
@@ -265,7 +265,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     data.gsub! '/images/', '' unless File.exist? 'public/images'
     data.gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
   end
-  cmd 'rake db:seed'
+  db :seed
 
   desc 'Link to the stylesheet in the layout'
   edit 'app/views/layouts/application.html.erb' do
@@ -791,7 +791,7 @@ section 9.1, 'Iteration D1: Finding a Cart' do
 
   desc 'Create a cart.'
   generate 'scaffold Cart'
-  cmd 'rake db:migrate'
+  db :migrate
 
   desc "Implement set_cart, which creates a new cart if it" +
     " can't find one."
@@ -828,7 +828,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
 
   desc 'Create the model object.'
   generate 'scaffold LineItem product:references cart:belongs_to'
-  cmd 'rake db:migrate'
+  db :migrate
 
   desc 'Cart has many line items.'
   edit 'app/models/cart.rb' do
@@ -1052,7 +1052,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   end
 
   desc "Apply the migration"
-  cmd 'rake db:migrate'
+  db :migrate
 
   desc 'Create a method to add a product to the cart by either incrementing ' +
        'the quantity of an existing line item, or creating a new line item.'
@@ -1107,7 +1107,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   end
 
   desc 'Combine entries'
-  cmd 'rake db:migrate'
+  db :migrate
 
   desc "Verify that the entries have been combined."
   get '/carts/1'
@@ -1117,8 +1117,8 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   edit migration, 'down'
 
   desc 'Separate out individual items.'
-  cmd 'rake db:rollback'
-  cmd 'rake db:migrate:status'
+  db :rollback
+  db ':migrate:status'
   cmd "mv #{migration} #{migration.sub('.rb', '.bak')}"
 
   desc 'Every item should (once again) only have a quantity of one.'
@@ -1126,7 +1126,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
 
   desc 'Recombine the item data.'
   cmd "mv #{migration.sub('.rb', '.bak')} #{migration}"
-  cmd 'rake db:migrate'
+  db :migrate
 
   desc 'Add a few products to the order.'
   post '/', {'product_id' => 2}, {:snapget => false}
@@ -1851,7 +1851,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   generate 'migration add_order_id_to_line_item order_id:integer'
 
   desc 'Apply both migrations'
-  cmd 'rake db:migrate'
+  db :migrate
 
   desc 'Add a Checkout button to the cart'
   edit 'app/views/carts/_cart.html.erb' do
@@ -2706,7 +2706,7 @@ section 14.1, 'Iteration I1: Adding Users' do
   end
 
   desc 'Run the migration'
-  cmd 'rake db:migrate'
+  db :migrate
 
   desc 'Add validation, has_secure_password'
   edit "app/models/user.rb" do
@@ -3625,7 +3625,7 @@ section 17, 'Retrospective' do
 end
 
 section 18, 'Finding Your Way Around' do
-  cmd 'rake db:version'
+  db :version
   edit 'lib/tasks/db_schema_migrations.rake' do |data|
     data << <<-EOF.unindent(6)
       namespace :db do
@@ -3637,7 +3637,7 @@ section 18, 'Finding Your Way Around' do
       end
     EOF
   end
-  cmd 'rake db:schema_migrations'
+  db :schema_migrations
   cmd 'ls log'
   cmd 'find script -type f'
   console 'puts $:'
@@ -4282,6 +4282,6 @@ unless $PUB or $rails_version =~ /^3\./
     generate 'devise Admin'
 
     desc 'Apply the migration'
-    cmd 'rake db:migrate'
+    db :migrate
   end
 end
