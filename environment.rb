@@ -207,6 +207,15 @@ module AWDWR
       gems['ruby-prof'] = {}
     end
 
+    if File.read("#{rails}/RAILS_VERSION") =~ /^4\./
+      # avoid odd dependencies that don't work in the Gemfiles of so-called
+      # 'stable' branches.  :-)
+      gems['sprockets'] = {}
+      gems['rack'] = {}
+      gems['sass-rails'].delete(:github) if gems['sass-rails']
+      gems['coffee-rails'].delete(:github) if gems['coffee-rails']
+    end
+
     gems
   end
 end
