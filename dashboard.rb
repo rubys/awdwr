@@ -109,6 +109,8 @@ _html do
 
     require 'shellwords'
     @args = Shellwords.join(@args.split).untaint
+    _pre "ruby #{$bindir}/testrails #{@args} " +
+	     "> #{$logdir}/post.out 2> #{$logdir}/post.err "
     _.submit "ruby #{$bindir}/testrails #{@args} " +
 	     "> #{$logdir}/post.out 2> #{$logdir}/post.err "
 

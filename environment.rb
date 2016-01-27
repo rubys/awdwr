@@ -72,6 +72,10 @@ module AWDWR
       'railties/lib/rails/generators/rails/app/templates/Gemfile')
     base = File.join(rails, 'railties/lib/rails/generators/app_base.rb')
 
+    if File.read(File.join(rails, 'RAILS_VERSION')) =~ /^[34]/
+      gems << ['rack', ', "~> 1.6"']
+    end
+
     # grab app dependencies
     if File.exist? template
       gemfile = File.read(template)
