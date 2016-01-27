@@ -1424,7 +1424,7 @@ section 10.4, 'Playtime' do
       EOF
     end
   end
-  rake 'db:migrate'
+  db :migrate
   edit 'app/models/cart.rb' do
     dcl 'add_product' do
       msub /line_items[.]build.*\n()/, <<-EOF.unindent(2)
@@ -3711,7 +3711,7 @@ section 21.2, 'Form Helpers' do
     'ketchup:boolean mustard:boolean mayonnaise:boolean start:date ' +
     'alarm:time'
   generate 'controller Form input'
-  rake 'db:migrate'
+  db :migrate
   restart_server
 
   edit 'app/views/form/input.html.erb' do
@@ -4040,7 +4040,7 @@ if $rails_version =~ /^3\.0/
       end
     end
     rake 'asset:packager:build_all'
-    rake "db:seed"
+    db :seed
   end
 end
 
