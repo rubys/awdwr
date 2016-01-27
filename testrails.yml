@@ -7,7 +7,7 @@ default:
   output:  []
   message: []
   rvm:
-    bin:   ruby-2.2.3
+    bin:   ruby-2.3.0
 
 193:
   output:  1.9.3
@@ -72,8 +72,6 @@ default:
 
 42:
   output:  '4.2'
-# branch:  4-2-0
-# message: '4-2-0'
   branch:  4-2-stable
   message: '4-2-stable'
 
