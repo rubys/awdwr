@@ -497,22 +497,18 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   generate 'controller Store index'
 
   desc "Route the 'root' of the site to the store"
-  edit 'config/routes.rb', 'root' do
+  edit 'config/routes.rb' do
     if match /welcome/
-    msub /^()/, "# START:root\n"
-    msub /welcome#index.*\n()/, "  # ...\n# END:root\n"
-    edit /^end/, :mark=>'root'
-
-    edit 'welcome#index', :highlight do
-      msub /^\s+(# )root.*/, ''
-      msub /(welcome)#index/, 'store'
-      msub /()$/, ", :as => 'store'"
-      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    end
+      edit 'welcome#index', :highlight do
+        msub /^\s+(# )root.*/, ''
+        msub /(welcome)#index/, 'store'
+        msub /()$/, ", :as => 'store'"
+        gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+      end
     else
       msub /(\s*)\Z/, "\n\n"
-      msub /\n\n()\Z/, <<-EOF.unindent(2), :highlight
-      root 'store#index', as: 'store'
+      msub /do\n()/, <<-EOF.unindent(6) + "\n", :highlight
+        root 'store#index', as: 'store'
       EOF
     end
 
