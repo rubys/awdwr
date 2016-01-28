@@ -143,6 +143,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 9.2, "Connection Products to Carts" do
+    ticket 23314,
+      list:  'rails',
+      title: 'generate scaffold with no fields generates a broken controller test',
+      match: /ArgumentError: When assigning attributes, you must pass a hash as an argument./
+
     if $rails_version =~ /^3/
       assert_test_summary :tests => 22, :assertions => 35
     else
