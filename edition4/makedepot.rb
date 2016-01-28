@@ -404,8 +404,12 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
           edit 'attributes', :highlight do
             sub! /@product.attributes/, "@update"
           end
+        elsif match /products?_url/
+          edit /^\s+(put|post|patch) products?_url.*\n/, :highlight do
+            msub /params: (\{.*\})/, "@update"
+          end
         else
-          edit /^\s+(put|post|patch) (:|products?_url).*\n/, :highlight do
+          edit /^\s+(put|post|patch) :.*\n/, :highlight do
             sub! /\{.*\}/, "@update"
           end
         end
