@@ -129,8 +129,13 @@ $gems = gems = AWDWR::dependencies(File.join(HOME, 'git', 'rails'), release)
 gems['rails'] ||= {:github => 'rails/rails'}
 
 def gem name, version=nil, opts={}
-  opts[:version] = version if String === version
-  opts.merge version       if Hash === version
+  if String === version
+    opts[:version] ||= []
+    opts[:version] << version
+  elsif Hash === version
+    opts.merge version
+  end
+
   $gems[name] ||= {}
   $gems[name].merge! opts
 end
@@ -204,12 +209,15 @@ Dir.chdir File.join(PROFILE.source,WORK) do
       if options[:git] or options[:github]
         path = File.join(HOME,'git',gem)
         if File.exist?(File.join(path, "/#{gem}.gemspec"))
-          options = {:path => path}
+          options.delete :git
+          options.delete :github
+          options.delete :version
+          options[:path] = path
         end
       end
 
       args = []
-      args.push options.delete(:version).inspect if options[:version]
+      args += options.delete(:version).map(&:inspect) if options[:version]
 
       options.each do |name, value|
         if release =~ /^1.8/
@@ -301,7 +309,7 @@ if File.exist? File.join(WORK, 'Gemfile')
   end
 
   install = <<-EOF
-    gem list -i ^bundler$ | grep -q #{bundler} && gem update bundler || gem #{install} bundler
+    gem list -i ^bundler$ > /dev/null && gem update bundler || gem #{install} bundler
     (cd #{WORK}; rm -rf Gemfile.lock vendor; bundle install)
   EOF
 else
