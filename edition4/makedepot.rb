@@ -3551,10 +3551,16 @@ section 16, 'Deployment' do
   end
 
   edit 'Gemfile', 'mysql' do
+    mysql_version = if $rails_version =~ /^3\.[12]/ || $rails_version =~ /^4\.0/ || $rails_version =~ /^4\.1/ || $rails_version =~ /^4\.2\.[01234]/
+                      "~> 0.3"
+                    else
+                      "~> 0.4"
+                    end
+
     clear_all_marks
     msub /'sqlite.*\n()/, <<-EOF.unindent(6), :mark => 'mysql'
       group :production do
-        gem 'mysql2'
+        gem 'mysql2', '#{mysql_version}'
       end
     EOF
 
