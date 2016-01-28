@@ -105,7 +105,7 @@ class DepotTest < Gorp::TestCase
       assert_test_summary :tests => '[01]', :assertions => '[01]'
       assert_test_summary :tests => 7, :assertions => '1[03]'
     else
-      assert_test_summary :tests => 7, :assertions => 13
+      assert_test_summary :tests => 7, :assertions => '1[23]'
     end
   end
 

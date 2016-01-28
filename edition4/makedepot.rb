@@ -406,7 +406,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
           end
         elsif match /products?_url/
           edit /^\s+(put|post|patch) products?_url.*\n/, :highlight do
-            msub /params: (\{.*\})/, "@update"
+            msub /product: (\{.*?\})/, "@update"
           end
         else
           edit /^\s+(put|post|patch) :.*\n/, :highlight do
