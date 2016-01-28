@@ -740,12 +740,18 @@ section 8.4, 'Iteration C4: Functional Testing' do
 end
 
 section 8.5, 'Iteration C5 - Caching' do
+  ced = 'config/environments/development.rb'
+
   unless File.exist? 'public/images'
     desc "Turn on caching in development"
-    edit 'config/environments/development.rb', 'perform_caching' do
-      clear_all_marks
-      edit 'perform_caching', :mark => 'perform_caching' do
-        msub /perform_caching = (false)/, 'true'
+    if File.read(ced).include? 'tmp/caching-dev.txt'
+      cmd 'rails dev:cache'
+    else
+      edit 'ced', 'perform_caching' do
+        clear_all_marks
+        edit 'perform_caching', :mark => 'perform_caching' do
+          msub /perform_caching = (false)/, 'true'
+        end
       end
     end
   end
@@ -781,12 +787,16 @@ section 8.5, 'Iteration C5 - Caching' do
 
   unless File.exist? 'public/images'
     desc "Turn caching back off"
-    edit 'config/environments/development.rb', 'perform_caching' do
-      msub /perform_caching = (true)/, 'false'
+    if File.read(ced).include? 'tmp/caching-dev.txt'
+      cmd 'rails dev:cache'
+    else
+      edit 'config/environments/development.rb', 'perform_caching' do
+        msub /perform_caching = (true)/, 'false'
+      end
+      cmd 'rm -f public/assets/*'
+      cmd 'rm -rf tmp/*cache/*'
+      restart_server
     end
-    cmd 'rm -f public/assets/*'
-    cmd 'rm -rf tmp/*cache/*'
-    restart_server
   end
 end
 
