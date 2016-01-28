@@ -211,6 +211,7 @@ Dir.chdir File.join(PROFILE.source,WORK) do
         if File.exist?(File.join(path, "/#{gem}.gemspec"))
           options.delete :git
           options.delete :github
+          options.delete :version
           options[:path] = path
         end
       end
