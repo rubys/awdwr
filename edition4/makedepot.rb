@@ -4224,7 +4224,7 @@ $cleanup = Proc.new do
       $style.text! '/* ' + error.to_s + " */\n"
     end
 
-    Dir[File.join($WORK,'depot/app/assets/stylesheets/*.css*')].each do |css|
+    Dir[File.join($WORK,'depot/app/assets/stylesheets/*.scss')].each do |css|
       text = File.read(css)
       next if text =~ /\A\/\*[^*]*\*\/\s*\Z/ # nothing but a single comment
       if css =~ /\.scss/
