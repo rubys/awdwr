@@ -10,6 +10,8 @@
 package "nodejs"
 package "libmysqlclient-dev"
 package "mysql-server"
+package "ruby1.9.3"
+package "ruby-nokogiri"
 package "libpq-dev"
 package "zlib1g-dev"
 package "libgmp3-dev"
