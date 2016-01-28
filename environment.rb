@@ -216,6 +216,11 @@ module AWDWR
       gems['coffee-rails'].delete(:github) if gems['coffee-rails']
     end
 
+    if ruby =~ /^1/
+      # ensure gems are compatible with Ruby 1.9.x
+      gems['net-ssh'] = {version: ["~> 2.10"]}
+    end
+
     gems
   end
 end
