@@ -256,7 +256,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     desc 'Copy some images'
     cmd "cp -v #{$DATA}/assets/* app/assets/images/"
 
-    unless $rails_version =~ /^[34]/
+    unless $rails_version =~ /^(3|4\.[01])/
       desc 'Workaround for sprockets-rails issue 321'
       restart_server 
     end
@@ -2568,8 +2568,12 @@ section 13.1, 'Iteration H1: Email Notifications' do
 
   desc 'Tailor the from address'
   edit 'app/mailers/order_notifier.rb' do
-    edit 'from', :highlight do
-      msub /from:?\s*=?>?\s*(.*)/, "'Sam Ruby <depot@example.com>'"
+    if match /from/
+      edit 'from', :highlight do
+        msub /from:?\s*=?>?\s*(.*)/, "'Sam Ruby <depot@example.com>'"
+      end
+    else
+      msub /class.*\n()/, "  default from: 'Sam Ruby <depot@example.com>'"
     end
   end
 
