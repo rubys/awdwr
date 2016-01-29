@@ -470,7 +470,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
   end
 
   desc 'Tests pass!'
-  test 'models'
+  test :models
 end
 
 section 7.3, 'Playtime' do
@@ -741,7 +741,7 @@ section 8.4, 'Iteration C4: Functional Testing' do
   edit 'test/fixtures/products.yml'
 
   desc 'Show that the tests pass.'
-  test 'controllers'
+  test :controllers
 end
 
 section 8.5, 'Iteration C5 - Caching' do
@@ -921,7 +921,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
     end
   end
 
-  test 'controllers'
+  test :controllers
 end
 
 section 9.3, 'Iteration D3: Adding a button' do
@@ -1224,7 +1224,7 @@ section 10.2, 'Iteration E2: Handling Errors' do
       sub! /(, only allow the white) (list through\.)$/, "\\1\n    # \\2"
     end
 
-    test 'controllers'
+    test :controllers
 
     desc 'Inspect the log.'
     cmd 'grep -B 8 -A 7 "Unpermitted parameter" log/test.log',
@@ -1238,7 +1238,7 @@ section 10.2, 'Iteration E2: Handling Errors' do
     end
  
     rake 'log:clear LOGS=test'
-    test 'controllers'
+    test :controllers
     cmd 'grep "Unpermitted parameters" log/test.log | wc -l'
   end
 end
@@ -2697,7 +2697,7 @@ section 13.2, 'Iteration H2: Integration Tests' do
   end
 
   desc 'Run the tests'
-  test 'integration'
+  test :integration
 
   desc 'Create an integration test using a DSL'
   generate 'integration_test dsl_user_stories'
@@ -2706,7 +2706,7 @@ section 13.2, 'Iteration H2: Integration Tests' do
   end
 
   desc 'Run the tests'
-  test 'integration'
+  test :integration
 end
 
 section 13.3, 'Playtime' do
@@ -3207,7 +3207,7 @@ section 14.5, 'Playtime' do
   end
 
   desc 'Verify  that the test passes'
-  test 'controllers'
+  test :controllers
 
   desc 'Look at the data in the database'
   cmd 'sqlite3 db/development.sqlite3 .schema'
@@ -3704,7 +3704,7 @@ if $rails_version =~ /^3\./
       self.all = read('test/routing_test.rb')
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
-    test 'units'
+    test :units
   end
 end
 
