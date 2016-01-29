@@ -10,19 +10,24 @@ end
 
 include Gorp::Commands
 
-$title = 'Agile Web Development with Rails, Edition 4'
-$autorestart = 'depot'
-$output = 'makedepot'
-$checker = 'checkdepot'
-
-omit 100..199
-
 # what version of Rails are we running?
 $rails_version = `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`.split(' ').last
 if $rails_version =~ /^2/
   STDERR.puts 'This scenario is for Rails 3'
   Process.exit!
 end
+
+if $rails_version =~ /^[34]/
+  $title = 'Agile Web Development with Rails, Edition 4'
+else
+  $title = 'Agile Web Development with Rails, Edition 5'
+end
+
+$autorestart = 'depot'
+$output = 'makedepot'
+$checker = 'checkdepot'
+
+omit 100..199
 
 section 2, 'Instant Gratification' do
   overview <<-EOF
