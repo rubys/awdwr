@@ -226,6 +226,16 @@ module AWDWR
       gems['web-console'][:group] = :development
     end
 
+    # pin version of mysql
+    if gems['mysql2']
+      gems.delete 'mysql'
+      if gems['mysql2'][:version].length == 1
+        if gems['mysql2'][:version].first =~ /^>= 0\.3/
+          gems['mysql2'][:version] << '< 0.4'
+        end
+      end
+    end
+
     gems
   end
 end
