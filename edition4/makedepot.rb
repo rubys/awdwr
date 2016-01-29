@@ -1044,15 +1044,21 @@ section 9.4, 'Playtime' do
   desc 'Update parameters passed as well as expected target of redirect'
   edit 'test/*/line_items_controller_test.rb', 'create' do
     dcl 'should create', :mark => 'create' do
-      edit 'post :create', :highlight do
-        if self =~ /:line_item =>/
+      edit 'post', :highlight do
+        if match /params: /
+          msub /(line_item: \{ (.*?) \})/, 'product_id: products(:ruby).id'
+        elsif match /:line_item =>/
           msub /(:line_item =>.*)/, ':product_id => products(:ruby).id'
         else
           msub /(line_item:.*)/, 'product_id: products(:ruby).id'
         end
       end
       edit 'line_item_path', :highlight do
-        msub /(line_item_path.*)/, 'cart_path(assigns(:line_item).cart)'
+        if $rails_version =~ /^[34]/
+          msub /(line_item_path.*)/, 'cart_path(assigns(:line_item).cart)'
+        else
+          msub /(line_item_path.*)/, 'cart_path(controller.session[:cart_id])'
+        end
       end
     end
   end
