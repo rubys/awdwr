@@ -203,22 +203,26 @@ module AWDWR
     end
 
     # avoid busted version of rubyprof
-    if gems['ruby-prof'] == {version: ["~> 0.11.2"]}
-      gems['ruby-prof'] = {}
+    if gems['ruby-prof']
+      gems['ruby-prof'].delete :if
+      gems['ruby-prof'] = {} if gems['ruby-prof'] == {version: ["~> 0.11.2"]}
     end
 
-    if File.read("#{rails}/RAILS_VERSION") =~ /^4\./
+    if File.read("#{rails}/RAILS_VERSION") =~ /^[34]\./
       # avoid odd dependencies that don't work in the Gemfiles of so-called
       # 'stable' branches.  :-)
       gems['sprockets'] = {}
       gems['rack'] = {}
       gems['sass-rails'].delete(:github) if gems['sass-rails']
       gems['coffee-rails'].delete(:github) if gems['coffee-rails']
+      gems.delete 'journey'
     end
 
     # ensure gems are compatible with Ruby 1.9.x
     if ruby =~ /^1/
-      gems['net-ssh'] = {version: ["~> 2.10"]}
+      gems['net-ssh'] = {version: ["~> 2.9"]}
+      gems['activemerchant'] = {version: ["~> 1.55.0"]}
+      gems['ibm_db'] = {version: ["~> 2.5.0"]}
     end
 
     # ensure web-console is only run in development mode
