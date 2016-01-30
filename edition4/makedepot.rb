@@ -1435,7 +1435,14 @@ section 10.4, 'Playtime' do
   desc 'Update expected target of redirect: Cart#destroy.'
   edit 'test/*/carts_controller_test.rb', 'destroy' do
     dcl 'should destroy', :mark => 'destroy' do |destroy|
-      msub /()\n\s*delete /, "      session[:cart_id] = @cart.id\n", :highlight
+      if match /delete :/
+        msub /\n()\s*delete .*\n/, "      session[:cart_id] = @cart.id\n",
+          :highlight
+      else
+        msub /\n()\s*delete .*\n/, 
+          "      controller.session[:cart_id] = @cart.id\n",
+          :highlight
+      end
       edit 'carts_path', :highlight do
         msub /(carts)/, 'store'
       end

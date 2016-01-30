@@ -222,7 +222,7 @@ module AWDWR
     if ruby =~ /^1/
       gems['net-ssh'] = {version: ["~> 2.9"]}
       gems['activemerchant'] = {version: ["~> 1.55.0"]}
-      gems['ibm_db'] = {version: ["~> 2.5.0"]}
+      gems.delete 'ibm_db'
     end
 
     # ensure web-console is only run in development mode
