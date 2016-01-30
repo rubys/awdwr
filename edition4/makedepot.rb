@@ -571,10 +571,12 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
   desc 'Modify the stylesheet'
   if DEPOT_CSS =~ /scss/
-    if File.read('app/assets/stylesheets/scaffolds.scss').include? '33px'
+    if
+      File.exist? 'app/assets/stylesheets/scaffolds.scss' and
+      File.read('app/assets/stylesheets/scaffolds.scss').include? '33px'
+    then
       additional_css = <<-EOF.gsub(/^\s+/, '') + "\n"
-        body {margin: 0 !important}
-        p, ol, ul, td {margin: 8px !important}
+        body, p, ol, ul, td {margin: 8px !important}
       EOF
     else
       additional_css = ''
@@ -1407,8 +1409,7 @@ section 10.4, 'Playtime' do
   desc 'Update expected target of redirect: Cart#destroy.'
   edit 'test/*/carts_controller_test.rb', 'destroy' do
     dcl 'should destroy', :mark => 'destroy' do |destroy|
-      msub /().*delete :destroy/, "      session[:cart_id] = @cart.id\n", 
-        :highlight
+      msub /()\n\s*delete /, "      session[:cart_id] = @cart.id\n", :highlight
       edit 'carts_path', :highlight do
         msub /(carts)/, 'store'
       end
