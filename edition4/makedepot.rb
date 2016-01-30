@@ -4255,12 +4255,16 @@ $cleanup = Proc.new do
     end
   end
 
-  if $rails_version =~ /^[34]/
+  if $rails_version =~ /^(3|4\.[01])/
     # Link static files
     system "ln -f -s #{$DATA} #{$WORK}"
   else
     desc "cleanup - precompile assets for inclusion in results"
-    cmd "rails assets:precompile"
+    if $rails_version =~ /^4/
+      cmd "rake assets:precompile"
+    else
+      cmd "rails assets:precompile"
+    end
     system "rm -rf #{$WORK}/data"
     system "cp -rp #{$DATA} #{$WORK}"
     system "cp -rp #{$WORK}/depot/public/assets #{$WORK}/data"
