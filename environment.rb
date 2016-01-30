@@ -63,7 +63,7 @@ module AWDWR
 
   def self.dependencies(rails, ruby)
     libs = %w(rails)
-    gems = []
+    gems = [['http-cookie']]
     branches = []
     repos = [['gorp', 'rubys/gorp']]
 
