@@ -8,6 +8,8 @@ rescue LoadError
   end
 end
 
+Gorp::Config.load('~/.awdwr')
+
 include Gorp::Commands
 
 # what version of Rails are we running?
@@ -143,6 +145,18 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   desc 'Create the application.'
   ENV.delete('BUNDLE_GEMFILE')
   rails 'depot', :a
+
+  if Gorp::Config[:protect_from_forgery] == false
+    if File.read('app/controllers/application_controller.rb').include? \
+      'protect_from_forgery'
+    then
+      flag 'Disable forgery protection in order to make progress on tests'
+      edit 'app/controllers/application_controller.rb' do
+        msub /protect_from_forgery.*\n()/, \
+          "  skip_before_action :verify_authenticity_token\n"
+      end
+    end
+  end
 
   desc 'Look at the files created.'
   cmd 'ls -p'
@@ -828,7 +842,12 @@ section 9.1, 'Iteration D1: Finding a Cart' do
   EOF
 
   desc 'Create a cart.'
-  generate 'scaffold Cart'
+  if Gorp::Config[:dummy_field]
+    warn 'dummy field added to avoid Rails bug'
+    generate :scaffold, :Cart, :title
+  else
+    generate :scaffold, :Cart
+  end
   db :migrate
 
   desc "Implement set_cart, which creates a new cart if it" +
@@ -865,7 +884,14 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
   EOF
 
   desc 'Create the model object.'
-  generate 'scaffold LineItem product:references cart:belongs_to'
+  generate :scaffold, :LineItem, 'product:references cart:belongs_to'
+  if Gorp::Config[:dummy_field]
+    warn 'dummy values added to fixture'
+    edit 'test/fixtures/line_items.yml' do
+      msub /product: (.*)/, 'one'
+      msub /cart: (.*)/, 'one'
+    end
+  end
   db :migrate
 
   desc 'Cart has many line items.'

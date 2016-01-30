@@ -62,6 +62,7 @@ class DepotTest < Gorp::TestCase
       match: /DEPRECATION WARNING: alias_method_chain is deprecated./
 
     assert_select '.stderr', :minimum => 0 do |errors|
+      next if Gorp::Config[:ignore_deprecations]
       errors.each do |err|
         assert_match /\d+ (test|run)s, \d+ assertions, 0 failures, 0 errors/,
           err.to_s
@@ -74,8 +75,10 @@ class DepotTest < Gorp::TestCase
     if $rails_version =~ /^3/
       assert_test_summary :tests => '[01]', :assertions => '[01]'
       assert_test_summary :tests => 7, :assertions => '1[03]'
-    else
+    elsif $rails_version =~ /^3/
       assert_test_summary :tests => 7, :assertions => 13
+    else
+      assert_test_summary :tests => 7, :assertions => 12
     end
   end
 
@@ -153,7 +156,7 @@ class DepotTest < Gorp::TestCase
     if $rails_version =~ /^3/
       assert_test_summary :tests => 22, :assertions => 35
     else
-      assert_test_summary :tests => 22, :assertions => 44
+      assert_test_summary :tests => 22, :assertions => 41
     end
   end
 
