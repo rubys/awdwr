@@ -571,6 +571,15 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
   desc 'Modify the stylesheet'
   if DEPOT_CSS =~ /scss/
+    if File.read('app/assets/stylesheets/scaffolds.scss').include? '33px'
+      additional_css = <<-EOF.gsub(/^\s+/, '') + "\n"
+        body {margin: 0 !important}
+        p, ol, ul, td {margin: 8px !important}
+      EOF
+    else
+      additional_css = ''
+    end
+    
     desc 'Rename the application stylesheet so that we can use SCSS'
     cmd "mv app/assets/stylesheets/application.css #{DEPOT_CSS}"
 
@@ -583,7 +592,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
       end
 
       msub /(\s*)\Z/, "\n\n"
-      msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
+      msub /\n\n()\Z/, additional_css + <<-EOF.unindent(8), :highlight
         #banner {
           background: #9c9;
           padding: 10px;
