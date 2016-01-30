@@ -411,6 +411,14 @@ if File.exist?("#{WORK}/checkdepot.html")
       links = "      #{next_link[section]}\n      #{prev_link[section]}\n"
       links = "    <p>\n#{links}    </p>\n"
       body = links + '    <a class="toc">'+ body + links
+
+      count = 0
+      body.gsub!(/<pre class="stdin">.*<\/pre>/) do |line|
+        count += 1
+        line.sub('</', '</a></').sub('>',
+          " id='cmd#{count}'><a href='#cmd#{count}'>")
+      end
+
       open(page(section),'w') {|file| file.write(head+body+tail)}
     end
   end
