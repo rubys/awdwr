@@ -399,6 +399,14 @@ if File.exist?("#{WORK}/checkdepot.html")
     li.gsub('href="#', "href=\"#{section}.html#").gsub("##{section}\"", '"')
   end
 
+  # hotlink commands in env section
+  count = 0
+  env.gsub!(/<pre class="stdin">.*<\/pre>/) do |line|
+    count += 1
+    line.sub('</', '</a></').sub('>',
+      " id='cmd#{count}'><a href='#cmd#{count}'>")
+  end
+
   # output the files
   system "rm -rf #{WORK}/checkdepot"
   system "mkdir -p #{WORK}/checkdepot"
@@ -412,6 +420,7 @@ if File.exist?("#{WORK}/checkdepot.html")
       links = "    <p>\n#{links}    </p>\n"
       body = links + '    <a class="toc">'+ body + links
 
+      # hotlink commands
       count = 0
       body.gsub!(/<pre class="stdin">.*<\/pre>/) do |line|
         count += 1
