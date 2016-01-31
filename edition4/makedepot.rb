@@ -150,7 +150,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
     if File.read('app/controllers/application_controller.rb').include? \
       'protect_from_forgery'
     then
-      flag 'Disable forgery protection in order to make progress on tests'
+      warn 'Disable forgery protection in order to make progress on tests'
       edit 'app/controllers/application_controller.rb' do
         msub /protect_from_forgery.*\n()/, \
           "  skip_before_action :verify_authenticity_token\n"
@@ -3603,6 +3603,20 @@ end
 
 section 16, 'Deployment' do
   Dir.chdir(File.join($WORK, 'depot'))
+
+  if Gorp::Config[:mysql_null_primary_key]
+    # https://github.com/rails/rails/pull/13247#issuecomment-158787912
+    warn 'avoid primary key columns with NULL values'
+    edit 'config/initializers/abstract_mysql2_adapter.rb' do
+      self.all = <<-EOF.unindent(8)
+        require 'active_record/connection_adapters/mysql2_adapter.rb'
+        class ActiveRecord::ConnectionAdapters::Mysql2Adapter  
+          NATIVE_DATABASE_TYPES[:primary_key] = "int(11) auto_increment PRIMARY KEY" 
+        end
+      EOF
+    end
+  end
+
   cmd 'git add .'
   cmd 'git commit -a -m "save work"'
   edit 'config/database.yml' do
