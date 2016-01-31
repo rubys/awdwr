@@ -428,6 +428,14 @@ if File.exist?("#{WORK}/checkdepot.html")
           " id='cmd#{count}'><a href='#cmd#{count}'>")
       end
 
+      if body =~ /<div class="traceback" title=".* Exception caught">/
+        layout = 'actionpack/lib/action_dispatch/middleware/' +
+          'templates/rescues/layout.erb'
+        if File.exist? "#$rails/#{layout}"
+          body += File.read("#$rails/#{layout}")[/<script>.*?<\/script>/m]
+        end
+      end
+
       open(page(section),'w') {|file| file.write(head+body+tail)}
     end
   end
