@@ -152,6 +152,10 @@ class DepotTest < Gorp::TestCase
       list:  'rails',
       title: 'generate scaffold with no fields generates a broken controller test',
       match: /ArgumentError: When assigning attributes, you must pass a hash as an argument./
+    ticket 23384,
+      list:  'rails',
+      title: 'generate scaffold with only ref fields generates a broken controller test',
+      match: /"LineItem.count" didn't change by 1./
 
     if $rails_version =~ /^3/
       assert_test_summary :tests => 22, :assertions => 35
@@ -210,16 +214,19 @@ class DepotTest < Gorp::TestCase
   end
 
   section 10.4, "Playtime" do
-    ticket 12343,
-      :title =>  "assign_attributes should return if arguments are blank",
-      :match => /ActiveModel::ForbiddenAttributesError/
+    ticket 23386,
+      :title =>  "can't access session in ActionDispatch::IntegrationTest",
+      :match => /undefined method `session' for nil:NilClass/
 
     if $rails_version =~ /^3/
       assert_test_summary :tests => '\d', :assertions => '2\d'
       assert_test_summary :tests => 23, :assertions => '[34]7'
-    else
+    elsif $rails_version =~ /^3/
       assert_test_summary :tests => 2, :assertions => 5
       assert_test_summary :tests => 30, :assertions => 75
+    else
+      assert_test_summary :tests => 2, :assertions => 5
+      assert_test_summary :tests => 30, :assertions => 72
     end
     assert_select '.stdout', /AddPriceToLineItem: migrated/
   end

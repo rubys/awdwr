@@ -1094,7 +1094,7 @@ section 9.4, 'Playtime' do
         if $rails_version =~ /^[34]/
           msub /(line_item_path.*)/, 'cart_path(assigns(:line_item).cart)'
         else
-          msub /(line_item_path.*)/, 'cart_path(controller.session[:cart_id])'
+          msub /(line_item_path.*)/, 'cart_path(session[:cart_id])'
         end
       end
     end
@@ -1432,16 +1432,17 @@ section 10.4, 'Playtime' do
     msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
   end
 
+  integration_session_bug = Gorp::Config[:integration_session_bug]
+
   desc 'Update expected target of redirect: Cart#destroy.'
   edit 'test/*/carts_controller_test.rb', 'destroy' do
-    dcl 'should destroy', :mark => 'destroy' do |destroy|
-      if match /delete :/
-        msub /\n()\s*delete .*\n/, "      session[:cart_id] = @cart.id\n",
-          :highlight
-      else
-        msub /\n()\s*delete .*\n/, 
-          "      controller.session[:cart_id] = @cart.id\n",
-          :highlight
+    warn 'integration session bug, part 1' if integration_session_bug
+    dcl 'should destroy', :mark => 'destroy' do
+      msub /\n()\s*delete .*\n/, "      session[:cart_id] = @cart.id\n",
+        :highlight
+      if integration_session_bug
+        sub! 'session', '# session'
+        sub! '-1', '0'
       end
       edit 'carts_path', :highlight do
         msub /(carts)/, 'store'
@@ -1468,6 +1469,7 @@ section 10.4, 'Playtime' do
   test
 
   desc "Add a test ensuring that non-empty carts can't be deleted."
+  warn 'integration session bug, part 2' if integration_session_bug
   edit 'test/*/products_controller_test.rb', 'destroy' do
     clear_highlights
     gsub! "\n\n  # ...\n", "\n" 
@@ -1475,7 +1477,7 @@ section 10.4, 'Playtime' do
       destroy_product_two = dup
       sub!('@product', 'products(:ruby)')
       sub! 'should destroy product', "can't delete product in cart"
-      sub! '-1', '0'
+      sub! '-1', '0' unless integration_session_bug
       self << "\n" + destroy_product_two
     end
   end
