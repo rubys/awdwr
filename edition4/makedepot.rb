@@ -1881,7 +1881,7 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
     msub /^()end/, <<-EOF.unindent(4), :mark => 'ajax'
       test "should create line_item via ajax" do
         assert_difference('LineItem.count') do
-          xhr :post, :create, :product_id => products(:ruby).id
+          xhrpost
         end 
     
         assert_response :success
@@ -1890,6 +1890,14 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
         end
       end
     EOF
+
+    if $rails_version =~ /^[34]/
+      sub! 'xhrpost', 'xhr :post, :create, :product_id => products(:ruby).id'
+    else
+      sub! 'xhrpost', 'post line_items_url, params: ' + 
+        '{ product_id: products(:ruby).id }, xhr: true'
+    end
+
     unless File.exist? 'public/images'
       gsub! "_rjs :replace_html, 'cart'", "_jquery :html, '#cart'"
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -2221,11 +2229,6 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     dcl 'should create order', :mark => 'valid' do
       edit 'order_path', :highlight do
         msub /(order_path.*)/, 'store_path'
-      end
-      unless match /attributes/
-        edit /^\s+post :.*\n/ do
-          msub /,() :?name[: =]/, "\n       "
-        end
       end
     end
   end

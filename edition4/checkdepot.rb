@@ -221,7 +221,7 @@ class DepotTest < Gorp::TestCase
     if $rails_version =~ /^3/
       assert_test_summary :tests => '\d', :assertions => '2\d'
       assert_test_summary :tests => 23, :assertions => '[34]7'
-    elsif $rails_version =~ /^3/
+    elsif $rails_version =~ /^4/
       assert_test_summary :tests => 2, :assertions => 5
       assert_test_summary :tests => 30, :assertions => 75
     else
@@ -253,8 +253,10 @@ class DepotTest < Gorp::TestCase
     if $rails_version =~ /^3/
       assert_test_summary :tests => '[78]', :assertions => '2\d'
       assert_test_summary :tests => '2\d', :assertions => '[45]\d'
-    else
+    elsif $rails_version =~ /^4/
       assert_test_summary :tests => 32, :assertions => 80
+    else
+      assert_test_summary :tests => 32, :assertions => 75
     end
   end
 
