@@ -106,3 +106,7 @@ if [[ -n "$ruby" ]]; then
 fi
 
 unset ruby dir rvm_reload
+
+if [[ "$@" = "depot" ]]; then
+  cd depot
+fi
