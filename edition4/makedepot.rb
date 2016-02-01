@@ -1094,7 +1094,10 @@ section 9.4, 'Playtime' do
         if $rails_version =~ /^[34]/
           msub /(line_item_path.*)/, 'cart_path(assigns(:line_item).cart)'
         else
-          msub /(line_item_path.*)/, 'cart_path(session[:cart_id])'
+          msub /(assert_redirect.*)/, 
+            "follow_redirect!\n\n" +
+            "    assert_select 'h2', 'Your Pragmatic Cart'\n" +
+            "    assert_select 'li', 'Programming Ruby 1.9'"
         end
       end
     end
