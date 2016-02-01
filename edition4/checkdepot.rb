@@ -214,9 +214,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 10.4, "Playtime" do
-    ticket 23386,
-      :title =>  "can't access session in ActionDispatch::IntegrationTest",
-      :match => /undefined method `session' for nil:NilClass/
+#   ticket 23386,
+#     :title =>  "can't access session in ActionDispatch::IntegrationTest",
+#     :match => /undefined method `session' for nil:NilClass/
 
     if $rails_version =~ /^3/
       assert_test_summary :tests => '\d', :assertions => '2\d'
