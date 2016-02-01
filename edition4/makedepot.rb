@@ -590,7 +590,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
       File.read('app/assets/stylesheets/scaffolds.scss').include? '33px'
     then
       additional_css = <<-EOF.gsub(/^\s+/, '') + "\n"
-        body, p, ol, ul, td {margin: 8px !important}
+        body, body > p, body > ol, body > ul, body > td {margin: 8px !important}
       EOF
     else
       additional_css = ''
@@ -4312,11 +4312,18 @@ $cleanup = Proc.new do
     Dir[File.join($WORK,'depot/app/assets/stylesheets/*.scss')].each do |css|
       text = File.read(css)
       next if text =~ /\A\/\*[^*]*\*\/\s*\Z/ # nothing but a single comment
+
       if css =~ /\.scss/
         next unless defined? Sass
         text = Sass::Engine.new(text, :syntax => :scss).render
       end
-      $style.text! text
+
+      if text.include? '33px' and not text.include? '8px !important'
+        text += "body, body > p, body > ol, body > ul, body > td " + 
+          "{margin: 8px !important}"
+      end
+
+      $style << text
     end
   end
 
