@@ -1206,6 +1206,20 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   post '/', {'product_id' => 3}, {:snapget => false}
   publish_code_snapshot :g
 
+  unless $rails_version =~ /^[34]/
+    desc 'fix the test case'
+    edit 'test/*/line_items_controller_test.rb', 'create' do
+      dcl 'should create', :mark => 'create' do
+        clear_all_marks
+        msub /Programming Ruby 1\.9(')/, '"'
+        msub /(')Programming Ruby 1\.9/, '"1 \\u00D7 '
+      end
+    end
+
+    desc 'rerun tests'
+    test
+  end
+
   desc 'Try something malicious.'
   get '/carts/wibble'
 end
