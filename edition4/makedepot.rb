@@ -1439,6 +1439,21 @@ section 10.4, 'Playtime' do
   desc 'See that the tests fail.'
   test
 
+  unless $rails_version =~ /^[34]/
+    desc 'Update the value of the header that we are looking for'
+    edit 'test/controllers/line_items_controller_test.rb', 'create' do
+      dcl 'should create' do
+        edit 'Your Pragmatic Cart', :highlight do
+          sub! /Pragmatic\s/, ''
+        end
+        edit 'Programming Ruby', :highlight do
+          sub! "'li'", "'td'"
+          sub! /1 .*? /, ''
+        end
+      end
+    end
+  end
+
   desc 'Substitute names of products and carts for numbers'
   edit 'test/fixtures/line_items.yml' do
     gsub! /product(_id)?:.*/, 'product: ruby'
@@ -1452,8 +1467,10 @@ section 10.4, 'Playtime' do
   desc 'Update expected target of redirect: Cart#destroy.'
   edit 'test/*/carts_controller_test.rb', 'destroy' do
     dcl 'should destroy', :mark => 'destroy' do
-      msub /\n()\s*delete .*\n/, "      session[:cart_id] = @cart.id\n",
-        :highlight
+      if $rails_version =~ /^[34]/
+        msub /\n()\s*delete .*\n/, "      session[:cart_id] = @cart.id\n",
+          :highlight
+      end
       edit 'carts_path', :highlight do
         msub /(carts)/, 'store'
       end
@@ -1483,9 +1500,20 @@ section 10.4, 'Playtime' do
     clear_highlights
     gsub! "\n\n  # ...\n", "\n" 
     dcl 'should destroy product', :mark => 'destroy' do
+      if $rails_version =~ /^[34]/
+        msub /do()\n/, "\n" +
+          "    cart = Cart.new\n" +
+          "    session[:cart_id] = cart.id\n" +
+          "    cart.add_product(products(:ruby).id)\n"
+      else
+        msub /do()\n/, "\n" +
+          '    post line_items_url, params: { product_id: products(:ruby).id }'
+      end
+
       destroy_product_two = dup
       sub!('@product', 'products(:ruby)')
       sub! 'should destroy product', "can't delete product in cart"
+      sub! '-1', '0'
       self << "\n" + destroy_product_two
     end
   end
