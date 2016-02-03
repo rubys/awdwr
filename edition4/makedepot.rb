@@ -885,13 +885,6 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
 
   desc 'Create the model object.'
   generate :scaffold, :LineItem, 'product:references cart:belongs_to'
-  if Gorp::Config[:dummy_field]
-    warn 'dummy values added to fixture'
-    edit 'test/fixtures/line_items.yml' do
-      msub /product: (.*)/, 'one'
-      msub /cart: (.*)/, 'one'
-    end
-  end
   db :migrate
 
   desc 'Cart has many line items.'
@@ -939,6 +932,12 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
         end
         #END_HIGHLIGHT
     EOF
+
+    unless $rails_version =~ /^[34]/
+      msub /(if) line_items.empty\?/, 'unless'
+      sub! /return true\s*else\s*/, ''
+      sub! /return false/, 'throw :abort'
+    end
   end
 
   desc 'Line item belongs to both Cart and Product ' +
@@ -956,6 +955,25 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
         attr_accessible :cart_id, :product_id
       EOF
     end
+  end
+
+  desc "Add a test ensuring that non-empty carts can't be deleted."
+  edit 'test/*/products_controller_test.rb', 'destroy' do
+    clear_highlights
+    gsub! "\n\n  # ...\n", "\n" 
+    dcl 'should destroy product', :mark => 'destroy' do
+      destroy_product_ruby = dup
+      sub!('@product', 'products(:two)')
+      sub! 'should destroy product', "can't delete product in cart"
+      destroy_product_ruby.sub! '-1', '0'
+      self << "\n" + destroy_product_ruby
+    end
+  end
+
+  desc 'change fixture so that product one is in a cart'
+  edit 'test/fixtures/line_items.yml' do
+    msub /product((_id)?:.*)/, ': one'
+    msub /cart((_id)?:.*)/, ': one'
   end
 
   test :controllers
@@ -1454,21 +1472,20 @@ section 10.4, 'Playtime' do
     end
   end
 
-  desc 'Substitute names of products and carts for numbers'
-  edit 'test/fixtures/line_items.yml' do
-    gsub! /product(_id)?:.*/, 'product: ruby'
-    gsub! /cart(_id)?:.*/, 'cart: one'
-
-    msub /one:\n(.*?)\n\n/m, '\1', :highlight
-    msub /two:\n(.*?)\n\Z/m, '\1', :highlight
-    msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
-  end
-
   desc 'Update expected target of redirect: Cart#destroy.'
+  unless $rails_version =~ /^[34]/
+    warn 'avoid using session in integration tests'
+  end
   edit 'test/*/carts_controller_test.rb', 'destroy' do
     dcl 'should destroy', :mark => 'destroy' do
       if $rails_version =~ /^[34]/
-        msub /\n()\s*delete .*\n/, "      session[:cart_id] = @cart.id\n",
+        msub /do\n()/, "    session[:cart_id] = @cart.id\n",
+          :highlight
+      else
+        msub /do\n()/, 
+          "    post line_items_url, params: " +
+                    "{ product_id: products(:ruby).id }\n" +
+          "    @cart = Cart.find(session[:cart_id])\n\n"
           :highlight
       end
       edit 'carts_path', :highlight do
@@ -1494,29 +1511,6 @@ section 10.4, 'Playtime' do
 
   desc 'Verify that the tests pass.'
   test
-
-  desc "Add a test ensuring that non-empty carts can't be deleted."
-  edit 'test/*/products_controller_test.rb', 'destroy' do
-    clear_highlights
-    gsub! "\n\n  # ...\n", "\n" 
-    dcl 'should destroy product', :mark => 'destroy' do
-      if $rails_version =~ /^[34]/
-        msub /do()\n/, "\n" +
-          "    cart = Cart.new\n" +
-          "    session[:cart_id] = cart.id\n" +
-          "    cart.add_product(products(:ruby).id)\n"
-      else
-        msub /do()\n/, "\n" +
-          '    post line_items_url, params: { product_id: products(:ruby).id }'
-      end
-
-      destroy_product_two = dup
-      sub!('@product', 'products(:ruby)')
-      sub! 'should destroy product', "can't delete product in cart"
-      sub! '-1', '0'
-      self << "\n" + destroy_product_two
-    end
-  end
 
   desc 'Now the tests should pass.'
   test
@@ -2192,8 +2186,10 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   desc 'Move a line item from a cart to an order'
   edit 'test/fixtures/line_items.yml' do
     clear_all_marks
-    msub /(cart): one/, 'order'
-    edit 'order:', :highlight
+    msub /^two:.*(product(_id)?:.*?)\n/m, 'product: ruby'
+    msub /^two:.*(cart(_id)?:.*?)\n/m, 'order: one'
+    edit 'product: ruby', :highlight
+    edit 'order: one', :highlight
     msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
   end
 
