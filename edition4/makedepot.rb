@@ -777,7 +777,7 @@ section 8.5, 'Iteration C5 - Caching' do
     if File.read(ced).include? 'tmp/caching-dev.txt'
       cmd 'rails dev:cache'
     else
-      edit 'ced', 'perform_caching' do
+      edit ced, 'perform_caching' do
         clear_all_marks
         edit 'perform_caching', :mark => 'perform_caching' do
           msub /perform_caching = (false)/, 'true'
@@ -820,7 +820,7 @@ section 8.5, 'Iteration C5 - Caching' do
     if File.read(ced).include? 'tmp/caching-dev.txt'
       cmd 'rails dev:cache'
     else
-      edit 'config/environments/development.rb', 'perform_caching' do
+      edit ced, 'perform_caching' do
         msub /perform_caching = (true)/, 'false'
       end
       cmd 'rm -f public/assets/*'
