@@ -1897,11 +1897,13 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
     end
   end
 
-  desc 'Update the redirect test.'
-  edit 'test/*/line_items_controller_test.rb', 'create' do
-    clear_highlights
-    edit "assert_redirected_to", :highlight do
-      msub /assert_redirected_to (cart_path.*)/, 'store_path'
+  if $rails_version =~ /^[34]/
+    desc 'Update the redirect test.'
+    edit 'test/*/line_items_controller_test.rb', 'create' do
+      clear_highlights
+      edit "assert_redirected_to", :highlight do
+        msub /assert_redirected_to (cart_path.*)/, 'store_path'
+      end
     end
   end
 
@@ -1939,11 +1941,12 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
     clear_highlights
     msub /^()end/, <<-EOF.unindent(4), :mark => 'cs'
       test "markup needed for store.js.coffee is in place" do
-        get :index
+        get store_index_url
         assert_select '.store .entry > img', 3
         assert_select '.entry input[type=submit]', 3
       end
     EOF
+    sub! 'store_index_url', ':index' if $rails_version =~ /^[34]/
   end
 
   desc 'Run the tests again.'
