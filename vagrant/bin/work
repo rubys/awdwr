@@ -41,6 +41,12 @@ eval $(ruby <<__return
   puts "cd #{profile['source']}/#{profile['work']};"
   puts 'export GORP_WORK=$' + '(pwd);'
 
+  # change to the desired rails branch
+  Dir.chdir '$GORP_RAILS' do
+    STDERR.write "\033[34mrails\033[00m: "
+    system "git checkout #{profile['branch']} > /dev/null"
+  end
+
   # set up an alias for rails
   if File.exist? "$GORP_RAILS/railties/exe/rails"
     puts 'alias rails="ruby $GORP_RAILS/railties/exe/rails";'
@@ -48,12 +54,6 @@ eval $(ruby <<__return
     puts 'alias rails="ruby -rubygems $GORP_RAILS/railties/bin/rails";'
   elsif File.exist? "$GORP_RAILS/bin/rails"
     puts 'alias rails="ruby -rubygems $GORP_RAILS/bin/rails";'
-  end
-
-  # change to the desired rails branch
-  Dir.chdir '$GORP_RAILS' do
-    STDERR.write "\033[34mrails\033[00m: "
-    system "git checkout #{profile['branch']} > /dev/null"
   end
 
   # infer dependencies
