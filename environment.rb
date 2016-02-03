@@ -23,6 +23,9 @@
 #
 # Previously, there was a historical motivation, which was to deal with
 # releases of Rails prior to Rails 3 which did not support bundler.
+#
+# Finally, this provides the ability to do 'fixups' on old releases.
+# For example, there no longer is a 2-1-stable branch of sprockets-rails.
 
 module AWDWR
   def self.config(config, *args)
@@ -216,13 +219,13 @@ module AWDWR
       gems['sass-rails'].delete(:github) if gems['sass-rails']
       gems['coffee-rails'].delete(:github) if gems['coffee-rails']
       gems.delete 'journey'
-      gems.delete 'ibm_db'
     end
 
     # ensure gems are compatible with Ruby 1.9.x
     if ruby =~ /^1/
       gems['net-ssh'] = {version: ["~> 2.9"]}
       gems['activemerchant'] = {version: ["~> 1.55.0"]}
+      gems.delete 'ibm_db'
     end
 
     # ensure web-console is only run in development mode
@@ -237,6 +240,12 @@ module AWDWR
         if gems['mysql2'][:version].first =~ /^>= 0\.3/
           gems['mysql2'][:version] << '< 0.4'
         end
+      end
+    end
+
+    if gems['sprockets-rails']
+      if gems['sprockets-rails'][:branch] == "2-1-stable"
+        gems['sprockets-rails'][:branch] = '2.x'
       end
     end
 
