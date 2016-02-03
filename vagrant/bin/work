@@ -97,8 +97,11 @@ if [[ -n "$ruby" ]]; then
     ruby=$(cd $rvm_path/rubies; ls -trd $ruby | tail -1)
     rvm use $ruby
   else
+    rbenv=${RBENV_ROOT:-~/.rbenv}
+    first=$(echo $PATH | cut -d ':' -f 1)
+    test "$first" != "$rbenv/shims" && export PATH=$rbenv/shims:$PATH
     ruby=$(echo $ruby | sed s/^ruby-//)
-    export RBENV_VERSION=$(cd $RBENV_ROOT/versions; ls -trd $ruby | tail -1)
+    export RBENV_VERSION=$(cd $rbenv/versions; ls -trd $ruby | tail -1)
     echo -n -e "\033[32mUsing "
     ruby -v
     echo -n -e "\033[0m"

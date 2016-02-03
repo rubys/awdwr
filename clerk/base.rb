@@ -38,8 +38,10 @@ protected
   # compare source releases by patch number
   RELEASE_COMPARE = Proc.new do |a,b|
     pattern = /(.*?)(\d+)$/
-    if a =~ pattern and a[pattern,1] == b[pattern,1]
+    if a =~ pattern and b =~ pattern and a[pattern,1] == b[pattern,1]
       a[pattern,2].to_i <=> b[pattern,2].to_i
+    elsif a.include?('-') ^ b.include?('-')
+      a.include?('-') ? -1 : +1
     else
       a <=> b
     end

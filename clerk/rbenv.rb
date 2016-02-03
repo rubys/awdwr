@@ -1,3 +1,12 @@
+#
+# Note ruby-head does not work.  Prior efforts to make it work:
+#
+# * http://intertwingly.net/blog/2013/03/21/rbenv-first-impressions
+# * https://twitter.com/sstephenson/status/314796965537910784
+# * https://github.com/rbenv/ruby-build/issues/332
+# * https://github.com/rbenv/ruby-build/pull/334
+#
+
 require 'fileutils'
 require 'shellwords'
 require_relative 'base'
@@ -5,7 +14,7 @@ require_relative 'base'
 class RBenv < Clerk
   # Is rbenv installed on this machine?
   def self.available?
-    !!self.root
+    !!self.root or not `which rbenv`.empty?
   end
 
   # Where can RBENV be found
@@ -53,7 +62,7 @@ class RBenv < Clerk
 
   # install (if necessary) the latest patch level of a release and return it
   def install_latest(pattern)
-    bin = pattern.sub('ruby-','')
+    bin = pattern.sub('ruby-',' ')
     release = `rbenv install --list | grep #{bin.sub(/\*$/,'\d').inspect}`.
       lines.sort(&RELEASE_COMPARE).last.strip
     unless `rbenv versions --bare`.lines.map(&:strip).include? release
@@ -78,6 +87,10 @@ class RBenv < Clerk
   # run a series of commands against a specified ruby release
   def run(release, command)
     ENV['RBENV_VERSION'] = release
+    shims = "#{RBenv.root}/shims"
+    unless ENV['PATH'].split(':').first == shims
+      ENV['PATH'] = "#{shims}:#{ENV['PATH']}"
+    end
     command = command.join("\n") if command.respond_to? :join
     command.lines.each do |line|
       system line.chomp
