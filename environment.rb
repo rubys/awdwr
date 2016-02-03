@@ -216,13 +216,13 @@ module AWDWR
       gems['sass-rails'].delete(:github) if gems['sass-rails']
       gems['coffee-rails'].delete(:github) if gems['coffee-rails']
       gems.delete 'journey'
+      gems.delete 'ibm_db'
     end
 
     # ensure gems are compatible with Ruby 1.9.x
     if ruby =~ /^1/
       gems['net-ssh'] = {version: ["~> 2.9"]}
       gems['activemerchant'] = {version: ["~> 1.55.0"]}
-      gems.delete 'ibm_db'
     end
 
     # ensure web-console is only run in development mode
