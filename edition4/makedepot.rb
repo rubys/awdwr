@@ -2213,7 +2213,11 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       belongs_to :order, optional: true
     EOF
 
-    gsub! 'optional: true', 'required: false' if $rails_version =~ /^[34]/
+    if $rails_version =~ /^4\.[2-9]/
+      gsub! 'optional: true', 'required: false' 
+    elsif $rails_version =~ /^[34]/
+      gsub! ', optional: true', ''
+    end
   end
 
   desc 'Define a relationship from the order to the line item'
@@ -2771,7 +2775,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   desc 'Tailor the confirm shipped email (this time in HTML)'
-  edit 'app/views/order_notifier*/shipped.html.erb' do
+  edit "#{Dir['app/views/order_notifier*'].first}/shipped.html.erb" do
     self.all = <<-EOF.unindent(6)
       <h3>Pragmatic Order Shipped</h3>
       <p>
