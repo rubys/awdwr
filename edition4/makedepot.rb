@@ -1970,15 +1970,6 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   desc 'Create a migration to add an order_id column to line_items'
   generate 'migration add_order_id_to_line_item order_id:integer'
 
-if false
-  desc "Modify the migration to allow nulls"
-  edit Dir['db/migrate/*add_order_id_to_line_item.rb'].first do |data|
-    edit 'add_column', :highlight
-
-    data[/add_column.*()/,1] = ', null: true'
-  end
-end
-
   desc 'Apply both migrations'
   db :migrate
 
@@ -2453,18 +2444,25 @@ section 12.3, 'Iteration G3: Downloading an eBook' do
   overview <<-EOF
     demonstrate streaming with ActionController::Live
   EOF
+
+  if Gorp::Config[:skip_actioncontroller_live]
+    warn 'section skipped as this locks the database'
+    next
+  end
   
-  desc 'Switch to puma as a server'
-  edit 'Gemfile', 'puma' do
-    clear_all_marks
-    self << "\ngem 'puma'\n"
-    edit 'puma', :mark => 'puma'
+  if $rails_version =~ /^[34]/
+    desc 'Switch to puma as a server'
+    edit 'Gemfile', 'puma' do
+      clear_all_marks
+      self << "\ngem 'puma'\n"
+      edit 'puma', :mark => 'puma'
+    end
+
+    restart_server
   end
 
-  restart_server
-
   desc 'add a route for downloading a product'
-  edit 'config/routes.rb', 'root' do
+  edit 'config/routes.rb' do
     msub /resources :products do\n()/, <<-EOF.unindent(2), :highlight
       get :download, :on => :member
     EOF
@@ -2537,12 +2535,17 @@ section 12.3, 'Iteration G3: Downloading an eBook' do
   desc 'click download'
   get '/products/2/download'
 
-  desc 'Switch back to WEBRick'
-  edit 'Gemfile', 'puma' do
-    msub /()gem 'puma'/, '# '
+  if $rails_version =~ /^[34]/
+    desc 'Switch back to WEBRick'
+    edit 'Gemfile', 'puma' do
+      msub /()gem 'puma'/, '# '
+    end
+
+    restart_server
   end
 
-  restart_server
+  desc 'make sure that nothing is broken'
+  test
 end
 end
 
