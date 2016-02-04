@@ -483,9 +483,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 21.1, "Views" do
-    ticket 10984,
-      :title =>  "Live streaming doesn't work with basic authentication or builder",
-      :match => /<pre class="stdin">curl.*<\/pre>\s+<pre class="stdin">/
+#   ticket 10984,
+#     :title =>  "Live streaming doesn't work with basic authentication or builder",
+#     :match => /<pre class="stdin">curl.*<\/pre>\s+<pre class="stdin">/
 
     assert_select '.stdout', /(<|&lt;)price currency="USD"(>|&gt;)49.95(<|&lt;)\/price(>|&gt;)/
     assert_select '.stdout', /"1 minute"/
