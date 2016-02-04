@@ -2550,6 +2550,23 @@ end
 end
 
 section 12.4, 'Playtime' do
+  if Gorp::Config[:skip_xml_serialization]
+    warn 'xml serialization skipped'
+    next
+  end
+
+  unless $rails_version =~ /^[34]/
+    desc 'add activemodel-serializers-xml'
+    edit 'Gemfile', 'as_xml' do
+      clear_all_marks
+      self << "\ngem 'activemodel-serializers-xml'\n"
+      edit 'activemodel-serializers-xml', :mark => 'as_xml'
+    end
+
+    bundle 'install'
+    restart_server
+  end
+
   desc 'Add the xml format to the controller'
   edit 'app/controllers/products_controller.rb', 'who_bought' do
     clear_highlights
@@ -2674,23 +2691,23 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   desc 'Tailor the from address'
-  edit 'app/mailers/order_notifier.rb' do
+  edit 'app/mailers/order_notifier*.rb' do
     if match /from/
       edit 'from', :highlight do
         msub /from:?\s*=?>?\s*(.*)/, "'Sam Ruby <depot@example.com>'"
       end
     else
-      msub /class.*\n()/, "  default from: 'Sam Ruby <depot@example.com>'"
+      msub /class.*\n()/, "  default from: 'Sam Ruby <depot@example.com>'\n"
     end
   end
 
   desc 'Tailor the confirm receipt email'
 
-  if File.exist? 'app/views/order_notifier/received.html.erb'
+  if File.exist? 'app/views/order_notifier*/received.html.erb'
     cmd 'rm app/views/order_notifier/received.html.erb'
   end
 
-  edit 'app/views/order_notifier/received.text.erb' do
+  edit 'app/views/order_notifier*/received.text.erb' do
     self.all = <<-EOF.unindent(6)
       Dear <%= @order.name %>
 
@@ -2717,7 +2734,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
   publish_code_snapshot :q
 
   desc 'Get the order, sent the confirmation'
-  edit 'app/mailers/order_notifier.rb' do
+  edit 'app/mailers/order_notifier*.rb' do
     clear_highlights
     %w(received shipped).each do |notice|
       dcl notice, :mark => notice
@@ -2742,16 +2759,19 @@ section 13.1, 'Iteration H1: Email Notifications' do
     clear_highlights
     dcl 'create' do
       msub /\n()\s+format/, <<-EOF, :highlight
-        OrderNotifier.received(@order).deliver_later
+        OrderNotifierMailer.received(@order).deliver_later
       EOF
       if $rails_version =~ /^3\./ or $rails_version =~ /^4\.[01]/
         gsub! 'deliver_later', 'deliver'
       end
     end
+    if $rails_version =~ /^[34]/
+      sub! 'OrderNotifierMailer', 'OrderNotifier'
+    end
   end
 
   desc 'Tailor the confirm shipped email (this time in HTML)'
-  edit 'app/views/order_notifier/shipped.html.erb' do
+  edit 'app/views/order_notifier*/shipped.html.erb' do
     self.all = <<-EOF.unindent(6)
       <h3>Pragmatic Order Shipped</h3>
       <p>
@@ -2771,9 +2791,9 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   desc 'Update the test case'
-  edit 'test/*/order_notifier_test.rb' do
+  edit 'test/*/order_notifier*_test.rb' do
     2.times do
-      msub /OrderNotifier.\w+()$/, '(orders(:one))'
+      msub /OrderNotifier\w*\.\w+()$/, '(orders(:one))'
       msub /do()\s+mail =/, "\n#START_HIGHLIGHT"
       msub /mail.body.encoded()\s+end/, "\n#END_HIGHLIGHT"
     end
@@ -2791,7 +2811,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
     rake 'db:test:load'
   end
 
-  test 'test/*/order_notifier_test.rb'
+  test 'test/*/order_notifier*_test.rb'
 end
 
 section 13.2, 'Iteration H2: Integration Tests' do

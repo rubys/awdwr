@@ -225,6 +225,9 @@ module AWDWR
           gems['sprockets-rails'][:branch] = '2.x'
         end
       end
+    else
+      # include xml serializers
+      # gems['activemodel-serializers-xml'] = {}
     end
 
     # ensure gems are compatible with Ruby 1.9.x

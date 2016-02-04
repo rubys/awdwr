@@ -289,6 +289,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 12.4, "Playtime" do
+    next if Gorp::Config[:skip_xml_serialization]
     ticket 167,
       :list => 'jquery-rails',
       :title =>  "SelectorAssertions moved in Rails 4.2",
@@ -324,6 +325,8 @@ class DepotTest < Gorp::TestCase
   section 13.1, "Iteration H1: Email Notifications" do
     if $rails_version =~ /^3/
       assert_test_summary :tests => 2, :assertions => '(8|10)'
+    elsif $rails_version =~ /^3/
+      assert_test_summary :tests => 2, :assertions => 10
     else
       assert_test_summary :tests => 2, :assertions => 10
     end
