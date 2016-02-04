@@ -2704,7 +2704,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
   desc 'Tailor the confirm receipt email'
 
   if File.exist? 'app/views/order_notifier*/received.html.erb'
-    cmd 'rm app/views/order_notifier/received.html.erb'
+    cmd 'rm app/views/order_notifier*/received.html.erb'
   end
 
   edit 'app/views/order_notifier*/received.text.erb' do
@@ -2819,11 +2819,10 @@ section 13.2, 'Iteration H2: Integration Tests' do
   generate 'integration_test user_stories'
   publish_code_snapshot :q, :depot, 'test/integration/user_stories_test.rb'
   edit "test/integration/user_stories_test.rb" do |data|
-    data[/(.*)/m,1] = read('test/user_stories_test.rb')
-    unless RUBY_VERSION =~ /^1\.8/
-      data.gsub! /\s{3}:/, ':'
-      data.gsub! /:(\w+) (\s*)=>/, '\1:\2'
-      data.sub! 'order: {', '   order: {'
+    if $rails_version =~ /^[34]/
+      data[/(.*)/m,1] = read('test/user_stories_test4.rb')
+    else
+      data[/(.*)/m,1] = read('test/user_stories_test.rb')
     end
   end
 
@@ -2833,7 +2832,11 @@ section 13.2, 'Iteration H2: Integration Tests' do
   desc 'Create an integration test using a DSL'
   generate 'integration_test dsl_user_stories'
   edit "test/integration/dsl_user_stories_test.rb" do |data|
-    data[/(.*)/m,1] = read('test/dsl_user_stories_test.rb')
+    if $rails_version =~ /^[34]/
+      data[/(.*)/m,1] = read('test/dsl_user_stories_test4.rb')
+    else
+      data[/(.*)/m,1] = read('test/dsl_user_stories_test.rb')
+    end
   end
 
   desc 'Run the tests'

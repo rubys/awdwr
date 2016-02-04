@@ -5,18 +5,18 @@ class DslUserStoriesTest < ActionDispatch::IntegrationTest
 
   #START:daves_details
   DAVES_DETAILS = {
-      name:     "Dave Thomas",
-      address:  "123 The Street",
-      email:    "dave@example.com",
-      pay_type: "Check"
+      :name     => "Dave Thomas",
+      :address  => "123 The Street",
+      :email    => "dave@example.com",
+      :pay_type => "Check"
   }
   #END:daves_details
 
   MIKES_DETAILS = {
-      name:     "Mike Clark",
-      address:  "345 The Avenue",
-      email:    "mike@pragmaticstudio.com",
-      pay_type: "Credit card"
+      :name     => "Mike Clark",
+      :address  => "345 The Avenue",
+      :email    => "mike@pragmaticstudio.com",
+      :pay_type => "Credit card"
   }
     
   def setup
@@ -37,11 +37,11 @@ class DslUserStoriesTest < ActionDispatch::IntegrationTest
   def test_buying_a_product
     dave = regular_user
     dave.get "/"
-    dave.is_viewing "Your Pragmatic Catalog"
+    dave.is_viewing "index"
     dave.buys_a @ruby_book
     dave.has_a_cart_containing @ruby_book
     dave.checks_out DAVES_DETAILS
-    dave.is_viewing "Your Pragmatic Catalog"
+    dave.is_viewing "index"
     check_for_order DAVES_DETAILS, @ruby_book
   end
   #END:test_buying_a_product
@@ -66,11 +66,11 @@ class DslUserStoriesTest < ActionDispatch::IntegrationTest
     open_session do |user|
       def user.is_viewing(page)
         assert_response :success
-        assert_select 'h1', page
+        assert_template page
       end
     
       def user.buys_a(product)
-        post '/line_items', params: { product_id: product.id }, xhr: true
+        xml_http_request :post, '/line_items', :product_id => product.id
         assert_response :success 
       end
     
@@ -85,21 +85,16 @@ class DslUserStoriesTest < ActionDispatch::IntegrationTest
       def user.checks_out(details)
         get "/orders/new"
         assert_response :success
-        assert_select 'legend', 'Please Enter Your Details'
+        assert_template "new"
 
-        post "/orders", params: {
-          order: { 
-            name:     details[:name],
-            address:  details[:address],
-            email:    details[:email],
-            pay_type: details[:pay_type]
-          }
-        }
-
-        follow_redirect!
-
+       post_via_redirect "/orders",
+                          :order => { :name     => details[:name],
+                                     :address  => details[:address],
+                                     :email    => details[:email],
+                                     :pay_type => details[:pay_type]
+                                    }
         assert_response :success
-        self.is_viewing "Your Pragmatic Catalog"
+        assert_template "index"
         cart = Cart.find(session[:cart_id])
         assert_equal 0, cart.line_items.size
       end

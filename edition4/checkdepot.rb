@@ -290,10 +290,10 @@ class DepotTest < Gorp::TestCase
 
   section 12.4, "Playtime" do
     next if Gorp::Config[:skip_xml_serialization]
-    ticket 167,
-      :list => 'jquery-rails',
-      :title =>  "SelectorAssertions moved in Rails 4.2",
-      :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
+    ticket 5,
+      :list => 'activemodel-serializers-xml',
+      :title =>  "release activemodel-serializers-xml gem",
+      :match => /Could not find gem 'activemodel-serializers-xml' in any of the gem sources/
 
     # raw xml
     assert_select '.stdout', /(<|&lt;)email(>|&gt;)customer@example.com(<|&lt;)\/email(>|&gt;)/,
