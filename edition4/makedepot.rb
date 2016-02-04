@@ -2993,7 +2993,7 @@ section 14.1, 'Iteration I1: Adding Users' do
   else
     edit 'test/*/users_controller_test.rb', 'create' do
       dcl "should create user", :mark => 'create' do
-        edit 'post :create', :highlight
+        edit '@user.name', :highlight
         sub! '@user.name', "'sam'"
         msub /,( )password_confirmation/, "\n" + (' ' * 8)
 

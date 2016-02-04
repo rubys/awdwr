@@ -355,7 +355,11 @@ class DepotTest < Gorp::TestCase
     assert_select 'td', 'dave'
     unless $rails_version =~ /^3/
       assert_select 'p', 'User dave was successfully created.'
-      assert_test_summary :tests => 52, :assertions => 166
+      if $rails_version =~ /^4/
+        assert_test_summary :tests => 52, :assertions => 166
+      else
+        assert_test_summary :tests => 52, :assertions => 161
+      end
     end
   end
 
