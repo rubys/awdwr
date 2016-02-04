@@ -2029,13 +2029,19 @@ end
       empty.sub! 'should get new', 'requires item in cart'
       empty.dcl 'requires item in cart', :highlight
     
-      getnew.msub /do\n()/, <<-EOF.unindent(4) + "\n", :highlight
-        item = LineItem.new
-        item.build_cart
-        item.product = products(:ruby)
-        item.save!
-        session[:cart_id] = item.cart.id
-      EOF
+      if $rails_version =~ /^[34]/
+        getnew.msub /do\n()/, <<-EOF.unindent(6) + "\n", :highlight
+          item = LineItem.new
+          item.build_cart
+          item.product = products(:ruby)
+          item.save!
+          session[:cart_id] = item.cart.id
+        EOF
+      else
+        getnew.msub /do\n()/, <<-EOF.unindent(6) + "\n", :highlight
+          post line_items_url, params: { product_id: products(:ruby).id }
+        EOF
+      end
 
       getnew.msub /()\A/, empty + "\n"
       getnew.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
