@@ -29,6 +29,8 @@ $autorestart = 'depot'
 $output = 'makedepot'
 $checker = 'checkdepot'
 
+DEPOT_CSS = "app/assets/stylesheets/application.css.scss"
+
 omit 100..199
 
 section 2, 'Instant Gratification' do
@@ -265,7 +267,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     desc 'Copy some images and a stylesheet'
     cmd "cp -v #{$DATA}/images/* public/images/"
     cmd "cp -v #{$DATA}/depot.css public/stylesheets"
-    DEPOT_CSS = "public/stylesheets/depot.css"
+    DEPOT_CSS[0..-1] = "public/stylesheets/depot.css"
   else
     desc 'Copy some images'
     cmd "cp -v #{$DATA}/assets/* app/assets/images/"
@@ -276,7 +278,6 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     end
 
     desc 'Add some style'
-    DEPOT_CSS =  "app/assets/stylesheets/application.css.scss"
     edit "app/assets/stylesheets/products.css.scss" do
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, read('products.css.scss'), :highlight
@@ -1969,6 +1970,15 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   desc 'Create a migration to add an order_id column to line_items'
   generate 'migration add_order_id_to_line_item order_id:integer'
 
+if false
+  desc "Modify the migration to allow nulls"
+  edit Dir['db/migrate/*add_order_id_to_line_item.rb'].first do |data|
+    edit 'add_column', :highlight
+
+    data[/add_column.*()/,1] = ', null: true'
+  end
+end
+
   desc 'Apply both migrations'
   db :migrate
 
@@ -2037,6 +2047,16 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     self.all = read('orders/new.html.erb')
   end
 
+  desc 'Add payment types to the order'
+  edit 'app/models/order.rb', 'select' do |data|
+    msub /class Order.*\n()/, <<-EOF.unindent(4), :mark => 'select'
+      PAYMENT_TYPES = [ "Check", "Credit card", "Purchase order" ]
+    EOF
+    edit 'class Order', :mark => 'select'
+    edit 'PAYMENT_TYPES', :highlight
+    edit /^end/, :mark => 'select'
+  end
+
   desc 'Modify the partial used by the template'
   edit 'app/views/orders/_form.html.erb' do
     msub /<%= pluralize.*%>( )/, "\n      "
@@ -2060,16 +2080,6 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       msub /() %>/, " 'Place Order'"
     end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  desc 'Add payment types to the order'
-  edit 'app/models/order.rb', 'select' do |data|
-    msub /class Order.*\n()/, <<-EOF.unindent(4), :mark => 'select'
-      PAYMENT_TYPES = [ "Check", "Credit card", "Purchase order" ]
-    EOF
-    edit 'class Order', :mark => 'select'
-    edit 'PAYMENT_TYPES', :highlight
-    edit /^end/, :mark => 'select'
   end
 
   desc 'Add some CSS'
@@ -2196,12 +2206,17 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
   end
 
-  desc 'Define a relationship from the line item to the order'
+  desc 'Define an optional relationship from the line item to the order'
   edit 'app/models/line_item.rb' do
     clear_all_marks
-    msub /class LineItem.*\n()/, <<-EOF.unindent(6), :highlight
-        belongs_to :order
+    edit 'belongs_to', :highlight do
+      msub /.*()/, ', optional: true'
+    end
+    msub /class LineItem.*\n()/, <<-EOF.unindent(4), :highlight
+      belongs_to :order, optional: true
     EOF
+
+    gsub! 'optional: true', 'required: false' if $rails_version =~ /^[34]/
   end
 
   desc 'Define a relationship from the order to the line item'
