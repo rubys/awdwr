@@ -2703,7 +2703,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
 
   desc 'Tailor the confirm receipt email'
 
-  if File.exist? 'app/views/order_notifier*/received.html.erb'
+  unless Dir['app/views/order_notifier*/received.html.erb'].empty?
     cmd 'rm app/views/order_notifier*/received.html.erb'
   end
 
