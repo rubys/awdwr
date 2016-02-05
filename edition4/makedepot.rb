@@ -527,7 +527,7 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
       end
     else
       msub /(\s*)\Z/, "\n\n"
-      msub /do\n()/, <<-EOF.unindent(6) + "\n", :highlight
+      msub /^()end/, <<-EOF.unindent(6) + "\n", :highlight
         root 'store#index', as: 'store'
       EOF
     end
