@@ -378,8 +378,10 @@ class DepotTest < Gorp::TestCase
     assert_select 'h1', 'Welcome'
     if $rails_version =~ /^3/
       assert_test_summary :tests => 47, :assertions => '[789]\d'
-    else
+    elsif $rails_version =~ /^3/
       assert_test_summary :tests => 57, :assertions => 172
+    else
+      assert_test_summary :tests => 57, :assertions => 167
     end
   end
 

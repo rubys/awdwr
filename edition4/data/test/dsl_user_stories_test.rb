@@ -2,6 +2,7 @@ require 'test_helper'
 
 class DslUserStoriesTest < ActionDispatch::IntegrationTest
   fixtures :products
+  include ActiveJob::TestHelper
 
   #START:daves_details
   DAVES_DETAILS = {
@@ -35,29 +36,33 @@ class DslUserStoriesTest < ActionDispatch::IntegrationTest
   
   #START:test_buying_a_product
   def test_buying_a_product
-    dave = regular_user
-    dave.get "/"
-    dave.is_viewing "Your Pragmatic Catalog"
-    dave.buys_a @ruby_book
-    dave.has_a_cart_containing @ruby_book
-    dave.checks_out DAVES_DETAILS
-    dave.is_viewing "Your Pragmatic Catalog"
-    check_for_order DAVES_DETAILS, @ruby_book
+    perform_enqueued_jobs do
+      dave = regular_user
+      dave.get "/"
+      dave.is_viewing "Your Pragmatic Catalog"
+      dave.buys_a @ruby_book
+      dave.has_a_cart_containing @ruby_book
+      dave.checks_out DAVES_DETAILS
+      dave.is_viewing "Your Pragmatic Catalog"
+      check_for_order DAVES_DETAILS, @ruby_book
+    end
   end
   #END:test_buying_a_product
 
   #START:test_two_people_buying
   def test_two_people_buying
-    dave = regular_user
+    perform_enqueued_jobs do
+      dave = regular_user
         mike = regular_user
-    dave.buys_a @ruby_book
+      dave.buys_a @ruby_book
         mike.buys_a @rails_book
-    dave.has_a_cart_containing @ruby_book
-    dave.checks_out DAVES_DETAILS
+      dave.has_a_cart_containing @ruby_book
+      dave.checks_out DAVES_DETAILS
         mike.has_a_cart_containing @rails_book
-    check_for_order DAVES_DETAILS, @ruby_book
+      check_for_order DAVES_DETAILS, @ruby_book
         mike.checks_out MIKES_DETAILS
         check_for_order MIKES_DETAILS, @rails_book
+    end
   end
   #END:test_two_people_buying
   
@@ -122,7 +127,7 @@ class DslUserStoriesTest < ActionDispatch::IntegrationTest
     end
 
     mail = ActionMailer::Base.deliveries.last
-    assert_equal order.email,           mail[:to].value
+    assert_equal order.email, mail.to.first
     for line_item in order.line_items
       assert_operator mail.body.to_s, :include?, line_item.product.title
     end

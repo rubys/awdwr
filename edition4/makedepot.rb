@@ -3144,39 +3144,77 @@ section 14.2, 'Iteration I2: Authenticating Users' do
     'name' => 'dave',
     'password' => 'secret'
 
+  unless $rails_version =~ /^[34]/
+    edit "test/*/admin_controller_test.rb" do |data|
+      edit 'admin_index_url', :highlight
+      sub! 'admin_index_url', 'admin_url'
+    end
+  end
+
   desc 'Fix the sessions controller test'
   edit "test/*/sessions_controller_test.rb" do |data|
-    dcl 'should get create' do
-      self.all = <<-EOF.unindent(6)
-        #START_HIGHLIGHT
-        test "should login" do
-          dave = users(:one)
-          post :create, :name => dave.name, :password => 'secret'
-          assert_redirected_to admin_url
-          assert_equal dave.id, session[:user_id]
-        end
-        #END_HIGHLIGHT
+    if $rails_version =~ /^[34]/
+      dcl 'should get create' do
+        self.all = <<-EOF.unindent(8)
+          test "should login" do
+            dave = users(:one)
+            post :create, :name => dave.name, :password => 'secret'
+            assert_redirected_to admin_url
+            assert_equal dave.id, session[:user_id]
+          end
 
-        #START_HIGHLIGHT
-        test "should fail login" do
-          dave = users(:one)
-          post :create, :name => dave.name, :password => 'wrong'
-          assert_redirected_to login_url
-        end
-        #END_HIGHLIGHT
-      EOF
+          test "should fail login" do
+            dave = users(:one)
+            post :create, :name => dave.name, :password => 'wrong'
+            assert_redirected_to login_url
+          end
+        EOF
+      end
+      dcl 'should get destroy' do
+        self.all = <<-EOF.unindent(8)
+          test "should logout" do
+            delete :destroy
+            assert_redirected_to store_url
+          end
+        EOF
+      end
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    else
+      dcl 'should get new' do
+        self.all = <<-EOF.unindent(8)
+          test "should prompt for login" do
+            get login_url
+            assert_response :success
+          end
+        EOF
+      end
+
+      dcl 'should get create' do
+        self.all = <<-EOF.unindent(8)
+          test "should login" do
+            dave = users(:one)
+            post login_url, params: { name: dave.name, password: 'secret' }
+            assert_redirected_to admin_url
+            assert_equal dave.id, session[:user_id]
+          end
+
+          test "should fail login" do
+            dave = users(:one)
+            post login_url, params: { name: dave.name, password: 'wrong' }
+            assert_redirected_to login_url
+          end
+        EOF
+      end
+
+      dcl 'should get destroy' do
+        self.all = <<-EOF.unindent(8)
+          test "should logout" do
+            delete logout_url
+            assert_redirected_to store_url
+          end
+        EOF
+      end
     end
-    dcl 'should get destroy' do
-      self.all = <<-EOF.unindent(6)
-        #START_HIGHLIGHT
-        test "should logout" do
-          delete :destroy
-          assert_redirected_to store_url
-        end
-        #END_HIGHLIGHT
-      EOF
-    end
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   test
