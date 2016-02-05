@@ -2569,6 +2569,25 @@ section 12.4, 'Playtime' do
 
     bundle 'install'
     restart_server
+
+    desc 'include xml serializers'
+    edit 'app/models/product.rb', 'asxml' do
+      edit /^class.*\n/, mark: 'asxml'
+      edit /^end.*\n/, mark: 'asxml'
+      msub /^()class/, "require 'active_model/serializers/xml'\n",
+        :highlight
+      msub /^class.*\n()/, "  include ActiveModel::Serializers::Xml\n",
+        :highlight
+    end
+
+    edit 'app/models/order.rb', 'asxml' do
+      edit /^class.*\n/, mark: 'asxml'
+      edit /^end.*\n/, mark: 'asxml'
+      msub /^()class/, "require 'active_model/serializers/xml'\n",
+        :highlight
+      msub /^class.*\n()/, "  include ActiveModel::Serializers::Xml\n",
+        :highlight
+    end
   end
 
   desc 'Add the xml format to the controller'
