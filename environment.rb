@@ -227,7 +227,7 @@ module AWDWR
       end
     else
       # include xml serializers
-      # gems['activemodel-serializers-xml'] = {}
+      gems['activemodel-serializers-xml'] = {}
     end
 
     # ensure gems are compatible with Ruby 1.9.x
