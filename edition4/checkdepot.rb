@@ -393,9 +393,10 @@ class DepotTest < Gorp::TestCase
 
     if $rails_version =~ /^3/
       assert_test_summary :tests => 47, :assertions => '[789]\d'
-    else
+    elsif $rails_version =~ /^4/
       assert_test_summary :tests => 57, :assertions => 172
     end
+      assert_test_summary :tests => 57, :assertions => 167
   end
 
   section 14.4, "Iteration I4: Adding a Sidebar" do

@@ -3283,23 +3283,40 @@ section 14.3, 'Iteration I3: Limiting Access' do
   end
 
   desc 'Cause all tests to do an implicit login'
-  edit 'test/test_helper.rb', 'more' do |data|
-    data.edit 'class ActiveSupport::TestCase', :mark => 'more'
-    data.edit /\n +# Add more.*\nend\n/, :mark => 'more' do |more|
-      more.msub /\A()/, <<-EOF.unindent(6)
-        # ...
-      EOF
-      more.msub /^()end/, <<-EOF.unindent(6)
-        def login_as(user)
-          session[:user_id] = users(user).id
-        end
+  edit 'test/test_helper.rb' do
+    if $rails_version =~ /^[34]/
+      edit /\n +# Add more.*\nend\n/ do
+        msub /\A()/, <<-EOF.unindent(8)
+          # ...
+        EOF
+        msub /^()end/, <<-EOF.unindent(8)
+          def login_as(user)
+            session[:user_id] = users(user).id
+          end
 
-        def logout
-          session.delete :user_id
-        end
+          def logout
+            session.delete :user_id
+          end
 
-        def setup
-          login_as :one if defined? session
+          def setup
+            login_as :one if defined? session
+          end
+        EOF
+      end
+    else
+      msub /()\Z/, "\n" + <<-EOF, :highlight
+        class ActionDispatch::IntegrationTest
+          def login_as(user)
+            post login_url, params: { name: user.name, password: 'secret' }
+          end
+
+          def logout
+            delete logout_url
+          end
+
+          def setup
+            login_as users(:one)
+          end
         end
       EOF
     end
@@ -3392,13 +3409,24 @@ section 14.5, 'Playtime' do
   edit 'test/*/products_controller_test.rb', 'logout' do
     clear_all_marks
     msub /^()end/, "\n"
-    msub /^()end/, <<-EOF.unindent(4), :mark => 'logout'
-      test "should require login" do
-        logout
-        get :index
-        assert_redirected_to login_path
-      end
-    EOF
+    if $rails_version =~ /^[34]/
+      msub /^()end/, <<-EOF.unindent(6), :mark => 'logout'
+        test "should require login" do
+          logout
+          get :index
+          assert_redirected_to login_path
+        end
+      EOF
+    else
+      msub /^()end/, <<-EOF.unindent(6), :mark => 'logout'
+        test "should require login" do
+          logout
+          get products_url
+          follow_redirect!
+          assert_select 'legend', 'Please Log In'
+        end
+      EOF
+    end
   end
 
   desc 'Verify  that the test passes'
@@ -3417,7 +3445,7 @@ section 14.5, 'Playtime' do
     dcl 'authorize', :mark => 'auth' do
       gsub! /^      /, '        '
       msub /def authorize\n()/, <<-EOF.unindent(2), :highlight
-        if request.format == Mime::HTML 
+        if request.format == Mime[:html]
       EOF
       msub /\n()    end/, <<-EOF.unindent(2), :highlight
         else
@@ -3432,6 +3460,7 @@ section 14.5, 'Playtime' do
         msub /user = (.*\n.*)/, 'User.authenticate(username, password)'
       end
     end
+    sub! 'Mime[:html]', 'Mime::HTML' if $rails_version =~ /^[34]/
   end
 
   desc 'Try requesting the xml... see auth succeed.'
