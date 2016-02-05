@@ -3534,12 +3534,17 @@ section 15.1, 'Task J1: Selecting the locale' do
           end
         end
       end
-
-      def default_url_options
-        { :locale => I18n.locale }
-      end
       #END_HIGHLIGHT
     EOF
+
+    if $rails_version =~ /^[34]/
+      data.msub /^() +def set_i18n_locale/, <<-'EOF'.unindent(4) + "\n"
+        def default_url_options
+          { :locale => I18n.locale }
+        end
+      EOF
+    end
+
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
