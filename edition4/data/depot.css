@@ -9,6 +9,9 @@
         font: bold smaller sans-serif;
 }
 
+#notice:empty {
+        display: none
+}
 
 .store h1 {
         font:  150% sans-serif;

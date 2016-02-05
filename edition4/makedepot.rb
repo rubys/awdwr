@@ -2923,8 +2923,6 @@ section 14.1, 'Iteration I1: Adding Users' do
           gsub!("'",'"').sub!('User ', 'User #{@user.name} ')
         end
         msub /redirect_to\(?\s?(@user, ):?notice/, "users_url,\n" + (' ' * 10)
-        msub /,( ):?status/, "\n" + (' ' * 10)
-        msub /,( ):?status/, "\n" + (' ' * 10) if action == 'create'
       end
     end
   end
@@ -2937,27 +2935,29 @@ section 14.1, 'Iteration I1: Adding Users' do
     end
   end
 
-  desc 'Add Notice'
-  edit 'app/views/users/index.html.erb' do
-    msub /<\/h1>\n()/, <<-EOF.unindent(6), :highlight
-      <% if notice %>
-      <p id="notice"><%= notice %></p>
-      <% end %>
-    EOF
-    if File.exist? 'public/images'
-      msub /(.*<th>Hashed password.*\n)/, ''
-      msub /(.*<th>Salt.*\n)/, ''
-      msub /(.*user.hashed_password.*\n)/, ''
-      msub /(.*user.salt.*\n)/, ''
-    elsif self =~ /password/i
-      msub /(.*<th>Password digest.*\n)/, ''
-      msub /(.*user.password_digest.*\n)/, ''
-    end
-    unless $rails_version =~ /^3\.[01]/
-      if self =~ /,( ):?data/
-        msub /,( ):?data/, "\n" + (' ' * 8)
-      else
-        msub /,( ):?method/, "\n" + (' ' * 6)
+  if $rails_version =~ /^(3|4\.[01])/
+    desc 'Add Notice'
+    edit 'app/views/users/index.html.erb' do
+      msub /<\/h1>\n()/, <<-EOF.unindent(8), :highlight
+        <% if notice %>
+        <p id="notice"><%= notice %></p>
+        <% end %>
+      EOF
+      if File.exist? 'public/images'
+        msub /(.*<th>Hashed password.*\n)/, ''
+        msub /(.*<th>Salt.*\n)/, ''
+        msub /(.*user.hashed_password.*\n)/, ''
+        msub /(.*user.salt.*\n)/, ''
+      elsif self =~ /password/i
+        msub /(.*<th>Password digest.*\n)/, ''
+        msub /(.*user.password_digest.*\n)/, ''
+      end
+      unless $rails_version =~ /^3\.[01]/
+        if self =~ /,( ):?data/
+          msub /,( ):?data/, "\n" + (' ' * 8)
+        else
+          msub /,( ):?method/, "\n" + (' ' * 6)
+        end
       end
     end
   end

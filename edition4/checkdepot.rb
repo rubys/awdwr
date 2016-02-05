@@ -353,7 +353,11 @@ class DepotTest < Gorp::TestCase
       :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
 
     assert_select 'legend', 'Enter User Details'
-    assert_select 'h1', /Listing Users/i
+    if $rails_version =~ /^[34]/
+      assert_select 'h1', /Listing Users/i
+    else
+      assert_select 'h1', 'Users'
+    end
     assert_select 'td', 'dave'
     unless $rails_version =~ /^3/
       assert_select 'p', 'User dave was successfully created.'
