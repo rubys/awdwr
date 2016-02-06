@@ -189,7 +189,7 @@ gems.each do |lib, opts|
   print lib + ': '
   if not File.exist? File.join(HOME,'git',lib)
     Dir.chdir(File.join(HOME,'git')) do 
-      system "git clone #{opts[:git]}"
+      system "git clone #{opts[:git]} #{lib}"
     end
   end
   Dir.chdir(File.join(HOME,'git',lib)) do 
