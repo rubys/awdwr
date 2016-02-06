@@ -301,7 +301,7 @@ class DepotTest < Gorp::TestCase
     ticket 23503,
       :list => 'rails',
       :title =>  "ActionController::Live causes requests to hang",
-      :match => />curl.*<\/a><\/pre>\s*<p class="note">/
+      :match => />curl.*<\/pre>\s*<p class="note">/
 
     # raw xml
     assert_select '.stdout', /(<|&lt;)email(>|&gt;)customer@example.com(<|&lt;)\/email(>|&gt;)/,
