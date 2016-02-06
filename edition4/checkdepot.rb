@@ -290,10 +290,10 @@ class DepotTest < Gorp::TestCase
 
   section 12.4, "Playtime" do
     next if Gorp::Config[:skip_xml_serialization]
-    ticket 5,
-      :list => 'activemodel-serializers-xml',
-      :title =>  "release activemodel-serializers-xml gem",
-      :match => /Could not find gem 'activemodel-serializers-xml' in any of the gem sources/
+    ticket 23503,
+      :list => 'rails',
+      :title =>  "ActionController::Live causes requests to hang",
+      :match => />curl.*<\/a><\/pre>\s*<p class="note">/
 
     # raw xml
     assert_select '.stdout', /(<|&lt;)email(>|&gt;)customer@example.com(<|&lt;)\/email(>|&gt;)/,
