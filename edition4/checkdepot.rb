@@ -208,6 +208,14 @@ class DepotTest < Gorp::TestCase
   end
 
   section 10.3, "Iteration E3: Finishing the Cart" do
+    ticket 23524, title: "CSRF and authenticity tokens don't match" do |raw|
+      raw.scan(/<ul>.*?<\/ul>/m).any? do |form|
+        auth = form[/authenticity_token =&gt; (.*?)</, 1]
+        csrf = form[/csrf-token =&gt; (.*?)</, 1]
+        auth and csrf and auth != csrf
+      end
+    end
+
     assert_select '#notice', 'Your cart is currently empty'
     assert_select '.total_cell', '$121.95'
     assert_select 'input[type=submit][value="Empty cart"]'
