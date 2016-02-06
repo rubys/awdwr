@@ -4327,11 +4327,6 @@ if $rails_version =~ /^3\.0/
 end
 
 section 26.3, 'Pagination' do
-  if Gorp::Config[:skip_pagination]
-    warn 'skipping pagination'
-    next
-  end
-
   if $rails_version =~ /^3\./
     desc 'Add in the will_paginate gem'
   else

@@ -580,6 +580,8 @@ class DepotTest < Gorp::TestCase
   end
 
   section 26.3, "Iteration G3: Pagination" do
+    next if Gorp::Config[:skip_pagination]
+
     ticket 774,
       :list => 'kaminari',
       :title =>  "non sanitized request parameter",
