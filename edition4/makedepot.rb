@@ -4341,12 +4341,13 @@ section 26.3, 'Pagination' do
     end
   end
 
-# cmd 'rake environment RAILS_ENV=test db:migrate' unless $rails_version =~ /^3\./
   `rake environment RAILS_ENV=test db:migrate` if $rails_version =~ /^3\.0/
   if File.exist? 'test/unit'
     `ruby -I test test/unit/order_test.rb 2> /dev/null > /dev/null`
-  else
+  elsif $rails_version =~ /^[34]/
     `rake test test/models/order_test.rb 2> /dev/null > /dev/null`
+  else
+    `rails test test/models/order_test.rb 2> /dev/null > /dev/null`
   end
   unless $?.success?
     test "test/*/order_test.rb"
