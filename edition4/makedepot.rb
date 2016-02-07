@@ -26,9 +26,9 @@ DEPOT_CSS = "app/assets/stylesheets/application.css.scss"
 
 begin
   require './pub_gorp'
-# rescue LoadError
-# def publish_code_snapshot *args
-# end
+rescue LoadError
+  def publish_code_snapshot *args
+  end
 end
 
 omit 100..199
