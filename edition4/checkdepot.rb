@@ -208,7 +208,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 10.3, "Iteration E3: Finishing the Cart" do
-    ticket 23386,
+    ticket 23524,
       title: "form authenticity_tokens don't work",
       match: /ActionController::InvalidAuthenticityToken/
 
