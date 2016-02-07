@@ -610,6 +610,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, additional_css + <<-EOF.unindent(8), :highlight
+        /* START:desktop */
         #banner {
           background: #9c9;
           padding: 10px;
@@ -634,17 +635,16 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
         #columns {
           background: #141;
+          display: flex;
 
           #main {
-            margin-left: 17em;
             padding: 1em;
             background: white;
+            flex: 1;
           }
 
           #side {
-            float: left;
             padding: 1em 2em;
-            width: 13em;
             background: #141;
 
             ul {
@@ -661,6 +661,25 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
             }
           }
         }
+        /* END:desktop */
+
+        /* START:mobile */
+	@media all and (max-width: 800px) {
+	  #columns {
+	    flex-direction: column-reverse;
+	  }
+	}
+
+	@media all and (max-width: 500px) {
+	  #banner {
+	    height: 1em;
+	  }
+
+	  #banner .title {
+	    display: none;
+	  }
+	}
+        /* END:mobile */
       EOF
     end
   else
