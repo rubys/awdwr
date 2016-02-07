@@ -286,10 +286,12 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /Etag:/i
   end
 
+  unless $PUB
   section 12.3, 'Iteration G3: Downloading an eBook' do
     ticket 23483,
       :title =>  "ActionController::Live locks database",
       :match => /SQLite3::BusyException/
+  end
   end
 
   section 12.4, "Playtime" do

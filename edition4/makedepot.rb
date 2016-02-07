@@ -1,13 +1,6 @@
 require 'rubygems'
 require 'gorp'
 
-begin
-  require './pub_gorp'
-rescue LoadError
-  def publish_code_snapshot *args
-  end
-end
-
 Gorp::Config.load('~/.awdwr')
 
 include Gorp::Commands
@@ -30,6 +23,13 @@ $output = 'makedepot'
 $checker = 'checkdepot'
 
 DEPOT_CSS = "app/assets/stylesheets/application.css.scss"
+
+begin
+  require './pub_gorp'
+# rescue LoadError
+# def publish_code_snapshot *args
+# end
+end
 
 omit 100..199
 
@@ -3323,7 +3323,8 @@ section 14.3, 'Iteration I3: Limiting Access' do
         EOF
       end
     else
-      msub /()\Z/, "\n" + <<-EOF, :highlight
+      msub /()\Z/, "\n"
+      msub /()\Z/, <<-EOF.unindent(8), mark: 'more'
         class ActionDispatch::IntegrationTest
           def login_as(user)
             post login_url, params: { name: user.name, password: 'secret' }
