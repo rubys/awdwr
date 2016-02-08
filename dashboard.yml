@@ -1,7 +1,9 @@
-testrails: ~/bin/testrails.yml
 log: ~/logs
 bin: ~/bin
-
+testrails: 
+  - ~/bin/testrails.yml
+  - testrails.yml
+ 
 book:
 - '4':
     web:  AWDwR4

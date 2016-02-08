@@ -13,7 +13,9 @@ config = YAML.load_file($dashboard)
 $logdir = config.delete('log').sub(home_re, $home).untaint
 $bindir = config.delete('bin').sub(home_re, $home).untaint
 
-testrails = config.delete('testrails').to_s.sub /^\~\//, ENV['HOME'] + '/'
+testrails = Array(config.delete('testrails')).
+  map {|name| File.expand_path(name)}.
+  find {|name| File.exist? name}
 testrails = YAML.load_file(testrails.untaint) if testrails
 
 # set up symbolic links

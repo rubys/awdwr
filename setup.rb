@@ -2,8 +2,7 @@
 
 # notes:
 #  * copy/setup .gitconfig, .ssh, bin/testrails*
-#  * apt-get install ruby1.9.3
-#  * gem install xmpp4r ruby-dbus
+#  * gem install ruby-dbus
 #  * apt-get install apache2 curl git libmysqlclient-dev mysql-server nodejs
 #  * gem install nokogiri wunderbar
 #
@@ -11,8 +10,6 @@
 #  * sudo -u postgres createuser --superuser $USER
 
 # check prereqs
-require 'rubygems'
-require 'xmpp4r'
 %w(apache2ctl curl git mysql).each do |cmd| 
   next if cmd == 'apache2ctl' and not RUBY_PLATFORM.include? 'linux'
   next if system "which #{cmd} > /dev/null"
@@ -55,14 +52,15 @@ Dir.chdir git_path do
   end
 end
 
-# install rvm
-require 'yaml'
-rvm_path = File.expand_path(ENV['rvm_path'] || '~/.rvm')
-if not File.exist? rvm_path
-  system 'bash -c "curl -L https://get.rvm.io | bash -s stable"'
-  exit -1 unless File.exist? rvm_path
-  cmd = "source #{rvm_path}/scripts/rvm; rvm default system; " +
-    "rvm --autolibs=enable requirements ruby-2.0.0"
-  system 'bash -c ' + cmd.inspect
-  exit 0
+if `which rbenv`.empty?
+  # install rvm
+  rvm_path = File.expand_path(ENV['rvm_path'] || '~/.rvm')
+  if not File.exist? rvm_path
+    system 'bash -c "curl -L https://get.rvm.io | bash -s stable"'
+    exit -1 unless File.exist? rvm_path
+    cmd = "source #{rvm_path}/scripts/rvm; rvm default system; " +
+      "rvm --autolibs=enable requirements ruby-2.0.0"
+    system 'bash -c ' + cmd.inspect
+    exit 0
+  end
 end

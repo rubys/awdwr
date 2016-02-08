@@ -1,5 +1,17 @@
 task :default => [:test]
 
+task :setup do
+  ruby 'setup.rb'
+  sh 'bundle update'
+end
+
+task :dashboard do
+  cmd = ['rackup']
+  cmd += ['-p', ENV['PORT']] if ENV['PORT']
+  cmd += ['-o', ENV['IP']] if ENV['IP']
+  system *cmd
+end
+
 # example usage: rake test[6.1-6.5,save]
 task :test, :arg1, :arg2, :arg3, :arg4 do |task, args|
   ruby 'makedepot.rb', *serialize(args)
