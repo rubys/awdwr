@@ -27,8 +27,16 @@ fi
 
 eval $(ruby <<__return
   require 'yaml'
-  testrails = YAML.load_file('$dir/testrails.yml')
-  git = testrails['git'] || '$HOME/git'
+
+  dir = File.expand_path('$dir')
+  while dir != '/'
+    puts dir
+    if File.exist? "#{dir}/testrails.yml"
+      testrails = YAML.load_file("#{dir}/testrails.yml")
+      break
+    end
+    dir = File.dirname(dir)
+  end
 
   require 'shellwords'
   require "#{git}/awdwr/environment"

@@ -1,0 +1,3 @@
+if ! grep -q 'alias work=' ~/.bashrc ; then
+  echo "alias work='source `pwd`/vagrant/bin/work'" >> ~/.bashrc
+fi
