@@ -38,6 +38,8 @@ eval $(ruby <<__return
     dir = File.dirname(dir)
   end
 
+  git = testrails['git'] || '$HOME/git'
+
   require 'shellwords'
   require "#{git}/awdwr/environment"
 
