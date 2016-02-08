@@ -182,7 +182,6 @@ gems.each do |lib, opts|
 
   if opts[:github]
     opts[:git] = "https://github.com/#{opts[:github]}.git" 
-    opts[:git] += " #{lib}"if opts[:github] =~ /^\w+\/(\w+)$/ and lib != $1
   end
 
   next unless opts[:git]

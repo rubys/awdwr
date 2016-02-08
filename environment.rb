@@ -277,7 +277,8 @@ if __FILE__ == $0
     next if gem == 'gorp'
     args = []
     if options[:version]
-      args.push options.delete(:version).map(&:inspect).join(', ')
+      version = options.delete(:version)
+      args.push version.map(&:inspect).join(', ') unless version.empty?
     end
     options.delete :branch if options[:branch] == 'master'
     options.each do |name, value|
