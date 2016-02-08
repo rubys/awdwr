@@ -17,9 +17,9 @@ if ! grep -q 'alias depot=' ~/.bashrc ; then
 fi
 
 # link awdwr into the git directory
-if [[ ! -e ~/git ]]; then
-  mkdir ~/git
-  ln -s . ~/git/awdwr
+if [[ ! -e ~/git/awdwr ]]; then
+  mkdir -p ~/git
+  ln -s `pwd` ~/git/awdwr
 fi
 
 # start mysql

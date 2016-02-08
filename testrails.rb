@@ -310,8 +310,15 @@ if File.exist? File.join(WORK, 'Gemfile')
 
   install = <<-EOF
     gem list -i ^bundler$ > /dev/null && gem update bundler || gem #{install} bundler
-    (cd #{WORK}; rm -rf Gemfile.lock vendor; bundle install)
+    (cd #{File.realpath WORK}; rm -rf Gemfile.lock vendor; bundle install)
   EOF
+
+  ENV.delete 'BUNDLE_GEMFILE'
+  ENV.delete 'BUNDLE_BIN_PATH'
+  ENV.delete 'GEM_HOME'
+  ENV.delete 'GEM_PATH'
+  ENV.delete 'RUBYLIB'
+  ENV.delete 'RUBYOPT'
 else
   install = <<-EOF
     gem list rack | grep -q 1.1.3 || gem install rack -v 1.1.3

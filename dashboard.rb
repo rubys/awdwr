@@ -109,10 +109,13 @@ _html do
       ENV['PATH'] = config['path'] + File::PATH_SEPARATOR + ENV['PATH']
     end
 
+    testrails = "#{$bindir}/testrails"
+    testrails = "#{Dir.pwd}/testrails.rb" unless File.exist? testrails
+
     require 'shellwords'
     @args = Shellwords.join(@args.split).untaint
-    _.submit "ruby #{$bindir}/testrails #{@args} " +
-	     "> #{$logdir}/post.out 2> #{$logdir}/post.err "
+    _.submit "ruby #{testrails.untaint} #{@args} " +
+       "> #{$logdir}/post.out 2> #{$logdir}/post.err "
 
     sleep 2
   end
