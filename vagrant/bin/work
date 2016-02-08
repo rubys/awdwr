@@ -30,7 +30,6 @@ eval $(ruby <<__return
 
   dir = File.expand_path('$dir')
   while dir != '/'
-    puts dir
     if File.exist? "#{dir}/testrails.yml"
       testrails = YAML.load_file("#{dir}/testrails.yml")
       break

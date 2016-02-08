@@ -1,3 +1,38 @@
+# testrails alias
+if ! grep -q 'alias testrails=' ~/.bashrc ; then
+  echo "alias testrails='ruby `pwd`/testrails.rb'" >> ~/.bashrc
+  source ~/.bashrc
+fi
+
+# work alias
 if ! grep -q 'alias work=' ~/.bashrc ; then
   echo "alias work='source `pwd`/vagrant/bin/work'" >> ~/.bashrc
+  source ~/.bashrc
+fi
+
+# depot alias
+if ! grep -q 'alias depot=' ~/.bashrc ; then
+  echo "alias depot='bash `pwd`/vagrant/bin/depot'" >> ~/.bashrc
+  source ~/.bashrc
+fi
+
+# link awdwr into the git directory
+if [[ ! -e ~/git ]]; then
+  mkdir ~/git
+  ln -s . ~/git/awdwr
+fi
+
+# start mysql
+if mysql-ctl status 2>&1 | grep -q stopped ; then
+  sudo mysql-ctl start
+fi
+
+# run setup
+if [[ ! -e ~/git/gorp ]]; then
+  ruby setup.rb
+fi
+
+# install gems
+if [[ ! -e  Gemfile.lock ]]; then
+  bundle update
 fi
