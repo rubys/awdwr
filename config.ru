@@ -4,6 +4,7 @@
 # running the dashboard as a Phusion Passenger application.
 
 require 'wunderbar/sinatra'
+require 'yaml'
 
 $HOME = ENV['HOME']
 
@@ -14,6 +15,8 @@ ENV.keys.each do |var|
 end
 
 DASHBOARD = File.read(File.expand_path('../dashboard.rb', __FILE__)).untaint
+config = YAML.load_file(File.expand_path('../dashboard.yml', __FILE__))
+logdir = File.expand_path(config['log']).untaint
 
 get '/' do
   # FileUtils.touch File.expand_path('../tmp/restart.txt', __FILE__).untaint
@@ -39,6 +42,28 @@ end
 
 get %r{^/([-\w.]+.js)} do |path|
   send_file "vagrant/www/#{path}"
+end
+
+get '/logs' do
+  _html do
+    _h2 "Logs"
+    logs = Dir["#{logdir}/*"].map(&:untaint)
+    
+    _table do
+      logs.sort_by {|name| File.mtime(name)}.reverse.each do |fullname|
+        name = File.basename(fullname)
+        _tr do
+          _td File.mtime(fullname).to_s
+          _td {_a name, href: "logs/#{name}"}
+        end
+      end
+    end
+  end
+end
+
+get %r{^/logs/(\w[-\w]+\.\w+)$} do |log|
+  content_type "text/plain"
+  send_file "#{logdir}/#{log.untaint}"
 end
 
 get '/env' do
