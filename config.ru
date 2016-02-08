@@ -50,10 +50,17 @@ get '/logs' do
     logs = Dir["#{logdir}/*"].map(&:untaint)
     
     _table do
+      _tr do
+        _th 'Updated'
+        _th 'Size'
+        _th 'Name'
+      end
+
       logs.sort_by {|name| File.mtime(name)}.reverse.each do |fullname|
         name = File.basename(fullname)
         _tr do
           _td File.mtime(fullname).to_s
+          _td File.size(fullname), align: 'right'
           _td {_a name, href: "logs/#{name}"}
         end
       end

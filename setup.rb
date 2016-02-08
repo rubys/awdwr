@@ -64,3 +64,5 @@ if `which rbenv`.empty?
     exit 0
   end
 end
+
+FileUtils.mkdir_p File.expand_path('~/logs')

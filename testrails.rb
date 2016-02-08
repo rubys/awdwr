@@ -3,6 +3,8 @@ require 'rubygems'
 require 'yaml'
 require 'ostruct'
 
+Dir.chdir File.dirname(__FILE__)
+
 unless Kernel.respond_to?(:require_relative)
   module Kernel
     def require_relative(path)
