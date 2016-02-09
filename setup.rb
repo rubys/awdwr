@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 require 'etc'
+require 'fileutils'
 
 prereqs = {
   apachectl: 'apache2',
@@ -16,7 +17,9 @@ prereqs.delete 'nodejs' if RUBY_PLATFORM.include? 'darwin'
 # check prereqs
 prereqs.keys.each do |cmd| 
   next unless `which #{cmd}`.empty?
-  if %(vagrant ubuntu).include? Etc.getlogin
+  if Process.uid == 0
+    system "apt-get install -y #{prereqs[cmd]}"
+  elsif %(awdwr vagrant ubuntu).include? Etc.getlogin
     system "sudo apt-get install -y #{prereqs[cmd]}"
   else
     STDERR.puts "Unable to find #{cmd}"
@@ -68,21 +71,29 @@ Dir.chdir git_path do
 end
 
 if `which rbenv`.empty?
-  # download key
-  unless `gpg --list-keys`.include? 'D39DC0E3'
-    system 'gpg --keyserver hkp://keys.gnupg.net --recv-keys ' +
-      '409B6B1796C275462A1703113804BB82D39DC0E3'
-  end
-
-  # install rvm
   rvm_path = File.expand_path(ENV['rvm_path'] || '~/.rvm')
   if not File.exist? rvm_path
+    # download key
+    unless `gpg --list-keys`.include? 'D39DC0E3'
+      system 'gpg --keyserver hkp://keys.gnupg.net --recv-keys ' +
+        '409B6B1796C275462A1703113804BB82D39DC0E3'
+    end
+
+    # install rvm
     system 'bash -c "curl -L https://get.rvm.io | bash -s stable"'
     exit -1 unless File.exist? rvm_path
     cmd = "source #{rvm_path}/scripts/rvm; rvm default system; " +
       "rvm --autolibs=enable requirements ruby-2.0.0"
     system 'bash -c ' + cmd.inspect
     exit 0
+  end
+end
+
+if `which bundler`.empty?
+  if ENV['rvm_version']
+    system 'gem install bundler'
+  else
+    system 'sudo gem install bundler'
   end
 end
 
