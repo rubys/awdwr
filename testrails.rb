@@ -24,7 +24,11 @@ $rails = "#{HOME}/git/rails"
 
 # chaining support
 if ARGV.join(' ').include?(',')
-  ARGV.join(' ').split(',').each { |args| system "#{$0} #{args.strip}" }
+  opts = ARGV.select {|arg| arg.start_with? '--'}
+  ARGV.delete_if {|arg| opts.include? arg}
+  ARGV.join(' ').split(',').each do |args| 
+    system "#{$0} #{args.strip} #{opts.join(' ')}"
+  end
   exit
 end
 
@@ -264,7 +268,7 @@ at_exit do
 end
 
 # select arguments to pass through
-args = ARGV.grep(/^(\d+(\.\d+)?-\d+(\.\d+)?|\d+\.\d+?|save|restore)$/)
+args = ARGV.grep(/^(\d+(\.\d+)?-\d+(\.\d+)?|\d+\.\d+?|save|restore|--.*)$/)
 args << "--work=#{WORK}"
 
 # select rvm or rbenv

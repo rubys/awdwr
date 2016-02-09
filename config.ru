@@ -86,6 +86,16 @@ get '/env' do
         end
       end
     end
+
+    _h2 "Request environment"
+    _table do
+      env.sort.each do |name, value|
+        _tr do
+          _td name
+          _td value
+        end
+      end
+    end
   end
 end
 

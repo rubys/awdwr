@@ -2443,7 +2443,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
     end
   end
 
-  fetch =  '--user dave:secret http://localhost:3000/products/2/who_bought.atom'
+  fetch =  "--user dave:secret http://localhost:#$PORT/products/2/who_bought.atom"
   desc 'Fetch the Atom feed'
   cmd "curl --max-time 15 --silent #{fetch}"
 
@@ -2451,7 +2451,7 @@ section 12.2, 'Iteration G2: Atom Feeds' do
   cmd "curl --max-time 15 --silent --dump - --output /dev/null #{fetch}"
   req = Net::HTTP::Get.new('/products/2/who_bought.atom')
   req.basic_auth 'dave', 'secret'
-  response = Net::HTTP.start('localhost', 3000) {|http| http.request(req)}
+  response = Net::HTTP.start('localhost', $PORT) {|http| http.request(req)}
 
   cmd "curl --max-time 15 --silent --dump - --output /dev/null #{fetch} " +
     "-H 'If-None-Match: #{response['Etag']}'"
@@ -2620,7 +2620,7 @@ section 12.4, 'Playtime' do
   end
 
   desc 'Fetch the XML, see that there are no orders there'
-  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought.atom'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.atom"
 
   desc 'Include "orders" in the response'
   edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
@@ -2633,7 +2633,7 @@ section 12.4, 'Playtime' do
   end
 
   desc 'Fetch the xml, see that the orders are included'
-  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.xml"
 
   desc 'Define an HTML view'
   edit 'app/views/products/who_bought.html.erb' do |data|
@@ -2661,7 +2661,7 @@ section 12.4, 'Playtime' do
   end
 
   desc 'See the (raw) HTML'
-  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought"
 
   desc 'Anything that XML can do, JSON can too...'
   edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
@@ -2672,7 +2672,7 @@ section 12.4, 'Playtime' do
   end
 
   desc 'Fetch the data in JSON format'
-  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought.json'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.json"
 
   desc 'Customize the xml'
   edit 'app/views/products/who_bought.xml.builder' do |data|
@@ -2698,7 +2698,7 @@ section 12.4, 'Playtime' do
   end
 
   desc 'Fetch the (much streamlined) XML'
-  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.xml"
 
   desc 'Verify that the tests still pass'
   test
@@ -3456,7 +3456,7 @@ section 14.5, 'Playtime' do
   cmd 'sqlite3 db/development.sqlite3 .schema'
 
   desc 'Try requesting the xml... see auth failure.'
-  cmd 'curl --max-time 15 --silent http://localhost:3000/products/2/who_bought.xml'
+  cmd "curl --max-time 15 --silent http://localhost:#$PORT/products/2/who_bought.xml"
 
   # issue 'Is this the best way to detect request format?'
   desc 'Enable basic auth'
@@ -3484,7 +3484,7 @@ section 14.5, 'Playtime' do
   end
 
   desc 'Try requesting the xml... see auth succeed.'
-  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products/2/who_bought.xml'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.xml"
 end
 
 section 15.1, 'Task J1: Selecting the locale' do
@@ -3997,7 +3997,7 @@ section 21.1, 'Views' do
       end
     end
   end
-  cmd 'curl --max-time 15 --silent --user dave:secret http://localhost:3000/products.xml'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products.xml"
   if $rails_version =~ /^3\./
     irb 'helpers/date3.rb'
   else
@@ -4042,7 +4042,7 @@ if $rails_version =~ /^3\./
     edit 'app/models/product.rb' do |data|
       data << <<-EOF.unindent(6)
         class Product < ActiveResource::Base
-          self.site = 'http://dave:secret@localhost:3000/'
+          self.site = "http://dave:secret@localhost:#$PORT/"
         end
       EOF
     end
@@ -4097,7 +4097,7 @@ if $rails_version =~ /^3\./
     edit 'app/models/order.rb' do |data|
       data << <<-EOF.unindent(6)
         class Order < ActiveResource::Base
-          self.site = 'http://dave:secret@localhost:3000/'
+          self.site = 'http://dave:secret@localhost:#$PORT/'
         end
       EOF
     end
@@ -4105,7 +4105,7 @@ if $rails_version =~ /^3\./
     edit 'app/models/line_item.rb' do |data|
       data << <<-EOF.unindent(6)
         class LineItem < ActiveResource::Base
-          self.site = 'http://dave:secret@localhost:3000/orders/:order_id'
+          self.site = 'http://dave:secret@localhost:#$PORT/orders/:order_id'
         end
       EOF
     end
@@ -4561,7 +4561,7 @@ unless $PUB or $rails_version =~ /^3\./
     edit 'config/environments/development.rb', 'default_url_options' do
       msub /^()end/, "\n" + <<-EOF.unindent(6), :mark => 'default_url_options'
         # define default url options for devise
-        config.action_mailer.default_url_options = { :host => 'localhost:3000' }
+        config.action_mailer.default_url_options = { :host => 'localhost:#$PORT' }
       EOF
     end
 

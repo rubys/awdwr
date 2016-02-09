@@ -112,6 +112,10 @@ _html do
     testrails = "#{$bindir}/testrails"
     testrails = "#{Dir.pwd}/testrails.rb" unless File.exist? testrails
 
+    if _.env["SERVER_PORT"] == "3000"
+      testrails += ' --port=3001'
+    end
+
     require 'shellwords'
     @args = Shellwords.join(@args.split).untaint
     _.submit "ruby #{testrails.untaint} #{@args} " +
