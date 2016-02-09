@@ -66,3 +66,9 @@ fi
 if [[ ! -e  Gemfile.lock ]]; then
   bundle update
 fi
+
+# configure a dummy git user
+if [[ -z "$(git config --get-regexp user.*)" ]]; then
+  git config --global user.name "Agile Web Development with Rails"
+  git config --global user.email rails-dev-box@example.com
+fi

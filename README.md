@@ -15,11 +15,15 @@ accommodations for things like:
   * Ruby 1.8.7's hash syntax and the requirement to require `rubygems` if
     you wanted to use it.
 
-It works natively on Mac OS/X El Capitan and Ubuntu 14.04.  Instructions are
-provided separately for usage under [vagrant](vagrant#readme) and 
-[cloud9](cloud9.md).  It works with either `rbenv` or `rvm`.  The dashboard
-can be run as CGI under Apache httpd, using Passenger on nginx, or simply with
-WebBrick.
+It works natively on Mac OS/X El Capitan and Ubuntu 14.04.  It works with
+either `rbenv` or `rvm`.  The dashboard can be run as CGI under Apache httpd,
+using Passenger on nginx, or simply with WebBrick.
+
+Instructions are provided separately for usage under [vagrant](vagrant#readme)
+and [cloud9](cloud9.md).  Or install 
+[Rails Dev Box](https://github.com/rails/rails-dev-box#readme), ssh into the vagrant machine and run the following command:
+
+  eval "$(curl https://raw.githubusercontent.com/rubys/awdwr/master/rdb-setup)"
 
 Control over directory locations and versions to be tested is provided by
 [dashboard.yml](dashboard.yml) and [testrails.yml](testrails.yml).
