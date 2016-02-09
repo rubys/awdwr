@@ -124,8 +124,10 @@ if PROFILE.path
 end
 
 # clean up mysql
-open('|mysql -u root','w') {|f| f.write "drop database depot_production;"}
-open('|mysql -u root','w') {|f| f.write "create database depot_production;"}
+mysql_root = 'mysql -u root'
+mysql_root += ' -proot' if system("mysql -u root -proot < /dev/null 2>&0") 
+open("|#{mysql_root}",'w') {|f| f.write "drop database depot_production;"}
+open("|#{mysql_root}",'w') {|f| f.write "create database depot_production;"}
 
 $gems = gems = AWDWR::dependencies(File.join(HOME, 'git', 'rails'), release)
 gems['rails'] ||= {:github => 'rails/rails'}

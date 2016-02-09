@@ -1,20 +1,27 @@
 #!/usr/bin/ruby
+require 'etc'
 
-# notes:
-#  * copy/setup .gitconfig, .ssh, bin/testrails*
-#  * gem install ruby-dbus
-#  * apt-get install apache2 curl git libmysqlclient-dev mysql-server nodejs
-#  * gem install nokogiri wunderbar
-#
-#  * sudo apt-get install postgresql
-#  * sudo -u postgres createuser --superuser $USER
+prereqs = {
+  apachectl: 'apache2',
+  curl: 'curl',
+  git: 'git',
+  mysql: 'libmysqlclient-dev mysql-server',
+  nodejs: 'nodejs'
+}
+
+# accept node as an alias for nodejs; not absolutely required on Mac OS/X
+prereqs.delete 'nodejs' unless `which node`.empty?
+prereqs.delete 'nodejs' if RUBY_PLATFORM.include? 'darwin'
 
 # check prereqs
-%w(apache2ctl curl git mysql).each do |cmd| 
-  next if cmd == 'apache2ctl' and not RUBY_PLATFORM.include? 'linux'
-  next if system "which #{cmd} > /dev/null"
-  STDERR.puts "Unable to find #{cmd}"
-  exit -1
+prereqs.keys.each do |cmd| 
+  next unless `which #{cmd}`.empty?
+  if %(vagrant ubuntu).include? Etc.getlogin
+    system "sudo apt-get install -y #{prereqs[cmd]}"
+  else
+    STDERR.puts "Unable to find #{cmd}"
+    exit -1
+  end
 end
 
 unless RUBY_PLATFORM.include? 'darwin'
@@ -25,15 +32,23 @@ unless RUBY_PLATFORM.include? 'darwin'
 end
 
 # set up mysql
-open('|mysql -u root','w') do |file|
+mysql_root = '-u root'
+if ENV['MYSQL_ROOT_PASSWD']
+  mysql_root += " -p#{ENV['MYSQL_ROOT_PASSWD']}"
+elsif system("mysql -u root -proot < /dev/null 2>&0")
+  mysql_root += ' -proot'
+end
+open("|mysql #{mysql_root}",'w') do |file|
   file.write "GRANT ALL PRIVILEGES ON depot_production.* TO " +
     "'username'@'localhost' IDENTIFIED BY 'password';"
 end
 
 # set up postgres
-# open('|psql postgres','w') do |file|
-#   file.write "alter user username password 'password';"
-# end
+unless `which psql`.empty?
+  open('|psql postgres','w') do |file|
+    file.write "alter user username password 'password';"
+  end
+end
 
 # fetch code
 repositories = %w(
@@ -53,6 +68,12 @@ Dir.chdir git_path do
 end
 
 if `which rbenv`.empty?
+  # download key
+  unless `gpg --list-keys`.include? 'D39DC0E3'
+    system 'gpg --keyserver hkp://keys.gnupg.net --recv-keys ' +
+      '409B6B1796C275462A1703113804BB82D39DC0E3'
+  end
+
   # install rvm
   rvm_path = File.expand_path(ENV['rvm_path'] || '~/.rvm')
   if not File.exist? rvm_path
