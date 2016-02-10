@@ -335,6 +335,11 @@ _html do
       _form :method=>'post' do
         _input :name=>'args'
         _input :type=>'submit', :value=>'submit'
+
+        if File.exist? "#$HOME/.awdwr"
+          _h2 'Overrides'
+          _pre File.read("#$HOME/.awdwr")
+        end
       end
 
       _div_ :id=>'executing' do
