@@ -102,6 +102,10 @@ class DepotTest < Gorp::TestCase
   end
 
   section 7.1, "Iteration B1: Validation and Unit Testing" do
+    ticket 23590,
+      title: "most validations fail",
+      match: /<h2>1 error/
+
     assert_select 'h2', /4 errors\s+prohibited this product from being saved/
     assert_select 'li', "Image url can't be blank"
     assert_select 'li', 'Price is not a number'
