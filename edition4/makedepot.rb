@@ -985,15 +985,23 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
       destroy_product_ruby = dup
       sub!('@product', 'products(:two)')
       sub! 'should destroy product', "can't delete product in cart"
-      destroy_product_ruby.sub! '-1', '0'
+      sub! '-1', '0'
       self << "\n" + destroy_product_ruby
     end
   end
 
-  desc 'change fixture so that product one is in a cart'
+  desc 'change fixture so that product two is in both carts'
   edit 'test/fixtures/line_items.yml' do
-    msub /product((_id)?:.*)/, ': one'
-    msub /cart((_id)?:.*)/, ': one'
+    if self =~ /_id:/
+      msub /product(_id: .*)/, ': two'
+      msub /cart(_id: .*)/, ': one'
+      msub /product(_id: .*)/, ': two'
+      msub /cart(_id: .*)/, ': two'
+    else
+      edit 'product: one', :highlight do
+        sub! 'one', 'two'
+      end
+    end
   end
 
   test :controllers
