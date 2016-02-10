@@ -60,6 +60,7 @@ fi
 # run setup
 if [[ ! -e ~/git/gorp ]]; then
   ruby setup.rb
+  source ~/.bash_profile
 fi
 
 # install gems
