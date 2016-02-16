@@ -365,7 +365,11 @@ _json do
     running = File.exist?(statfile.sub('checkdepot.','')+'.run')
 
     config[job['id']] = {
+      'rails'   => job['rails'],
+      'ruby'    => job['ruby'],
+      'branch'  => job['branch'],
       'status'  => status,
+      'pass'    => !!(status =~ / 0 failures, 0 errors/),
       'mtime'   => mtime.sub('T',' ').sub(/[+-]\d\d:\d\d$/,''),
       'running' => running,
       'link'    => Dashboard.checkdepot(job, status)
