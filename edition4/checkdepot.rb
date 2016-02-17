@@ -595,7 +595,7 @@ class DepotTest < Gorp::TestCase
     ticket 774,
       :list => 'kaminari',
       :title =>  "non sanitized request parameter",
-      :match => /Generating an URL from non sanitized request parameters is insecure!/
+      :match => /Generating a URL from non sanitized request parameters is insecure!/
     assert_select 'td', 'Customer 100'
     assert_select "a[href='http://localhost:#{$PORT}/en/orders?page=4']"
   end
