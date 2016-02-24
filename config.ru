@@ -6,7 +6,7 @@
 require 'wunderbar/sinatra'
 require 'yaml'
 
-$HOME = ENV['HOME']
+$HOME = ENV['HOME'].dup.untaint
 
 ENV.keys.each do |var|
   if var =~ /^rvm_|PASSENGER_|_ENV$/
