@@ -272,7 +272,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     desc 'Copy some images'
     cmd "cp -v #{$DATA}/assets/* app/assets/images/"
 
-    unless $rails_version =~ /^(3|4\.[01])/
+    if $rails_version =~ /^4\.2/
       desc 'Workaround for sprockets-rails issue 321'
       restart_server 
     end

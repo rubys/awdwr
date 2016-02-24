@@ -84,10 +84,10 @@ class DepotTest < Gorp::TestCase
 
   section 6.2, "Iteration A2: Prettier Listings" do
     unless $rails_version =~ /^4.2/
-      ticket 321,
-        list:  'sprockets-rails',
-        title: 'Adding new images requires a server restart in development',
-        match: /Workaround for sprockets-rails issue 321/
+#     ticket 321,
+#       list:  'sprockets-rails',
+#       title: 'Adding new images requires a server restart in development',
+#       match: /Workaround for sprockets-rails issue 321/
     end
 
     assert_select '.list_line_even'
