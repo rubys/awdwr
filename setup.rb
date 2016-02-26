@@ -11,11 +11,11 @@ prereqs = {
 }
 
 # accept node as an alias for nodejs; not absolutely required on Mac OS/X
-prereqs.delete 'nodejs' unless `which node`.empty?
-prereqs.delete 'nodejs' if RUBY_PLATFORM.include? 'darwin'
+prereqs.delete :nodejs unless `which node`.empty?
+prereqs.delete :nodejs if RUBY_PLATFORM.include? 'darwin'
 
 # check prereqs
-prereqs.keys.each do |cmd| 
+prereqs.keys.each do |cmd|
   next unless `which #{cmd}`.empty?
   if Process.uid == 0
     system "apt-get install -y #{prereqs[cmd]}"
