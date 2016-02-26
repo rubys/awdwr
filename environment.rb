@@ -260,6 +260,17 @@ module AWDWR
       end
     end
 
+    # load updates from configuration file
+    if 
+      File.exist? File.expand_path('~/.awdwr') and
+      Dir.exist? File.expand_path('../../gorp', __FILE__)
+    then
+      require_relative '../gorp/lib/gorp/config'
+      $rails = rails
+      Gorp::Config.load('~/.awdwr')
+      gems.merge! Gorp::Config['gems', {}]
+    end
+
     gems
   end
 end
