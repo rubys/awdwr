@@ -254,10 +254,16 @@ module AWDWR
       end
     end
 
+    # branch was renamed
     if gems['sprockets-rails']
       if gems['sprockets-rails'][:branch] == "2-1-stable"
         gems['sprockets-rails'][:branch] = '2.x'
       end
+    end
+
+    # bcrypt replaces bcrypt-ruby
+    if gems['bcrypt']
+      gems.delete('bcrypt-ruby')
     end
 
     # load updates from configuration file
