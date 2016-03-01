@@ -353,10 +353,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.1, "Iteration I1: Adding Users" do
-    ticket 167,
-      :list => 'jquery-rails',
-      :title =>  "SelectorAssertions moved in Rails 4.2",
-      :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
+    ticket 23989,
+      :title =>  "Delivering mail causes tests to fail",
+      :match => /SQLite3::BusyException: database is locked/
 
     assert_select 'legend', 'Enter User Details'
     if $rails_version =~ /^[34]/
