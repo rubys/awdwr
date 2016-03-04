@@ -3087,6 +3087,13 @@ section 14.1, 'Iteration I1: Adding Users' do
     end
   end
 
+  if Gorp::Config[:inline_queue]
+    desc 'Workaround https://github.com/rails/rails/issues/23989'
+    edit 'config/environments/test.rb' do
+      msub /()^end/, "\nconfig.active_job.queue_adapter = :inline\n"
+    end
+  end
+
   test
 end
 
