@@ -1098,9 +1098,7 @@ section 9.3, 'Iteration D3: Adding a button' do
   desc 'Update the template that shows the Cart.'
   edit 'app/views/carts/show.html.erb' do
     self.all = <<-EOF.unindent(6)
-      <% if notice %>
       <p id="notice"><%= notice %></p>
-      <% end %>
 
       <h2>Your Pragmatic Cart</h2>
       <ul>    
@@ -2966,9 +2964,7 @@ section 14.1, 'Iteration I1: Adding Users' do
     desc 'Add Notice'
     edit 'app/views/users/index.html.erb' do
       msub /<\/h1>\n()/, <<-EOF.unindent(8), :highlight
-        <% if notice %>
         <p id="notice"><%= notice %></p>
-        <% end %>
       EOF
       if File.exist? 'public/images'
         msub /(.*<th>Hashed password.*\n)/, ''
@@ -4591,10 +4587,10 @@ unless $PUB or $rails_version =~ /^3\./
     edit 'app/views/layouts/application.html.erb', 'main' do
       clear_all_marks
       gsub! /(\n\s+)(<%= yield %>)/, 
-        '\1<% if notice %>\1<p id="notice"><%= notice %></p>\1<% end %>' +
-        '\1<% if alert %>\1<p id="alert"><%= alert %></p>\1<% end %>' +
+        '\1<p id="notice"><%= notice %></p>' +
+        '\1<p id="alert"><%= alert %></p>' +
         "\n\\1\\2"
-      edit /^ +<% if notice %>.*?\n\n/m, :highlight
+      edit /^ +<p id="notice">.*?\n\n/m, :highlight
       edit /^ +<div id="main">.*?<\/div>\n/m, :mark => 'main'
     end
 
@@ -4602,6 +4598,7 @@ unless $PUB or $rails_version =~ /^3\./
     edit 'app/views/store/index.html.*' do
       gsub! /^- if notice.*?\n\n/m, ''
       gsub! /<% if notice %>.*?\n\n/m, ''
+      gsub! /<p id="notice">.*?\n\n/m, ''
     end
 
     edit 'app/views/sessions/new.html.erb' do
@@ -4611,6 +4608,7 @@ unless $PUB or $rails_version =~ /^3\./
     edit 'app/views/users/index.html.erb' do
       clear_all_marks
       gsub! /^<% if notice.*?\n\n/m, "\n"
+      gsub! /<p id="notice">.*?\n\n/m, ''
     end
     
     Dir['app/views/*/show.html.erb'].each do |view|
