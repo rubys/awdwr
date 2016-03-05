@@ -664,21 +664,21 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
         /* END:desktop */
 
         /* START:mobile */
-	@media all and (max-width: 800px) {
-	  #columns {
-	    flex-direction: column-reverse;
-	  }
-	}
+        @media all and (max-width: 800px) {
+          #columns {
+            flex-direction: column-reverse;
+          }
+        }
 
-	@media all and (max-width: 500px) {
-	  #banner {
-	    height: 1em;
-	  }
+        @media all and (max-width: 500px) {
+          #banner {
+            height: 1em;
+          }
 
-	  #banner .title {
-	    display: none;
-	  }
-	}
+          #banner .title {
+            display: none;
+          }
+        }
         /* END:mobile */
       EOF
     end
