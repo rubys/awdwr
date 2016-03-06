@@ -53,6 +53,9 @@ class DepotTest < Gorp::TestCase
     else
       assert_select 'p', /^It is now \d+-\d\d-\d\d \d\d:\d\d:\d\d [+-]\d+/
     end
+
+    assert_select 'h2', /undefined method `know' for Time:Class/
+    assert_select 'h2', 'No route matches [GET] "/say/hullo"'
   end
 
   section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do

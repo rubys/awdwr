@@ -135,7 +135,18 @@ section 2, 'Instant Gratification' do
     EOF
   end
   get '/say/goodbye'
+
+  desc 'Intentionally introduce a typo in the code'
+  edit 'app/controllers/say_controller.rb' do
+   sub! 'Time.now', 'Time.know'
+  end
+  get '/say/hello'
+
+  desc 'Intentionally introduce a typo in a URL'
+  get '/say/hullo'
+
   publish_code_snapshot :work, :demo5
+
 end
 
 section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
@@ -1647,7 +1658,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
     edit DEPOT_CSS, 'side' do
       clear_highlights
-      edit /^  #side.*\n  \}/m, :mark => 'side' do
+      edit /^  #side.*?\n  \}/m, :mark => 'side' do
         msub /^()    ul \{$/, <<-EOF.unindent(6) + "\n", :highlight
           form, div {
             display: inline;
