@@ -644,6 +644,10 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
           font: bold smaller sans-serif;
         }
 
+        #notice:empty {
+          display: none
+        }
+
         #columns {
           background: #141;
           display: flex;
