@@ -1940,28 +1940,10 @@ unless $rails_version =~ /^4\./
     edit 'app/controllers/products_controller.rb', 'update' do
       dcl 'update', :mark do
         msub /\n()\s*else/, "\n" + <<-EOF.unindent(2), :highlight
+          @products = Product.all
           ActionCable.server.broadcast 'products',
-            id: @product.id, price: number_to_currency(@product.price)
+            html: render_to_string('store/index', layout: false)
         EOF
-      end
-    end
-
-    desc 'make number_to_currency helper method available to controller'
-    edit 'app/controllers/products_controller.rb', 'class' do
-      edit /^class.*?\n\n/m, mark: 'class' do
-        msub /\n(\n)/, <<-EOF.unindent(8), :highlight
-          include ActionView::Helpers::NumberHelper
-
-          # ...
-        EOF
-      end
-      edit /^end/, mark: 'class'
-    end
-
-    desc 'make price line easy to find'
-    edit 'app/views/store/index.html.erb' do
-      edit 'price_line', :highlight do
-        msub /()>/, ' data-product="<%= product.id %>"'
       end
     end
 
@@ -1970,17 +1952,13 @@ unless $rails_version =~ /^4\./
       self.all += "\n" + <<-'EOF'.unindent(8)
         App.productsChannel = 
           App.cable.subscriptions.create { channel: "ProductsChannel" },
-            received: (product) ->
-              $(".price_line[data-product=#{product.id}] .price").
-                text(product.price).
-                css({'background-color':'#FF8800'}).
-                animate({'background-color':'#FFFFFF'}, 1000);
+            received: (data) -> $("#main").html(data.html)
       EOF
     end
   end
 end
 
-section 11.7, 'Iteration F6: Testing AJAX changes' do
+section 11.7, 'Iteration F7: Testing AJAX changes' do
   publish_code_snapshot :n
 
   desc 'Verify that yes, indeed, the product index is broken.'
