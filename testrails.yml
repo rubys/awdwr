@@ -69,6 +69,11 @@ default:
   branch:  4-2-stable
   message: '4-2-stable'
 
+5b3:
+  output:  '5.0.0beta3'
+  branch:  v5.0.0.beta3
+  message: '5.0.0.beta3'
+
 3:
   source:  /home/rubys/git/awdwr/edition3
   destdir: AWDwR3
