@@ -1952,7 +1952,7 @@ unless $rails_version =~ /^4\./
       self.all += "\n" + <<-'EOF'.unindent(8)
         App.productsChannel = 
           App.cable.subscriptions.create { channel: "ProductsChannel" },
-            received: (data) -> $("#main").html(data.html)
+            received: (data) -> $(".store #main").html(data.html)
       EOF
     end
   end
