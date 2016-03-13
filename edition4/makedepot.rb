@@ -1925,7 +1925,7 @@ if $rails_version =~ /^4\./
 
 else
 
-  section 11.5, 'Iteration F5: Broadcasting updates' do
+  section 11.5, 'Iteration F5: Broadcasting Updates' do
     desc 'create a channel'
     edit 'app/channels/application_cable/products_channel.rb' do
       self.all = <<-EOF.unindent(8)
