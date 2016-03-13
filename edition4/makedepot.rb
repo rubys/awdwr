@@ -1898,7 +1898,8 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
   post '/', 'product_id' => 2
 end
 
-unless $rails_version =~ /^3\.0/
+if $rails_version =~ /^4\./
+
   section 11.5, 'Iteration F5: Making Images Clickable' do
     desc 'Review our current storefront markup'
     edit 'app/views/store/index.html.erb' do
@@ -1921,10 +1922,10 @@ unless $rails_version =~ /^3\.0/
     desc 'Run tests... oops.'
     test
   end
-end
 
-unless $rails_version =~ /^4\./
-  section 11.6, 'Iteration F6: Dynamic Updates' do
+else
+
+  section 11.5, 'Iteration F5: Broadcasting updates' do
     desc 'create a channel'
     edit 'app/channels/application_cable/products_channel.rb' do
       self.all = <<-EOF.unindent(8)
@@ -1955,10 +1956,14 @@ unless $rails_version =~ /^4\./
             received: (data) -> $(".store #main").html(data.html)
       EOF
     end
+
+    desc 'Run tests... oops.'
+    test
   end
+
 end
 
-section 11.7, 'Iteration F7: Testing AJAX changes' do
+section 11.6, 'Iteration F6: Testing AJAX changes' do
   publish_code_snapshot :n
 
   desc 'Verify that yes, indeed, the product index is broken.'

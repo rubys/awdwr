@@ -249,7 +249,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.total_cell', '$171.90'
   end
 
-  section 11.7, "Testing AJAX changes" do
+  section 11.6, "Testing AJAX changes" do
     ticket 167,
       :list => 'jquery-rails',
       :title =>  "SelectorAssertions moved in Rails 4.2",
