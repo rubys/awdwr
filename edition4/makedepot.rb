@@ -1347,6 +1347,7 @@ section 10.2, 'Iteration E2: Handling Errors' do
       dcl "should update line_item", :mark => 'update' do
         edit 'cart_id', :highlight
         msub /(cart_id: .*?, )/, ''
+        sub! ', params:', ",\n      params:"
       end
     end
  
@@ -1951,9 +1952,11 @@ else
     desc 'Update price when notified of price changes'
     edit 'app/assets/javascripts/products.coffee' do
       self.all += "\n" + <<-'EOF'.unindent(8)
+        # START_HIGHLIGHT
         App.productsChannel = 
           App.cable.subscriptions.create { channel: "ProductsChannel" },
             received: (data) -> $(".store #main").html(data.html)
+        # END_HIGHLIGHT
       EOF
     end
 
@@ -2008,7 +2011,7 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
       sub! 'xhrpost', 'xhr :post, :create, :product_id => products(:ruby).id'
     else
       sub! 'xhrpost', 'post line_items_url, params: ' + 
-        '{ product_id: products(:ruby).id }, xhr: true'
+        "{ product_id: products(:ruby).id },\n        xhr: true"
     end
 
     unless File.exist? 'public/images'
@@ -2116,6 +2119,9 @@ section 12.1, 'Iteration G1: Capturing an Order' do
 
       getnew.msub /()\A/, empty + "\n"
       getnew.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+
+      getnew.gsub! ', email:', ",\n      email:"
+      getnew.gsub! ', pay_type:', ",\n      pay_type:"
     end
   end
 
@@ -2361,6 +2367,8 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       edit 'order_path', :highlight do
         msub /(order_path.*)/, 'store_path'
       end
+      sub! ', email:', ",\n        email:"
+      sub! ', pay_type:', ",\n        pay_type:"
     end
   end
 
@@ -3003,6 +3011,8 @@ section 14.1, 'Iteration I1: Adding Users' do
           gsub!("'",'"').sub!('User ', 'User #{@user.name} ')
         end
         msub /redirect_to\(?\s?(@user, ):?notice/, "users_url,\n" + (' ' * 10)
+        sub! ', status: :unprocessable_entity', 
+          ",\n" + (' ' * 10) + 'status: :unprocessable_entity'
       end
     end
   end
@@ -3086,6 +3096,7 @@ section 14.1, 'Iteration I1: Adding Users' do
           end
           edit 'user_path', :highlight
           msub /(user_path.*)/, 'users_path'
+          msub /,( )password/, "\n" + (' ' * 8)
         end
       end
 
@@ -3096,19 +3107,20 @@ section 14.1, 'Iteration I1: Adding Users' do
       dcl "should create user", :mark => 'create' do
         edit '@user.name', :highlight
         sub! '@user.name', "'sam'"
-        msub /,( )password_confirmation/, "\n" + (' ' * 8)
 
         edit 'user_path', :highlight
         msub /(user_path.*)/, 'users_path'
+
+        sub! /, password:/, ",\n" + (' ' * 6) + 'password:'
       end
     end
 
     edit 'test/*/users_controller_test.rb', 'create' do
       dcl "should update user", :mark => 'update' do
-        msub /,( )password_confirmation/, "\n" + (' ' * 8)
-
         edit 'user_path', :highlight
         msub /(user_path.*)/, 'users_path'
+
+        sub! /, password:/, ",\n" + (' ' * 6) + 'password:'
       end
     end
   end
