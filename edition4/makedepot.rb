@@ -538,6 +538,7 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
       end
     else
       msub /(\s*)\Z/, "\n\n"
+      msub /, see( )http/, "\n  # "
       msub /^()end/, <<-EOF.unindent(6) + "\n", :highlight
         root 'store#index', as: 'store'
       EOF
@@ -4281,7 +4282,7 @@ section 26.1, 'Active Merchant' do
   desc 'Determine if a credit card is valid'
   edit 'Gemfile', 'plugins' do
     clear_all_marks
-    version = '1.31'
+    version = '1.58'
     version = '1.21.0' if RUBY_VERSION =~ /^1\.8/
     version = '1.10.0' if $rails_version =~ /^3\.0/
     msub /()\Z/, "\n\ngem 'activemerchant', '~> #{version}'\n"
@@ -4435,7 +4436,7 @@ section 26.3, 'Pagination' do
       gem 'will_paginate', '~> 3.0'
     EOF
     unless $rails_version =~ /^3\./
-      sub! /'will_paginate.*'/, "'kaminari', '~> 0.14'" 
+      sub! /'will_paginate.*'/, "'kaminari', '~> 0.16'" 
     end
   end
 
