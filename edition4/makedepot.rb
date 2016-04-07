@@ -14,15 +14,16 @@ end
 
 if $rails_version =~ /^[34]/
   $title = 'Agile Web Development with Rails, Edition 4'
+  DEPOT_CSS = "app/assets/stylesheets/application.css.scss"
 else
   $title = 'Agile Web Development with Rails, Edition 5'
+  DEPOT_CSS = "app/assets/stylesheets/application.scss"
 end
 
 $autorestart = 'depot'
 $output = 'makedepot'
 $checker = 'checkdepot'
 
-DEPOT_CSS = "app/assets/stylesheets/application.css.scss"
 
 begin
   require './pub_gorp'
@@ -289,7 +290,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     end
 
     desc 'Add some style'
-    edit "app/assets/stylesheets/products.css.scss" do
+    edit "app/assets/stylesheets/products*.scss" do
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, read('products.css.scss'), :highlight
     end
@@ -571,7 +572,7 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
 
   unless File.exist? 'public/images'
     desc 'Add some basic style'
-    edit "app/assets/stylesheets/store.css.scss" do
+    edit "app/assets/stylesheets/store*.scss" do
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, read('store.css.scss'), :highlight
     end
@@ -1040,7 +1041,7 @@ section 9.3, 'Iteration D3: Adding a button' do
 
   desc 'Add a bit of style to make it show all on one line'
   if DEPOT_CSS =~ /scss/
-    edit 'app/assets/stylesheets/store.css.scss', 'inline' do
+    edit 'app/assets/stylesheets/store*.scss', 'inline' do
       edit /^ +p, div.price_line \{.*?\n()    \}\n/m, :mark => 'inline'
       msub /^ +p, div.price_line \{.*?\n()    \}\n/m, "\n" + <<-EOF.unindent(2)
         /* START_HIGHLIGHT */
@@ -1446,7 +1447,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
 
   desc 'Add some style.'
   if DEPOT_CSS =~ /scss/
-    edit 'app/assets/stylesheets/carts.css.scss' do
+    edit 'app/assets/stylesheets/carts*.scss' do
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
         .carts {
@@ -1656,7 +1657,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
   desc 'Add a small bit of style.'
   if DEPOT_CSS =~ /scss/
-    edit 'app/assets/stylesheets/carts.css.scss' do |data|
+    edit 'app/assets/stylesheets/carts*.scss' do |data|
       clear_highlights
       edit '.carts', :highlight
       msub /.carts()/, ', #side #cart'
@@ -1909,7 +1910,7 @@ if $rails_version =~ /^4\./
     end
 
     desc 'Associate image clicks with submit button clicks'
-    edit 'app/assets/javascripts/store.js.coffee' do
+    edit 'app/assets/javascripts/store*.coffee' do
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
         $(document).on "ready page:change", ->
@@ -2025,7 +2026,7 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
   edit 'test/*/store_controller_test.rb', 'cs' do
     clear_highlights
     msub /^()end/, <<-EOF.unindent(4), :mark => 'cs'
-      test "markup needed for store.js.coffee is in place" do
+      test "markup needed for store.coffee is in place" do
         get store_index_url
         assert_select '.store .entry > img', 3
         assert_select '.entry input[type=submit]', 3
