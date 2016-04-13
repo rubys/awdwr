@@ -282,7 +282,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     DEPOT_CSS[0..-1] = "public/stylesheets/depot.css"
   else
     desc 'Copy some images'
-    cmd "cp -v #{$DATA}/assets/* app/assets/images/"
+    cmd "cp -vp #{$DATA}/assets/* app/assets/images/"
 
     if $rails_version =~ /^4\.2/
       desc 'Workaround for sprockets-rails issue 321'
