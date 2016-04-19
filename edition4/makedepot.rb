@@ -3962,6 +3962,8 @@ section 16, 'Deployment' do
   #   TO 'username'@'localhost' IDENTIFIED BY 'password';
   #
 
+  cmd 'mysqladmin -f -u root drop depot_production 2>&1'
+  # ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = '1'
   rake 'db:setup RAILS_ENV=production'
   unbundle { cmd 'capify .' }
   edit 'config/deploy.rb' do
