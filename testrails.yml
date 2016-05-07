@@ -2,7 +2,7 @@ default:
   script:  makedepot.rb
 
   destdir: AWDwR4
-  branch:  master # v5.0
+  branch:  master # v5.1
   source:  ~/git/awdwr/edition4
   output:  []
   message: []
@@ -68,6 +68,11 @@ default:
   output:  '4.2'
   branch:  4-2-stable
   message: '4-2-stable'
+
+50:
+  output:  '5.0'
+  branch:  5-0-stable
+  message: '5-0-stable'
 
 5b3:
   output:  '5.0.0beta3'

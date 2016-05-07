@@ -8,11 +8,11 @@ book:
 - '4':
     web:  AWDwR4
     env:
+    - rails: '5.1'
+      ruby:  '2.3.0'
     - rails: '5.0'
       ruby:  '2.3.0'
     - rails: '5.0'
-      ruby:  '2.2.4'
-    - rails: '5b3'
       ruby:  '2.2.4'
     - rails: '4.2'
       ruby:  '2.2.4'
