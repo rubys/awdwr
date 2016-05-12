@@ -181,7 +181,7 @@ end
 unless $rails_version =~ /^3\./
   gem 'sass'
   gem 'puma'
-  gem 'devise', '~> 3.1' unless $rails_version =~ /^5\.1/
+  gem 'devise', ('~> 3.5' if $rails_version =~ /^4\./)
 end
 
 # checkout/update git repositories

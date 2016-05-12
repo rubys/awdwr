@@ -4620,7 +4620,7 @@ $cleanup = Proc.new do
   end
 end
 
-unless $PUB or $rails_version =~ /^3\.|^5\.1/
+unless $PUB or $rails_version =~ /^3\./
   section 26.4, 'Devise' do
     edit 'Gemfile', 'devise' do
       msub /activemerchant.*\n()/, <<-EOF.unindent(8), :mark => 'devise'
