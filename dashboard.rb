@@ -13,6 +13,7 @@ config = YAML.load_file($dashboard)
 $logdir = config.delete('log').sub(home_re, $home).untaint
 $bindir = config.delete('bin').sub(home_re, $home).untaint
 
+STDERR.puts config['testrails'].inspect
 testrails = Array(config.delete('testrails')).
   map {|name| File.expand_path(name)}.
   find {|name| File.exist? name}
@@ -42,7 +43,7 @@ $jobs = config['book'].map do |editions|
         ruby  = info['ruby'].gsub('.', '')
         info = AWDWR::config(testrails, book, rails, ruby).merge(info)
       else
-        info['source'] = book_info['home'].sub(home_re ,HOME)
+        info['source'] = book_info['home'].sub(home_re, $HOME)
       end
       info['book']=book
       info['path']=File.join(info['source'], info['work']).untaint
