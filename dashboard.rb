@@ -13,7 +13,6 @@ config = YAML.load_file($dashboard)
 $logdir = config.delete('log').sub(home_re, $home).untaint
 $bindir = config.delete('bin').sub(home_re, $home).untaint
 
-STDERR.puts config['testrails'].inspect
 testrails = Array(config.delete('testrails')).
   map {|name| File.expand_path(name)}.
   find {|name| File.exist? name}
