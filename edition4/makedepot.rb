@@ -3962,7 +3962,7 @@ section 16, 'Deployment' do
   #   TO 'username'@'localhost' IDENTIFIED BY 'password';
   #
 
-  cmd 'mysqladmin -f -u root drop depot_production 2>&1'
+  # cmd 'mysqladmin -f -u root drop depot_production 2>&1'
   # ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = '1'
   rake 'db:setup RAILS_ENV=production'
   unbundle { cmd 'capify .' }
@@ -4563,9 +4563,14 @@ begin
     require 'mysql2'
     client = Mysql2::Client.new :host=>'localhost',
       :username=>'username', :password => 'password'
-    dbs = client.query('show databases').map {|row| row['Database']}
-    unless dbs.include? 'depot_production'
-      client.query 'create database depot_production'
+    begin
+      dbs = client.query('show databases').map {|row| row['Database']}
+      unless dbs.include? 'depot_production'
+        client.query 'create database depot_production'
+      end
+    ensure
+      client.query 'drop database depot_production'
+      client.close
     end
   end
 rescue Exception => e
