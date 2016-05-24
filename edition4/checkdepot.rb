@@ -434,7 +434,7 @@ class DepotTest < Gorp::TestCase
       :match => %r{Missing partial routes/_route}
 
     unless $rails_version =~ /^3\./
-      assert_select 'td', /store_path/
+      assert_select 'td', /store_index_path/
       assert_select 'td', /\(:locale\)\(\.:format\)/
       assert_select 'td', /store#index/
     end

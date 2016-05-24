@@ -540,9 +540,8 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
     else
       msub /(\s*)\Z/, "\n\n"
       msub /, see( )http/, "\n  # "
-      msub /^()end/, <<-EOF.unindent(6) + "\n", :highlight
-        root 'store#index', as: 'store'
-      EOF
+      msub /^\s+(get 'store\/index')$/, 
+        "  root 'store#index', as: 'store_index'", :highlight
     end
 
     if self =~ /priority is based upon order of creation: first created/
@@ -834,7 +833,7 @@ section 8.5, 'Iteration C5 - Caching' do
     msub /\n()end/, "\n"
     msub /\n()end/, <<-EOF.unindent(4), :mark => 'latest'
       def self.latest
-        Product.order(:updated_at).last
+        order(:updated_at).last
       end
     EOF
   end
@@ -847,9 +846,9 @@ section 8.5, 'Iteration C5 - Caching' do
       gsub!(/<div.*<\/div>/m) { |div| div.gsub! /^/, '  ' }
 
       msub /()  <% @products.each do \|product\| %>\n/,
-        "<% cache ['store', Product.latest] do %>\n", :highlight
+        "<% cache @products do %>\n", :highlight
       msub /<% @products.each do \|product\| %>\n()/, 
-        "    <% cache ['entry', product] do %>\n", :highlight
+        "    <% cache @product do %>\n", :highlight
       msub /<\/div>\n  <% end %>\n()/,  "<% end %>\n", :highlight
       msub /<\/div>\n()  <% end %>\n/,  "    <% end %>\n", :highlight
     end
@@ -903,7 +902,6 @@ section 9.1, 'Iteration D1: Finding a Cart' do
     if File.exist? 'app/controllers/concerns'
       self.all = <<-EOF.unindent(8)
         module CurrentCart
-          extend ActiveSupport::Concern
         end
       EOF
     end
@@ -1315,7 +1313,7 @@ section 10.2, 'Iteration E2: Handling Errors' do
     msub /^()end/, <<-'EOF'.unindent(2), :highlight
       def invalid_cart
         logger.error "Attempt to access invalid cart #{params[:id]}"
-        redirect_to store_url, :notice => 'Invalid cart'
+        redirect_to store_index_url, :notice => 'Invalid cart'
       end
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -1400,7 +1398,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
 
       edit 'carts_url', :highlight do
         sub! /carts_url.*?}/, 
-          "store_url,\n        :notice => 'Your cart is currently empty' }"
+          "store_index_url,\n        :notice => 'Your cart is currently empty' }"
       end
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     end
@@ -1538,7 +1536,7 @@ section 10.4, 'Playtime' do
           :highlight
       end
       edit 'carts_path', :highlight do
-        msub /(carts)/, 'store'
+        msub /(carts)/, 'store_index'
       end
     end
   end
@@ -1716,7 +1714,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
   desc 'Change the redirect to be back to the store.'
   edit 'app/controllers/line_items_controller.rb', 'create' do |data|
-    data[/(@line_item.cart)/,1] = "store_url"
+    data[/(@line_item.cart)/,1] = "store_index_url"
   end
 
   desc 'Purchase another product.'
@@ -1737,7 +1735,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
   desc 'Enable a the controller to respond to js requests'
   edit 'app/controllers/line_items_controller.rb', 'create' do
     clear_highlights
-    msub /format.html.*store_url.*\n()/, "        format.js\n", :highlight
+    msub /format.html.*store_index_url.*\n()/, "        format.js\n", :highlight
   end
 
   desc 'Use JavaScript to replace the cart with a new rendering'
@@ -1993,7 +1991,7 @@ section 11.6, 'Iteration F6: Testing AJAX changes' do
     edit 'test/*/line_items_controller_test.rb', 'create' do
       clear_highlights
       edit "assert_redirected_to", :highlight do
-        msub /assert_redirected_to (cart_path.*)/, 'store_path'
+        msub /assert_redirected_to (cart_path.*)/, 'store_index_path'
       end
     end
   end
@@ -2092,7 +2090,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     dcl 'new', :mark => 'checkout'
     msub /\n()\s+@order = Order.new\n/, <<-EOF.unindent(2) + "\n", :highlight
       if @cart.line_items.empty?
-        redirect_to store_url, :notice => "Your cart is empty"
+        redirect_to store_index_url, :notice => "Your cart is empty"
         return
       end
     EOF
@@ -2104,7 +2102,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     data.dcl 'should get new', :mark => 'new' do |getnew|
       empty = getnew.dup
       empty.edit 'assert_response' do |assert|
-        assert.msub /assert_(response :success)/, 'redirected_to store_path'
+        assert.msub /assert_(response :success)/, 'redirected_to store_index_path'
         assert << "\n    assert_equal flash[:notice], 'Your cart is empty'"
       end
       empty.sub! 'should get new', 'requires item in cart'
@@ -2341,7 +2339,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       msub /Order was successfully created.*\n()/, <<-EOF
         #END_HIGHLIGHT
       EOF
-      msub /redirect_to[\(\s](@order), :?notice/, 'store_url'
+      msub /redirect_to[\(\s](@order), :?notice/, 'store_index_url'
       msub /('Order was successfully created.')/,
         "\n          'Thank you for your order.'"
       msub /,( ):?location/, "\n          "
@@ -2372,7 +2370,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   edit 'test/*/orders_controller_test.rb', 'valid' do
     dcl 'should create order', :mark => 'valid' do
       edit 'order_path', :highlight do
-        msub /(order_path.*)/, 'store_path'
+        msub /(order_path.*)/, 'store_index_path'
       end
       sub! ', email:', ",\n        email:"
       sub! ', pay_type:', ",\n        pay_type:"
@@ -3194,7 +3192,7 @@ section 14.2, 'Iteration I2: Authenticating Users' do
     dcl 'destroy', :mark => 'logout' do
       msub /^()\s*end/, <<-EOF.unindent(4), :highlight
         session[:user_id] = nil
-        redirect_to store_url, :notice => "Logged out"
+        redirect_to store_index_url, :notice => "Logged out"
       EOF
     end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -3278,7 +3276,7 @@ section 14.2, 'Iteration I2: Authenticating Users' do
         self.all = <<-EOF.unindent(8)
           test "should logout" do
             delete :destroy
-            assert_redirected_to store_url
+            assert_redirected_to store_index_url
           end
         EOF
       end
@@ -3314,7 +3312,7 @@ section 14.2, 'Iteration I2: Authenticating Users' do
         self.all = <<-EOF.unindent(8)
           test "should logout" do
             delete logout_url
-            assert_redirected_to store_url
+            assert_redirected_to store_index_url
           end
         EOF
       end
@@ -3587,7 +3585,7 @@ section 15.1, 'Task J1: Selecting the locale' do
     data.gsub! /\n\s*\n/, "\n"
 
     # scope selected resources
-    nonadmin = data.slice! /^\s*resources.*?root.*?\n/m
+    nonadmin = data.slice! /^\s*resources.*?\n +end\n/m
     nonadmin.extend Gorp::StringEditingFunctions
     nonadmin.gsub! /.*get "store\/index.*\n/, ''
     nonadmin.gsub! /^/, '  '
@@ -3858,7 +3856,7 @@ section 15.4, 'Task J4: Add a locale switcher.' do
       gsub! /^    /,'      '
       msub /def.*\n()/, <<-EOF.unindent(4), :highlight
         if params[:set_locale]
-          redirect_to store_url(:locale => params[:set_locale])
+          redirect_to store_index_url(:locale => params[:set_locale])
         else
       EOF
       msub /^()\s+end/, <<-EOF.unindent(4), :highlight
@@ -3872,7 +3870,7 @@ section 15.4, 'Task J4: Add a locale switcher.' do
     clear_highlights
     edit /^\s+<div id="banner">.*?<\/div>\n/m, :mark => 'i18n'
     msub /\n()\s+<%= image_tag/, <<-EOF.unindent(2), :highlight
-      <%= form_tag store_path, :class => 'locale' do %>
+      <%= form_tag store_index_path, :class => 'locale' do %>
         <%= select_tag 'set_locale', 
           options_for_select(LANGUAGES, I18n.locale.to_s),
           :onchange => 'this.form.submit()' %>
