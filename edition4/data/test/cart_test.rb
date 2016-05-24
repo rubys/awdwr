@@ -8,8 +8,8 @@ class CartTest < ActiveSupport::TestCase
     cart = Cart.create
     book_one = products(:one)
     book_two  = products(:two)
-    cart.add_product(book_one.id).save!
-    cart.add_product(book_two.id).save!
+    cart.add_product(book_one).save!
+    cart.add_product(book_two).save!
     assert_equal 2, cart.line_items.size
     assert_equal book_one.price + book_two.price, cart.total_price
   end
@@ -19,8 +19,8 @@ class CartTest < ActiveSupport::TestCase
   test "add_duplicate_product" do
     cart = Cart.create
     ruby_book = products(:ruby)
-    cart.add_product(ruby_book.id).save!
-    cart.add_product(ruby_book.id).save!
+    cart.add_product(ruby_book).save!
+    cart.add_product(ruby_book).save!
     assert_equal 2*book_one.price, cart.total_price
     assert_equal 1, cart.line_items.size
     assert_equal 2, cart.line_items[0].quantity

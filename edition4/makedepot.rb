@@ -1195,12 +1195,12 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
        'the quantity of an existing line item, or creating a new line item.'
   edit 'app/models/cart.rb', 'add_product' do
     msub /^()end/, "\n" + <<-'EOF'.unindent(4), :mark => 'add_product'
-      def add_product(product_id)
-        current_item = line_items.find_by_product_id(product_id)
+      def add_product(product)
+        current_item = line_items.find_by_product_id(product.id)
         if current_item
           current_item.quantity += 1
         else
-          current_item = line_items.build(:product_id => product_id)
+          current_item = line_items.build(:product_id => product.id)
         end
         current_item
       end
@@ -1214,7 +1214,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
     clear_highlights
     dcl 'create' do
       edit 'line_items.build', :highlight do
-        msub /@line_item = (.*)/, '@cart.add_product(product.id)'
+        msub /@line_item = (.*)/, '@cart.add_product(product)'
       end
     end
   end
@@ -1748,7 +1748,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
   else
     edit 'app/views/line_items/create.js.erb' do |data|
       data.all =  <<-EOF.unindent(8)
-        $('#cart').html("<%= escape_javascript render(@cart) %>");
+        $('#cart').html("<%=j render(@cart) %>");
       EOF
     end
   end
