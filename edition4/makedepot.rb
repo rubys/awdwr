@@ -625,6 +625,8 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
       msub /\n\n()\Z/, additional_css + <<-EOF.unindent(8), :highlight
         /* START:desktop */
         #banner {
+          position: relative;
+          min-height: 40px;
           background: #9c9;
           padding: 10px;
           border-bottom: 2px solid;
@@ -633,7 +635,10 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
           text-align: center;
 
           img {
-            float: left;
+            position: absolute;
+            top: 0; 
+            left: 0;
+            width: 192px;
           }
         }
 
@@ -3655,15 +3660,15 @@ end
 
 section 15.2, 'Task J2: translating the store front' do
   desc 'Replace translatable text with calls out to translation functions.'
-  edit 'app/views/layouts/application.html.erb' do |data|
+  edit 'app/views/layouts/application.html.erb' do
     clear_highlights
-    data.gsub! '"Pragmatic Bookshelf"', "t('.title')"
-    data.gsub! 'Home', "<%= t('.home') %>"
-    data.gsub! 'Questions', "<%= t('.questions') %>"
-    data.gsub! 'News', "<%= t('.news') %>"
-    data.gsub! 'Contact', "<%= t('.contact') %>"
-    data.gsub! /(.*t\('\..*'\))/, "<!-- START_HIGHLIGHT -->\n\\1"
-    data.gsub! /(t\('\..*'\).*)/, "\\1\n<!-- END_HIGHLIGHT -->"
+    gsub! '"Pragmatic Bookshelf"', "t('.title')"
+    gsub! 'Home', "<%= t('.home') %>"
+    gsub! 'Questions', "<%= t('.questions') %>"
+    gsub! 'News', "<%= t('.news') %>"
+    gsub! 'Contact', "<%= t('.contact') %>"
+    gsub! /(.*t\('\..*'\))/, "<!-- START_HIGHLIGHT -->\n\\1"
+    gsub! /(t\('\..*'\).*)/, "\\1\n<!-- END_HIGHLIGHT -->"
   end
 
   desc 'Replace translatable text with calls out to translation functions.'

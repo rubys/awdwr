@@ -33,7 +33,7 @@ en:
 #START:layout
   layouts:
     application:
-      title:       "Pragmatic Bookshelf"
+      title:       "The Pragmatic Bookshelf"
       home:        "Home"
       questions:   "Questions"
       news:        "News"

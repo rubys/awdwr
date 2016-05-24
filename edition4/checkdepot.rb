@@ -130,15 +130,15 @@ class DepotTest < Gorp::TestCase
   section 8.1, "Iteration C1: Create the Catalog Listing" do
     assert_select 'p', 'Find me in app/views/store/index.html.erb'
     assert_select 'h1', 'Your Pragmatic Catalog'
-    assert_select 'span.price', '36.0'
+    assert_select 'span.price', '45.0'
   end
 
   section 8.2, "Iteration C2: Add a Page Layout" do
-    assert_select '#banner', /Pragmatic Bookshelf/
+    assert_select '#banner img[alt="The Pragmatic Bookshelf"]'
   end
 
   section 8.3, "Iteration C3: Use a Helper to Format the Price" do
-    assert_select 'span.price', '$36.00'
+    assert_select 'span.price', '$45.00'
   end
 
   section 8.4, "Iteration C4: Functional Testing" do
@@ -178,7 +178,7 @@ class DepotTest < Gorp::TestCase
     assert_select "a[href='http://localhost:#{$PORT}/carts/1']", 'redirected'
     assert_select '#notice', 'Line item was successfully created.'
 
-    assert_select 'li', /^Programming Ruby 1\.9 &(amp;)? 2\.0$/
+    assert_select 'li', /^Seven Mobile Apps in Seven Weeks$/
   end
 
   section 9.4, "Playtime" do
@@ -193,8 +193,8 @@ class DepotTest < Gorp::TestCase
   end
 
   section 10.1, "Iteration E1: Creating A Smarter Cart" do
-    assert_select 'li', /3 (.|&#?\w+;) Programming Ruby 1.9/u
-    assert_select '#main li', :count => 4, :html => /1 .+ Programming Ruby/
+    assert_select 'li', /Rails, Angular, Postgres, and Bootstrap/u
+    assert_select '#main li', :count => 4, :html => /1 .+ Seven Mobile Apps in Seven Weeks/
     assert_select '.stdout', /^=+ (\d+)? *CombineItemsInCart: reverting =+$/
     assert_select '.stdout', /^ +down +\d+ +Combine items in cart$/
     if $rails_version =~ /^3\./
@@ -216,7 +216,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.3, "Iteration E3: Finishing the Cart" do
     assert_select '#notice', 'Your cart is currently empty'
-    assert_select '.total_cell', '$121.95'
+    assert_select '.total_cell', '$116.00'
     assert_select 'input[type=submit][value="Empty cart"]'
   end
 
@@ -240,13 +240,13 @@ class DepotTest < Gorp::TestCase
 
   section 11.1, "Iteration F1: Moving the Cart" do
     assert_select 'h2', 'Your Cart'
-    assert_select '.total_cell', '$121.95'
+    assert_select '.total_cell', '$116.00'
     assert_select 'input[type=submit][value="Empty cart"]'
   end
 
   section 11.4, "Iteration F4: Hide an Empty Cart" do
     assert_select '#cart[style="display: none"]'
-    assert_select '.total_cell', '$171.90'
+    assert_select '.total_cell', '$142.00'
   end
 
   section 11.6, "Testing AJAX changes" do
@@ -281,8 +281,8 @@ class DepotTest < Gorp::TestCase
     # atom
     assert_select '.stdout', /(<|&lt;)summary type="xhtml"(>|&gt;)/,
       'Missing <summary type="xhtml">'
-    assert_select '.stdout', /(<|&lt;)td(>|&gt;)CoffeeScript(<|&lt;)\/td(>|&gt;)/,
-      'Missing <td>CoffeeScript</td>'
+    assert_select '.stdout', /(<|&lt;)td(>|&gt;)Rails, Angular, Postgres, and Bootstrap(<|&lt;)\/td(>|&gt;)/,
+      'Missing <td>Rails, Angular, Postgres, and Bootstrap</td>'
 
     # caching
     assert_select '.stdout', /304 Not Modified/
@@ -315,7 +315,7 @@ class DepotTest < Gorp::TestCase
       'Missing <a href="mailto:customer@example.com">'
 
     # json
-    assert_select '.stdout', /[{,] ?"title": ?"CoffeeScript"[,}]/,
+    assert_select '.stdout', /[{,] ?"title": ?"Rails, Angular, Postgres, and Bootstrap"[,}]/,
       'Missing "title": "CoffeeScript"'
 
     # custom xml
@@ -447,11 +447,11 @@ class DepotTest < Gorp::TestCase
       :title => "Can't set locale to something other than the default",
       :match =>  /"es" is not a valid locale/
 
-    assert_select '.price', /49,95(.|&#?\w+;)\$US/u
+    assert_select '.price', /45,00(.|&#?\w+;)\$US/u
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
     assert_select 'input[type=submit][value$="dir al Carrito"]'
     assert_select 'td', /1(.|&#?\w+;)/u
-    assert_select 'td', 'CoffeeScript'
+    assert_select 'td', 'Rails, Angular, Postgres, and Bootstrap'
   end
 
   section 15.3, "Task J3: i18n for the order page" do
@@ -514,7 +514,7 @@ class DepotTest < Gorp::TestCase
 #     :title =>  "Live streaming doesn't work with basic authentication or builder",
 #     :match => /<pre class="stdin">curl.*<\/pre>\s+<pre class="stdin">/
 
-    assert_select '.stdout', /(<|&lt;)price currency="USD"(>|&gt;)49.95(<|&lt;)\/price(>|&gt;)/
+    assert_select '.stdout', /(<|&lt;)price currency="USD"(>|&gt;)26.0(<|&lt;)\/price(>|&gt;)/
     assert_select '.stdout', /"1 minute"/
     assert_select '.stdout', /"half a minute"/
     assert_select '.stdout', /"CAN\$235"/
@@ -547,8 +547,8 @@ class DepotTest < Gorp::TestCase
   end
 
   section 25.1, 'rack' do
-    assert_select 'p', '34.95'
-    assert_select 'h2', /^Programming Ruby 1\.9 &(amp;)? 2\.0$/
+    assert_select 'p', '26.0'
+    assert_select 'h2', /^Seven Mobile Apps in Seven Weeks$/
   end
 
   section 25.2, 'rake' do
@@ -576,7 +576,7 @@ class DepotTest < Gorp::TestCase
 
   section 26.2, 'HAML' do
     assert_select 'h1', 'Your Pragmatic Catalog'
-    assert_select 'span.price', /\$3[16].00/
+    assert_select 'span.price', /\$45.00/
   end
 
   if File.exist? 'public/images'

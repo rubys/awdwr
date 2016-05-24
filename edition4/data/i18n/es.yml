@@ -46,7 +46,7 @@ es:
 #START:layout
   layouts:
     application:
-      title:       "Publicaciones de Pragmatic"
+      title:       "Biblioteca de Pragmatic"
       home:        "Inicio"
       questions:   "Preguntas"
       news:        "Noticias"
