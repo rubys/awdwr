@@ -2076,6 +2076,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       msub /class.*?\n()/, <<-EOF.unindent(6), :highlight
         include CurrentCart
         before_action :set_cart, :only => [:new, :create]
+        before_action :ensure_cart_isnt_empty, only: :new
       EOF
       sub! /\s+include CurrentCart/, '' if $rails_version =~ /^3\./
       gsub! '_action', '_filter' if $rails_version =~ /^3\./
@@ -2083,18 +2084,15 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     end
     edit /^end/, :mark => 'current_cart' do
       msub /^()end/, "  #...\n"
+      msub /^()end/, "\n" + <<-EOF.unindent(6), :highlight
+        private
+           def ensure_cart_isnt_empty
+             if @cart.line_items.empty?
+               redirect_to store_index_url, notice: 'Your cart is empty'
+             end
+           end
+      EOF
     end
-  end
-
-  edit 'app/controllers/orders_controller.rb', 'checkout' do
-    dcl 'new', :mark => 'checkout'
-    msub /\n()\s+@order = Order.new\n/, <<-EOF.unindent(2) + "\n", :highlight
-      if @cart.line_items.empty?
-        redirect_to store_index_url, :notice => "Your cart is empty"
-        return
-      end
-    EOF
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc 'Modify tests to ensure that there is an item in the cart'
