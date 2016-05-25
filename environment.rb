@@ -159,6 +159,7 @@ module AWDWR
       gemfile = File.read(template)
       gemfile.sub! /platforms :jruby.*\nend/m, ''
       gemfile.sub! /group :doc.*?\nend/m, ''
+      gemfile.sub! /group :cable.*?\nend/m, ''
 
       gems += gemfile.scan(/^\s*gem ['"]([-\w]+)['"](,.*)?/)
       branches += gemfile.scan(
