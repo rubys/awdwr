@@ -3590,7 +3590,7 @@ section 15.1, 'Task J1: Selecting the locale' do
       nonadmin[/^ +get/] = "  post 'store/index'\n  get"
     else
       nonadmin = data.slice! /^\s*resources.*?\n +end\n/m
-      nonadmin.gsub! /.*get "store\/index.*\n/, ''
+      nonadmin.gsub! /.*get ['"]store\/index.*\n/, ''
     end
     nonadmin.extend Gorp::StringEditingFunctions
     nonadmin.gsub! /^/, '  '

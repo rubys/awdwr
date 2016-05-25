@@ -206,7 +206,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.2, "Iteration E2: Handling Errors" do
     if $rails_version =~ /^4/
-      assert_select "a[href='http://localhost:#{$PORT}/store/index]", 'redirected'
+      assert_select "a[href='http://localhost:#{$PORT}/store/index']", 'redirected'
     else
       assert_select "a[href='http://localhost:#{$PORT}/']", 'redirected'
     end
