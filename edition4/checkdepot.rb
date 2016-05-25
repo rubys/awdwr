@@ -205,7 +205,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 10.2, "Iteration E2: Handling Errors" do
-    assert_select "a[href='http://localhost:#{$PORT}/']", 'redirected'
+    if $rails_version =~ /^4/
+      assert_select "a[href='http://localhost:#{$PORT}/store/index]", 'redirected'
+    else
+      assert_select "a[href='http://localhost:#{$PORT}/']", 'redirected'
+    end
     assert_select '.hilight', 'Attempt to access invalid cart wibble'
     assert_select '#notice', 'Invalid cart'
     unless $rails_version =~ /^3\./

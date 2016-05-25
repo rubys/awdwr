@@ -3585,9 +3585,14 @@ section 15.1, 'Task J1: Selecting the locale' do
     data.gsub! /\n\s*\n/, "\n"
 
     # scope selected resources
-    nonadmin = data.slice! /^\s*resources.*?\n +end\n/m
+    if $rails_version =~ /^4\./
+      nonadmin = data.slice! /^\s*resources.*?root.*?\n/m
+      nonadmin[/^ +get/] = "  post 'store/index'\n  get"
+    else
+      nonadmin = data.slice! /^\s*resources.*?\n +end\n/m
+      nonadmin.gsub! /.*get "store\/index.*\n/, ''
+    end
     nonadmin.extend Gorp::StringEditingFunctions
-    nonadmin.gsub! /.*get "store\/index.*\n/, ''
     nonadmin.gsub! /^/, '  '
     nonadmin.msub /()\s*resource/, "  scope '(:locale)' do\n", :highlight
     nonadmin.msub /root.*\n()/, "  end\n", :highlight
