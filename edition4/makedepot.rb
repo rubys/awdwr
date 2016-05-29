@@ -2053,8 +2053,10 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   if $rails_version =~ /^3\.[01]/
     generate :scaffold, :Order,
       'name:string address:text email:string pay_type:string'
-  else
+  elsif $rails_version =~ /^3|4\.0/
     generate :scaffold, :Order, 'name address:text email pay_type'
+  else
+    generate :scaffold, :Order, 'name address:text email pay_type:integer'
   end
 
   desc 'Create a migration to add an order_id column to line_items'
@@ -2137,11 +2139,23 @@ section 12.1, 'Iteration G1: Capturing an Order' do
 
   desc 'Add payment types to the order'
   edit 'app/models/order.rb', 'select' do |data|
-    msub /class Order.*\n()/, <<-EOF.unindent(4), :mark => 'select'
-      PAYMENT_TYPES = [ "Check", "Credit card", "Purchase order" ]
-    EOF
+    if $rails_version =~ /^(3|4\.0)/
+      msub /class Order.*\n()/, <<-EOF.unindent(6), :mark => 'select'
+        PAYMENT_TYPES = [ "Check", "Credit card", "Purchase order" ]
+      EOF
+      edit 'PAYMENT_TYPES', :highlight
+    else
+      msub /class Order.*\n()/, <<-EOF.unindent(6), :mark => 'select'
+        enum pay_type: {
+          "Check"          => 0, 
+          "Credit card"    => 1, 
+          "Purchase order" => 2
+        }
+      EOF
+      edit 'pay_type', :highlight
+    end
+
     edit 'class Order', :mark => 'select'
-    edit 'PAYMENT_TYPES', :highlight
     edit /^end/, :mark => 'select'
   end
 
@@ -2158,15 +2172,29 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       msub /(text)_field/, 'email'
       msub /() %>/, ', :size => 40'
     end
-    edit 'text_field :pay_type', :highlight # while it still is on one line
-    edit 'text_field :pay_type' do
-      msub /(text_field)/, 'select'
-      msub /() %>/, ", Order::PAYMENT_TYPES,\n" + (' ' * 18) +
-        ":prompt => 'Select a payment method'"
+
+    if $rails_version =~ /^(3|4\.0)/
+      edit 'text_field :pay_type', :highlight # while it still is on one line
+      edit 'text_field :pay_type' do
+        msub /(text_field)/, 'select'
+        msub /() %>/, ", Order::PAYMENT_TYPES,\n" + 
+          (' ' * 18) + ":prompt => 'Select a payment method'"
+      end
+      edit 'submit', :highlight do
+        msub /() %>/, " 'Place Order'"
+      end
+    else
+      edit 'number_field :pay_type', :highlight # while it still is on one line
+      edit 'number_field :pay_type' do
+        msub /(number_field)/, 'select'
+        msub /() %>/, ", Order.pay_types.keys,\n" + 
+          (' ' * 18) + ":prompt => 'Select a payment method'"
+      end
+      edit 'submit', :highlight do
+        msub /() %>/, " 'Place Order'"
+      end
     end
-    edit 'submit', :highlight do
-      msub /() %>/, " 'Place Order'"
-    end
+
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
@@ -2254,7 +2282,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     end
   end
 
-  desc 'Validate name and pay_type'
+  desc 'Validate that required fields are present'
   edit 'app/models/order.rb', 'validate' do |data|
     msub /^()(#START:.*\n)*end/, <<-EOF.unindent(4), :mark => 'validate'
       # ...
@@ -2262,9 +2290,10 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     msub /^()(#START:.*\n)*end/, <<-EOF.unindent(4), :mark => 'validate'
       #START_HIGHLIGHT
       validates :name, :address, :email, :presence => true
-      validates :pay_type, :inclusion => PAYMENT_TYPES
+      validates :pay_type, :inclusion => pay_types.keys
       #END_HIGHLIGHT
     EOF
+    sub! 'pay_types.keys', 'PAYMENT_TYPES' if $rails_version =~ /^(3|4\.0)/
     edit 'class Order', :mark => 'validate'
     edit /^end/, :mark => 'validate'
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -2278,8 +2307,8 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     edit "email: MyString", :highlight do
       sub! /MyString/, 'dave@example.org' 
     end
-    edit 'pay_type: MyString', :highlight do
-      sub! /MyString/, 'Check'
+    edit 'pay_type:', :highlight do
+      sub! /MyString|1/, 'Check'
     end
     msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
   end
