@@ -1154,10 +1154,12 @@ section 9.4, 'Playtime' do
           msub /(line_item:.*)/, 'product_id: products(:ruby).id'
         end
       end
-      edit 'line_item_path', :highlight do
-        if $rails_version =~ /^[34]/
+      if $rails_version =~ /^[34]/
+        edit 'line_item_path', :highlight do
           msub /(line_item_path.*)/, 'cart_path(assigns(:line_item).cart)'
-        else
+        end
+      else
+        edit 'line_item_url', :highlight do
           msub /(assert_redirect.*)/, 
             "follow_redirect!\n\n" +
             "    assert_select 'h2', 'Your Pragmatic Cart'\n" +
@@ -1535,7 +1537,7 @@ section 10.4, 'Playtime' do
           "    @cart = Cart.find(session[:cart_id])\n\n"
           :highlight
       end
-      edit 'carts_path', :highlight do
+      edit /^.*carts_(path|url).*\n/, :highlight do
         msub /(carts)/, 'store_index'
       end
     end
@@ -2367,8 +2369,9 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   desc 'Modify the test to reflect the new redirect'
   edit 'test/*/orders_controller_test.rb', 'valid' do
     dcl 'should create order', :mark => 'valid' do
-      edit 'order_path', :highlight do
-        msub /(order_path.*)/, 'store_index_path'
+      linktype = (self =~ /_path/ ? 'path' : 'url')
+      edit "order_#{linktype}", :highlight do
+        msub /(order_#{linktype}.*)/, "store_index_#{linktype}"
       end
       sub! ', email:', ",\n        email:"
       sub! ', pay_type:', ",\n        pay_type:"
@@ -3111,8 +3114,10 @@ section 14.1, 'Iteration I1: Adding Users' do
         edit '@user.name', :highlight
         sub! '@user.name', "'sam'"
 
-        edit 'user_path', :highlight
-        msub /(user_path.*)/, 'users_path'
+        edit "assert_redirected_to user_", :highlight do
+          msub /(user_)/, "users_"
+          msub /(\(.*\))/, ''
+        end
 
         sub! /, password:/, ",\n" + (' ' * 6) + 'password:'
       end
@@ -3120,8 +3125,10 @@ section 14.1, 'Iteration I1: Adding Users' do
 
     edit 'test/*/users_controller_test.rb', 'create' do
       dcl "should update user", :mark => 'update' do
-        edit 'user_path', :highlight
-        msub /(user_path.*)/, 'users_path'
+        edit "assert_redirected_to user_", :highlight do
+          msub /(user_)/, "users_"
+          msub /(\(.*\))/, ''
+        end
 
         sub! /, password:/, ",\n" + (' ' * 6) + 'password:'
       end

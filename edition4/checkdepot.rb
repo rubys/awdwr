@@ -81,7 +81,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 7, :assertions => 13
     else
-      assert_test_summary :tests => 7, :assertions => 12
+      assert_test_summary :tests => 7, :assertions => 9
     end
   end
 
@@ -119,7 +119,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 7, :assertions => 13
     else
-      assert_test_summary :tests => 7, :assertions => 12
+      assert_test_summary :tests => 7, :assertions => 9
     end
   end
 
@@ -149,8 +149,8 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 13, :assertions => 37
     else
-      assert_test_summary :tests => 13, :assertions => 36
-      assert_test_summary :tests => 8, :assertions => 17
+      assert_test_summary :tests => 13, :assertions => 33
+      assert_test_summary :tests => 8, :assertions => 14
     end
   end
 
@@ -169,7 +169,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 23, :assertions => 47
     else
-      assert_test_summary :tests => 23, :assertions => 44
+      assert_test_summary :tests => 23, :assertions => 34
     end
   end
 
@@ -188,7 +188,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4\./
       assert_test_summary :tests => 7, :assertions => 13
     else
-      assert_test_summary :tests => 7, :assertions => 12
+      assert_test_summary :tests => 7, :assertions => 10
     end
   end
 
@@ -237,7 +237,7 @@ class DepotTest < Gorp::TestCase
       assert_test_summary :tests => 30, :assertions => 75
     else
       assert_test_summary :tests => 2, :assertions => 5
-      assert_test_summary :tests => 30, :assertions => 72
+      assert_test_summary :tests => 30, :assertions => 63
     end
     assert_select '.stdout', /AddPriceToLineItem: migrated/
   end
@@ -267,7 +267,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 32, :assertions => 80
     else
-      assert_test_summary :tests => 32, :assertions => 77
+      assert_test_summary :tests => 32, :assertions => 68
     end
   end
 
@@ -333,7 +333,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 40, :assertions => 96
     else
-      assert_test_summary :tests => 40, :assertions => 92
+      assert_test_summary :tests => 40, :assertions => 80
     end
   end
 
@@ -376,7 +376,7 @@ class DepotTest < Gorp::TestCase
       if $rails_version =~ /^4/
         assert_test_summary :tests => 52, :assertions => 166
       else
-        assert_test_summary :tests => 52, :assertions => 161
+        assert_test_summary :tests => 52, :assertions => 146
       end
     end
   end
@@ -393,7 +393,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 57, :assertions => 172
     else
-      assert_test_summary :tests => 57, :assertions => 167
+      assert_test_summary :tests => 57, :assertions => 152
     end
   end
 
@@ -408,7 +408,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 57, :assertions => 172
     else
-      assert_test_summary :tests => 57, :assertions => 167
+      assert_test_summary :tests => 57, :assertions => 152
     end
   end
 
@@ -426,7 +426,11 @@ class DepotTest < Gorp::TestCase
       :title =>  "SelectorAssertions moved in Rails 4.2",
       :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
 
-    assert_test_summary :tests => '4[68]', :assertions => '[789]\d'
+    if $rails_version =~ /^[34]/
+      assert_test_summary :tests => '4[68]', :assertions => '[789]\d'
+    else
+      assert_test_summary :tests => '46', :assertions => 68
+    end
 
     assert_select '.stdout', /login"(>|&gt;)redirected/
     assert_select '.stdout', /customer@example.com/
@@ -487,7 +491,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 58, :assertions => 174
     else
-      assert_test_summary :tests => 58, :assertions => 168
+      assert_test_summary :tests => 58, :assertions => 153
     end
   end
 
