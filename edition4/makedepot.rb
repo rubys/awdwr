@@ -3211,7 +3211,7 @@ section 14.2, 'Iteration I2: Authenticating Users' do
     dcl 'create', :mark => 'login' do
       msub /^()\s*end/, <<-EOF.unindent(4), :highlight
         user = User.find_by_name(params[:name])
-        if user and user.authenticate(params[:password])
+        if user.try(:authenticate, params[:password])
           session[:user_id] = user.id
           redirect_to admin_url
         else
