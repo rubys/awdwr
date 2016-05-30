@@ -2814,7 +2814,11 @@ end
 
 section 13.1, 'Iteration H1: Email Notifications' do
   desc 'Create a mailer'
-  generate 'mailer OrderNotifier received shipped'
+  if $rails_version =~ /^[34]/
+    generate 'mailer OrderMailer received shipped'
+  else
+    generate 'mailer Order received shipped'
+  end
 
   desc 'Edit development configuration'
   edit 'config/environments/development.rb' do
@@ -2837,7 +2841,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   desc 'Tailor the from address'
-  edit 'app/mailers/order_notifier*.rb' do
+  edit 'app/mailers/order*.rb' do
     if match /from/
       edit 'from', :highlight do
         msub /from:?\s*=?>?\s*(.*)/, "'Sam Ruby <depot@example.com>'"
@@ -2849,11 +2853,11 @@ section 13.1, 'Iteration H1: Email Notifications' do
 
   desc 'Tailor the confirm receipt email'
 
-  unless Dir['app/views/order_notifier*/received.html.erb'].empty?
-    cmd 'rm app/views/order_notifier*/received.html.erb'
+  unless Dir['app/views/order*/received.html.erb'].empty?
+    cmd 'rm app/views/order*/received.html.erb'
   end
 
-  edit 'app/views/order_notifier*/received.text.erb' do
+  edit 'app/views/order*/received.text.erb' do
     self.all = <<-EOF.unindent(6)
       Dear <%= @order.name %>
 
@@ -2880,7 +2884,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
   publish_code_snapshot :q
 
   desc 'Get the order, sent the confirmation'
-  edit 'app/mailers/order_notifier*.rb' do
+  edit 'app/mailers/order*.rb' do
     clear_highlights
     %w(received shipped).each do |notice|
       dcl notice, :mark => notice
@@ -2905,19 +2909,16 @@ section 13.1, 'Iteration H1: Email Notifications' do
     clear_highlights
     dcl 'create' do
       msub /\n()\s+format/, <<-EOF, :highlight
-        OrderNotifierMailer.received(@order).deliver_later
+        OrderMailer.received(@order).deliver_later
       EOF
       if $rails_version =~ /^3\./ or $rails_version =~ /^4\.[01]/
         gsub! 'deliver_later', 'deliver'
       end
     end
-    if $rails_version =~ /^[34]/
-      sub! 'OrderNotifierMailer', 'OrderNotifier'
-    end
   end
 
   desc 'Tailor the confirm shipped email (this time in HTML)'
-  edit "#{Dir['app/views/order_notifier*'].first}/shipped.html.erb" do
+  edit "#{Dir['app/views/order*'].first}/shipped.html.erb" do
     self.all = <<-EOF.unindent(6)
       <h3>Pragmatic Order Shipped</h3>
       <p>
@@ -2937,9 +2938,9 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   desc 'Update the test case'
-  edit 'test/*/order_notifier*_test.rb' do
+  edit 'test/mailers/order*_test.rb' do
     2.times do
-      msub /OrderNotifier\w*\.\w+()$/, '(orders(:one))'
+      msub /Order\w*\.\w+()$/, '(orders(:one))'
       msub /do()\s+mail =/, "\n#START_HIGHLIGHT"
       msub /mail.body.encoded()\s+end/, "\n#END_HIGHLIGHT"
     end
@@ -2957,7 +2958,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
     rake 'db:test:load'
   end
 
-  test 'test/*/order_notifier*_test.rb'
+  test 'test/mailers/order*_test.rb'
 end
 
 section 13.2, 'Iteration H2: Integration Tests' do
