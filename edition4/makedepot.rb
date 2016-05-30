@@ -2918,7 +2918,8 @@ section 13.1, 'Iteration H1: Email Notifications' do
   end
 
   desc 'Tailor the confirm shipped email (this time in HTML)'
-  edit "#{Dir['app/views/order*'].first}/shipped.html.erb" do
+  cmd "rm #{Dir['app/views/order_*'].first}/shipped.text.erb"
+  edit "#{Dir['app/views/order_*'].first}/shipped.html.erb" do
     self.all = <<-EOF.unindent(6)
       <h3>Pragmatic Order Shipped</h3>
       <p>
