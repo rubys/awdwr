@@ -129,7 +129,7 @@ class DslUserStoriesTest < ActionDispatch::IntegrationTest
     mail = ActionMailer::Base.deliveries.last
     assert_equal order.email, mail.to.first
     for line_item in order.line_items
-      assert_operator mail.body.to_s, :include?, line_item.product.title
+      assert_includes mail.body.to_s, line_item.product.title
     end
   end
 end

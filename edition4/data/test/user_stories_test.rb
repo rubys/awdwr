@@ -11,8 +11,7 @@ class UserStoriesTest < ActionDispatch::IntegrationTest
   
   test "buying a product" do
     #START:setup
-    LineItem.delete_all
-    Order.delete_all
+    start_order_count = Order.count
     ruby_book = products(:ruby)
     #END:setup
 
@@ -37,8 +36,10 @@ class UserStoriesTest < ActionDispatch::IntegrationTest
     assert_select 'legend', 'Please Enter Your Details'
     #END:step3
     
-    #START:step4
+    #START_HIGHLIGHT
     perform_enqueued_jobs do
+    #END_HIGHLIGHT
+      #START:step4
       post "/orders", params: {
         order: {
           name:     "Dave Thomas",
@@ -57,9 +58,8 @@ class UserStoriesTest < ActionDispatch::IntegrationTest
     #END:step4
     
     #START:step5
-      orders = Order.all
-      assert_equal 1, orders.size
-      order = orders[0]
+      assert_equal start_order_count + 1, Order.count
+      order = Order.last
       
       assert_equal "Dave Thomas",      order.name
       assert_equal "123 The Street",   order.address
@@ -77,8 +77,8 @@ class UserStoriesTest < ActionDispatch::IntegrationTest
       assert_equal 'Sam Ruby <depot@example.com>', mail[:from].value
       assert_equal "Pragmatic Store Order Confirmation", mail.subject
     #END:step6
-    #START:step4
+    #START_HIGHLIGHT
     end
-    #END:step4
+    #END_HIGHLIGHT
   end
 end
