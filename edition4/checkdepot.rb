@@ -352,7 +352,7 @@ class DepotTest < Gorp::TestCase
       :title =>  "assert_template w/ open_session in an integration test",
       :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
 
-    if $rails_version =~ /^3/
+    if $rails_version =~ /^[34]/
       assert_test_summary :tests => 3, :assertions => '\d+'
     else
       assert_test_summary :tests => 3, :assertions => 50
