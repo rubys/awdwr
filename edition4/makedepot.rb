@@ -3513,32 +3513,36 @@ section 14.4, 'Iteration I4: Adding a Sidebar' do
       #START:after_destroy
       after_destroy :ensure_an_admin_remains
 
+      class Error < StandardError
+      end
+
       private
         def ensure_an_admin_remains
           if User.count.zero?
-            raise "Can't delete last user"
+            raise Error.new "Can't delete last user"
           end
         end     
       #END:after_destroy
     EOF
   end
 
-  edit "app/controllers/users_controller.rb" do |data|
-    data[/()  def destroy/,1] = "  #START:delete_user\n"
-    data[/def destroy\n.*?  end\n()/m,1] = "  #END:delete_user\n"
-    data[/(.*user.destroy.*\n)/,1] = <<-'EOF'.unindent(2)
-      #START_HIGHLIGHT
-      begin
-        @user.destroy
-        flash[:notice] = "User #{@user.name} deleted"
-      rescue StandardError => e
-        flash[:notice] = e.message
+  edit "app/controllers/users_controller.rb" do
+    dcl 'destroy', mark: 'delete_user' do
+      if self =~ /, notice/
+        msub /redirect_to users_url,( )notice:/, "\n" + (' ' * 8)
+        msub /notice: ['"](.*)['"]/, '"User #{@user.name} deleted"'
+      else
+        msub /@user.destroy()/, "\n    " + 
+          'flash[:notice] = "User #{@user.name} deleted"'
       end
-      #END_HIGHLIGHT
-    EOF
 
-    if data =~ /, notice/
-      data.msub /redirect_to users_url,( )notice:/, "\n" + (' ' * 8)
+      self << "\n" + <<-EOF.unindent(6)
+        #START_HIGHLIGHT
+        rescue_from 'User::Error' do |exception|
+          redirect_to users_url, notice: exception.message
+        end
+        #END_HIGHLIGHT
+      EOF
     end
   end
 end
