@@ -603,6 +603,7 @@ class DepotTest < Gorp::TestCase
       :title =>  "non sanitized request parameter",
       :match => /Generating a URL from non sanitized request parameters is insecure!/
     assert_select 'td', 'Customer 100'
-    assert_select "a[href='http://localhost:#{$PORT}/orders?page=4']"
+    # assert_select "a[href='http://localhost:#{$PORT}/orders?page=4' or href='http://localhost:#{$PORT}/en/orders?page=4']"
+    assert_select "a", href: %r{http://localhost:#{$PORT}(/en)?/orders?page=4}
   end
 end
