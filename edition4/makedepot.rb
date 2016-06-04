@@ -233,29 +233,23 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   edit 'app/views/products/_form.html.erb' do
     msub /<%= pluralize.*%>( )/, "\n      "
     edit 'text_area :description', :highlight do
-      if RUBY_VERSION =~ /^1\.8/
-        msub /:description() %>/, ', :rows => 6'
-      else
-        msub /:description() %>/, ', rows: 6'
-      end
+      msub /:description() %>/, ', rows: 10, cols: 60'
     end
   end
 
   desc 'Create a product'
   post '/products/new',
-    'product[title]' => 'CoffeeScript',
+    'product[title]' => 'Seven Mobile Apps in Seven Weeks',
     'product[description]' => <<-EOF.unindent(6),
       <p>
-        CoffeeScript is JavaScript done
-        right. It provides all of
-        JavaScript's functionality wrapped in
-        a cleaner, more succinct syntax. In
-        the first book on this exciting new
-        language, CoffeeScript guru Trevor
-        Burnham shows you how to hold onto
-        all the power and flexibility of
-        JavaScript while writing clearer,
-        cleaner, and safer code.
+        <em>Native Apps, Multiple Platforms</em>
+        Answer the question “Can we build this for ALL the
+        devices?” with a resounding YES. This book will help you
+        get there with a real-world introduction to seven
+        platforms, whether you’re new to mobile or an experienced
+        developer needing to expand your options. Plus, you’ll
+        find out which cross-platform solution makes the most
+        sense for your needs.
       </p>
     EOF
     'product[price]' => '29.00',
@@ -2212,6 +2206,10 @@ section 12.1, 'Iteration G1: Capturing an Order' do
               background: #141;
               font-family: sans-serif;
               padding: 0.2em 1em;
+            }
+
+            div {
+              margin-bottom: 0.3em;
             }
           }
 

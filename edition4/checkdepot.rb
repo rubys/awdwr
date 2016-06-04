@@ -73,7 +73,7 @@ class DepotTest < Gorp::TestCase
     end
 
     assert_select 'th', 'Image url'
-    assert_select 'input#product_title[value=CoffeeScript]'
+    assert_select 'input#product_title[value="Seven Mobile Apps in Seven Weeks"]'
     assert_select "a[href='http://localhost:#{$PORT}/products/1']", 'redirected'
     if $rails_version =~ /^3/
       assert_test_summary :tests => '[01]', :assertions => '[01]'
