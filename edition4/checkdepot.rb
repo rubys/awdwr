@@ -246,29 +246,31 @@ class DepotTest < Gorp::TestCase
     assert_select 'h2', 'Your Cart'
     assert_select '.total_cell', '$116.00'
     assert_select 'input[type=submit][value="Empty cart"]'
+
+    assert_select 'h2, code', "'nil' is not an ActiveModel-compatible object. It must implement :to_partial_path."
+
+    if $rails_version =~ /^34/
+      assert_test_summary :tests => '\d', :assertions => '\d'
+    elsif $rails_version =~ /^4/
+      assert_test_summary :tests => 30, :assertions => 75
+    else
+      assert_test_summary :tests => 30, :assertions => 63 
+    end
+  end
+
+  section 11.3, "Iteration F1: Highlighting Changes" do
+    if $rails_version =~ /^3/
+      assert_test_summary :tests => '\d', :assertions => '\d'
+    elsif $rails_version =~ /^4/
+      assert_test_summary :tests => 31, :assertions => 78
+    else
+      assert_test_summary :tests => 31, :assertions => 66 
+    end
   end
 
   section 11.4, "Iteration F4: Hide an Empty Cart" do
     assert_select '#cart[style="display: none"]'
     assert_select '.total_cell', '$142.00'
-  end
-
-  section 11.6, "Testing AJAX changes" do
-    ticket 167,
-      :list => 'jquery-rails',
-      :title =>  "SelectorAssertions moved in Rails 4.2",
-      :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
-
-    assert_select 'h2, code', "undefined method `line_items' for nil:NilClass"
-
-    if $rails_version =~ /^3/
-      assert_test_summary :tests => '[78]', :assertions => '2\d'
-      assert_test_summary :tests => '2\d', :assertions => '[45]\d'
-    elsif $rails_version =~ /^4/
-      assert_test_summary :tests => 32, :assertions => 80
-    else
-      assert_test_summary :tests => 32, :assertions => 68
-    end
   end
 
   section 12.1, "Iteration G1: Capturing an Order" do
@@ -331,9 +333,9 @@ class DepotTest < Gorp::TestCase
       assert_test_summary :tests => '[79]', :assertions => '[23]\d'
       assert_test_summary :tests => '3\d', :assertions => '[456]\d'
     elsif $rails_version =~ /^4/
-      assert_test_summary :tests => 40, :assertions => 96
+      assert_test_summary :tests => 39, :assertions => 94
     else
-      assert_test_summary :tests => 40, :assertions => 80
+      assert_test_summary :tests => 39, :assertions => 78
     end
   end
 
@@ -374,9 +376,9 @@ class DepotTest < Gorp::TestCase
     unless $rails_version =~ /^3/
       assert_select 'p', 'User dave was successfully created.'
       if $rails_version =~ /^4/
-        assert_test_summary :tests => 52, :assertions => 166
+        assert_test_summary :tests => 51, :assertions => 164
       else
-        assert_test_summary :tests => 52, :assertions => 149
+        assert_test_summary :tests => 51, :assertions => 147
       end
     end
   end
@@ -391,9 +393,9 @@ class DepotTest < Gorp::TestCase
     if $rails_version =~ /^3/
       assert_test_summary :tests => 47, :assertions => '[789]\d'
     elsif $rails_version =~ /^4/
-      assert_test_summary :tests => 57, :assertions => 172
+      assert_test_summary :tests => 56, :assertions => 170
     else
-      assert_test_summary :tests => 57, :assertions => 155
+      assert_test_summary :tests => 56, :assertions => 153
     end
   end
 
@@ -406,9 +408,9 @@ class DepotTest < Gorp::TestCase
     if $rails_version =~ /^3/
       assert_test_summary :tests => 47, :assertions => '[789]\d'
     elsif $rails_version =~ /^4/
-      assert_test_summary :tests => 57, :assertions => 172
+      assert_test_summary :tests => 56, :assertions => 170
     else
-      assert_test_summary :tests => 57, :assertions => 155
+      assert_test_summary :tests => 56, :assertions => 153
     end
   end
 
@@ -426,10 +428,12 @@ class DepotTest < Gorp::TestCase
       :title =>  "SelectorAssertions moved in Rails 4.2",
       :match => /NoMethodError: undefined method `assert_select_jquery' for #&lt;LineItemsControllerTest:/
 
-    if $rails_version =~ /^[34]/
+    if $rails_version =~ /^3/
       assert_test_summary :tests => '4[68]', :assertions => '[789]\d'
+    elsif $rails_version =~ /^4/
+      assert_test_summary :tests => 45, :assertions => 87
     else
-      assert_test_summary :tests => '46', :assertions => 68
+      assert_test_summary :tests => 45, :assertions => 66
     end
 
     assert_select '.stdout', /login"(>|&gt;)redirected/
@@ -489,9 +493,9 @@ class DepotTest < Gorp::TestCase
       assert_test_summary :tests => 48, :assertions => '[789]\d'
       assert_test_summary :tests => 3, :assertions => '\d+'
     elsif $rails_version =~ /^4/
-      assert_test_summary :tests => 58, :assertions => 174
+      assert_test_summary :tests => 57, :assertions => 172
     else
-      assert_test_summary :tests => 58, :assertions => 156
+      assert_test_summary :tests => 57, :assertions => 154
     end
   end
 

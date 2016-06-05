@@ -1721,6 +1721,9 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   desc 'Run tests... oops.'
   test
 
+  desc 'Verify that the products page is indeed broken'
+  get '/products'
+
   desc 'Check for nil'
   edit "app/views/layouts/application.html.erb", 'side' do
     clear_all_marks
@@ -1730,6 +1733,16 @@ section 11.1, 'Iteration F1: Moving the Cart' do
       gsub!(/^/, '  ')
       msub /\A()/,   "        <% if @cart %>\n", :highlight
       msub /\n()\Z/, "        <% end %>\n",     :highlight
+    end
+  end
+
+  if $rails_version =~ /^[34]/
+    desc 'Update the redirect test.'
+    edit 'test/*/line_items_controller_test.rb', 'create' do
+      clear_highlights
+      edit "assert_redirected_to", :highlight do
+        msub /assert_redirected_to (cart_path.*)/, 'store_index_path'
+      end
     end
   end
 
@@ -2020,11 +2033,11 @@ else
 
     desc 'Run tests'
     test
-  end
 
-  desc 'Save our progress'
-  cmd 'git commit -a -m "AJAX"'
-  cmd 'git tag iteration-f'
+    desc 'Save our progress'
+    cmd 'git commit -a -m "AJAX"'
+    cmd 'git tag iteration-f'
+  end
 end
 
 section 12.1, 'Iteration G1: Capturing an Order' do
