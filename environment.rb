@@ -240,6 +240,9 @@ module AWDWR
     # no need for ibm_db
     gems.delete 'ibm_db'
 
+    # wdm is only for windows
+    gems.delete 'wdm'
+
     # ensure web-console is only run in development mode
     if gems['web-console']
       gems['web-console'][:group] = :development

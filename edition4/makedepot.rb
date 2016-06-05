@@ -1717,6 +1717,24 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   post '/', 'product_id' => 3
 
   publish_code_snapshot :k
+
+  desc 'Run tests... oops.'
+  test
+
+  desc 'Check for nil'
+  edit "app/views/layouts/application.html.erb", 'side' do
+    clear_all_marks
+    msub /()\s+<div id="side">/, "<!-- START:side -->\n"
+    msub /()\s+<div id="main">/, "<!-- END:side -->\n"
+    edit /^ +<%= render @cart %>\s*\n/m do
+      gsub!(/^/, '  ')
+      msub /\A()/,   "        <% if @cart %>\n", :highlight
+      msub /\n()\Z/, "        <% end %>\n",     :highlight
+    end
+  end
+
+  desc 'all better'
+  test
 end
 
 section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
@@ -1750,6 +1768,9 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
   end
 
   publish_code_snapshot :l
+
+  test
+
 end
 
 section 11.3, 'Iteration F3: Highlighting Changes' do
@@ -1832,6 +1853,38 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
     end
   end
   publish_code_snapshot :m
+
+  desc 'Add an XHR test.'
+  edit 'test/*/line_items_controller_test.rb', 'ajax' do
+    msub /^()end/, "\n"
+    msub /^()end/, <<-EOF.unindent(4), :mark => 'ajax'
+      test "should create line_item via ajax" do
+        assert_difference('LineItem.count') do
+          xhrpost
+        end 
+    
+        assert_response :success
+        assert_select_rjs :replace_html, 'cart' do
+          assert_select 'tr#current_item td', /Programming Ruby 1.9/
+        end
+      end
+    EOF
+
+    if $rails_version =~ /^[34]/
+      sub! 'xhrpost', 'xhr :post, :create, :product_id => products(:ruby).id'
+    else
+      sub! 'xhrpost', 'post line_items_url, params: ' + 
+        "{ product_id: products(:ruby).id },\n        xhr: true"
+    end
+
+    unless File.exist? 'public/images'
+      gsub! "_rjs :replace_html, 'cart'", "_jquery :html, '#cart'"
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
+  end
+
+  test
+
 end
 
 section 11.4, 'Iteration F4: Hide an Empty Cart' do
@@ -1868,8 +1921,10 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
   edit 'app/views/layouts/application.html.erb', 'hidden_div' do
     msub /<div id="cart">.*?(<\/div>)/m, '<% end %>' +
       "\n    <!-- END:hidden_div -->"
+    sub! /^\s*<% if @cart %>\n/, ''
     msub /(<div id="cart">)/,
       "<!-- START:hidden_div -->\n      " +
+      "<% if @cart %>\n        " +
       "<%= hidden_div_if(@cart.line_items.empty?, :id => 'cart') do %>"
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
@@ -1898,6 +1953,8 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
   desc 'Demonstrate emptying and recreating the cart'
   post '/carts/2', '_method'=>'delete'
   post '/', 'product_id' => 2
+
+  test
 end
 
 if $rails_version =~ /^4\./
@@ -1921,7 +1978,7 @@ if $rails_version =~ /^4\./
     desc 'The page looks no different'
     get '/'
 
-    desc 'Run tests... oops.'
+    desc 'Run tests'
     test
   end
 
@@ -1961,81 +2018,9 @@ else
       EOF
     end
 
-    desc 'Run tests... oops.'
+    desc 'Run tests'
     test
   end
-
-end
-
-section 11.6, 'Iteration F6: Testing AJAX changes' do
-  publish_code_snapshot :n
-
-  desc 'Verify that yes, indeed, the product index is broken.'
-  get '/products'
-
-  desc 'Conditionally display the cart.'
-  edit "app/views/layouts/application.html.erb", 'hidden_div' do |data|
-    data.edit /^ +<%= hidden_div_if.*? end %>\s*\n/m do
-      gsub!(/^/, '  ')
-      msub /\A()/,   "      <% if @cart %>\n", :highlight
-      msub /\n()\Z/, "      <% end %>\n",     :highlight
-    end
-  end
-
-  if $rails_version =~ /^[34]/
-    desc 'Update the redirect test.'
-    edit 'test/*/line_items_controller_test.rb', 'create' do
-      clear_highlights
-      edit "assert_redirected_to", :highlight do
-        msub /assert_redirected_to (cart_path.*)/, 'store_index_path'
-      end
-    end
-  end
-
-  desc 'Add an XHR test.'
-  edit 'test/*/line_items_controller_test.rb', 'ajax' do
-    msub /^()end/, "\n"
-    msub /^()end/, <<-EOF.unindent(4), :mark => 'ajax'
-      test "should create line_item via ajax" do
-        assert_difference('LineItem.count') do
-          xhrpost
-        end 
-    
-        assert_response :success
-        assert_select_rjs :replace_html, 'cart' do
-          assert_select 'tr#current_item td', /Programming Ruby 1.9/
-        end
-      end
-    EOF
-
-    if $rails_version =~ /^[34]/
-      sub! 'xhrpost', 'xhr :post, :create, :product_id => products(:ruby).id'
-    else
-      sub! 'xhrpost', 'post line_items_url, params: ' + 
-        "{ product_id: products(:ruby).id },\n        xhr: true"
-    end
-
-    unless File.exist? 'public/images'
-      gsub! "_rjs :replace_html, 'cart'", "_jquery :html, '#cart'"
-      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    end
-  end
-
-  desc 'Add an test in support for the coffeescript changes.'
-  edit 'test/*/store_controller_test.rb', 'cs' do
-    clear_highlights
-    msub /^()end/, <<-EOF.unindent(4), :mark => 'cs'
-      test "markup needed for store.coffee is in place" do
-        get store_index_url
-        assert_select '.store .entry > img', 3
-        assert_select '.entry input[type=submit]', 3
-      end
-    EOF
-    sub! 'store_index_url', ':index' if $rails_version =~ /^[34]/
-  end
-
-  desc 'Run the tests again.'
-  test
 
   desc 'Save our progress'
   cmd 'git commit -a -m "AJAX"'
