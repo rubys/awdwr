@@ -3758,6 +3758,8 @@ section 15.2, 'Task J2: translating the store front' do
   edit('config/locales/en.yml', 'cart') {}
   edit('config/locales/es.yml', 'cart') {} 
   
+  publish_code_snapshot :s
+
   desc 'Handle remote calls too'
   edit 'app/views/store/index.html.erb', 'price_line' do
     sub! "<!-- START_HIGHLIGHT -->\n", ''
@@ -3812,7 +3814,7 @@ section 15.3, 'Task J3: Translating Checkout' do
   edit('config/locales/en.yml', 'checkout') {}
   edit('config/locales/es.yml', 'checkout') {} 
 
-  publish_code_snapshot :s
+  publish_code_snapshot :t
   
   desc 'Add to cart'
   post '/es', 'product_id' => 2
@@ -4140,7 +4142,7 @@ section 21.1, 'Views' do
     irb 'helpers/date4.rb'
   end
   irb 'helpers/number.rb'
-  publish_code_snapshot :t
+  publish_code_snapshot :u
 end
 
 section 21.2, 'Form Helpers' do
@@ -4327,7 +4329,7 @@ section 25.2, 'rake' do
     clear_all_marks
   end
 
-  publish_code_snapshot :u
+  publish_code_snapshot :v
 
   desc 'remove scaffolding needed for standalone operation'
   edit 'app/store.rb' do
@@ -4573,7 +4575,7 @@ section 26.3, 'Pagination' do
   desc 'Show the orders'
   get '/orders'
 
-  publish_code_snapshot :v
+  publish_code_snapshot :w
 end
 
 required = %w(will_paginate nokogiri htmlentities)
