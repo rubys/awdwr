@@ -253,8 +253,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
       </p>
     EOF
     'product[price]' => '29.00',
-    'product[image_url]' => 
-      (File.exist?('public/images') ? '/images/cs.jpg' : 'cs.jpg')
+    'product[image_url]' => '7apps.jpg'
 
   desc 'Verify that the product has been added'
   get '/products'
@@ -1726,9 +1725,9 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
   desc 'Check for nil'
   edit "app/views/layouts/application.html.erb", 'side' do
-    clear_all_marks
-    msub /()\s+<div id="side">/, "<!-- START:side -->\n"
-    msub /()\s+<div id="main">/, "<!-- END:side -->\n"
+    clear_highlights
+    msub /\n()\s+<div id="side">/, "<!-- START:side -->\n"
+    msub /\n()\s+<div id="main">/, "<!-- END:side -->\n"
     edit /^ +<%= render @cart %>\s*\n/m do
       gsub!(/^/, '  ')
       msub /\A()/,   "        <% if @cart %>\n", :highlight
@@ -3759,6 +3758,17 @@ section 15.2, 'Task J2: translating the store front' do
   edit('config/locales/en.yml', 'cart') {}
   edit('config/locales/es.yml', 'cart') {} 
   
+  desc 'Handle remote calls too'
+  edit 'app/views/store/index.html.erb', 'price_line' do
+    sub! "<!-- START_HIGHLIGHT -->\n", ''
+    sub! "<!-- END_HIGHLIGHT -->\n", ''
+    edit /^\s+<div class="price_line">.*?<\/div>\n/m, :mark => 'price_line'
+    msub /,( )line_items_path/, "\n            "
+    msub /line_items_path\(.*?()\)/, ", locale: I18n.locale"
+    gsub! /^<!--/, "        <!--"
+    gsub! /^#/, "        #"
+  end
+
   desc 'Format the currency.'
   edit('config/locales/es.yml', 'currency') {} 
 

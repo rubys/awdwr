@@ -11,5 +11,6 @@
         = sanitize(product.description)
         .price_line
           %span.price= number_to_currency(product.price)
-          = button_to t('.add_html'), line_items_path(:product_id => product),
+          = button_to t('.add_html'),
+            line_items_path(:product_id => product, :locale => I18n.locale),
             :remote => true
