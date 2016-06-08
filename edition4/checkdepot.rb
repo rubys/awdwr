@@ -419,7 +419,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'input[type=submit][value=Login]'
     assert_select 'h1', 'Welcome'
     assert_select "a[href='http://localhost:#{$PORT}/login']", 'redirected'
-    assert_select 'h1', 'Listing products'
+    assert_select 'h1', 'Products'
   end
 
   section 14.5, "Playtime" do
