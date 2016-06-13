@@ -18,5 +18,5 @@ book:
       ruby:  '2.2.5'
     - rails: '4.1'
       ruby:  '2.2.5'
-    - rails: '4.0'
-      ruby:  '2.2.5'
+#   - rails: '4.0'
+#     ruby:  '2.2.5'
