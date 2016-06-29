@@ -841,7 +841,7 @@ section 8.5, 'Iteration C5 - Caching' do
       msub /()  <% @products.each do \|product\| %>\n/,
         "<% cache @products do %>\n", :highlight
       msub /<% @products.each do \|product\| %>\n()/, 
-        "    <% cache @product do %>\n", :highlight
+        "    <% cache product do %>\n", :highlight
       msub /<\/div>\n  <% end %>\n()/,  "<% end %>\n", :highlight
       msub /<\/div>\n()  <% end %>\n/,  "    <% end %>\n", :highlight
     end
@@ -996,9 +996,11 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
     gsub! "\n\n  # ...\n", "\n" 
     dcl 'should destroy product', :mark => 'destroy' do
       destroy_product_ruby = dup
+      sub! /\A/, "  # START_HIGHLIGHT\n"
       sub!('@product', 'products(:two)')
       sub! 'should destroy product', "can't delete product in cart"
       sub! '-1', '0'
+      sub! /\Z/, "  # END_HIGHLIGHT\n"
       self << "\n" + destroy_product_ruby
     end
   end
@@ -1268,10 +1270,11 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   unless $rails_version =~ /^[34]/
     desc 'fix the test case'
     edit 'test/*/line_items_controller_test.rb', 'create' do
-      dcl 'should create', :mark => 'create' do
+      dcl 'should create' do
         clear_all_marks
         msub /Programming Ruby 1\.9(')/, '"'
         msub /(')Programming Ruby 1\.9/, '"1 \\u00D7 '
+        edit '00D7', :highlight
       end
     end
 
@@ -1614,6 +1617,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   edit 'app/views/carts/_cart.html.erb' do
     clear_highlights
     sub! /^<% if notice %>.*?<% end %>\n\n/m, ''
+    sub! /^<p id="notice"><%= notice %><\/p>\n\n/m, ''
     while include? '@cart'
       edit '@cart', :highlight
       sub! '@cart', 'cart'
