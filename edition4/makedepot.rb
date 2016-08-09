@@ -1000,7 +1000,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
       sub!('@product', 'products(:two)')
       sub! 'should destroy product', "can't delete product in cart"
       sub! '-1', '0'
-      sub! /\Z/, "  # END_HIGHLIGHT\n"
+      sub! /\Z/, "\n  # END_HIGHLIGHT"
       self << "\n" + destroy_product_ruby
     end
   end
