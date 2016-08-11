@@ -2,9 +2,9 @@
 
 %h1= t('.title_html')
 
-- cache ['store', Product.latest] do
+- cache @products do
   - @products.each do |product|
-    - cache ['entry', product] do
+    - cache product do
       .entry
         = image_tag(product.image_url)
         %h3= product.title

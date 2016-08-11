@@ -820,17 +820,6 @@ section 8.5, 'Iteration C5 - Caching' do
     end
   end
 
-  desc "add a method to return the latest product"
-  edit 'app/models/product.rb', 'latest' do
-    clear_all_marks
-    msub /\n()end/, "\n"
-    msub /\n()end/, <<-EOF.unindent(4), :mark => 'latest'
-      def self.latest
-        order(:updated_at).last
-      end
-    EOF
-  end
-
   unless $rails_version =~ /^3\./
     desc 'cache sections'
     edit 'app/views/store/index.html.erb' do
@@ -1971,7 +1960,10 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
   post '/', 'product_id' => 2
 
   test
+
+  publish_code_snapshot :n
 end
+     
 
 if $rails_version =~ /^4\./
 
@@ -2002,14 +1994,20 @@ else
 
   section 11.5, 'Iteration F5: Broadcasting Updates' do
     desc 'create a channel'
-    edit 'app/channels/application_cable/products_channel.rb' do
-      self.all = <<-EOF.unindent(8)
-        class ProductsChannel < ActionCable::Channel::Base
-          def subscribed
-            stream_from "products"
-          end
-        end
-      EOF
+    generate 'channel products'
+
+    desc 'create a channel'
+    edit 'app/channels/products_channel.rb' do
+      edit '# stream_from', :highlight do
+        gsub! /#.*/, 'stream_from "products"'
+      end
+    end
+
+    desc 'Update price when notified of price changes'
+    edit 'app/assets/javascripts/channels/products.coffee' do
+      edit 'incoming data', :highlight do
+        gsub! /#.*/, '$(".store #main").html(data.html)'
+      end
     end
 
     desc 'send updates when price changes'
@@ -2021,17 +2019,6 @@ else
             html: render_to_string('store/index', layout: false)
         EOF
       end
-    end
-
-    desc 'Update price when notified of price changes'
-    edit 'app/assets/javascripts/products.coffee' do
-      self.all += "\n" + <<-'EOF'.unindent(8)
-        # START_HIGHLIGHT
-        App.productsChannel = 
-          App.cable.subscriptions.create { channel: "ProductsChannel" },
-            received: (data) -> $(".store #main").html(data.html)
-        # END_HIGHLIGHT
-      EOF
     end
 
     desc 'Run tests'
