@@ -2829,12 +2829,11 @@ section 13.1, 'Iteration H1: Email Notifications' do
   desc 'Tailor the from address'
   edit 'app/mailers/order*.rb' do
     if match /from/
-      edit 'from', :highlight do
-        msub /from:?\s*=?>?\s*(.*)/, "'Sam Ruby <depot@example.com>'"
-      end
+      msub /from:?\s*=?>?\s*(.*)/, "'Sam Ruby <depot@example.com>'"
     else
       msub /class.*\n()/, "  default from: 'Sam Ruby <depot@example.com>'\n"
     end
+    edit 'from', :highlight
   end
 
   desc 'Tailor the confirm receipt email'
@@ -3562,7 +3561,11 @@ section 14.5, 'Playtime' do
   test :controllers
 
   desc 'Look at the data in the database'
-  cmd 'sqlite3 db/development.sqlite3 .schema'
+  if $rails_version =~ /^[34]/
+    cmd 'sqlite3 db/development.sqlite3 .schema'
+  else
+    cmd 'echo .schema | rails dbconsole'
+  end
 
   desc 'Try requesting the xml... see auth failure.'
   cmd "curl --max-time 15 --silent http://localhost:#$PORT/products/2/who_bought.xml"
