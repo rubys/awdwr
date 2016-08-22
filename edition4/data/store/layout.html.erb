@@ -5,17 +5,17 @@
 <!-- START_HIGHLIGHT -->
   <title>Pragprog Books Online Store</title>
 <!-- END_HIGHLIGHT -->
-  <!-- <label id="code.slt"/> --><%= stylesheet_link_tag    "application", :media => "all",
+  <%= stylesheet_link_tag    "application", :media => "all",
     "data-turbolinks-track" => 'reload' %>
-  <%= javascript_include_tag "application", "data-turbolinks-track" => 'reload' %><!-- <label id="code.jlt"/> -->
-  <%= csrf_meta_tags %><!-- <label id="code.csrf"/> -->
+  <%= javascript_include_tag "application", "data-turbolinks-track" => 'reload' %>
+  <%= csrf_meta_tags %>
 </head>
 <!-- END:head -->
 <body class="<%= controller.controller_name %>">
 <!-- START_HIGHLIGHT -->
   <div id="banner">
     <%= image_tag 'logo.svg', alt: 'The Pragmatic Bookshelf' %>
-    <span class="title"><%= @page_title %></span><!-- <label id="code.depot.e.title"/> -->
+    <span class="title"><%= @page_title %></span>
   </div>
   <div id="columns">
     <div id="side">
@@ -28,7 +28,7 @@
     </div>
     <div id="main">
 <!-- END_HIGHLIGHT -->
-      <%= yield %><!-- <label id="code.depot.e.include"/> -->
+      <%= yield %>
 <!-- START_HIGHLIGHT -->
     </div>
   </div>

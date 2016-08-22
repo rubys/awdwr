@@ -336,7 +336,10 @@ section 6.3, 'Playtime' do
   cmd 'git config --get-regexp user.*'
 
   desc 'Look at the .gitignore that Rails helpfully provided...'
-  cmd 'cat .gitignore'
+  edit '.gitignore', 'files' do
+    msub /#.*\n\s*()\n/, "\n# START:files"
+    msub /()\Z/, "\n# END:files"
+  end
   
   desc 'Initialize repository.'
   cmd 'git init'
@@ -1819,6 +1822,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
     desc 'Make the jquery-ui libraries available to the application'
     edit 'Gemfile', 'jquery' do
       clear_all_marks
+
       edit /^(#.*\n)*gem.*jquery.*\n/, :mark => 'jquery'
       msub /jquery-rails.*?\n()/, <<-EOF.unindent(8), :highlight
         gem 'jquery-ui-rails'
@@ -1998,6 +2002,7 @@ else
 
     desc 'create a channel'
     edit 'app/channels/products_channel.rb' do
+      msub /Action Cable( )runs/, "\n# "  if self =~ /^#/
       edit '# stream_from', :highlight do
         gsub! /#.*/, 'stream_from "products"'
       end
@@ -4277,8 +4282,15 @@ else
       edit /^gem 'coffee-rails'.*/, :highlight
       edit /^gem 'jquery-ui-rails'.*/, :highlight
 
-      # insert line break
-      sub! /in the background/, "in the\n# background"
+      # insert line breaks
+      sub! /in the background/, "in the\n  # background"
+
+      sub! "and get a debugger console",
+        "and get a\n  # debugger console"
+
+      sub! "using <%= console %> anywhere",
+        "using <%= console %>\n  # anywhere"
+
     end
   end
 end
