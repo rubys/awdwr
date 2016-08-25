@@ -100,7 +100,7 @@ module AWDWR
         # ignore dev-only instructions
         app_base.gsub! /^\s+if options\.dev\?\s+\[.*?\]/m, ''
 
-        pattern = /GemfileEntry\.github[ (]'([-\w]+)',\s*'([-\/\w]+)'/
+        pattern = /GemfileEntry\.github[ (]['"]([-\w]+)['"],\s*['"]([-\/\w]+)['"]/
         app_base.scan(pattern) do |gem, repos|
           libs << gem
         end
@@ -139,7 +139,7 @@ module AWDWR
         branches += app_base.scan(
           /^\s*gem ['"]([-\w]+)['"],.* github:.*branch: ['"]([-\w]+)['"]/)
         branches += app_base.scan(
-          /GemfileEntry\.github[ (]'([-\w]+)',\s*'[-\/\w]+', '(.*?)'/)
+          /GemfileEntry\.github[ (]['"]([-\w]+)['"],\s*['"][-\/\w]+['"], ['"](.*?)['"]/)
 
         gems += [['json',nil]] if ruby < "1.9.2"
         if app_base.match(/gem ['"]turn['"]/)
