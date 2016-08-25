@@ -2,7 +2,7 @@
 # Change directory, ruby version, and checkout the branches associated
 # with the specified version of [book, ruby, rails].
 #
-
+test "$(uname)" == "Darwin" && unset -f cd # disable /etc/bashrc_Apple_Terminal 
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 export GORP_RAILS=$HOME/git/rails
