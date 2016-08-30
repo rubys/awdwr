@@ -1931,9 +1931,10 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
     msub /<div id="cart">.*?(<\/div>)/m, '<% end %>' +
       "\n    <!-- END:hidden_div -->"
     sub! /^\s*<% if @cart %>\n/, ''
+    sub! /^<!-- START_HIGHLIGHT -->\n/, ''
     msub /(<div id="cart">)/,
       "<!-- START:hidden_div -->\n      " +
-      "<% if @cart %>\n        " +
+      "<% if @cart %>\n<!-- START_HIGHLIGHT -->\n        " +
       "<%= hidden_div_if(@cart.line_items.empty?, :id => 'cart') do %>"
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
