@@ -4007,7 +4007,12 @@ section 16, 'Deployment' do
     edit /#.*\n# gem .capistrano.*/, :mark => 'capistrano' do
       edit 'gem', :highlight
       msub /^(# )gem .capistrano/, ''
-      msub /^gem .(capistrano[-\w]*)/, 'rvm-capistrano'
+      sub!(/^gem .capistrano-rails.*\n/) do |line| 
+        "#{line}\n" +
+        "#{line.sub('-rails', '-rvm')}\n" +
+        "#{line.sub('-rails', '-bundler')}\n" +
+        "#{line.sub('-rails', '-passenger')}\n"
+      end
     end
   end
   bundle 'install'
@@ -4021,12 +4026,12 @@ section 16, 'Deployment' do
   # cmd 'mysqladmin -f -u root drop depot_production 2>&1'
   # ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = '1'
   rake 'db:setup RAILS_ENV=production'
-  unbundle { cmd 'capify .' }
+  unbundle { cmd 'echo no | bundle exec cap install STAGES=production' }
   edit 'config/deploy.rb' do
     self.all = read('config/deploy.rb')
     msub /set :user, '(\w+)'/, ENV['USER'] || 'rubys'
 
-    msub /set :rvm_ruby_string, '(\d+\.\d+\.\d+)'/,
+    msub /set :rvm_ruby_string, '((ruby-)?\d+\.\d+\.\d+)'/,
       ENV['RUBY_VERSION'] ||
       ("ruby-#{ENV['RBENV_VERSION']}" if ENV['RBENV_VERSION']) ||
       RUBY_VERSION
@@ -4041,10 +4046,11 @@ section 16, 'Deployment' do
     console "Depot::Application.configure { paths.log.first }", 'production'
   else
     edit 'Capfile' do
-      edit 'deploy/assets', :highlight do
-        msub /^(\s*# )load/, ''
+      %w(rails/assets rvm bundler rails/migrations passenger).each do |option|
+        edit /^\s*# require ['"]capistrano\/#{option}.*\n/, :highlight do 
+          msub /^(\s*# )require/, ''
+        end
       end
-      msub /\.()each/, "\n  " if include? '.each'
     end
 #   rake 'assets:precompile'
 #   cmd 'ls public/assets'

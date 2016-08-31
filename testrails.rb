@@ -152,7 +152,8 @@ end
 %w(
   htmlentities test-unit
   sqlite3 jquery-rails
-  rvm-capistrano activemerchant haml
+  capistrano-rails capistrano-rvm capistrano-passenger capistrano-bundler
+  activemerchant haml
 ).each do |name|
   gem name
 end

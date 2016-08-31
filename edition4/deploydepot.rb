@@ -105,6 +105,7 @@ section 16.1, 'Capistrano' do
     cmd "psql --version"
   end
 
+  cmd "DISABLE_DATABASE_ENVIRONMENT_CHECK=1 rails db:drop RAILS_ENV=production"
   rake "db:create RAILS_ENV=production"
 
   system "rm -rf #{$HOME}/work/depot"
@@ -131,11 +132,12 @@ section 16.1, 'Capistrano' do
 
   system 'sed -i "s/depot.pragprog.com/localhost/" config/deploy.rb'
   desc 'Initial capistrano setup'
-  cmd 'cap deploy:setup'
-  cmd 'cap deploy:check'
-  cmd 'cap deploy:seed'
+  cmd 'cap production deploy:check'
 
   desc 'Deploy'
-  cmd 'cap deploy'
+  cmd 'cap production deploy'
+
+  desc 'Seed'
+  cmd 'cap production deploy:seed'
   system 'sed -i "s/localhost/depot.pragprog.com/" config/deploy.rb'
 end
