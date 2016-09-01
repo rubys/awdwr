@@ -4027,6 +4027,7 @@ section 16, 'Deployment' do
   # ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = '1'
   rake 'db:setup RAILS_ENV=production'
   unbundle { cmd 'echo no | bundle exec cap install STAGES=production' }
+
   edit 'config/deploy.rb' do
     self.all = read('config/deploy.rb')
     msub /user\s*=\s*'(\w+)'/, ENV['USER'] || 'rubys'
@@ -4036,6 +4037,11 @@ section 16, 'Deployment' do
       ("ruby-#{ENV['RBENV_VERSION']}" if ENV['RBENV_VERSION']) ||
       RUBY_VERSION
   end
+
+  edit 'lib/capistrano/tasks/deploy-seed.rake' do
+    self.all = read('config/deploy-seed.rake')
+  end
+
   if File.exist? 'public/images'
     edit 'config/environments/production.rb' do
       msub /^()end/, "\n" + <<-EOF.unindent(6)

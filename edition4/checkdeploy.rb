@@ -14,7 +14,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /CreateUsers: migrated/
     assert_select '.stdout', /deploy:assets:precompile/
     assert_select '.stdout', /Writing.*public\/assets\/rails-[0-9a-f]+\.png/
-    assert_select '.stdout', /Restarting.*depot\/current/
+    assert_select '.stdout', /passenger:restart/
     assert_select '.stderr', text: /^cap aborted!/, count: 0
 
     # find deploy directory
