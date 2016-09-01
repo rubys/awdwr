@@ -4008,10 +4008,10 @@ section 16, 'Deployment' do
       edit 'gem', :highlight
       msub /^(# )gem .capistrano/, ''
       sub!(/^gem .capistrano-rails.*\n/) do |line| 
-        "#{line}\n" +
-        "#{line.sub('-rails', '-rvm')}\n" +
-        "#{line.sub('-rails', '-bundler')}\n" +
-        "#{line.sub('-rails', '-passenger')}\n"
+        "#{line}" +
+        "#{line.sub('-rails', '-rvm')}" +
+        "#{line.sub('-rails', '-bundler')}" +
+        "#{line.sub('-rails', '-passenger')}"
       end
     end
   end
