@@ -20,7 +20,7 @@ class DepotTest < Gorp::TestCase
     # find deploy directory
     config = File.read('depot/config/deploy.rb')
     deploy_to  = config[/^set :deploy_to, "(.*)"/,1]
-    deploy_to.sub! '#{fetch(:user)}', config[/^set :user, '(.*)'/,1]
+    deploy_to.sub! '#{user}', config[/^user\s*=\s*'(.*)'/,1]
     deploy_to.sub! '#{fetch(:application)}', config[/^set :application, '(.*)'/,1]
     assert File.exist? deploy_to
 

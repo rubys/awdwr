@@ -4029,7 +4029,7 @@ section 16, 'Deployment' do
   unbundle { cmd 'echo no | bundle exec cap install STAGES=production' }
   edit 'config/deploy.rb' do
     self.all = read('config/deploy.rb')
-    msub /set :user, '(\w+)'/, ENV['USER'] || 'rubys'
+    msub /user\s*=\s*'(\w+)'/, ENV['USER'] || 'rubys'
 
     msub /set :rvm_ruby_string, '((ruby-)?\d+\.\d+\.\d+)'/,
       ENV['RUBY_VERSION'] ||
