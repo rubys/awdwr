@@ -21,21 +21,33 @@ default:
   rvm:
     bin:   ruby-2.1.5
 
-224:
-  output:  2.2.4
-  message: 'Ruby 2.2.4'
-  rvm:
-    bin:   ruby-2.2.4
-
 225:
   output:  2.2.5
   message: 'Ruby 2.2.5'
   rvm:
     bin:   ruby-2.2.5
 
+226:
+  output:  2.2.6
+  message: 'Ruby 2.2.6'
+  rvm:
+    bin:   ruby-2.2.6
+
+233:
+  output:  2.3.3
+  message: 'Ruby 2.3.3'
+  rvm:
+    bin:   ruby-2.3.3
+
 240:
-  output:  2.2.0
-  message: 'Ruby 2.2.0'
+  output:  2.4.0
+  message: 'Ruby 2.4.0'
+  rvm:
+    bin:   ruby-2.4.0
+
+250:
+  output:  2.5.0
+  message: 'Ruby 2.5.0'
   rvm:
     src:   trunk
     bin:   ruby-head-n*

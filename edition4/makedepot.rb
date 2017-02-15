@@ -4514,7 +4514,7 @@ section 26.3, 'Pagination' do
       gem 'will_paginate', '~> 3.0'
     EOF
     unless $rails_version =~ /^3\./
-      sub! /'will_paginate.*'/, "'kaminari', '~> 0.16'" 
+      sub! /'will_paginate.*'/, "'kaminari', '~> 1.0'" 
     end
   end
 
