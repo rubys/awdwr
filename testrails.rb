@@ -273,7 +273,9 @@ args = ARGV.grep(/^(\d+(\.\d+)?-\d+(\.\d+)?|\d+\.\d+?|save|restore|--.*)$/)
 args << "--work=#{WORK}"
 
 # select rvm or rbenv
-if RVM.available?
+if RUBY_PLATFORM =~ /darwin/ and RBenv.available?
+  clerk = RBenv.new
+elsif RVM.available?
   clerk = RVM.new
 elsif RBenv.available?
   clerk = RBenv.new

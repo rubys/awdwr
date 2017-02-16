@@ -16,6 +16,11 @@ if [[ "$@" = "gems" ]]; then
   return 0
 fi
 
+if [[ -e ~/.rbenv && `uname` = 'Darwin' ]]; then
+  unset rvm_version
+  unset rvm_path
+fi
+
 if [[ -n "$rvm_path" ]]; then
   if test -f $rvm_path/scripts/rvm; then
     [ "$(type -t rvm)" = "function" ] || source $rvm_path/scripts/rvm
