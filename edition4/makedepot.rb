@@ -341,8 +341,10 @@ section 6.3, 'Playtime' do
     msub /()\Z/, "\n# END:files"
   end
   
-  desc 'Initialize repository.'
-  cmd 'git init'
+  unless File.exist? '.git'
+    desc 'Initialize repository.'
+    cmd 'git init'
+  end
 
   desc 'Add all the files.'
   cmd 'git add .'

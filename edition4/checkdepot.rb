@@ -100,7 +100,11 @@ class DepotTest < Gorp::TestCase
     # assert_select '.stdout', /CreateProducts: reverted/
     # assert_select '.stdout', /CreateProducts: migrated/
     assert_select '.stdout', /user.email/
-    assert_select '.stdout', /Initialized empty Git repository/
+
+    if $rails_version =~ /^(3|4|5\.0)/
+      assert_select '.stdout', /Initialized empty Git repository/
+    end
+
     assert_select '.stdout', /(Created initial |root-)commit.*Depot Scaffold/
   end
 
