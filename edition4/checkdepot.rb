@@ -109,9 +109,9 @@ class DepotTest < Gorp::TestCase
   end
 
   section 7.1, "Iteration B1: Validation and Unit Testing" do
-    ticket 23590,
-      title: "most validations fail",
-      match: /Product was successfully created\./
+    ticket 27429,
+      title: "Type::Decimal casting raises exceptions on ruby 2.4",
+      match: /invalid value for BigDecimal\(\): "wibble"/
 
     assert_select 'h2', /4 errors\s+prohibited this product from being saved/
     assert_select 'li', "Image url can't be blank"
