@@ -514,7 +514,12 @@ class DepotTest < Gorp::TestCase
         assert_match /mkdir -p/, err.to_s
       end
     end
-    assert_select '.stdout', /create_table\("carts", {:force=>/
+
+    if $rails_version =~ /^[34]/
+      assert_select '.stdout', /initialize_schema_migrations_table/
+    else
+      assert_select '.stdout', /create_table\("carts", \{:force=>/
+    end
     assert_select '.stdout', 'Capified'
     assert_select '.stdout', /depot\/log\/production.log/
   end
