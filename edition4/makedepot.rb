@@ -1238,8 +1238,10 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
 
   desc 'Fill in the self.up method'
   edit Dir['db/migrate/*combine_items_in_cart.rb'].first, 'up' do
+    dcl = self[/^class.*/]
     selfup = include?('self.up')
     self.all = read('cart/combine_items_in_cart.rb')
+    self[/^class.*/] = dcl
     gsub! 'self.', '' unless selfup
     gsub! ', :quantity=>1', '' if $rails_version =~ /^3\.2/
     gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
