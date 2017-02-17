@@ -430,7 +430,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
 
       # temporary hack for Ruby 5.1
       unless $rails_version =~ /^(3\.|4\.|5\.0)/
-        gsub! /image_url: .*/, 'image_url: 7apps.jpg'
+        gsub! 'lorem.jpg', '7apps.jpg'
       end
     end
     
