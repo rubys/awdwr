@@ -4467,9 +4467,15 @@ end
 
 section 26.2, 'HAML' do
   edit 'Gemfile', 'haml' do
+    edit 'activemerchant', :mark => 'haml'
     msub /activemerchant.*\n()/, <<-EOF.unindent(6)
       gem 'haml', '~> 4.0'
     EOF
+    unless $rails_version =~ /^(3\.|4\.|5\.0)/
+      msub /activemerchant.*\n()/, <<-EOF.unindent(8)
+        gem 'erubis'
+      EOF
+    end
   end
   bundle 'install'
 
