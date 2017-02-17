@@ -1838,10 +1838,19 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
     edit 'Gemfile', 'jquery' do
       clear_all_marks
 
-      edit /^(#.*\n)*gem.*jquery.*\n/, :mark => 'jquery'
-      msub /jquery-rails.*?\n()/, <<-EOF.unindent(8), :highlight
-        gem 'jquery-ui-rails'
-      EOF
+      if self =~ /jquery/
+        edit /^(#.*\n)*gem.*jquery.*\n/, :mark => 'jquery'
+        msub /jquery-rails.*?\n()/, <<-EOF.unindent(10), :highlight
+          gem 'jquery-ui-rails'
+        EOF
+      else
+        self.sub!(/\n*\Z/, "\n\n\n")
+        msub /\n()\Z/, <<-EOF.unindent(10), :mark => 'jquery'
+          gem 'jquery-rails'
+          gem 'jquery-ui-rails'
+        EOF
+        self.sub!(/\n+\Z/, "\n")
+      end
     end
 
     desc 'Install the gem'
@@ -1860,7 +1869,9 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
       spec = Gem::Specification.find_by_name('jquery-ui-rails')
       if spec
         assets = "#{spec.gem_dir}/app/assets/javascripts"
-        if File.exist?("#{assets}/jquery-ui/effect-blind.js")
+        if File.exist?("#{assets}/jquery-ui/effects/effect-blind.js")
+          effect = 'jquery-ui/effects/effect-blind'
+        elsif File.exist?("#{assets}/jquery-ui/effect-blind.js")
           effect = 'jquery-ui/effect-blind'
         elsif File.exist?("#{assets}/jquery.ui.effect-blind.js")
           effect = 'jquery.ui.effect-blind'
@@ -1869,11 +1880,21 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
 
       raise "can't find jquery-ui/effect-blind" unless effect
 
-      msub /()\/\/= require jquery_ujs/, <<-EOF.unindent(8)
-        //#START_HIGHLIGHT
-        //= require #{effect}
-        //#END_HIGHLIGHT
-      EOF
+      if self =~ /jquery_ujs/
+        msub /()\/\/= require jquery_ujs/, <<-EOF.unindent(10)
+          //#START_HIGHLIGHT
+          //= require #{effect}
+          //#END_HIGHLIGHT
+        EOF
+      else
+        msub /(\/\/= require rails-ujs\n)/, <<-EOF.unindent(10)
+          //#START_HIGHLIGHT
+          //= require jquery
+          //= require jquery_ujs
+          //= require #{effect}
+          //#END_HIGHLIGHT
+        EOF
+      end
     end
   end
   publish_code_snapshot :m
