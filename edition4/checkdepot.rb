@@ -595,6 +595,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 26.2, 'HAML' do
+    ticket 895,
+      :list => 'haml',
+      :title =>  "Erubis deprecated in Rails 5.1",
+      :match => /DEPRECATION WARNING: ActionView::Template::Handlers::Erubis is deprecated/
+
     assert_select 'h1', 'Your Pragmatic Catalog'
     assert_select 'span.price', /\$45.00/
   end
