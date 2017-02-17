@@ -786,6 +786,17 @@ section 8.4, 'Iteration C4: Functional Testing' do
   desc 'Verify that the tests still pass.'
   test
 
+  # temporary hack for Ruby 5.1
+  unless $rails_version =~ /^(3\.|4\.|5\.0)/
+    desc 'Make sure all of the images are real'
+    edit "test/fixtures/products.yml" do
+      gsub! /image_url: .*/, 'image_url: 7apps.jpg'
+    end
+
+    desc 'Rerun the tests.'
+    test
+  end
+
   desc 'Add tests for layout, product display, and formatting, using ' +
     'counts, string comparisons, and regular expressions.'
   edit 'test/*/store_controller_test.rb' do
