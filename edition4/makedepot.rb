@@ -425,7 +425,13 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
           :price       => 19.95
         }
       EOF
+
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+
+      # temporary hack for Ruby 5.1
+      unless $rails_version =~ /^(3\.|4\.|5\.0)/
+        gsub! /image_url: .*/, 'image_url: 7apps.jpg'
+      end
     end
     
     %w(update create).each do |test|
