@@ -1,37 +1,40 @@
 <!-- START:head -->
 <!DOCTYPE html>
 <html>
-<head>
-<!-- START_HIGHLIGHT -->
-  <title>Pragprog Books Online Store</title>
-<!-- END_HIGHLIGHT -->
-  <%= stylesheet_link_tag    "application", :media => "all",
-    "data-turbolinks-track" => 'reload' %>
-  <%= javascript_include_tag "application", "data-turbolinks-track" => 'reload' %>
-  <%= csrf_meta_tags %>
-</head>
-<!-- END:head -->
-<body class="<%= controller.controller_name %>">
-<!-- START_HIGHLIGHT -->
-  <div id="banner">
-    <%= image_tag 'logo.svg', alt: 'The Pragmatic Bookshelf' %>
-    <span class="title"><%= @page_title %></span>
-  </div>
-  <div id="columns">
-    <div id="side">
-      <ul>
-        <li><a href="http://www....">Home</a></li>
-        <li><a href="http://www..../faq">Questions</a></li>
-        <li><a href="http://www..../news">News</a></li>
-        <li><a href="http://www..../contact">Contact</a></li>
-      </ul>
+  <head>
+  <!-- START_HIGHLIGHT -->
+    <title>Pragprog Books Online Store</title>
+  <!-- END_HIGHLIGHT -->
+    <%= csrf_meta_tags %>
+
+    <%= csrf_meta_tags %>
+
+    <%= stylesheet_link_tag    'application', media: 'all',
+    'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+  <!-- END:head -->
+  <body class="<%= controller.controller_name %>">
+  <!-- START_HIGHLIGHT -->
+    <div id="banner">
+      <%= image_tag 'logo.svg', alt: 'The Pragmatic Bookshelf' %>
+      <span class="title"><%= @page_title %></span>
     </div>
-    <div id="main">
-<!-- END_HIGHLIGHT -->
-      <%= yield %>
-<!-- START_HIGHLIGHT -->
+    <div id="columns">
+      <div id="side">
+	<ul>
+	  <li><a href="http://www....">Home</a></li>
+	  <li><a href="http://www..../faq">Questions</a></li>
+	  <li><a href="http://www..../news">News</a></li>
+	  <li><a href="http://www..../contact">Contact</a></li>
+	</ul>
+      </div>
+      <div id="main">
+  <!-- END_HIGHLIGHT -->
+	<%= yield %>
+  <!-- START_HIGHLIGHT -->
+      </div>
     </div>
-  </div>
-<!-- END_HIGHLIGHT -->
-</body>
+  <!-- END_HIGHLIGHT -->
+  </body>
 </html>
