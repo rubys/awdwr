@@ -2,7 +2,7 @@
 #START:vcc
 Product.delete_all
 #END:vcc    
-Product.create(title: 'Rails, Angular, Postgres, and Bootstrap',
+Product.create!(title: 'Rails, Angular, Postgres, and Bootstrap',
   description:
     %{<p>
       <em>Powerful, Effective, and Efficient Full-Stack Web Development</em>
@@ -19,7 +19,7 @@ Product.create(title: 'Rails, Angular, Postgres, and Bootstrap',
   price: 45.00)
 #START:vcc
 # . . .
-Product.create(title: 'Seven Mobile Apps in Seven Weeks',
+Product.create!(title: 'Seven Mobile Apps in Seven Weeks',
   description:
     %{<p>
       <em>Native Apps, Multiple Platforms</em>
@@ -34,7 +34,7 @@ Product.create(title: 'Seven Mobile Apps in Seven Weeks',
 # . . .
 #END:vcc
 
-Product.create(title: 'Ruby Performance Optimization',
+Product.create!(title: 'Ruby Performance Optimization',
   description:
     %{<p>
       <em>Why Ruby Is Slow, and How to Fix It</em> 
