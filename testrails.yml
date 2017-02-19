@@ -7,37 +7,13 @@ default:
   output:  []
   message: []
   rvm:
-    bin:   ruby-2.3.1
-
-193:
-  output:  1.9.3
-  message: 'Ruby 1.9.3'
-  rvm:
-    bin:   ruby-1.9.3-p*
-
-215:
-  output:  2.1.5
-  message: 'Ruby 2.1.5'
-  rvm:
-    bin:   ruby-2.1.5
-
-225:
-  output:  2.2.5
-  message: 'Ruby 2.2.5'
-  rvm:
-    bin:   ruby-2.2.5
+    bin:   ruby-2.3.3
 
 226:
   output:  2.2.6
   message: 'Ruby 2.2.6'
   rvm:
     bin:   ruby-2.2.6
-
-233:
-  output:  2.3.3
-  message: 'Ruby 2.3.3'
-  rvm:
-    bin:   ruby-2.3.3
 
 240:
   output:  2.4.0
@@ -51,26 +27,6 @@ default:
   rvm:
     src:   trunk
     bin:   ruby-head-n*
-
-23:
-  output:  '2.3'
-  branch:  2-3-stable
-  message: 'Rails 2-3-stable'
-
-30:
-  output:  '3.0'
-  branch:  3-0-stable
-  message: '3-0-stable'
-
-31:
-  branch:  3-1-stable
-  output:  '3.1'
-  message: '3-1-stable'
-
-32:
-  branch:  3-2-stable
-  output:  '3.2'
-  message: '3-2-stable'
 
 40:
   output:  '4.0'
@@ -91,11 +47,6 @@ default:
   output:  '5.0'
   branch:  5-0-stable
   message: '5-0-stable'
-
-5b3:
-  output:  '5.0.0beta3'
-  branch:  v5.0.0.beta3
-  message: '5.0.0.beta3'
 
 3:
   source:  /home/rubys/git/awdwr/edition3
