@@ -594,7 +594,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
   desc 'Modify the application layout'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
-    self.all = read('store/layout.html.erb')
+    self.all = read('store/application.html.erb')
     gsub! '"application"', '"depot"' if File.exist? 'public/images'
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     gsub! 'csrf_meta_tags', 'csrf_meta_tag' if $rails_version =~ /^3\.0/
@@ -1649,7 +1649,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   desc 'Reference the partial from the layout.'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
-    msub /<div id="side">\n()/, <<-'EOF' + "\n", :highlight
+    msub /<div id="side">\n()/, <<-'EOF'.gsub(/^/, '  ') + "\n", :highlight
       <div id="cart">
         <%= render @cart %>
       </div>
@@ -1747,8 +1747,8 @@ section 11.1, 'Iteration F1: Moving the Cart' do
     msub /\n()\s+<div id="main">/, "<!-- END:side -->\n"
     edit /^ +<%= render @cart %>\s*\n/m do
       gsub!(/^/, '  ')
-      msub /\A()/,   "        <% if @cart %>\n", :highlight
-      msub /\n()\Z/, "        <% end %>\n",     :highlight
+      msub /\A()/,   "          <% if @cart %>\n", :highlight
+      msub /\n()\Z/, "          <% end %>\n",     :highlight
     end
   end
 
@@ -1975,8 +1975,8 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
     sub! /^\s*<% if @cart %>\n/, ''
     sub! /^<!-- START_HIGHLIGHT -->\n/, ''
     msub /(<div id="cart">)/,
-      "<!-- START:hidden_div -->\n      " +
-      "<% if @cart %>\n<!-- START_HIGHLIGHT -->\n        " +
+      "<!-- START:hidden_div -->\n        " +
+      "<% if @cart %>\n<!-- START_HIGHLIGHT -->\n          " +
       "<%= hidden_div_if(@cart.line_items.empty?, :id => 'cart') do %>"
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
@@ -3503,7 +3503,7 @@ section 14.4, 'Iteration I4: Adding a Sidebar' do
   desc 'Add admin links and a button to Logout'
   edit "app/views/layouts/application.html.erb" do |data|
     data.clear_highlights
-    data.msub /<div id="side">.*?() *<\/div>/m, "\n" + <<-EOF, :highlight
+    data.msub /<div id="side">.*?() *<\/div>/m, "\n" + <<-EOF.gsub(/^/, '  '), :highlight
       <% if session[:user_id] %>
         <ul>
           <li><%= link_to 'Orders',   orders_path   %></li>
@@ -3964,7 +3964,7 @@ section 15.4, 'Task J4: Add a locale switcher.' do
   edit 'app/views/layouts/application.html.erb', 'i18n' do
     clear_highlights
     edit /^\s+<div id="banner">.*?<\/div>\n/m, :mark => 'i18n'
-    msub /\n()\s+<%= image_tag/, <<-EOF.unindent(2), :highlight
+    msub /\n()\s+<%= image_tag/, <<-EOF, :highlight
       <%= form_tag store_index_path, :class => 'locale' do %>
         <%= select_tag 'set_locale', 
           options_for_select(LANGUAGES, I18n.locale.to_s),
