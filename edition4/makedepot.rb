@@ -655,7 +655,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
         }
 
         #notice:empty {
-          display: none
+          display: none;
         }
 
         #columns {
@@ -1543,7 +1543,7 @@ section 10.4, 'Playtime' do
         msub /do\n()/, 
           "    post line_items_url, params: " +
                     "{ product_id: products(:ruby).id }\n" +
-          "    @cart = Cart.find(session[:cart_id])\n\n"
+          "    @cart = Cart.find(session[:cart_id])\n\n",
           :highlight
       end
       edit /^.*carts_(path|url).*\n/, :highlight do
@@ -2268,7 +2268,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
             }
 
             br {
-              display: none
+              display: none;
             }
           }
         }
