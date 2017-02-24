@@ -277,6 +277,12 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     desc 'Copy some images'
     cmd "cp -vp #{$DATA}/assets/* app/assets/images/"
 
+    unless $rails_version =~ /^[34]|^5\.0/
+     desc 'HACK: make sure assets exist'
+     cmd 'touch app/assets/images/lorem.jpg'
+     cmd 'touch app/assets/images/MyString'
+    end
+
     if $rails_version =~ /^4\.2/
       desc 'Workaround for sprockets-rails issue 321'
       restart_server 
@@ -427,11 +433,6 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
       EOF
 
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-
-      # temporary hack for Ruby 5.1
-      unless $rails_version =~ /^(3\.|4\.|5\.0)/
-        gsub! 'lorem.jpg', '7apps.jpg'
-      end
     end
     
     %w(update create).each do |test|
@@ -792,12 +793,10 @@ section 8.4, 'Iteration C4: Functional Testing' do
   desc 'Verify that the tests still pass.'
   test
 
-  # temporary hack for Ruby 5.1
+  # temporary HACK for Ruby 5.1
   unless $rails_version =~ /^(3\.|4\.|5\.0)/
-    desc 'Make sure all of the images are real'
-    edit "test/fixtures/products.yml" do
-      gsub! /image_url: .*/, 'image_url: 7apps.jpg'
-    end
+    desc 'Make sure the images exists'
+    cmd "touch app/assets/images/ruby.png"
 
     desc 'Rerun the tests.'
     test
