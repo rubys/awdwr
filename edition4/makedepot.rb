@@ -3121,7 +3121,60 @@ section 14.1, 'Iteration I1: Adding Users' do
 
   desc 'Update form used to both create and update users'
   edit "app/views/users/_form.html.erb" do
-    self.all = read('users/new.html.erb')
+    msub /\A()/, <<-EOF.unindent(6)
+      <!-- START_HIGHLIGHT -->
+      <div class="depot_form">
+
+      <!-- END_HIGHLIGHT -->
+    EOF
+
+    edit 'pluralize' do
+      msub /%>()/, "\n       "
+    end
+
+    msub /^()  <div class="field">/, <<-EOF.unindent(4)
+      <!-- START_HIGHLIGHT -->
+      <fieldset>
+      <legend>Enter User Details</legend>
+
+      <!-- END_HIGHLIGHT -->
+    EOF
+
+    edit 'label :name', :highlight do
+      msub /:name()/, ", 'Name:'"
+    end
+    edit 'field :name', :highlight do
+      msub /() %>/, ', size: 40'
+    end
+
+    edit 'label :password ', :highlight do
+      msub /:password()/, ", 'Password:'"
+    end
+    edit 'field :password ', :highlight do
+      msub /() %>/, ', size: 40'
+    end
+
+    edit 'label :password_', :highlight do
+      msub /:password_confirmation()/, ", 'Confirm:'"
+    end
+    edit 'field :password_', :highlight do
+      msub /() %>/, ', size: 40'
+    end
+
+    msub /^()<% end %>/, <<-EOF.unindent(4)
+      <!-- START_HIGHLIGHT -->
+
+      </fieldset>
+      <!-- END_HIGHLIGHT -->
+    EOF
+
+    msub /\n()\Z/, <<-EOF.unindent(6)
+      <!-- START_HIGHLIGHT -->
+
+      </div>
+      <!-- END_HIGHLIGHT -->
+    EOF
+
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
