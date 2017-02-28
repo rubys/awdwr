@@ -3819,15 +3819,14 @@ section 15.2, 'Task J2: translating the store front' do
   desc 'Replace translatable text with calls out to translation functions.'
   edit 'app/views/store/index.html.erb' do
     clear_highlights
-    edit 'Your Pragmatic Catalog' do
+    edit '<h1>', :highlight do
       gsub! 'Your Pragmatic Catalog', "<%= t('.title_html') %>"
-      gsub! /(t\('\..*'\).*)/, "\\1\n<!-- END_HIGHLIGHT -->"
     end
-    edit 'Add to Cart' do
+    edit 'button_to' do
       gsub! "'Add to Cart'", "t('.add_html')"
-      gsub! /(t\('\..*'\).*)/, "\\1\n# END_HIGHLIGHT"
+      gsub! /\A/, "<!-- START_HIGHLIGHT -->\n"
+      gsub! /\Z/, "\n# END_HIGHLIGHT"
     end
-    gsub! /(.*t\('\..*'\))/, "<!-- START_HIGHLIGHT -->\n\\1"
   end
 
   desc 'Define some translations for the main page.'
@@ -3856,13 +3855,11 @@ section 15.2, 'Task J2: translating the store front' do
 
   desc 'Handle remote calls too'
   edit 'app/views/store/index.html.erb', 'price_line' do
-    sub! "<!-- START_HIGHLIGHT -->\n", ''
-    sub! "<!-- END_HIGHLIGHT -->\n", ''
+    clear_all_marks
     edit /^\s+<div class="price_line">.*?<\/div>\n/m, :mark => 'price_line'
     msub /,( )line_items_path/, "\n            "
     msub /line_items_path\(.*?()\)/, ", locale: I18n.locale"
-    gsub! /^<!--/, "        <!--"
-    gsub! /^#/, "        #"
+    edit 'line_items_path', :highlight
   end
 
   desc 'Format the currency.'

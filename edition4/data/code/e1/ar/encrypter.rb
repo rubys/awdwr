@@ -1,7 +1,6 @@
 $: << File.dirname(__FILE__)
 require "./config/environment.rb"
 
-require "rubygems"
 require "active_record"
 
 ActiveRecord::Schema.define do
