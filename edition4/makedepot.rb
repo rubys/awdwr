@@ -3837,14 +3837,20 @@ section 15.2, 'Task J2: translating the store front' do
   get '/es'
 
   desc 'Replace translatable text with calls out to translation functions.'
-  edit 'app/views/carts/_cart.html.erb' do |data|
-    data.gsub! /.*_HIGHLIGHT.*\n/, ''
-    data.gsub! 'Your Cart', "<%= t('.title') %>"
-    data.gsub! '"Checkout"', "t('.checkout')"
-    data.gsub! /(t\('\..*'\).*)/, "\\1\n<!-- END_HIGHLIGHT -->"
-    data.gsub! "'Empty cart'", "t('.empty')"
-    data.gsub! /(.*t\('\..*'\))/, "<!-- START_HIGHLIGHT -->\n\\1"
-    data.gsub! /(t\('\.empty'\).*)/, "\\1\n# END_HIGHLIGHT"
+  edit 'app/views/carts/_cart.html.erb' do
+    clear_highlights
+
+    gsub! 'Your Cart', "<%= t('.title') %>"
+    sub! /(t\('\..*'\).*)/, "\\1\n<!-- END_HIGHLIGHT -->"
+
+    gsub! '"Checkout"', "t('.checkout')"
+    msub /new_order_path(,)/, "(locale: I18n.locale),\n   "
+    sub! /(I18n.locale.*)/, "\\1\n# END_HIGHLIGHT"
+
+    gsub! "'Empty cart'", "t('.empty')"
+    gsub! /(t\('\.empty'\).*)/, "\\1\n# END_HIGHLIGHT"
+
+    gsub! /(.*t\('\..*'\))/, "<!-- START_HIGHLIGHT -->\n\\1"
   end
 
   desc 'Define some translations for the cart.'
@@ -3959,11 +3965,17 @@ section 15.3, 'Task J3: Translating Checkout' do
   post '/es/orders/new', 'order[name]' => '', 'submit' => 'Realizar Pedido'
 
   desc 'Replace translatable text with calls out to translation functions.'
-  edit 'app/controllers/orders_controller.rb', 'create' do |data|
-    data.clear_highlights
-    data.dcl 'create', :mark => 'create' do |create|
-      create.edit  "'Thank you for your order.'", :highlight
-      create.gsub! "'Thank you for your order.'", "I18n.t('.thanks')"
+  edit 'app/controllers/orders_controller.rb', 'create' do
+    clear_highlights
+    dcl 'create', :mark => 'create' do
+      edit "store_index_url", :highlight
+      msub /store_index_url()/, '(locale: I18n.locale)'
+
+      edit  "'Thank you for your order.'", :highlight
+      gsub! "'Thank you for your order.'", "I18n.t('.thanks')"
+
+      gsub! ' notice:', ''
+      msub /()I18n.t/, 'notice: '
     end
   end
 
