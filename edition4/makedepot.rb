@@ -3979,6 +3979,16 @@ section 15.3, 'Task J3: Translating Checkout' do
     end
   end
 
+  desc 'Modify the test to reflect the new redirect'
+  edit 'test/*/orders_controller_test.rb', 'valid' do
+    clear_all_marks
+    dcl 'should create order', :mark => 'valid' do
+      edit "store_index_url", :highlight do
+        msub /store_index_url()/, "(locale: 'en')"
+      end
+    end
+  end
+
   desc 'Define some translations for the flash.'
   edit('config/locales/en.yml', 'flash') {}
   edit('config/locales/es.yml', 'flash') {} 
