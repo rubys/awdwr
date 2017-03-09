@@ -3983,8 +3983,8 @@ section 15.3, 'Task J3: Translating Checkout' do
   edit 'test/*/orders_controller_test.rb', 'valid' do
     clear_all_marks
     dcl 'should create order', :mark => 'valid' do
-      edit "store_index_url", :highlight do
-        msub /store_index_url()/, "(locale: 'en')"
+      edit "store_index_", :highlight do
+        msub /store_index_\w+()/, "(locale: 'en')"
       end
     end
   end
