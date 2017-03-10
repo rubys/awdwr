@@ -1,19 +1,21 @@
-$: << File.dirname(__FILE__)
-require "./config/environment.rb"
+require 'active_record'
+require 'yaml'
 
-require "active_record"
+# connect to the test database
+config = YAML.load_file('config/database.yml')
+ActiveRecord::Base.establish_connection(config['test'])
 
 ActiveRecord::Schema.define do
   
   #START:migration
-  create_table :orders, :force => true do |t|
+  create_table :orders, force: true do |t|
     t.integer :user_id
     t.string  :name
     t.string  :address
     t.string  :email
   end
   
-  create_table :users, :force => :true do |t|
+  create_table :users, force: true do |t|
     t.string :name
   end
   #END:migration
@@ -21,7 +23,9 @@ end
 
 
 #START:base
-class ActiveRecord::Base
+class ApplicationRecord < ActiveRecord::Base 
+  self.abstract_class = true
+
   def self.encrypt(*attr_names)
     encrypter = Encrypter.new(attr_names)
     
@@ -36,7 +40,6 @@ end
 
 #START:encrypter  
 class Encrypter
-
   # We're passed a list of attributes that should
   # be stored encrypted in the database
   def initialize(attrs_to_manage)
@@ -64,7 +67,7 @@ end
 #END:encrypter
 
 #START:order
-class Order < ActiveRecord::Base
+class Order < ApplicationRecord
   encrypt(:name, :email)
 end
 #END:order
