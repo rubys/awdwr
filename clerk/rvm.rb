@@ -11,7 +11,7 @@ class RVM < Clerk
   # Where can RVM be found
   def self.path
     @path ||= [ENV['rvm_path'], File.expand_path('~/.rvm'), '/usr/local/rvm'].
-      find {|path| path and File.exist? path}
+      find {|path| path and File.exist? path and File.exist? "#{path}/VERSION"}
   end
 
   # Update install recipes
