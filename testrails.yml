@@ -2,12 +2,12 @@ default:
   script:  makedepot.rb
 
   destdir: AWDwR4
-  branch:  master # v5.1
+  branch:  master # v5.2
   source:  ~/git/awdwr/edition4
   output:  []
   message: []
   rvm:
-    bin:   ruby-2.3.3
+    bin:   ruby-2.4.0
 
 226:
   output:  2.2.6
@@ -15,11 +15,11 @@ default:
   rvm:
     bin:   ruby-2.2.6
 
-240:
-  output:  2.4.0
-  message: 'Ruby 2.4.0'
+233:
+  output:  2.3.3
+  message: 'Ruby 2.3.3'
   rvm:
-    bin:   ruby-2.4.0
+    bin:   ruby-2.3.3
 
 250:
   output:  2.5.0
@@ -42,6 +42,11 @@ default:
   output:  '4.2'
   branch:  4-2-stable
   message: '4-2-stable'
+
+51:
+  output:  '5.1'
+  branch:  5-1-stable
+  message: '5-1-stable'
 
 50:
   output:  '5.0'
