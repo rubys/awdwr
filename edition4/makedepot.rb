@@ -233,7 +233,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   edit 'app/views/products/_form.html.erb' do
     msub /<%= pluralize.*%>( )/, "\n      "
     edit 'text_area :description', :highlight do
-      msub /:description() %>/, ', rows: 10, cols: 60'
+      msub /() %>/, ', rows: 10, cols: 60'
     end
   end
 
@@ -2216,8 +2216,9 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       edit 'number_field :pay_type', :highlight # while it still is on one line
       edit 'number_field :pay_type' do
         msub /(number_field)/, 'select'
-        msub /() %>/, ", Order.pay_types.keys,\n" + 
-          (' ' * 18) + ":prompt => 'Select a payment method'"
+        msub /:pay_type()/, ", Order.pay_types.keys"
+        msub /() %>/,  ",\n" + (' ' * 18) + 
+          ":prompt => 'Select a payment method'"
       end
       edit 'submit', :highlight do
         msub /() %>/, " 'Place Order'"
@@ -3150,7 +3151,7 @@ section 14.1, 'Iteration I1: Adding Users' do
     edit 'label :password ', :highlight do
       msub /:password()/, ", 'Password:'"
     end
-    edit 'field :password ', :highlight do
+    edit 'field :password', :highlight do
       msub /() %>/, ', size: 40'
     end
 
