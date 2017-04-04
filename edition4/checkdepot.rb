@@ -283,7 +283,10 @@ class DepotTest < Gorp::TestCase
     assert_select '#notice', 'Thank you for your order.'
   end
 
-  section 12.2, "Iteration G2: Atom Feeds" do
+  section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
+  end
+
+  section 12.3, "Iteration G2: Atom Feeds" do
     ticket 7910,
       :title =>  "Actions defined using resource get bypass the controller",
       :match => /undefined method `title&amp;#39; for nil:NilClass/

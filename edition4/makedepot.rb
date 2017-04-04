@@ -27,7 +27,7 @@ $checker = 'checkdepot'
 
 begin
   require './pub_gorp'
-rescue LoadError
+rescue LoadError => ex
   def publish_code_snapshot *args
   end
 end
@@ -493,7 +493,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
       ruby: 
         title:       Programming Ruby 1.9
         description: 
-          Ruby is the fastest growing and most exciting dynamic
+          Ruby YOOOO is the fastest growing and most exciting dynamic
           language out there.  If you need to get working programs
           delivered fast, you should add Ruby to your toolbox.
         price:       49.50
@@ -2475,7 +2475,39 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   end
 end
 
-section 12.2, 'Iteration G2: Atom Feeds' do
+section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
+  overview <<-EOF
+    Demonstrate how Webpacker works and why it exists by using React.
+  EOF
+  edit 'Gemfile' do
+    self << "gem 'webpacker', github: 'rails/webpacker'\n"
+  end
+  bundle 'install'
+  cmd 'rails webpacker:install'
+  cmd 'rails webpacker:install:react'
+  edit 'app/views/orders/new.html.erb', 'javascript_pack_tag' do
+    clear_all_marks
+    clear_highlights
+    self << %{
+<!-- START_HIGHLIGHT -->
+<%= javascript_pack_tag("hello_react") %>
+<!-- END_HIGHLIGHT -->
+}
+  end
+  edit 'Gemfile' do
+    self << "# START: foreman\n"
+    self << "gem 'foreman'\n"
+    self << "# END: foreman\n"
+  end
+  edit 'Procfile' do
+    self << "web:     bin/rails server\n"
+    self << "webpack: bin/webpack-dev-server\n"
+  end
+  restart_server
+  publish_code_snapshot :oa
+end
+
+section 12.3, 'Iteration G2: Atom Feeds' do
   overview <<-EOF
     Demonstrate various respond_to/format options, as well as "through"
     relations and basic authentication.
