@@ -493,7 +493,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
       ruby: 
         title:       Programming Ruby 1.9
         description: 
-          Ruby YOOOO is the fastest growing and most exciting dynamic
+          Ruby is the fastest growing and most exciting dynamic
           language out there.  If you need to get working programs
           delivered fast, you should add Ruby to your toolbox.
         price:       49.50
@@ -2485,6 +2485,11 @@ section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
   bundle 'install'
   cmd 'rails webpacker:install'
   cmd 'rails webpacker:install:react'
+  edit 'app/javascript/packs/hello_react.jsx' do
+    sub! /^\/\/.*$/,''
+    sub! /^\/\/.*$/,''
+    sub! /^\/\/.*$/,''
+  end
   edit 'app/views/orders/new.html.erb', 'javascript_pack_tag' do
     clear_all_marks
     clear_highlights
@@ -2499,12 +2504,242 @@ section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
     self << "gem 'foreman'\n"
     self << "# END: foreman\n"
   end
+  bundle 'install'
   edit 'Procfile' do
     self << "web:     bin/rails server\n"
     self << "webpack: bin/webpack-dev-server\n"
   end
   restart_server
   publish_code_snapshot :oa
+  edit 'app/views/orders/_form.html.erb', 'div_for_react' do
+    clear_all_marks
+    clear_highlights
+    edit /<div class="field">.*\n\s+<%= form.label :email %>/ do
+      sub! /<div class="field"/,"<!-- START:pay-type-component -->\n  <div class=\"field\""
+    end
+    sub! /<div class="field">.*\n\s+<%= form.label :pay_type %>.*\n\s+<%= form.select :pay_type.*\n.*\n\s+<\/div>/,
+      "<!-- START_HIGHLIGHT -->\n  <div id='pay-type-component'></div>\n<!-- END_HIGHLIGHT -->"
+    sub! /^<% end %>/,"<% end %>\n<!-- END:pay-type-component -->"
+  end
+  edit 'app/views/orders/new.html.erb', 'javascript_pack_tag' do
+    sub! /<%= javascript_pack_tag\("hello_react"\) %>/, "<%= javascript_pack_tag(\"pay_type\") %>"
+  end
+  edit 'app/javascript/packs/pay_type.jsx' do
+    self << %{import React           from 'react'
+import ReactDOM        from 'react-dom'
+import PayTypeSelector from 'PayTypeSelector'
+
+document.addEventListener('DOMContentLoaded', () => {
+  var element = document.getElementById(\"pay-type-component\");
+  ReactDOM.render(<PayTypeSelector />, element);
+})
+}
+  end
+  cmd 'mkdir app/javascript/PayTypeSelector'
+  edit 'app/javascript/PayTypeSelector/index.jsx' do
+    self << %{import React from 'react'
+
+class PayTypeSelector extends React.Component \{
+  constructor(props) \{
+    super(props);
+  \}
+
+  render() \{
+    return (
+      <div className="field">
+        <label htmlFor="order_pay_type">Pay type</label>
+        <select name="order[pay_type]">
+          <option value="">Select a payment method</option>
+          <option value="Check">Check</option>
+          <option value="Credit card">Credit card</option>
+          <option value="Purchase order">Purchase order</option>
+        </select>
+      </div>
+    );
+  \}
+\}
+module.exports = PayTypeSelector;
+}
+  end
+  publish_code_snapshot :ob
+  cmd 'rm app/javascript/PayTypeSelector/index.jsx'
+  edit 'app/javascript/PayTypeSelector/index.jsx' do
+    self << %{//START:import
+import React from 'react'
+
+// START_HIGHLIGHT
+import NoPayType            from './NoPayType';
+import CreditCardPayType    from './CreditCardPayType';
+import CheckPayType         from './CheckPayType';
+import PurchaseOrderPayType from './PurchaseOrderPayType';
+// END_HIGHLIGHT
+// END:import
+
+// START:bind
+class PayTypeSelector extends React.Component \{
+  constructor(props) \{
+    super(props);
+    // START_HIGHLIGHT
+    this.state = { selectedPayType: null };
+    this.onPayTypeSelected = this.onPayTypeSelected.bind(this);
+    // END_HIGHLIGHT
+  \}
+// END:bind
+
+// START:onPayTypeSelected
+  onPayTypeSelected(event) \{
+    // START_HIGHLIGHT
+    this.setState({ selectedPayType: event.target.value });
+    // END_HIGHLIGHT
+  \}
+  // END:onPayTypeSelected
+
+  // START:render
+  render() \{
+    // START_HIGHLIGHT
+    let PayTypeCustomComponent = NoPayType;
+    if (this.state.selectedPayType == "Credit card") {
+      PayTypeCustomComponent = CreditCardPayType;
+    } else if (this.state.selectedPayType == "Check") {
+      PayTypeCustomComponent = CheckPayType;
+    } else if (this.state.selectedPayType == "Purchase order") {
+      PayTypeCustomComponent = PurchaseOrderPayType;
+    }
+    // END_HIGHLIGHT
+    return (
+      <div>
+        <div className="field">
+          <label htmlFor="order_pay_type">Pay type</label>
+          <select onChange={this.onPayTypeSelected} name="order[pay_type]">
+            <option value="">Select a payment method</option>
+            <option value="Check">Check</option>
+            <option value="Credit card">Credit card</option>
+            <option value="Purchase order">Purchase order</option>
+          </select>
+        </div>
+        <PayTypeCustomComponent />
+      </div>
+    );
+  \}
+  // END:render
+\}
+module.exports = PayTypeSelector;
+}
+  end
+  edit 'app/javascript/PayTypeSelector/NoPayType.jsx' do
+    self << %{import React from 'react'
+
+class NoPayType extends React.Component \{
+  render() \{
+    return (<div></div>);
+  \}
+\}
+module.exports = NoPayType;
+}
+  end
+  edit 'app/javascript/PayTypeSelector/CreditCardPayType.jsx' do
+    self << %{import React from 'react'
+
+class CreditCardPayType extends React.Component \{
+  render() \{
+    return (
+      <div>
+        <div className="field">
+          <label htmlFor="order_credit_card_number">CC #</label>
+          <input type="password"
+                 name="order[credit_card_number]" 
+                 id="order_credit_card_number">
+        </div>
+        <div className="field">
+          <label htmlFor="order_expiration_date">Expiry</label>
+          <input type="text"
+                 name="order[expiration_date]" 
+                 id="order_expiration_date"
+                 size="9"
+                 placeholder="e.g. 03/19">
+        </div>
+      </div>
+    );
+  \}
+\}
+module.exports = CreditCardPayType;
+}
+  end
+  edit 'app/javascript/PayTypeSelector/CheckPayType.jsx' do
+    self << %{import React from 'react'
+
+class CheckPayType extends React.Component \{
+  render() \{
+    return (
+      <div>
+        <div className="field">
+          <label htmlFor="order_routing_number">Rtg #</label>
+          <input type="password"
+                 name="order[routing_number]" 
+                 id="order_routing_number">
+        </div>
+        <div className="field">
+          <label htmlFor="order_account_number">Acct #</label>
+          <input type="text"
+                 name="order[account_number]" 
+                 id="order_account_number">
+        </div>
+      </div>
+    );
+  \}
+\}
+module.exports = CheckPayType;
+}
+  end
+  edit 'app/javascript/PayTypeSelector/PurchaseOrderPayType.jsx' do
+    self << %{import React from 'react'
+
+class PurchaseOrderPayType extends React.Component \{
+  render() \{
+    return (
+      <div>
+        <div className="field">
+          <label htmlFor="order_po_number">PO #</label>
+          <input type="password"
+                 name="order[po_number]" 
+                 id="order_po_number">
+        </div>
+      </div>
+    );
+  \}
+\}
+module.exports = PurchaseOrderPayType;
+}
+  end
+  edit "app/controllers/orders_controller.rb" do
+    clear_highlights
+    clear_all_marks
+    msub /^()end/, %{
+    # START: pay_type_params
+      
+    def pay_type_params
+      if order_params[:pay_type] == "Credit Card"
+        params.require(:order).permit(:credit_card_number, :expiration_date)
+      elsif order_params[:pay_type] == "Check"
+        params.require(:order).permit(:routing_number, :account_number)
+      elsif order_params[:pay_type] == "Purchase Order"
+        params.require(:order).permit(:po_number)
+      else
+        {}
+      end
+    end
+
+    # END: pay_type_params
+}
+  end
+  edit "config/application.rb" do
+    msub /^()  end/, %{
+    #START:filter_parameters
+    config.filter_parameters += [ :credit_card_number ]
+    #END:filter_parameters
+  }
+  end
+  publish_code_snapshot :oc
 end
 
 section 12.3, 'Iteration G2: Atom Feeds' do
