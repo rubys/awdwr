@@ -185,6 +185,10 @@ unless $rails_version =~ /^3\./
   gem 'devise', ('~> 3.5' if $rails_version =~ /^4\./)
 end
 
+unless $rails_version =~ /^[34]|^5\.0/
+  gem 'foreman'
+end
+
 # checkout/update git repositories
 gems.each do |lib, opts|
   next if lib == 'rails'

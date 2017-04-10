@@ -283,10 +283,12 @@ class DepotTest < Gorp::TestCase
     assert_select '#notice', 'Thank you for your order.'
   end
 
-  section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
+  unless $rails_version =~ /^4|^5\.0/
+    section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
+    end
   end
 
-  section 12.3, "Iteration G2: Atom Feeds" do
+  section 12.3, "Iteration G3: Atom Feeds" do
     ticket 7910,
       :title =>  "Actions defined using resource get bypass the controller",
       :match => /undefined method `title&amp;#39; for nil:NilClass/
@@ -303,14 +305,14 @@ class DepotTest < Gorp::TestCase
   end
 
   unless $PUB
-  section 12.3, 'Iteration G3: Downloading an eBook' do
+  section 12.4, 'Iteration G3: Downloading an eBook' do
     ticket 23483,
       :title =>  "ActionController::Live locks database",
       :match => /SQLite3::BusyException/
   end
   end
 
-  section 12.4, "Playtime" do
+  section 12.5, "Playtime" do
     next if Gorp::Config[:skip_xml_serialization]
     ticket 23503,
       :list => 'rails',

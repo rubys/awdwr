@@ -2475,6 +2475,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   end
 end
 
+unless $rails_version =~ /^4|^5\.0/
 section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
   overview <<-EOF
     Demonstrate how Webpacker works and why it exists by using React.
@@ -2741,8 +2742,9 @@ module.exports = PurchaseOrderPayType;
   end
   publish_code_snapshot :oc
 end
+end
 
-section 12.3, 'Iteration G2: Atom Feeds' do
+section 12.3, 'Iteration G3: Atom Feeds' do
   overview <<-EOF
     Demonstrate various respond_to/format options, as well as "through"
     relations and basic authentication.
@@ -2868,7 +2870,7 @@ section 12.3, 'Iteration G2: Atom Feeds' do
 end
 
 unless $PUB or $rails_version =~ /^3\./
-section 12.3, 'Iteration G3: Downloading an eBook' do
+section 12.4, 'Iteration G3: Downloading an eBook' do
   overview <<-EOF
     demonstrate streaming with ActionController::Live
   EOF
@@ -2977,7 +2979,7 @@ section 12.3, 'Iteration G3: Downloading an eBook' do
 end
 end
 
-section 12.4, 'Playtime' do
+section 12.5, 'Playtime' do
   if Gorp::Config[:skip_xml_serialization]
     warn 'xml serialization skipped'
     next
