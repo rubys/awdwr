@@ -2649,7 +2649,7 @@ class CreditCardPayType extends React.Component \{
           <label htmlFor="order_credit_card_number">CC #</label>
           <input type="password"
                  name="order[credit_card_number]" 
-                 id="order_credit_card_number">
+                 id="order_credit_card_number" />
         </div>
         <div className="field">
           <label htmlFor="order_expiration_date">Expiry</label>
@@ -2657,7 +2657,7 @@ class CreditCardPayType extends React.Component \{
                  name="order[expiration_date]" 
                  id="order_expiration_date"
                  size="9"
-                 placeholder="e.g. 03/19">
+                 placeholder="e.g. 03/19" />
         </div>
       </div>
     );
@@ -2677,13 +2677,13 @@ class CheckPayType extends React.Component \{
           <label htmlFor="order_routing_number">Rtg #</label>
           <input type="password"
                  name="order[routing_number]" 
-                 id="order_routing_number">
+                 id="order_routing_number" />
         </div>
         <div className="field">
           <label htmlFor="order_account_number">Acct #</label>
           <input type="text"
                  name="order[account_number]" 
-                 id="order_account_number">
+                 id="order_account_number" />
         </div>
       </div>
     );
@@ -2703,7 +2703,7 @@ class PurchaseOrderPayType extends React.Component \{
           <label htmlFor="order_po_number">PO #</label>
           <input type="password"
                  name="order[po_number]" 
-                 id="order_po_number">
+                 id="order_po_number" />
         </div>
       </div>
     );
