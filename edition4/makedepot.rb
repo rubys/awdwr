@@ -2568,7 +2568,7 @@ class PayTypeSelector extends React.Component \{
     );
   \}
 \}
-module.exports = PayTypeSelector;
+export default PayTypeSelector
 }
   end
   publish_code_snapshot :ob
@@ -2633,7 +2633,7 @@ class PayTypeSelector extends React.Component \{
   \}
   // END:render
 \}
-module.exports = PayTypeSelector;
+export default PayTypeSelector
 }
   end
   edit 'app/javascript/PayTypeSelector/NoPayType.jsx' do
@@ -2644,7 +2644,7 @@ class NoPayType extends React.Component \{
     return (<div></div>);
   \}
 \}
-module.exports = NoPayType;
+export default NoPayType
 }
   end
   edit 'app/javascript/PayTypeSelector/CreditCardPayType.jsx' do
@@ -2672,7 +2672,7 @@ class CreditCardPayType extends React.Component \{
     );
   \}
 \}
-module.exports = CreditCardPayType;
+export default CreditCardPayType
 }
   end
   edit 'app/javascript/PayTypeSelector/CheckPayType.jsx' do
@@ -2698,7 +2698,7 @@ class CheckPayType extends React.Component \{
     );
   \}
 \}
-module.exports = CheckPayType;
+export default CheckPayType
 }
   end
   edit 'app/javascript/PayTypeSelector/PurchaseOrderPayType.jsx' do
@@ -2718,7 +2718,7 @@ class PurchaseOrderPayType extends React.Component \{
     );
   \}
 \}
-module.exports = PurchaseOrderPayType;
+export default PurchaseOrderPayType
 }
   end
   edit "app/controllers/orders_controller.rb" do
