@@ -2491,7 +2491,7 @@ section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
     sub! /^\/\/.*$/,''
     sub! /^\/\/.*$/,''
   end
-  edit 'app/views/orders/new.html.erb', 'javascript_pack_tag' do
+  edit 'app/views/orders/new.html.erb' do
     clear_all_marks
     clear_highlights
     self << %{
@@ -2500,7 +2500,7 @@ section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
 <!-- END_HIGHLIGHT -->
 }
   end
-  edit 'Gemfile' do
+  edit 'Gemfile', 'foreman' do
     self << "# START: foreman\n"
     self << "gem 'foreman'\n"
     self << "# END: foreman\n"
@@ -2510,9 +2510,18 @@ section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
     self << "web:     bin/rails server\n"
     self << "webpack: bin/webpack-dev-server\n"
   end
+
   restart_server
+
+  post '/', 'product_id' => 2
+  post '/orders/new',
+    'order[name]' => 'Dave Thomas',
+    'order[address]' => '123 Main St',
+    'order[email]' => 'customer@example.com',
+    'order[pay_type]' => 'Check'
   publish_code_snapshot :oa
-  edit 'app/views/orders/_form.html.erb', 'div_for_react' do
+
+  edit 'app/views/orders/_form.html.erb' do
     clear_all_marks
     clear_highlights
     edit /<div class="field">.*\n\s+<%= form.label :email %>/ do
@@ -2522,7 +2531,7 @@ section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
       "<!-- START_HIGHLIGHT -->\n  <div id='pay-type-component'></div>\n<!-- END_HIGHLIGHT -->"
     sub! /^<% end %>/,"<% end %>\n<!-- END:pay-type-component -->"
   end
-  edit 'app/views/orders/new.html.erb', 'javascript_pack_tag' do
+  edit 'app/views/orders/new.html.erb' do
     sub! /<%= javascript_pack_tag\("hello_react"\) %>/, "<%= javascript_pack_tag(\"pay_type\") %>"
   end
   edit 'app/javascript/packs/pay_type.jsx' do
