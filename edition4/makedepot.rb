@@ -2723,7 +2723,6 @@ export default PurchaseOrderPayType
   end
   edit "app/controllers/orders_controller.rb" do
     clear_highlights
-    clear_all_marks
     msub /^()end/, %{
     # START: pay_type_params
       
