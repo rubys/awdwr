@@ -2077,7 +2077,7 @@ else
   end
 end
 
-section 12.1, 'Iteration G1: Capturing an Order' do
+section 12.1, 'Iteration H1: Capturing an Order' do
   desc 'Create a model to contain orders'
   if $rails_version =~ /^3\.[01]/
     generate :scaffold, :Order,
@@ -2475,8 +2475,379 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   end
 end
 
+section 12.3, 'Iteration G2: Atom Feeds' do
+  overview <<-EOF
+    Demonstrate various respond_to/format options, as well as "through"
+    relations and basic authentication.
+  EOF
+
+  desc 'Define a "who_bought" member action'
+  edit 'app/controllers/products_controller.rb', 'who_bought' do
+    insert_at = /()\n *private/
+    insert_at = /^()end/ unless self =~ insert_at
+    msub insert_at, "\n"
+    msub insert_at, <<-EOF.unindent(4), :mark => 'who_bought'
+      def who_bought
+        @product = Product.find(params[:id])
+        @latest_order = @product.orders.order(:updated_at).last
+        if stale?(@latest_order)
+          respond_to do |format|
+            format.atom
+          end
+        end
+      end
+    EOF
+    if $rails_version =~ /^3\.[01]/
+      msub /stale\?\((.*)\)/, 
+        ":etag => @latest_order, :last_modified => @latest_order.created_at.utc"
+    end
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  end
+
+  desc 'Define an Atom view (using the Atom builder)'
+  edit 'app/views/products/who_bought.atom.builder' do
+    self.all = <<-'EOF'.unindent(6)
+      atom_feed do |feed|
+        feed.title "Who bought #{@product.title}"
+
+        feed.updated @latest_order.try(:updated_at) 
+      
+        @product.orders.each do |order|
+          feed.entry(order) do |entry|
+            entry.title "Order #{order.id}"
+            entry.summary :type => 'xhtml' do |xhtml|
+              xhtml.p "Shipped to #{order.address}"
+
+              xhtml.table do
+                xhtml.tr do
+                  xhtml.th 'Product'
+                  xhtml.th 'Quantity'
+                  xhtml.th 'Total Price'
+                end
+                order.line_items.each do |item|
+                  xhtml.tr do
+                    xhtml.td item.product.title
+                    xhtml.td item.quantity
+                    xhtml.td number_to_currency item.total_price
+                  end
+                end
+                xhtml.tr do
+                  xhtml.th 'total', :colspan => 2
+                  xhtml.th number_to_currency \
+                    order.line_items.map(&:total_price).sum
+                end
+              end
+
+              xhtml.p "Paid by #{order.pay_type}"
+            end
+            entry.author do |author|
+              author.name order.name
+              author.email order.email
+            end
+          end
+        end
+      end
+    EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  end
+
+  desc 'Add "orders" to the Product class'
+  edit 'app/models/product.rb', 'relationships' do
+    clear_all_marks
+    msub /^( +#\.\.\.\n\n)/, ''
+    edit /class.*has_many.*?\n/m, :mark=>'relationships' do
+      self.all += "  #...\n"
+    end
+    edit /^end/, :mark=>'relationships'
+    msub /has_many :line_items\n()/, <<-EOF.unindent(4), :highlight
+      has_many :orders, :through => :line_items
+    EOF
+    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  end
+
+  desc 'Add to the routes'
+  edit 'config/routes.rb', 'root' do
+    clear_highlights
+    edit 'resources :products', :highlight do |products|
+      products.all = <<-EOF.unindent(6)
+        resources :products do
+          get :who_bought, :on => :member
+        end
+      EOF
+    end
+    gsub! /\n\n\n+/, "\n\n"
+    edit ':who_bought' do
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
+  end
+
+  fetch =  "--user dave:secret http://localhost:#$PORT/products/2/who_bought.atom"
+  desc 'Fetch the Atom feed'
+  cmd "curl --max-time 15 --silent #{fetch}"
+
+  desc 'Look at the headers'
+  cmd "curl --max-time 15 --silent --dump - --output /dev/null #{fetch}"
+  req = Net::HTTP::Get.new('/products/2/who_bought.atom')
+  req.basic_auth 'dave', 'secret'
+  response = Net::HTTP.start('localhost', $PORT) {|http| http.request(req)}
+
+  cmd "curl --max-time 15 --silent --dump - --output /dev/null #{fetch} " +
+    "-H 'If-None-Match: #{response['Etag']}'"
+
+  cmd "curl --max-time 15 --silent --dump - --output /dev/null #{fetch} " +
+    "-H 'If-Modified-Since: #{response['Last-Modified']}'"
+
+  publish_code_snapshot :p
+end
+
+unless $PUB or $rails_version =~ /^3\./
+section 12.4, 'Iteration G2: Downloading an eBook' do
+  overview <<-EOF
+    demonstrate streaming with ActionController::Live
+  EOF
+
+  if Gorp::Config[:skip_actioncontroller_live]
+    warn 'section skipped as this locks the database'
+    next
+  end
+  
+  if $rails_version =~ /^[34]/
+    desc 'Switch to puma as a server'
+    edit 'Gemfile', 'puma' do
+      clear_all_marks
+      self << "\ngem 'puma'\n"
+      edit 'puma', :mark => 'puma'
+    end
+
+    restart_server
+  end
+
+  desc 'add a route for downloading a product'
+  edit 'config/routes.rb' do
+    msub /resources :products do\n()/, <<-EOF.unindent(2), :highlight
+      get :download, :on => :member
+    EOF
+  end
+
+  desc 'mock streaming implementation for download'
+  edit 'app/controllers/products_controller.rb', 'download' do
+    insert_at = /()\n *private/
+    msub insert_at, "\n"
+    msub insert_at, <<-'EOF'.unindent(4), :mark => 'download'
+      include ActionController::Live
+      def download
+        response.headers['Content-Type'] = 'text/plain'
+        40.times do |i|
+          response.stream.write "Line #{i}\n\n"
+          sleep 0.10
+        end
+        response.stream.write "Fini.\n"
+      ensure
+        response.stream.close
+      end
+    EOF
+  end
+
+  desc 'add order to the session'
+  edit 'app/controllers/orders_controller.rb', 'create' do
+    dcl 'create' do
+      msub /\n()\s+format/, <<-EOF, :highlight
+        session[:order_id] = @order.id
+      EOF
+    end
+  end
+
+  desc 'render order in the side bar'
+  edit 'app/views/layouts/application.html.erb' do
+    clear_all_marks
+    msub /()\n +<ul>/, "\n" + <<-EOF, :highlight
+      <%= render Order.find(session[:order_id]) if session[:order_id] -%>
+    EOF
+  end
+
+  desc 'implement order partial'
+  edit 'app/views/orders/_order.html.erb' do
+    self.all = read('orders/_order.html.erb')
+  end
+
+  desc 'css tweaks'
+  edit DEPOT_CSS, 'side' do
+    clear_highlights
+    edit '#cart', :highlight do
+      msub /#cart()/, ', #order'
+    end
+
+    msub /^() +table/, <<-EOF + "\n", :highlight
+      a, a:hover {
+        color: white;
+        background-color: #141;
+      }
+    EOF
+  end
+
+  desc 'place an order'
+  post '/', 'product_id' => 2
+  post '/orders/new',
+    'order[name]' => 'Dave Thomas',
+    'order[address]' => '123 Main St',
+    'order[email]' => 'customer@example.com',
+    'order[pay_type]' => 'Check'
+
+  desc 'click download'
+  get '/products/2/download'
+
+  if $rails_version =~ /^[34]/
+    desc 'Switch back to WEBRick'
+    edit 'Gemfile', 'puma' do
+      msub /()gem 'puma'/, '# '
+    end
+
+    restart_server
+  end
+
+  desc 'make sure that nothing is broken'
+  test
+end
+end
+
+section 12.3, 'Playtime' do
+  if Gorp::Config[:skip_xml_serialization]
+    warn 'xml serialization skipped'
+    next
+  end
+
+  unless $rails_version =~ /^[34]/
+    desc 'add activemodel-serializers-xml'
+    edit 'Gemfile', 'as_xml' do
+      clear_all_marks
+      self << "\ngem 'activemodel-serializers-xml'\n"
+      edit 'activemodel-serializers-xml', :mark => 'as_xml'
+    end
+
+    bundle 'install'
+    restart_server
+
+    desc 'include xml serializers'
+    edit 'app/models/product.rb', 'asxml' do
+      edit /^class.*\n/, mark: 'asxml'
+      edit /^end.*\n/, mark: 'asxml'
+      msub /^()class/, "require 'active_model/serializers/xml'\n",
+        :highlight
+      msub /^class.*\n()/, "  include ActiveModel::Serializers::Xml\n",
+        :highlight
+    end
+
+    edit 'app/models/order.rb', 'asxml' do
+      edit /^class.*\n/, mark: 'asxml'
+      edit /^end.*\n/, mark: 'asxml'
+      msub /^()class/, "require 'active_model/serializers/xml'\n",
+        :highlight
+      msub /^class.*\n()/, "  include ActiveModel::Serializers::Xml\n",
+        :highlight
+    end
+  end
+
+  desc 'Add the xml format to the controller'
+  edit 'app/controllers/products_controller.rb', 'who_bought' do
+    clear_highlights
+    dcl 'who_bought' do
+      msub /respond_to.*\n()/, <<-EOF, :highlight
+        format.xml { render :xml => @product }
+      EOF
+    end
+  end
+
+  desc 'Fetch the XML, see that there are no orders there'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.atom"
+
+  desc 'Include "orders" in the response'
+  edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
+    data.dcl('who_bought') do |wb|
+      wb.edit 'format.xml', :highlight do |xml|
+        xml.msub /@product() \}/, '.to_xml(:include => :orders)'
+        xml.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+      end
+    end
+  end
+
+  desc 'Fetch the xml, see that the orders are included'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.xml"
+
+  desc 'Define an HTML view'
+  edit 'app/views/products/who_bought.html.erb' do |data|
+    data[/(.*)/m,1] = <<-EOF.unindent(6)
+      <h3>People Who Bought <%= @product.title %></h3>
+
+      <ul>
+        <% for order in @product.orders %>
+          <li>
+            <%= mail_to order.email, order.name %>
+          </li>
+        <% end %>
+      </ul>
+    EOF
+  end
+
+  desc 'Add the html format to the controller'
+  edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
+    data.clear_highlights
+    data.dcl('who_bought') do |wb|
+      wb.msub /respond_to.*\n()/, <<-EOF, :highlight
+        format.html
+      EOF
+    end
+  end
+
+  desc 'See the (raw) HTML'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought"
+
+  desc 'Anything that XML can do, JSON can too...'
+  edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
+    data.dcl('who_bought') do |wb|
+      xml = wb[/\n(\s+format.xml \{.*?\}\n)/m,1]
+      wb.msub /respond_to.*?\n()\s+end/m, xml.gsub('xml','json')
+    end
+  end
+
+  desc 'Fetch the data in JSON format'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.json"
+
+  desc 'Customize the xml'
+  edit 'app/views/products/who_bought.xml.builder' do |data|
+    data.all = <<-EOF.unindent(6)
+      xml.order_list(:for_product => @product.title) do
+        for o in @product.orders
+          xml.order do
+            xml.name(o.name)
+            xml.email(o.email)
+          end
+        end
+      end
+    EOF
+  end
+
+  desc 'Change the rendering to use templates'
+  edit 'app/controllers/products_controller.rb', 'who_bought' do
+    clear_highlights
+    dcl('who_bought') do
+      edit 'format.xml', :highlight
+      msub /format.xml( \{ render .*)/, ''
+    end
+  end
+
+  desc 'Fetch the (much streamlined) XML'
+  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.xml"
+
+  desc 'Verify that the tests still pass'
+  test
+
+  desc 'Commit'
+  cmd 'git commit -a -m "Orders"'
+  cmd 'git tag iteration-g'
+end
+
 unless $rails_version =~ /^4|^5\.0/
-section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
+section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
   overview <<-EOF
     Demonstrate how Webpacker works and why it exists by using React.
   EOF
@@ -2519,7 +2890,7 @@ section 12.2, 'Iteration G2: Webpacker and App-Like JavaScript' do
     'order[address]' => '123 Main St',
     'order[email]' => 'customer@example.com',
     'order[pay_type]' => 'Check'
-  publish_code_snapshot :oa
+  publish_code_snapshot :pa
 
   edit 'app/views/orders/_form.html.erb' do
     clear_all_marks
@@ -2571,7 +2942,7 @@ class PayTypeSelector extends React.Component \{
 export default PayTypeSelector
 }
   end
-  publish_code_snapshot :ob
+  publish_code_snapshot :pb
   cmd 'rm app/javascript/PayTypeSelector/index.jsx'
   edit 'app/javascript/PayTypeSelector/index.jsx' do
     self << %{//START:import
@@ -2748,382 +3119,12 @@ export default PurchaseOrderPayType
     #END:filter_parameters
   }
   end
-  publish_code_snapshot :oc
+  publish_code_snapshot :pc
 end
 end
 
-section 12.3, 'Iteration G3: Atom Feeds' do
-  overview <<-EOF
-    Demonstrate various respond_to/format options, as well as "through"
-    relations and basic authentication.
-  EOF
 
-  desc 'Define a "who_bought" member action'
-  edit 'app/controllers/products_controller.rb', 'who_bought' do
-    insert_at = /()\n *private/
-    insert_at = /^()end/ unless self =~ insert_at
-    msub insert_at, "\n"
-    msub insert_at, <<-EOF.unindent(4), :mark => 'who_bought'
-      def who_bought
-        @product = Product.find(params[:id])
-        @latest_order = @product.orders.order(:updated_at).last
-        if stale?(@latest_order)
-          respond_to do |format|
-            format.atom
-          end
-        end
-      end
-    EOF
-    if $rails_version =~ /^3\.[01]/
-      msub /stale\?\((.*)\)/, 
-        ":etag => @latest_order, :last_modified => @latest_order.created_at.utc"
-    end
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  desc 'Define an Atom view (using the Atom builder)'
-  edit 'app/views/products/who_bought.atom.builder' do
-    self.all = <<-'EOF'.unindent(6)
-      atom_feed do |feed|
-        feed.title "Who bought #{@product.title}"
-
-        feed.updated @latest_order.try(:updated_at) 
-      
-        @product.orders.each do |order|
-          feed.entry(order) do |entry|
-            entry.title "Order #{order.id}"
-            entry.summary :type => 'xhtml' do |xhtml|
-              xhtml.p "Shipped to #{order.address}"
-
-              xhtml.table do
-                xhtml.tr do
-                  xhtml.th 'Product'
-                  xhtml.th 'Quantity'
-                  xhtml.th 'Total Price'
-                end
-                order.line_items.each do |item|
-                  xhtml.tr do
-                    xhtml.td item.product.title
-                    xhtml.td item.quantity
-                    xhtml.td number_to_currency item.total_price
-                  end
-                end
-                xhtml.tr do
-                  xhtml.th 'total', :colspan => 2
-                  xhtml.th number_to_currency \
-                    order.line_items.map(&:total_price).sum
-                end
-              end
-
-              xhtml.p "Paid by #{order.pay_type}"
-            end
-            entry.author do |author|
-              author.name order.name
-              author.email order.email
-            end
-          end
-        end
-      end
-    EOF
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  desc 'Add "orders" to the Product class'
-  edit 'app/models/product.rb', 'relationships' do
-    clear_all_marks
-    msub /^( +#\.\.\.\n\n)/, ''
-    edit /class.*has_many.*?\n/m, :mark=>'relationships' do
-      self.all += "  #...\n"
-    end
-    edit /^end/, :mark=>'relationships'
-    msub /has_many :line_items\n()/, <<-EOF.unindent(4), :highlight
-      has_many :orders, :through => :line_items
-    EOF
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  desc 'Add to the routes'
-  edit 'config/routes.rb', 'root' do
-    clear_highlights
-    edit 'resources :products', :highlight do |products|
-      products.all = <<-EOF.unindent(6)
-        resources :products do
-          get :who_bought, :on => :member
-        end
-      EOF
-    end
-    gsub! /\n\n\n+/, "\n\n"
-    edit ':who_bought' do
-      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    end
-  end
-
-  fetch =  "--user dave:secret http://localhost:#$PORT/products/2/who_bought.atom"
-  desc 'Fetch the Atom feed'
-  cmd "curl --max-time 15 --silent #{fetch}"
-
-  desc 'Look at the headers'
-  cmd "curl --max-time 15 --silent --dump - --output /dev/null #{fetch}"
-  req = Net::HTTP::Get.new('/products/2/who_bought.atom')
-  req.basic_auth 'dave', 'secret'
-  response = Net::HTTP.start('localhost', $PORT) {|http| http.request(req)}
-
-  cmd "curl --max-time 15 --silent --dump - --output /dev/null #{fetch} " +
-    "-H 'If-None-Match: #{response['Etag']}'"
-
-  cmd "curl --max-time 15 --silent --dump - --output /dev/null #{fetch} " +
-    "-H 'If-Modified-Since: #{response['Last-Modified']}'"
-
-  publish_code_snapshot :p
-end
-
-unless $PUB or $rails_version =~ /^3\./
-section 12.4, 'Iteration G3: Downloading an eBook' do
-  overview <<-EOF
-    demonstrate streaming with ActionController::Live
-  EOF
-
-  if Gorp::Config[:skip_actioncontroller_live]
-    warn 'section skipped as this locks the database'
-    next
-  end
-  
-  if $rails_version =~ /^[34]/
-    desc 'Switch to puma as a server'
-    edit 'Gemfile', 'puma' do
-      clear_all_marks
-      self << "\ngem 'puma'\n"
-      edit 'puma', :mark => 'puma'
-    end
-
-    restart_server
-  end
-
-  desc 'add a route for downloading a product'
-  edit 'config/routes.rb' do
-    msub /resources :products do\n()/, <<-EOF.unindent(2), :highlight
-      get :download, :on => :member
-    EOF
-  end
-
-  desc 'mock streaming implementation for download'
-  edit 'app/controllers/products_controller.rb', 'download' do
-    insert_at = /()\n *private/
-    msub insert_at, "\n"
-    msub insert_at, <<-'EOF'.unindent(4), :mark => 'download'
-      include ActionController::Live
-      def download
-        response.headers['Content-Type'] = 'text/plain'
-        40.times do |i|
-          response.stream.write "Line #{i}\n\n"
-          sleep 0.10
-        end
-        response.stream.write "Fini.\n"
-      ensure
-        response.stream.close
-      end
-    EOF
-  end
-
-  desc 'add order to the session'
-  edit 'app/controllers/orders_controller.rb', 'create' do
-    dcl 'create' do
-      msub /\n()\s+format/, <<-EOF, :highlight
-        session[:order_id] = @order.id
-      EOF
-    end
-  end
-
-  desc 'render order in the side bar'
-  edit 'app/views/layouts/application.html.erb' do
-    clear_all_marks
-    msub /()\n +<ul>/, "\n" + <<-EOF, :highlight
-      <%= render Order.find(session[:order_id]) if session[:order_id] -%>
-    EOF
-  end
-
-  desc 'implement order partial'
-  edit 'app/views/orders/_order.html.erb' do
-    self.all = read('orders/_order.html.erb')
-  end
-
-  desc 'css tweaks'
-  edit DEPOT_CSS, 'side' do
-    clear_highlights
-    edit '#cart', :highlight do
-      msub /#cart()/, ', #order'
-    end
-
-    msub /^() +table/, <<-EOF + "\n", :highlight
-      a, a:hover {
-        color: white;
-        background-color: #141;
-      }
-    EOF
-  end
-
-  desc 'place an order'
-  post '/', 'product_id' => 2
-  post '/orders/new',
-    'order[name]' => 'Dave Thomas',
-    'order[address]' => '123 Main St',
-    'order[email]' => 'customer@example.com',
-    'order[pay_type]' => 'Check'
-
-  desc 'click download'
-  get '/products/2/download'
-
-  if $rails_version =~ /^[34]/
-    desc 'Switch back to WEBRick'
-    edit 'Gemfile', 'puma' do
-      msub /()gem 'puma'/, '# '
-    end
-
-    restart_server
-  end
-
-  desc 'make sure that nothing is broken'
-  test
-end
-end
-
-section 12.5, 'Playtime' do
-  if Gorp::Config[:skip_xml_serialization]
-    warn 'xml serialization skipped'
-    next
-  end
-
-  unless $rails_version =~ /^[34]/
-    desc 'add activemodel-serializers-xml'
-    edit 'Gemfile', 'as_xml' do
-      clear_all_marks
-      self << "\ngem 'activemodel-serializers-xml'\n"
-      edit 'activemodel-serializers-xml', :mark => 'as_xml'
-    end
-
-    bundle 'install'
-    restart_server
-
-    desc 'include xml serializers'
-    edit 'app/models/product.rb', 'asxml' do
-      edit /^class.*\n/, mark: 'asxml'
-      edit /^end.*\n/, mark: 'asxml'
-      msub /^()class/, "require 'active_model/serializers/xml'\n",
-        :highlight
-      msub /^class.*\n()/, "  include ActiveModel::Serializers::Xml\n",
-        :highlight
-    end
-
-    edit 'app/models/order.rb', 'asxml' do
-      edit /^class.*\n/, mark: 'asxml'
-      edit /^end.*\n/, mark: 'asxml'
-      msub /^()class/, "require 'active_model/serializers/xml'\n",
-        :highlight
-      msub /^class.*\n()/, "  include ActiveModel::Serializers::Xml\n",
-        :highlight
-    end
-  end
-
-  desc 'Add the xml format to the controller'
-  edit 'app/controllers/products_controller.rb', 'who_bought' do
-    clear_highlights
-    dcl 'who_bought' do
-      msub /respond_to.*\n()/, <<-EOF, :highlight
-        format.xml { render :xml => @product }
-      EOF
-    end
-  end
-
-  desc 'Fetch the XML, see that there are no orders there'
-  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.atom"
-
-  desc 'Include "orders" in the response'
-  edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
-    data.dcl('who_bought') do |wb|
-      wb.edit 'format.xml', :highlight do |xml|
-        xml.msub /@product() \}/, '.to_xml(:include => :orders)'
-        xml.gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-      end
-    end
-  end
-
-  desc 'Fetch the xml, see that the orders are included'
-  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.xml"
-
-  desc 'Define an HTML view'
-  edit 'app/views/products/who_bought.html.erb' do |data|
-    data[/(.*)/m,1] = <<-EOF.unindent(6)
-      <h3>People Who Bought <%= @product.title %></h3>
-
-      <ul>
-        <% for order in @product.orders %>
-          <li>
-            <%= mail_to order.email, order.name %>
-          </li>
-        <% end %>
-      </ul>
-    EOF
-  end
-
-  desc 'Add the html format to the controller'
-  edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
-    data.clear_highlights
-    data.dcl('who_bought') do |wb|
-      wb.msub /respond_to.*\n()/, <<-EOF, :highlight
-        format.html
-      EOF
-    end
-  end
-
-  desc 'See the (raw) HTML'
-  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought"
-
-  desc 'Anything that XML can do, JSON can too...'
-  edit 'app/controllers/products_controller.rb', 'who_bought' do |data|
-    data.dcl('who_bought') do |wb|
-      xml = wb[/\n(\s+format.xml \{.*?\}\n)/m,1]
-      wb.msub /respond_to.*?\n()\s+end/m, xml.gsub('xml','json')
-    end
-  end
-
-  desc 'Fetch the data in JSON format'
-  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.json"
-
-  desc 'Customize the xml'
-  edit 'app/views/products/who_bought.xml.builder' do |data|
-    data.all = <<-EOF.unindent(6)
-      xml.order_list(:for_product => @product.title) do
-        for o in @product.orders
-          xml.order do
-            xml.name(o.name)
-            xml.email(o.email)
-          end
-        end
-      end
-    EOF
-  end
-
-  desc 'Change the rendering to use templates'
-  edit 'app/controllers/products_controller.rb', 'who_bought' do
-    clear_highlights
-    dcl('who_bought') do
-      edit 'format.xml', :highlight
-      msub /format.xml( \{ render .*)/, ''
-    end
-  end
-
-  desc 'Fetch the (much streamlined) XML'
-  cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.xml"
-
-  desc 'Verify that the tests still pass'
-  test
-
-  desc 'Commit'
-  cmd 'git commit -a -m "Orders"'
-  cmd 'git tag iteration-g'
-end
-
-section 13.1, 'Iteration H1: Email Notifications' do
+section 14.1, 'Iteration I1: Email Notifications' do
   desc 'Create a mailer'
   if $rails_version =~ /^[34]/
     generate 'mailer OrderMailer received shipped'
@@ -3272,7 +3273,7 @@ section 13.1, 'Iteration H1: Email Notifications' do
   test 'test/mailers/order*_test.rb'
 end
 
-section 13.2, 'Iteration H2: Integration Tests' do
+section 14.2, 'Iteration I2: Integration Tests' do
   desc 'Create an integration test'
   generate 'integration_test user_stories'
   publish_code_snapshot :q, :depot, 'test/integration/user_stories_test.rb'
@@ -3301,12 +3302,12 @@ section 13.2, 'Iteration H2: Integration Tests' do
   test :integration
 end
 
-section 13.3, 'Playtime' do
+section 14.3, 'Playtime' do
   cmd 'git commit -a -m "formats"'
   cmd 'git tag iteration-h'
 end
 
-section 14.1, 'Iteration I1: Adding Users' do
+section 15.1, 'Iteration J1: Adding Users' do
   desc 'Scaffold the user model'
   if File.exist? 'public/images'
     generate 'scaffold User name:string hashed_password:string salt:string'
@@ -3564,7 +3565,7 @@ section 14.1, 'Iteration I1: Adding Users' do
   test
 end
 
-section 14.2, 'Iteration I2: Authenticating Users' do
+section 15.2, 'Iteration J2: Authenticating Users' do
   desc 'Generate empty controllers for sessions and administration'
   generate 'controller Sessions new create destroy'
   generate 'controller Admin index'
@@ -3721,7 +3722,7 @@ section 14.2, 'Iteration I2: Authenticating Users' do
   test
 end
 
-section 14.3, 'Iteration I3: Limiting Access' do
+section 15.3, 'Iteration J3: Limiting Access' do
   desc 'require authorization before every access'
   edit "app/controllers/application_controller.rb", 'auth' do
     clear_highlights
@@ -3828,7 +3829,7 @@ section 14.3, 'Iteration I3: Limiting Access' do
   test
 end
 
-section 14.4, 'Iteration I4: Adding a Sidebar' do
+section 15.4, 'Iteration J4: Adding a Sidebar' do
 
   desc 'Add admin links and a button to Logout'
   edit "app/views/layouts/application.html.erb" do |data|
@@ -3910,7 +3911,7 @@ section 14.4, 'Iteration I4: Adding a Sidebar' do
   end
 end
 
-section 14.5, 'Playtime' do
+section 15.5, 'Playtime' do
   desc 'Verify that accessing product information requires login'
   edit 'test/*/products_controller_test.rb', 'logout' do
     clear_all_marks
@@ -3977,7 +3978,7 @@ section 14.5, 'Playtime' do
   cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.xml"
 end
 
-section 15.1, 'Task J1: Selecting the locale' do
+section 16.1, 'Task J1: Selecting the locale' do
   
   desc 'Define the default and available languages.'
   edit "config/initializers/i18n.rb" do |data|
@@ -4068,7 +4069,7 @@ section 15.1, 'Task J1: Selecting the locale' do
   get '/es'
 end
 
-section 15.2, 'Task J2: translating the store front' do
+section 16.2, 'Task J2: translating the store front' do
   desc 'Replace translatable text with calls out to translation functions.'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
@@ -4153,7 +4154,7 @@ section 15.2, 'Task J2: translating the store front' do
   post '/es', 'product_id' => 2
 end
 
-section 15.3, 'Task J3: Translating Checkout' do
+section 16.3, 'Task J3: Translating Checkout' do
   desc 'Edit the new order page'
   edit 'app/views/orders/new.html.erb' do
     edit 'Please Enter Your Details', :highlight
@@ -4279,7 +4280,7 @@ section 15.3, 'Task J3: Translating Checkout' do
     'order[pay_type]' => 'Check'
 end
 
-section 15.4, 'Task J4: Add a locale switcher.' do
+section 16.4, 'Task J4: Add a locale switcher.' do
   desc 'Add form for setting and showing the site based on the locale.'
   desc 'Use CSS to position the form.'
   edit DEPOT_CSS, 'i18n' do |data|
@@ -4330,7 +4331,7 @@ section 15.4, 'Task J4: Add a locale switcher.' do
   test
 end
 
-section 16, 'Deployment' do
+section 17, 'Deployment' do
   Dir.chdir(File.join($WORK, 'depot'))
 
   if Gorp::Config[:mysql_null_primary_key]
@@ -4463,7 +4464,7 @@ section 16, 'Deployment' do
   cmd 'git status'
 end
 
-section 17, 'Retrospective' do
+section 18, 'Retrospective' do
   readme = Dir['doc/README*', 'README*'].first
   edit readme do
     self.all = read('README_FOR_APP')
@@ -4472,7 +4473,7 @@ section 17, 'Retrospective' do
   rake 'stats'
 end
 
-section 18, 'Finding Your Way Around' do
+section 19, 'Finding Your Way Around' do
   db :version
   edit 'lib/tasks/db_schema_migrations.rake' do |data|
     data << <<-EOF.unindent(6)
@@ -4491,7 +4492,7 @@ section 18, 'Finding Your Way Around' do
   console 'puts $:'
 end
 
-section 19, 'Active Record' do
+section 20, 'Active Record' do
   edit 'config/initializers/inflections.rb' do
     self << "\n" + <<-EOF.unindent(6)
       ActiveSupport::Inflector.inflections do |inflect|
@@ -4501,14 +4502,14 @@ section 19, 'Active Record' do
   end
 end
 
-section 19, 'Action Controller' do
+section 21, 'Action Controller' do
   edit 'config/initializers/session_store.rb' do
     edit 'cookie_store', :highlight
   end
 end
 
 if $rails_version =~ /^3\./
-  section 20.1, 'Testing Routes' do
+  section 21.1, 'Testing Routes' do
     edit 'test/unit/routing_test.rb' do
       self.all = read('test/routing_test.rb')
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -4517,7 +4518,7 @@ if $rails_version =~ /^3\./
   end
 end
 
-section 21.1, 'Views' do
+section 22.1, 'Views' do
   edit 'app/views/products/index.xml.builder' do
     self.all = read('products/index.xml.builder')
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -4548,7 +4549,7 @@ section 21.1, 'Views' do
   publish_code_snapshot :u
 end
 
-section 21.2, 'Form Helpers' do
+section 22.2, 'Form Helpers' do
   rails 'views'
   generate 'model model input:string address:text color:string ' +
     'ketchup:boolean mustard:boolean mayonnaise:boolean start:date ' +
@@ -4677,7 +4678,7 @@ if $rails_version =~ /^3\./
     publish_code_snapshot nil, :depot_client
   end
 else
-  section 24.3, 'Managing Dependencies with Bundler' do
+  section 25.3, 'Managing Dependencies with Bundler' do
     Dir.chdir(File.join($WORK,'depot'))
     edit 'Gemfile' do
       clear_highlights
@@ -4699,7 +4700,7 @@ else
   end
 end
 
-section 25.1, 'rack' do
+section 26.1, 'rack' do
   Dir.chdir(File.join($WORK,'depot'))
   restart_server
 
@@ -4727,7 +4728,7 @@ section 25.1, 'rack' do
   get '/catalog'
 end
 
-section 25.2, 'rake' do
+section 26.2, 'rake' do
   desc 'implement a custom rake task'
   edit "lib/tasks/db_backup.rake" do
     self.all = read('depend/db_backup.rake')
@@ -4747,7 +4748,7 @@ section 25.2, 'rake' do
   end
 end
 
-section 26.1, 'Active Merchant' do
+section 27.1, 'Active Merchant' do
   desc 'Determine if a credit card is valid'
   edit 'Gemfile', 'plugins' do
     clear_all_marks
@@ -4775,7 +4776,7 @@ section 26.1, 'Active Merchant' do
 end
 
 if $rails_version =~ /^3\.0/
-  section '26.1.2', 'Asset Packager' do
+  section '27.1.2', 'Asset Packager' do
 
     Dir.chdir(File.join($WORK,'depot'))
     overview <<-EOF
@@ -4814,7 +4815,7 @@ if $rails_version =~ /^3\.0/
   end
 end
 
-section 26.2, 'HAML' do
+section 27.2, 'HAML' do
   edit 'Gemfile', 'haml' do
     edit 'activemerchant', :mark => 'haml'
     msub /activemerchant.*\n()/, <<-EOF.unindent(6)
@@ -4852,7 +4853,7 @@ section 26.2, 'HAML' do
 end
 
 if $rails_version =~ /^3\.0/
-  section '26.1.4', 'JQuery' do
+  section '27.1.4', 'JQuery' do
     edit 'Gemfile', 'plugins' do
       msub /haml.*\n()/, <<-EOF.unindent(8), :highlight
         gem 'jquery-rails', '~> 0.2.2'
@@ -4900,7 +4901,7 @@ if $rails_version =~ /^3\.0/
   end
 end
 
-section 26.3, 'Pagination' do
+section 27.3, 'Pagination' do
   if $rails_version =~ /^3\./
     desc 'Add in the will_paginate gem'
   else
@@ -5098,7 +5099,7 @@ $cleanup = Proc.new do
 end
 
 unless $PUB or $rails_version =~ /^3\./
-  section 26.4, 'Devise' do
+  section 27.4, 'Devise' do
     edit 'Gemfile', 'devise' do
       msub /activemerchant.*\n()/, <<-EOF.unindent(8), :mark => 'devise'
         gem 'devise', '~> 3.0.0.rc'
