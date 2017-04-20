@@ -280,7 +280,6 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     unless $rails_version =~ /^[34]|^5\.0/
      desc 'HACK: make sure assets exist'
      cmd 'touch app/assets/images/lorem.jpg'
-     cmd 'touch app/assets/images/MyString'
     end
 
     if $rails_version =~ /^4\.2/
@@ -457,6 +456,20 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
     msub /(\nend)/, "\n#START:valid\nend\n#END:valid"
   end
 
+  desc 'Onto the next failure...'
+  test
+
+  desc 'Update test data'
+  edit "test/fixtures/products.yml" do
+    msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
+    edit 'image_url: MyString', :highlight do
+      sub! 'MyString', 'lorem.jpg'
+    end
+    edit 'image_url: MyString', :highlight do
+      sub! 'MyString', 'lorem.jpg'
+    end
+  end
+
   desc 'Tests now pass again :-)'
   test
 end
@@ -478,11 +491,6 @@ section 7.2, 'Iteration B2: Unit Testing' do
     self.all = read('test/product_test.rb')
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     gsub! 'activerecord.errors', 'errors' unless $rails_version =~ /^3\./
-  end
-
-  desc 'Look at existing test data'
-  edit "test/fixtures/products.yml" do
-    msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
   end
 
   publish_code_snapshot :b
