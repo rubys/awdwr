@@ -2483,7 +2483,7 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   end
 end
 
-section 12.3, 'Iteration G2: Atom Feeds' do
+section 12.2, 'Iteration G2: Atom Feeds' do
   overview <<-EOF
     Demonstrate various respond_to/format options, as well as "through"
     relations and basic authentication.
@@ -2718,7 +2718,7 @@ section 12.4, 'Iteration G2: Downloading an eBook' do
 end
 end
 
-section 12.3, 'Playtime' do
+section 12.5, 'Playtime' do
   if Gorp::Config[:skip_xml_serialization]
     warn 'xml serialization skipped'
     next
@@ -2937,7 +2937,7 @@ class PayTypeSelector extends React.Component \{
     return (
       <div className="field">
         <label htmlFor="order_pay_type">Pay type</label>
-        <select name="order[pay_type]">
+        <select id="pay_type' name="order[pay_type]">
           <option value="">Select a payment method</option>
           <option value="Check">Check</option>
           <option value="Credit card">Credit card</option>
@@ -2999,7 +2999,8 @@ class PayTypeSelector extends React.Component \{
       <div>
         <div className="field">
           <label htmlFor="order_pay_type">Pay type</label>
-          <select onChange={this.onPayTypeSelected} name="order[pay_type]">
+          <select id="paytype" onChange={this.onPayTypeSelected} 
+            name="order[pay_type]">
             <option value="">Select a payment method</option>
             <option value="Check">Check</option>
             <option value="Credit card">Credit card</option>
@@ -3986,7 +3987,7 @@ section 15.5, 'Playtime' do
   cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.xml"
 end
 
-section 16.1, 'Task J1: Selecting the locale' do
+section 16.1, 'Task K1: Selecting the locale' do
   
   desc 'Define the default and available languages.'
   edit "config/initializers/i18n.rb" do |data|
@@ -4077,7 +4078,7 @@ section 16.1, 'Task J1: Selecting the locale' do
   get '/es'
 end
 
-section 16.2, 'Task J2: translating the store front' do
+section 16.2, 'Task K2: translating the store front' do
   desc 'Replace translatable text with calls out to translation functions.'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
@@ -4162,7 +4163,7 @@ section 16.2, 'Task J2: translating the store front' do
   post '/es', 'product_id' => 2
 end
 
-section 16.3, 'Task J3: Translating Checkout' do
+section 16.3, 'Task K3: Translating Checkout' do
   desc 'Edit the new order page'
   edit 'app/views/orders/new.html.erb' do
     edit 'Please Enter Your Details', :highlight
@@ -4288,7 +4289,7 @@ section 16.3, 'Task J3: Translating Checkout' do
     'order[pay_type]' => 'Check'
 end
 
-section 16.4, 'Task J4: Add a locale switcher.' do
+section 16.4, 'Task K4: Add a locale switcher.' do
   desc 'Add form for setting and showing the site based on the locale.'
   desc 'Use CSS to position the form.'
   edit DEPOT_CSS, 'i18n' do |data|

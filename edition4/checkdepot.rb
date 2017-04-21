@@ -288,7 +288,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 12.3, "Iteration G3: Atom Feeds" do
+  section 12.2, "Iteration G3: Atom Feeds" do
     ticket 7910,
       :title =>  "Actions defined using resource get bypass the controller",
       :match => /undefined method `title&amp;#39; for nil:NilClass/
@@ -348,7 +348,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 13.1, "Iteration H1: Email Notifications" do
+  section 14.1, "Iteration I1: Email Notifications" do
     if $rails_version =~ /^3/
       assert_test_summary :tests => 2, :assertions => '(8|10)'
     elsif $rails_version =~ /^3/
@@ -358,7 +358,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 13.2, "Iteration H2: Integration Tests" do
+  section 14.2, "Iteration I2: Integration Tests" do
     ticket 16272,
       :title =>  "assert_template w/ open_session in an integration test",
       :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
@@ -370,7 +370,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 14.1, "Iteration I1: Adding Users" do
+  section 15.1, "Iteration J1: Adding Users" do
     ticket 23989,
       :title =>  "Delivering mail causes tests to fail",
       :match => /SQLite3::BusyException: database is locked/
@@ -392,7 +392,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 14.2, "Iteration I2: Authenticating Users" do
+  section 15.2, "Iteration J2: Authenticating Users" do
     ticket 167,
       :list => 'jquery-rails',
       :title =>  "SelectorAssertions moved in Rails 4.2",
@@ -408,7 +408,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 14.3, "Iteration I3: Limiting Access" do
+  section 15.3, "Iteration J3: Limiting Access" do
     ticket 167,
       :list => 'jquery-rails',
       :title =>  "SelectorAssertions moved in Rails 4.2",
@@ -423,7 +423,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 14.4, "Iteration I4: Adding a Sidebar" do
+  section 15.4, "Iteration J4: Adding a Sidebar" do
     assert_select 'legend', 'Please Log In'
     assert_select 'input[type=submit][value=Login]'
     assert_select 'h1', 'Welcome'
@@ -431,7 +431,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'h1', 'Products'
   end
 
-  section 14.5, "Playtime" do
+  section 15.5, "Playtime" do
     ticket 167,
       :list => 'jquery-rails',
       :title =>  "SelectorAssertions moved in Rails 4.2",
@@ -449,7 +449,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /customer@example.com/
   end
 
-  section 15.1, "Task J1: i18n for the store front" do
+  section 16.1, "Task K1: Selecting the Locale" do
     ticket 16679,
       :title => "Missing partial routes/_route",
       :match => %r{Missing partial routes/_route}
@@ -462,7 +462,7 @@ class DepotTest < Gorp::TestCase
     assert_select '#notice', 'es translation not available'
   end
 
-  section 15.2, "Task J2: i18n for the cart" do
+  section 16.2, "Task K2: Translating the store front" do
     ticket 275,
       :list => 'i18n',
       :title => "Can't set locale to something other than the default",
@@ -475,7 +475,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'td', 'Rails, Angular, Postgres, and Bootstrap'
   end
 
-  section 15.3, "Task J3: i18n for the order page" do
+  section 16.3, "Task J3: Translating Checkout" do
     ticket 275,
       :list => 'i18n',
       :title => "Can't set locale to something other than the default",
@@ -487,7 +487,7 @@ class DepotTest < Gorp::TestCase
     assert_select '#notice', 'Gracias por su pedido'
   end
 
-  section 15.4, "Task J4: Add a locale switcher" do
+  section 16.4, "Task J4: Add a locale switcher" do
     ticket 167,
       :list => 'jquery-rails',
       :title =>  "SelectorAssertions moved in Rails 4.2",
@@ -508,7 +508,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 16, "Deployment" do
+  section 17, "Deployment" do
     ticket 8837,
       :title =>  'Bring back "database already exists" messages when running rake tasks',
       :match => /Mysql2::Error.*database exists/
@@ -529,17 +529,11 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /depot\/log\/production.log/
   end
 
-  section 18, "Finding Your Way Around" do
+  section 19, "Finding Your Way Around" do
     assert_select '.stdout', /Current version: \d{8}000009/
   end
 
-  if $rails_version =~ /^3\./
-    section 20.1, "Testing Routing" do
-      assert_test_summary :tests => '1\d', :assertions => '4\d'
-    end
-  end
-
-  section 21.1, "Views" do
+  section 22.1, "Views" do
 #   ticket 10984,
 #     :title =>  "Live streaming doesn't work with basic authentication or builder",
 #     :match => /<pre class="stdin">curl.*<\/pre>\s+<pre class="stdin">/
@@ -557,37 +551,18 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /"16.67"/
   end
 
-  if $rails_version =~ /^3\./
-    section 24.3, "Active Resources" do
-      # assert_select '.stdout', /ActiveResource::Redirection: Failed.* 302/
-      assert_select '.stdout', '36.0'
-      assert_select '.stdout', '=&gt; true'
-      assert_select '.price', '$31.00'
-      assert_select 'p', /31\.0/
-      assert_select '.stdout', '=&gt; "Dave Thomas"'
-      assert_select '.stdout', /NoMethodError: undefined method `line_items'/
-      if File.exist? "#{$WORK}/depot/public/images"
-        assert_select '.stdout', /&lt;id type="integer"&gt;\d+&lt;\/id&gt;/
-      else
-        assert_select '.body', /[{,]"id":\d+[,}]/
-      end
-      assert_select '.stdout', /"product_id"=&gt;2/
-      assert_select '.stdout', /=&gt; (28\.8|#&lt;BigDecimal:\w+,'0\.288E2')/
-    end
-  end
-
-  section 25.1, 'rack' do
+  section 26.1, 'rack' do
     assert_select 'p', '26.0'
     assert_select 'h2', /^Seven Mobile Apps in Seven Weeks$/
   end
 
-  section 25.2, 'rake' do
+  section 26.2, 'rake' do
     assert_select '.stderr', /^mkdir -p .*db\/backup$/
     assert_select '.stderr', 
       /^sqlite3 .*?db\/production\.db \.dump (>|&gt;) .*\/production.backup$/
   end
 
-  section 26.1, 'Active Merchant' do
+  section 27.1, 'Active Merchant' do
     ticket 477,
       :list => 'activemerchant',
       :title =>  "prepping for Rails 4.0",
@@ -604,7 +579,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 26.2, 'HAML' do
+  section 27.2, 'HAML' do
     ticket 895,
       :list => 'haml',
       :title =>  "Erubis deprecated in Rails 5.1",
@@ -622,7 +597,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 26.3, "Iteration G3: Pagination" do
+  section 27.3, "Iteration G3: Pagination" do
     next if Gorp::Config[:skip_pagination]
 
     ticket 774,
