@@ -2999,7 +2999,7 @@ class PayTypeSelector extends React.Component \{
       <div>
         <div className="field">
           <label htmlFor="order_pay_type">Pay type</label>
-          <select id="paytype" onChange={this.onPayTypeSelected} 
+          <select id="pay_type" onChange={this.onPayTypeSelected} 
             name="order[pay_type]">
             <option value="">Select a payment method</option>
             <option value="Check">Check</option>
@@ -3128,7 +3128,35 @@ export default PurchaseOrderPayType
     #END:filter_parameters
   }
   end
+
   publish_code_snapshot :pc
+end
+
+section 13.2, 'Iteration H2: System testing' do
+  edit 'test/system/orders_test.rb' do
+    gsub! /^  #.*\n/, ''
+    msub /^()end/, <<-EOF.unindent(4), :highlight
+      test "check routing number" do
+        visit store_index_url
+
+        first('.entry').click_on 'Add to Cart'
+
+        click_on 'Checkout'
+
+        fill_in 'order_name', with: 'Dave Thomas'
+        fill_in 'order_address', with: '123 Main Street'
+        fill_in 'order_email', with: 'dave@example.com'
+
+        select 'Check', from: 'pay_type'
+
+        assert_selector "#order_routing_number"
+      end 
+    EOF
+  end
+
+  cmd 'RAILS_ENV=test bin/webpack'
+  cmd 'rake test:system'
+  cmd 'rake test'
 end
 end
 
