@@ -2863,7 +2863,7 @@ section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
     self << "gem 'webpacker', github: 'rails/webpacker'\n"
   end
   bundle 'install'
-  cmd 'rails webpacker:install'
+  cmd 'echo Y | rails webpacker:install'
   cmd 'rails webpacker:install:react'
   edit 'app/javascript/packs/hello_react.jsx' do
     sub! /^\/\/.*$/,''
