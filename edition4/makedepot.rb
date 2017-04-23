@@ -2914,14 +2914,14 @@ section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
     sub! /<%= javascript_pack_tag\("hello_react"\) %>/, "<%= javascript_pack_tag(\"pay_type\") %>"
   end
   edit 'app/javascript/packs/pay_type.jsx' do
-    self << %{import React           from 'react'
-import ReactDOM        from 'react-dom'
-import PayTypeSelector from 'PayTypeSelector'
+    self << %{import React           from 'react'              // <callout id="co.payment-details.pay_type.import-react"/>
+import ReactDOM        from 'react-dom'           // <callout id="co.payment-details.pay_type.import-react-dom"/>
+import PayTypeSelector from 'PayTypeSelector'     // <callout id="co.payment-details.pay_type.import-PayTypeSelector"/>
 
-document.addEventListener('DOMContentLoaded', () => {
-  var element = document.getElementById(\"pay-type-component\");
-  ReactDOM.render(<PayTypeSelector />, element);
-})
+document.addEventListener('DOMContentLoaded', function() {       // <callout id="co.payment-details.pay_type.DOMContentLoaded"/>
+  var element = document.getElementById(\"pay-type-component\"); // <callout id="co.payment-details.pay_type.getElementById"/>
+  ReactDOM.render(<PayTypeSelector />, element);                 // <callout id="co.payment-details.pay_type.jsx"/>
+});
 }
   end
   cmd 'mkdir app/javascript/PayTypeSelector'
@@ -2929,10 +2929,6 @@ document.addEventListener('DOMContentLoaded', () => {
     self << %{import React from 'react'
 
 class PayTypeSelector extends React.Component \{
-  constructor(props) \{
-    super(props);
-  \}
-
   render() \{
     return (
       <div className="field">
@@ -2966,13 +2962,13 @@ import PurchaseOrderPayType from './PurchaseOrderPayType';
 
 // START:bind
 class PayTypeSelector extends React.Component \{
+  // START_HIGHLIGHT
   constructor(props) \{
     super(props);
-    // START_HIGHLIGHT
-    this.state = { selectedPayType: null };
     this.onPayTypeSelected = this.onPayTypeSelected.bind(this);
-    // END_HIGHLIGHT
+    this.state = { selectedPayType: null };
   \}
+  // END_HIGHLIGHT
 // END:bind
 
 // START:onPayTypeSelected
