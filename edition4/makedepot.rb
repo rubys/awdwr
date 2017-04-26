@@ -357,6 +357,9 @@ section 6.3, 'Playtime' do
   desc 'Initial commit.'
   cmd 'git commit -m "Depot Scaffold"'
 
+  edit "test/fixtures/products.yml" do
+    msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
+  end
   publish_code_snapshot :a
 end
 
@@ -461,7 +464,6 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
 
   desc 'Update test data'
   edit "test/fixtures/products.yml" do
-    msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
     edit 'image_url: MyString', :highlight do
       sub! 'MyString', 'lorem.jpg'
     end
