@@ -4121,8 +4121,18 @@ section 16.2, 'Task K2: translating the store front' do
   cmd "cp -r #{$DATA}/i18n/*.yml config/locales"
 
   desc 'Define some translations for the layout.'
-  edit('config/locales/en.yml', 'layout') {}
-  edit('config/locales/es.yml', 'layout') {} 
+  edit('config/locales/en.yml', 'layout') do
+    unless $rails_version =~ /^[34]|^5\.0/
+      sub! /\s*pay_prompt_html.*/, ''
+      sub! /\s*pay_type.*/, ''
+    end
+  end
+  edit('config/locales/es.yml', 'layout') do
+    unless $rails_version =~ /^[34]|^5\.0/
+      sub! /\s*pay_prompt_html.*/, ''
+      sub! /\s*pay_type.*/, ''
+    end
+  end
 
   desc 'Server needs to be restarted when introducting a new language'
   restart_server
@@ -4202,20 +4212,28 @@ section 16.3, 'Task K3: Translating Checkout' do
     edit "'Place Order'", :highlight do
       gsub! "'Place Order'", "t('.submit')"
     end
-    edit "'Select a payment method'" do
-      gsub! "'Select a payment method'", "t('.pay_prompt_html')"
-      msub /()$/, "\n<!-- END_HIGHLIGHT -->"
-      msub /^()/, "#START_HIGHLIGHT\n"
+
+    if $rails_version =~ /^[34]|^5\.0/
+      edit "'Select a payment method'" do
+        gsub! "'Select a payment method'", "t('.pay_prompt_html')"
+        msub /()$/, "\n<!-- END_HIGHLIGHT -->"
+        msub /^()/, "#START_HIGHLIGHT\n"
+      end
     end
+
     edit ':name', :highlight do
       msub /() %>/, ", t('.name')"
     end
     edit ':address', :highlight do
       msub /() %>/, ", t('.address_html')"
     end
-    edit ':pay_type', :highlight do
-      msub /() %>/, ", t('.pay_type')"
+
+    if $rails_version =~ /^[34]|^5\.0/
+      edit ':pay_type', :highlight do
+        msub /() %>/, ", t('.pay_type')"
+      end
     end
+
     edit ':email', :highlight do
       msub /() %>/, ", t('.email')"
     end
@@ -4223,7 +4241,7 @@ section 16.3, 'Task K3: Translating Checkout' do
 
   desc 'Define some translations for the new order.'
   edit('config/locales/en.yml', 'checkout') {}
-  edit('config/locales/es.yml', 'checkout') {} 
+  edit('config/locales/es.yml', 'checkout') {}
 
   publish_code_snapshot :t
   
