@@ -350,7 +350,7 @@ class DepotTest < Gorp::TestCase
 
   unless $rails_version =~ /^4|^5\.0/
     section 13.2, "Iteration H2: System testing" do
-      assert_test_summary :tests => 1, :assertions => 1
+      assert_test_summary :tests => 1, :assertions => 2
       assert_test_summary :tests => 39, :assertions => 78
     end
   end
