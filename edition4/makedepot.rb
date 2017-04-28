@@ -500,6 +500,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
   desc 'Add a fixture.'
   edit "test/fixtures/products.yml" do
     msub /.*\n()/m, "\n" + <<-EOF.unindent(6), :mark => 'ruby'
+      # START_HIGHLIGHT
       ruby: 
         title:       Programming Ruby 1.9
         description: 
@@ -508,6 +509,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
           delivered fast, you should add Ruby to your toolbox.
         price:       49.50
         image_url:   ruby.png 
+      # END_HIGHLIGHT
     EOF
   end
 
