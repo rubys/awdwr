@@ -270,6 +270,11 @@ module AWDWR
       gems.delete('bcrypt-ruby')
     end
 
+    # https://github.com/collectiveidea/delayed_job_active_record/issues/137
+    unless File.read("#{rails}/RAILS_VERSION") =~ /^[34]\.|^5\.0/
+      gems.delete('delayed_job_active_record')
+    end
+
     # load updates from configuration file
     if 
       File.exist? File.expand_path('~/.awdwr') and

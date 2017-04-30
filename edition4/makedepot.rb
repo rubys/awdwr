@@ -2864,7 +2864,7 @@ section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
     Demonstrate how Webpacker works and why it exists by using React.
   EOF
   edit 'Gemfile' do
-    self << "gem 'webpacker', github: 'rails/webpacker'\n"
+    self << "gem 'webpacker', '~> 1.2'"
   end
   bundle 'install'
   cmd 'echo Y | rails webpacker:install'
