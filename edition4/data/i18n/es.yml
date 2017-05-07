@@ -77,8 +77,20 @@ es:
       address_html: "Direcci&oacute;n"
       email:        "E-mail"
       pay_type:     "Forma de pago"
-      pay_prompt_html: "Seleccione un m&eacute;todo de pago"
+      pay_prompt_html: "Seleccione un método de pago"
       submit:       "Realizar Pedido"
+      pay_types:
+        check:           "Cheque"
+        credit_card:     "Tarjeta de Crédito"
+        purchase_order:  "Orden de Compra"
+      check_pay_type:
+        routing_number: "# de Enrutamiento"
+        account_number: "# de Cuenta"
+      credit_card_pay_type:
+        cc_number: "Número"
+        expiration_date: "Expiración"
+      purchase_order_pay_type:
+        po_number: "Número"
 #END:checkout
 
 #START:flash

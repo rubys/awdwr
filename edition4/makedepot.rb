@@ -44,6 +44,9 @@ section 2, 'Instant Gratification' do
   ENV.delete('BUNDLE_GEMFILE')
   rails 'demo1', :work
 
+  restart_server
+  get "/"#, screenshot: { filename: "hello_rails.png", dimensions: [ (640 *2), (480*2) ] }
+
   desc 'See what files were created'
   cmd 'ls -p'
 
@@ -56,7 +59,7 @@ section 2, 'Instant Gratification' do
   restart_server
 
   desc 'Attempt to fetch the file - note that it is missing'
-  get '/say/hello'
+  get '/say/hello'#, screenshot: { filename: "hello_missing.png", dimensions: [320,200] }
 
   desc 'Replace file with a simple hello world'
   edit 'app/views/say/hello.html.erb' do
@@ -66,7 +69,7 @@ section 2, 'Instant Gratification' do
   end
 
   desc 'This time it works!'
-  get '/say/hello'
+  get '/say/hello'#, screenshot: { filename: "hello_works.png", dimensions: [320,200] }
   publish_code_snapshot :work, :demo1
 
   desc 'Add a simple expression'
@@ -2263,7 +2266,7 @@ section 12.1, 'Iteration H1: Capturing an Order' do
 
           form {
             label {
-              width: 5em;
+              width: 10em;
               float: left;
               text-align: right;
               padding-top: 0.2em;
@@ -2275,8 +2278,8 @@ section 12.1, 'Iteration H1: Capturing an Order' do
               margin-left: 0.5em;
             }
 
-            .submit {
-              margin-left: 4em;
+            .actions {
+              margin-left: 10em;
             }
 
             br {
@@ -2884,7 +2887,7 @@ section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
 }
   end
   edit 'Gemfile', 'foreman' do
-    self << "# START: foreman\n"
+    self << "\n# START: foreman\n"
     self << "gem 'foreman'\n"
     self << "# END: foreman\n"
   end
@@ -3063,13 +3066,13 @@ class CheckPayType extends React.Component \{
     return (
       <div>
         <div className="field">
-          <label htmlFor="order_routing_number">Rtg #</label>
+          <label htmlFor="order_routing_number">Routing #</label>
           <input type="password"
                  name="order[routing_number]" 
                  id="order_routing_number" />
         </div>
         <div className="field">
-          <label htmlFor="order_account_number">Acct #</label>
+          <label htmlFor="order_account_number">Account #</label>
           <input type="text"
                  name="order[account_number]" 
                  id="order_account_number" />
@@ -3126,7 +3129,7 @@ export default PurchaseOrderPayType
     #START:filter_parameters
     config.filter_parameters += [ :credit_card_number ]
     #END:filter_parameters
-  }
+}
   end
 
   publish_code_snapshot :pc
@@ -4125,18 +4128,8 @@ section 16.2, 'Task K2: translating the store front' do
   cmd "cp -r #{$DATA}/i18n/*.yml config/locales"
 
   desc 'Define some translations for the layout.'
-  edit('config/locales/en.yml', 'layout') do
-    unless $rails_version =~ /^[34]|^5\.0/
-      sub! /\s*pay_prompt_html.*/, ''
-      sub! /\s*pay_type.*/, ''
-    end
-  end
-  edit('config/locales/es.yml', 'layout') do
-    unless $rails_version =~ /^[34]|^5\.0/
-      sub! /\s*pay_prompt_html.*/, ''
-      sub! /\s*pay_type.*/, ''
-    end
-  end
+  edit('config/locales/en.yml', 'layout') {}
+  edit('config/locales/es.yml', 'layout') {}
 
   desc 'Server needs to be restarted when introducting a new language'
   restart_server
@@ -4206,6 +4199,7 @@ end
 section 16.3, 'Task K3: Translating Checkout' do
   desc 'Edit the new order page'
   edit 'app/views/orders/new.html.erb' do
+    clear_highlights
     edit 'Please Enter Your Details', :highlight
     gsub! 'Please Enter Your Details', "<%= t('.legend') %>"
   end
@@ -4242,6 +4236,111 @@ section 16.3, 'Task K3: Translating Checkout' do
       msub /() %>/, ", t('.email')"
     end
   end
+
+  desc 'Install i18n-js'
+  edit 'Gemfile', 'i18n-js' do
+    self << "# START: i18n-js\n"
+    self << "gem 'i18n-js'\n"
+    self << "# END: i18n-js\n"
+  end
+  bundle 'install'
+  edit "config/application.rb" do
+    clear_all_marks
+    clear_highlights
+    msub /^()  end/, %{
+    # START:i18n-js
+    config.middleware.use I18n::JS::Middleware
+    # END:i18n-js
+}
+  end
+
+  restart_server
+
+  edit 'app/assets/javascripts/application.js' do
+    clear_highlights
+    msub /^()\/\/= require_tree ./, %{
+// START:i18n-js
+//= require i18n
+//= require i18n/translations
+// END:i18n-js
+}
+  end
+  edit "app/views/layouts/application.html.erb" do
+    msub /()<%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>/, %{
+    <!-- START:i18n-js -->
+    }
+    msub /<%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>()/, %{
+    <!-- START_HIGHLIGHT -->
+    <script type="text/javascript">
+      I18n.defaultLocale = "<%= I18n.default_locale %>";
+      I18n.locale        = "<%= I18n.locale %>";
+    </script>
+    <!-- END_HIGHLIGHT -->
+    <!-- END:i18n-js -->
+}
+
+  end
+  edit "app/javascript/PayTypeSelector/index.jsx" do
+    clear_highlights
+    gsub!  '          <label htmlFor="order_pay_type">Pay type</label>', <<EOF
+          <label htmlFor="order_pay_type">
+            {I18n.t("orders.form.pay_type")}
+          </label>
+EOF
+    gsub! '            <option value="">Select a payment method</option>', <<EOF
+            <option value="">
+              {I18n.t("orders.form.pay_prompt_html")}
+            </option>
+EOF
+    gsub! '            <option value="Check">Check</option>', <<EOF
+            <option value="Check">
+              {I18n.t("orders.form.pay_types.check")}
+            </option>
+EOF
+    gsub! '            <option value="Credit card">Credit card</option>', <<EOF
+            <option value="Credit card">
+              {I18n.t("orders.form.pay_types.credit_card")}
+            </option>
+EOF
+    gsub! '            <option value="Purchase order">Purchase order</option>', <<EOF
+            <option value="Purchase order">
+              {I18n.t("orders.form.pay_types.purchase_order")}
+            </option>
+EOF
+  end
+  edit "app/javascript/PayTypeSelector/CheckPayType.jsx" do
+    gsub! '          <label htmlFor="order_routing_number">Routing #</label>', <<EOF
+          <label htmlFor="order_routing_number">
+            {I18n.t("orders.form.check_pay_type.routing_number")}
+          </label>
+EOF
+    gsub! '          <label htmlFor="order_account_number">Account #</label>', <<EOF
+          <label htmlFor="order_acount_number">
+            {I18n.t("orders.form.check_pay_type.account_number")}
+          </label>
+EOF
+  end
+  edit "app/javascript/PayTypeSelector/CreditCardPayType.jsx" do
+    gsub! '          <label htmlFor="order_credit_card_number">CC #</label>', <<EOF
+          <label htmlFor="order_credit_card_number">
+            {I18n.t("orders.form.credit_card_pay_type.cc_number")}
+          </label>
+EOF
+    gsub! '          <label htmlFor="order_expiration_date">Expiry</label>', <<EOF
+          <label htmlFor="order_expiration_date">
+            {I18n.t("orders.form.credit_card_pay_type.expiration_date")}
+          </label>
+EOF
+  end
+  edit "app/javascript/PayTypeSelector/PurchaseOrderPayType.jsx" do
+    gsub! '          <label htmlFor="order_po_number">PO #</label>', <<EOF
+          <label htmlFor="order_po_number">
+            {I18n.t("orders.form.purchase_order_pay_type.po_number")}
+          </label>
+EOF
+  end
+
+  restart_server
 
   desc 'Define some translations for the new order.'
   edit('config/locales/en.yml', 'checkout') {}
