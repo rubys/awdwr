@@ -187,6 +187,7 @@ end
 
 unless $rails_version =~ /^[34]|^5\.0/
   gem 'foreman'
+  gem 'i18n-js'
 end
 
 # checkout/update git repositories
