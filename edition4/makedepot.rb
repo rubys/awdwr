@@ -1907,10 +1907,9 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
           //#END_HIGHLIGHT
         EOF
       else
-        msub /(\/\/= require rails-ujs\n)/, <<-EOF.unindent(10)
+        msub /\/\/= require rails-ujs\n()/, <<-EOF.unindent(10)
           //#START_HIGHLIGHT
           //= require jquery
-          //= require jquery_ujs
           //= require #{effect}
           //#END_HIGHLIGHT
         EOF
