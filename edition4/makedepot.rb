@@ -3020,6 +3020,7 @@ class PayTypeSelector extends React.Component \{
     }
     // END_HIGHLIGHT
     return (
+      // START_HIGHLIGHT
       <div>
         <div className="field">
           <label htmlFor="order_pay_type">Pay type</label>
@@ -3033,6 +3034,7 @@ class PayTypeSelector extends React.Component \{
         </div>
         <PayTypeCustomComponent />
       </div>
+      // END_HIGHLIGHT
     );
   \}
   // END:render
