@@ -1763,8 +1763,8 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   desc 'Check for nil'
   edit "app/views/layouts/application.html.erb", 'side' do
     clear_highlights
-    msub /\n()\s+<div id="side">/, "<!-- START:side -->\n"
-    msub /\n()\s+<div id="main">/, "<!-- END:side -->\n"
+    msub /\n()\s+<div id="side">/, "      <!-- START:side -->\n"
+    msub /\n()\s+<div id="main">/, "      <!-- END:side -->\n"
     edit /^ +<%= render @cart %>\s*\n/m do
       gsub!(/^/, '  ')
       msub /\A()/,   "          <% if @cart %>\n", :highlight
@@ -4811,12 +4811,6 @@ section 20, 'Active Record' do
         inflect.irregular 'tax', 'taxes'
       end
     EOF
-  end
-end
-
-section 21, 'Action Controller' do
-  edit 'config/initializers/session_store.rb' do
-    edit 'cookie_store', :highlight
   end
 end
 
