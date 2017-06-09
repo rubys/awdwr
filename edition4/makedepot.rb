@@ -3314,7 +3314,175 @@ section 14.1, 'Iteration I1: Email Notifications' do
   test 'test/mailers/order*_test.rb'
 end
 
-section 14.2, 'Iteration I2: Integration Tests' do
+section 14.2, 'Iteration I2: Connecting to a Slow Payment Processor with Active Job' do
+  edit 'lib/pago.rb' do
+    self <<%{
+require 'ostruct'
+class Pago
+  def self.make_payment(order_id:,
+                        payment_method:,
+                        payment_details:)
+
+    case payment_method
+    when :check
+      Rails.logger.info "Processing check: " +
+                         payment_details.fetch(:routing).to_s + 
+                         "/" + 
+                         payment_details.fetch(:account).to_s
+    when :credit_card
+      Rails.logger.info "Processing credit_card: " +
+												payment_details.fetch(:cc_num).to_s + 
+												"/" + 
+												payment_details.fetch(:expiration_month).to_s +
+												"/" + 
+												payment_details.fetch(:expiration_year).to_s
+    when :po
+      Rails.logger.info "Processing purchase order: " +
+                        payment_details.fetch(:po_num).to_s
+    else
+      raise "Dont' know what to do with payment_method \#{payment_method}"
+    end
+    unless Rails.env.test?
+      sleep 3
+    end
+    Rails.logger.info "Done"
+    OpenStruct.new(succeeded?: true)
+  end
+end
+}
+  end
+  edit 'app/models/order.rb' do
+    clear_highlights
+    clear_all_marks
+    msub /^()class/,<<EOF
+# START_HIGHLIGHT
+require 'pago'
+# END_HIGHLIGHT
+
+EOF
+    msub /^()end/, <<EOF
+
+# START_HIGHLIGHT
+  def charge!(pay_type_params)
+    payment_details = {}
+    payment_method = nil
+
+    case pay_type
+    when "Check"
+      payment_method = :check
+      payment_details[:routing] = pay_type_params[:routing_number]
+      payment_details[:account] = pay_type_params[:account_number]
+    when "Credit card"
+      payment_method = :credit_card
+      month,year = pay_type_params[:expiration_date].split(/\/)
+      payment_details[:cc_num] = pay_type_params[:credit_card_number]
+      payment_details[:expiration_month] = month
+      payment_details[:expiration_year] = year
+    when "Purchase order"
+      payment_method = :po
+      payment_details[:po_num] = pay_type_params[:po_number]
+    end
+
+    payment_result = Pago.make_payment(
+      order_id: id,
+      payment_method: payment_method,
+      payment_details: payment_details
+    )
+
+    if payment_result.succeeded?
+      OrderMailer.received(self).deliver_later
+    else
+      raise payment_result.error
+    end
+  end
+# END_HIGHLIGHT
+EOF
+  end
+  generate "job charge_order"
+  edit "app/jobs/charge_order_job.rb" do
+    msub /(  def perform\(\*args\))/, <<EOF
+  # START_HIGHLIGHT
+  def perform(order,pay_type_params)
+EOF
+    msub /(    . Do something later)/,<<EOF
+    order.charge!(pay_type_params)
+  # END_HIGHLIGHT
+EOF
+  end
+  edit "app/controllers/orders_controller.rb" do
+    msub /(        OrderMailer.received\(@order\).deliver_later)/,"        ChargeOrderJob.perform_later(@order,pay_type_params.to_h)"
+  end
+
+  edit "test/system/orders_test.rb" do
+    msub /(class OrdersTest < ApplicationSystemTestCase)/,%{
+#START:test_helper
+class OrdersTest < ApplicationSystemTestCase
+  # START_HIGHLIGHT
+  include ActiveJob::TestHelper
+  # END_HIGHLIGHT
+#END:test_helper
+    }
+  
+    msub /^(  test "check routing number" do)/,%{
+# START:clear
+  test "check routing number" do
+
+    # START_HIGHLIGHT
+    LineItem.delete_all
+    Order.delete_all
+    # END_HIGHLIGHT
+
+    visit store_index_url
+# END:clear
+}
+  
+    msub /^(    assert_selector "#order_routing_number")/,%{
+# START:fill_in
+    assert_selector "#order_routing_number"
+
+# START_HIGHLIGHT
+    fill_in "Routing #", with: "123456"
+    fill_in "Account #", with: "987654"
+# END_HIGHLIGHT
+# END:fill_in
+
+# START:perform_enqueued_jobs
+# START_HIGHLIGHT
+    perform_enqueued_jobs do
+      click_button "Place Order"
+    end
+# END_HIGHLIGHT
+# END:perform_enqueued_jobs
+
+# START:check_order
+# START_HIGHLIGHT
+    orders = Order.all
+    assert_equal 1, orders.size
+
+    order = orders.first
+
+    assert_equal "Dave Thomas",      order.name
+    assert_equal "123 Main Street",  order.address
+    assert_equal "dave@example.com", order.email
+    assert_equal "Check",            order.pay_type
+    assert_equal 1, order.line_items.size
+# END_HIGHLIGHT
+# END:check_order
+
+# START:check_mail
+# START_HIGHLIGHT
+    mail = ActionMailer::Base.deliveries.last
+    assert_equal ["dave@example.com"],                 mail.to
+    assert_equal 'Sam Ruby <depot@example.com>',       mail[:from].value
+    assert_equal "Pragmatic Store Order Confirmation", mail.subject
+# END_HIGHLIGHT
+# START:check_mail
+}
+  end
+  publish_code_snapshot :qa
+end
+
+section 14.3, 'Iteration I3: Integration Tests' do
   desc 'Create an integration test'
   generate 'integration_test user_stories'
   publish_code_snapshot :q, :depot, 'test/integration/user_stories_test.rb'
@@ -3343,7 +3511,7 @@ section 14.2, 'Iteration I2: Integration Tests' do
   test :integration
 end
 
-section 14.3, 'Playtime' do
+section 14.4, 'Playtime' do
   cmd 'git commit -a -m "formats"'
   cmd 'git tag iteration-h'
 end
