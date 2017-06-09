@@ -365,16 +365,8 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 14.2, "Iteration I2: Integration Tests" do
-    ticket 16272,
-      :title =>  "assert_template w/ open_session in an integration test",
-      :match => /expecting &lt;"index"&gt; but rendering with &lt;\[\]&gt;/
-
-    if $rails_version =~ /^[34]/
-      assert_test_summary :tests => 3, :assertions => '\d+'
-    else
-      assert_test_summary :tests => 3, :assertions => 50
-    end
+  section 14.2, 'Iteration I2: Connecting to a Slow Payment Processor with Active Job' do
+     # TODO
   end
 
   section 15.1, "Iteration J1: Adding Users" do
