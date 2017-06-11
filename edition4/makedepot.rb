@@ -873,6 +873,10 @@ section 8.5, 'Iteration C5 - Caching' do
       msub /<\/div>\n()  <% end %>\n/,  "    <% end %>\n", :highlight
     end
   end
+  edit "test/fixtures/products.yml" do
+    clear_all_marks
+    clear_highlights
+  end
 
   publish_code_snapshot :e
 
