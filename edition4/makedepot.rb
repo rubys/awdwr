@@ -280,11 +280,6 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     desc 'Copy some images'
     cmd "cp -vp #{$DATA}/assets/* app/assets/images/"
 
-    unless $rails_version =~ /^[34]|^5\.0/
-     desc 'HACK: make sure assets exist'
-     cmd 'touch app/assets/images/lorem.jpg'
-    end
-
     if $rails_version =~ /^4\.2/
       desc 'Workaround for sprockets-rails issue 321'
       restart_server 
@@ -511,7 +506,7 @@ section 7.2, 'Iteration B2: Unit Testing' do
           language out there.  If you need to get working programs
           delivered fast, you should add Ruby to your toolbox.
         price:       49.50
-        image_url:   ruby.png 
+        image_url:   ruby.jpg 
       # END_HIGHLIGHT
     EOF
   end
@@ -807,15 +802,6 @@ section 8.4, 'Iteration C4: Functional Testing' do
 
   desc 'Verify that the tests still pass.'
   test
-
-  # temporary HACK for Ruby 5.1
-  unless $rails_version =~ /^(3\.|4\.|5\.0)/
-    desc 'Make sure the images exists'
-    cmd "touch app/assets/images/ruby.png"
-
-    desc 'Rerun the tests.'
-    test
-  end
 
   desc 'Add tests for layout, product display, and formatting, using ' +
     'counts, string comparisons, and regular expressions.'
