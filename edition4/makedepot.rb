@@ -488,12 +488,28 @@ section 7.2, 'Iteration B2: Unit Testing' do
 
   desc 'Add some unit tests for new function.'
   edit "test/*/product_test.rb" do
+    msub /class ProductTest < ActiveSupport::TestCase()/, %{
+  
+  #START:test_empty_attributes
+  test "product attributes must not be empty" do
+    product = Product.new
+    assert product.invalid?
+    assert product.errors[:title].any?
+    assert product.errors[:description].any?
+    assert product.errors[:price].any?
+    assert product.errors[:image_url].any?
+  end
+  #END:test_empty_attributes
+}
+  end
+
+  publish_code_snapshot :b
+
+  edit "test/*/product_test.rb" do
     self.all = read('test/product_test.rb')
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     gsub! 'activerecord.errors', 'errors' unless $rails_version =~ /^3\./
   end
-
-  publish_code_snapshot :b
 
   desc 'Add a fixture.'
   edit "test/fixtures/products.yml" do
