@@ -3322,8 +3322,7 @@ end
 
 section 14.2, 'Iteration I2: Connecting to a Slow Payment Processor with Active Job' do
   edit 'lib/pago.rb' do
-    self <<%{
-require 'ostruct'
+    self <<%{require 'ostruct'
 class Pago
   def self.make_payment(order_id:,
                         payment_method:,
@@ -3332,26 +3331,21 @@ class Pago
     case payment_method
     when :check
       Rails.logger.info "Processing check: " +
-                         payment_details.fetch(:routing).to_s + 
-                         "/" + 
-                         payment_details.fetch(:account).to_s
+        payment_details.fetch(:routing).to_s + "/" + 
+        payment_details.fetch(:account).to_s
     when :credit_card
       Rails.logger.info "Processing credit_card: " +
-												payment_details.fetch(:cc_num).to_s + 
-												"/" + 
-												payment_details.fetch(:expiration_month).to_s +
-												"/" + 
-												payment_details.fetch(:expiration_year).to_s
+        payment_details.fetch(:cc_num).to_s + "/" + 
+        payment_details.fetch(:expiration_month).to_s + "/" + 
+        payment_details.fetch(:expiration_year).to_s
     when :po
       Rails.logger.info "Processing purchase order: " +
-                        payment_details.fetch(:po_num).to_s
+        payment_details.fetch(:po_num).to_s
     else
-      raise "Dont' know what to do with payment_method \#{payment_method}"
+      raise "Unknown payment_method \#{payment_method}"
     end
-    unless Rails.env.test?
-      sleep 3
-    end
-    Rails.logger.info "Done"
+    sleep 3 unless Rails.env.test?
+    Rails.logger.info "Done Processing Payment"
     OpenStruct.new(succeeded?: true)
   end
 end
@@ -3369,7 +3363,7 @@ EOF
     msub /^()end/, <<EOF
 
 # START_HIGHLIGHT
-  def charge!(pay_type_params)
+  def make_payment(pay_type_params)
     payment_details = {}
     payment_method = nil
 
@@ -3488,36 +3482,7 @@ class OrdersTest < ApplicationSystemTestCase
   publish_code_snapshot :qa
 end
 
-section 14.3, 'Iteration I3: Integration Tests' do
-  desc 'Create an integration test'
-  generate 'integration_test user_stories'
-  publish_code_snapshot :q, :depot, 'test/integration/user_stories_test.rb'
-  edit "test/integration/user_stories_test.rb" do |data|
-    if $rails_version =~ /^[34]/
-      data[/(.*)/m,1] = read('test/user_stories_test4.rb')
-    else
-      data[/(.*)/m,1] = read('test/user_stories_test.rb')
-    end
-  end
-
-  desc 'Run the tests'
-  test :integration
-
-  desc 'Create an integration test using a DSL'
-  generate 'integration_test dsl_user_stories'
-  edit "test/integration/dsl_user_stories_test.rb" do |data|
-    if $rails_version =~ /^[34]/
-      data[/(.*)/m,1] = read('test/dsl_user_stories_test4.rb')
-    else
-      data[/(.*)/m,1] = read('test/dsl_user_stories_test.rb')
-    end
-  end
-
-  desc 'Run the tests'
-  test :integration
-end
-
-section 14.4, 'Playtime' do
+section 14.3, 'Playtime' do
   cmd 'git commit -a -m "formats"'
   cmd 'git tag iteration-h'
 end
