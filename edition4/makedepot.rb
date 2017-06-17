@@ -1801,6 +1801,37 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
     msub /format.html.*store_index_url.*\n()/, "        format.js\n", :highlight
   end
 
+  desc 'Make the jquery library available to the application'
+  edit 'Gemfile', 'jquery' do
+    clear_all_marks
+
+    self.sub!(/\n*\Z/, "\n\n\n")
+    msub /\n()\Z/, <<-EOF, :mark => 'jquery'
+gem 'jquery-rails'
+    EOF
+    self.sub!(/\n+\Z/, "\n")
+  end
+
+  desc 'Install the gem'
+  bundle 'install'
+
+  desc 'Pull in jquery'
+  edit 'app/assets/javascripts/application.js' do
+    # reflow comments
+    gsub! /^\/\/ [^\n]{76}.*?\n\/\/\n/m do |paragraph|
+      paragraph.gsub(/^\/\//,' ').gsub(/\s+/,' ').strip.
+        gsub(/(.{1,76})(\s+|$)/, "\\1\n").gsub(/^/,'// ') + "//\n"
+    end
+
+    msub /\/\/= require rails-ujs\n()/, <<-EOF
+//#START_HIGHLIGHT
+//= require jquery
+//#END_HIGHLIGHT
+    EOF
+  end
+
+  restart_server
+
   desc 'Use JavaScript to replace the cart with a new rendering'
   if File.exist? 'public/images'
     edit 'app/views/line_items/create.js.rjs' do |data|
@@ -1861,22 +1892,13 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
     end
 
     desc 'Make the jquery-ui libraries available to the application'
-    edit 'Gemfile', 'jquery' do
+    edit 'Gemfile', 'jquery-ui' do
       clear_all_marks
-
-      if self =~ /jquery/
-        edit /^(#.*\n)*gem.*jquery.*\n/, :mark => 'jquery'
-        msub /jquery-rails.*?\n()/, <<-EOF.unindent(10), :highlight
-          gem 'jquery-ui-rails'
-        EOF
-      else
         self.sub!(/\n*\Z/, "\n\n\n")
-        msub /\n()\Z/, <<-EOF.unindent(10), :mark => 'jquery'
-          gem 'jquery-rails'
-          gem 'jquery-ui-rails'
+        msub /\n()\Z/, <<-EOF, :mark => 'jquery-ui'
+gem 'jquery-ui-rails'
         EOF
         self.sub!(/\n+\Z/, "\n")
-      end
     end
 
     desc 'Install the gem'
@@ -1886,12 +1908,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
 
     desc 'Pull in the blind effect from the jquery-ui libraries'
     edit 'app/assets/javascripts/application.js' do
-      # reflow comments
-      gsub! /^\/\/ [^\n]{76}.*?\n\/\/\n/m do |paragraph|
-        paragraph.gsub(/^\/\//,' ').gsub(/\s+/,' ').strip.
-          gsub(/(.{1,76})(\s+|$)/, "\\1\n").gsub(/^/,'// ') + "//\n"
-      end
-
+      clear_highlights
       spec = Gem::Specification.find_by_name('jquery-ui-rails')
       if spec
         assets = "#{spec.gem_dir}/app/assets/javascripts"
@@ -1913,9 +1930,8 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
           //#END_HIGHLIGHT
         EOF
       else
-        msub /\/\/= require rails-ujs\n()/, <<-EOF.unindent(10)
+        msub /\/\/= require jquery\n()/, <<-EOF.unindent(10)
           //#START_HIGHLIGHT
-          //= require jquery
           //= require #{effect}
           //#END_HIGHLIGHT
         EOF
