@@ -4876,433 +4876,94 @@ section 22.2, 'Form Helpers' do
   publish_code_snapshot nil, :views
 end
 
-if $rails_version =~ /^3\./
-  section 24.3, 'Active Resources' do
-    Dir.chdir(File.join($WORK,'depot'))
-    config = File.join($WORK,'depot/config/environments/development.rb')
-    if File.read(config) =~ /mass_assignment_sanitizer/
-      desc 'Turn off strict sanitization'
-      edit 'config/environments/development.rb' do
-        edit 'mass_assignment_sanitizer', :highlight do
-          msub /:(strict)/, 'logger'
-        end
-      end
-    end
-    restart_server
+section 25.1, 'Customizing and Extending Rails' do
 
-    rails 'depot_client'
-    edit 'app/models/product.rb' do |data|
-      data << <<-EOF.unindent(6)
-        class Product < ActiveResource::Base
-          self.site = "http://dave:secret@localhost:#$PORT/"
-        end
-      EOF
-    end
-    console 'Product.find(2).title'
-    Dir.chdir(File.join($WORK,'depot'))
-    edit 'app/controllers/line_items_controller.rb', 'create' do |data|
-      clear_all_marks
-      dcl 'create', :mark do
-        msub /\n()\s+product = Product.find/, <<-EOF.unindent(4), :highlight
-          if params[:line_item]
-            # ActiveResource
-            params[:line_item][:order_id] = params[:order_id]
-            @line_item = LineItem.new(params[:line_item])
-          else
-            # HTML forms
-        EOF
-        msub /\n()\s+product = Product.find/, '  '
-        msub /\n()\s+@line_item = @cart.add/, '  '
-        msub /@line_item = @cart.add.*\n()/, <<-EOF.unindent(4), :highlight
-          end
-        EOF
-      end
-    end
-    edit 'config/routes.rb' do |data|
-      clear_all_marks
-      edit 'resources :orders', :highlight
-      data[/resources :orders()/,1] = 
-        " do\n      resources :line_items\n    end\n"
-    end
-    # restart_server
-    Dir.chdir(File.join($WORK,'depot_client'))
-    console 'Product.find(2).title'
-    if File.exist? 'public/images'
-      console 'p = Product.find(2)\nputs p.price\np.price -= 5\np.save'
-    else
-      console 'p = Product.find(2)\nputs p.price\n' +
-        'p.price = BigDecimal.new(p.price)-5\np.save'
-    end
-
-    desc 'expire cache'
-    cmd "rm -rf #{File.join($WORK,'depot','tmp','cache')}"
-
-    desc 'fetch storefront'
-    get '/'
-
-    desc 'fetch product (fallback in case storefront is cached)'
-    post '/login',
-      'name' => 'dave',
-      'password' => 'secret'
-    get '/products/2'
-
-    edit 'app/models/order.rb' do |data|
-      data << <<-EOF.unindent(6)
-        class Order < ActiveResource::Base
-          self.site = 'http://dave:secret@localhost:#$PORT/'
-        end
-      EOF
-    end
-    console 'Order.find(1).name\nOrder.find(1).line_items\n'
-    edit 'app/models/line_item.rb' do |data|
-      data << <<-EOF.unindent(6)
-        class LineItem < ActiveResource::Base
-          self.site = 'http://dave:secret@localhost:#$PORT/orders/:order_id'
-        end
-      EOF
-    end
-    post '/admin', {'submit' => 'Logout'}, {:snapget => false}
-    console 'LineItem.find(:all, :params => {:order_id=>1})'
-    if File.exist? 'public/images'
-      console 'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
-           'puts li.price\nli.price *= 0.8\nli.save'
-    else
-      get '/orders/1/line_items.json', :auth => ['dave', 'secret']
-      Dir.chdir(File.join($WORK,'depot')) do
-        edit 'app/controllers/line_items_controller.rb', 'index' do
-          dcl 'index', :mark => 'index' do
-            msub /format.json.*\n()/, 
-              "        format.xml { render :xml => @line_items }\n"
-          gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-          end
-        end
-      end
-    end
-    get '/orders/1/line_items.xml', :auth => ['dave', 'secret']
-    console 'LineItem.format = :xml\n' +
-         'li = LineItem.find(:all, :params => {:order_id=>1}).first\n' +
-         'puts li.price\nli.price *= 0.8\nli.save'
-    console 'li2 = LineItem.new(:order_id=>1, :product_id=>2, :quantity=>1, ' +
-         ':price=>0.0)\nli2.save'
-         'li2.save'
-    publish_code_snapshot nil, :depot_client
-  end
-else
-  section 25.3, 'Managing Dependencies with Bundler' do
-    Dir.chdir(File.join($WORK,'depot'))
-    edit 'Gemfile' do
-      clear_highlights
-      edit /^gem 'rails'.*/, :highlight
-      edit /^gem 'sass-rails'.*/, :highlight
-      edit /^gem 'coffee-rails'.*/, :highlight
-      edit /^gem 'jquery-ui-rails'.*/, :highlight
-
-      # insert line breaks
-      sub! /in the background/, "in the\n  # background"
-
-      sub! "and get a debugger console",
-        "and get a\n  # debugger console"
-
-      sub! "using <%= console %> anywhere",
-        "using <%= console %>\n  # anywhere"
-
-    end
-  end
-end
-
-section 26.1, 'rack' do
-  Dir.chdir(File.join($WORK,'depot'))
-  restart_server
-
-  edit 'store.ru' do
-    self.all = read('rack/store.ru')
-  end
-
-  edit 'app/store.rb' do
-    self.all = read('rack/store.rb')
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  edit 'config/routes.rb' do
-    clear_highlights
-    msub /^()/, <<-EOF.unindent(6), :highlight
-      require './app/store'
-    EOF
-    msub /do\n()/, <<-EOF.unindent(4), :highlight
-      match 'catalog' => StoreApp.new
-    EOF
-    self[/StoreApp.new()/, 1] = ', :via => :all' unless $rails_version =~ /^3\./
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  get '/catalog'
-end
-
-section 26.2, 'rake' do
-  desc 'implement a custom rake task'
-  edit "lib/tasks/db_backup.rake" do
-    self.all = read('depend/db_backup.rake')
-  end
-  rake "db:backup"
-
-  desc 'cleanup (for HAML)'
-  edit 'app/views/store/index.html.erb', 'none' do 
-    clear_all_marks
-  end
-
-  publish_code_snapshot :v
-
-  desc 'remove scaffolding needed for standalone operation'
-  edit 'app/store.rb' do
-    msub /(.*?)class StoreApp/m, ''
-  end
-end
-
-section 27.1, 'Active Merchant' do
-  desc 'Determine if a credit card is valid'
-  edit 'Gemfile', 'plugins' do
-    clear_all_marks
-    version = '1.58'
-    version = '1.21.0' if RUBY_VERSION =~ /^1\.8/
-    version = '1.10.0' if $rails_version =~ /^3\.0/
-    msub /()\Z/, "\n\ngem 'activemerchant', '~> #{version}'\n"
-    edit 'activemerchant', :mark => 'plugins'
+  edit 'Gemfile', 'capistrano' do
+    msub /()group :development, :test do/, %{
+# START:rspec-rails
+}
+    msub /group :development, :test do()/, %{
+# START_HIGHLIGHT
+  gem 'rspec-rails'      
+# END_HIGHLIGHT
+# END:rspec-rails
+    }
   end
   bundle 'install'
-  cmd 'mkdir script' unless File.exist? 'script'
-  edit "script/creditcard.rb" do
-    self.all = read('script/creditcard.rb')
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  generate "rspec:install"
+  edit "spec/rails_helper.rb" do
+    msub /()RSpec.configure/, %{
+# START:fixtures
+}
+    msub /(config.fixture_path = "\#{::Rails.root}\/spec\/fixtures")/,<<EOF
+  # START_HIGHLIGHT
+  config.fixture_path = "\#{::Rails.root}/test/fixtures"
+  # END_HIGHLIGHT
+  # END:fixtures
+EOF
   end
-  ENV.delete('BUNDLE_GEMFILE')
-  runner "script/creditcard.rb"
 
-  `rake about 2> /dev/null > /dev/null`
-  unless $?.success?
-    edit 'Gemfile', 'plugins' do
-      msub /()gem 'activemerchant'/, '# '
-    end
-  end
-end
+  generate "rspec:model Cart"
+  edit "spec/models/cart_spec.rb" do
+    msub /()require 'rails_helper'/, %{
+#START:setup
+}
+    msub /(pending "add some examples to.*$)/, %{
+  #START_HIGHLIGHT
+  fixtures :products
+  subject(:cart) { Cart.new }
 
-if $rails_version =~ /^3\.0/
-  section '27.1.2', 'Asset Packager' do
+  let(:book_one) { products(:ruby) }
+  let(:book_two) { products(:two) }
+  #START_HIGHLIGHT
+#END:setup
 
-    Dir.chdir(File.join($WORK,'depot'))
-    overview <<-EOF
-      Minimize scripts and stylesheets
-    EOF
-
-    desc 'rails plugin install git://github.com/sbecker/asset_packager.git'
-    # cmd "mkdir -p vendor/plugins"
-    cmd "cp -rpv #{$DATA}/plugins/asset_packager vendor/plugins/"
-
-    desc 'list the new tasks introduced'
-    rake '-T asset'
-
-    desc 'inventory existing assets'
-    rake 'asset:packager:create_yml'
-
-    desc 'Look at the file that was produced'
-    cmd 'cat config/asset_packages.yml'
-
-    desc 'produce a minimized version'
-    rake 'asset:packager:build_all'
-
-    edit 'app/views/layouts/application.html.erb', 'head' do
-      clear_all_marks
-      msub /()<!DOCTYPE/, "<!-- #START:head -->\n"
-      msub /<\/head>\n()/, "<!-- ... -->\n<!-- END:head -->\n"
-      edit 'stylesheet_link_tag', :highlight do
-        msub /link_(tag.*) %>/, 'merged :base'
-        msub /<%=() /, ' raw'
+#START:unique
+  # START_HIGHLIGHT
+  describe "#add_product" do
+    context "adding unique products" do
+      before do
+        cart.add_product(book_one).save!
+        cart.add_product(book_two).save!
       end
-      edit 'javascript_include_tag', :highlight do
-        msub /include_(tag.*) %>/, 'merged :base'
-        msub /<%=() /, ' raw'
+
+      it "has two line items" do
+        expect(cart.line_items.size).to eq(2)
+      end
+      it "has a total price of the two items' price" do
+        expect(cart.total_price).to eq(book_one.price + book_two.price)
       end
     end
-  end
-end
+    # END_HIGHLIGHT
+#END:unique
 
-section 27.2, 'HAML' do
-  edit 'Gemfile', 'haml' do
-    edit 'activemerchant', :mark => 'haml'
-    msub /activemerchant.*\n()/, <<-EOF.unindent(6)
-      gem 'haml', '~> 4.0'
-    EOF
-    unless $rails_version =~ /^(3\.|4\.|5\.0)/
-      msub /activemerchant.*\n()/, <<-EOF.unindent(8)
-        gem 'erubis'
-      EOF
-    end
-  end
-  bundle 'install'
+#START:dupes
+    # START_HIGHLIGHT
+    context "adding duplicate products" do
+      before do
+        cart.add_product(book_one).save!
+        cart.add_product(book_one).save!
+      end
 
-  cmd %{rails runner "require \'haml\'"}
-  `rails runner "require 'haml'" 2> /dev/null > /dev/null`
-  unless $?.success?
-    edit 'Gemfile', 'plugins' do
-      msub /()gem 'haml'/, '# '
-    end
-    next
-  end
-
-  restart_server
-  cmd 'cat app/views/store/index.html.erb'
-  cmd 'rm app/views/store/index.html.erb'
-  edit 'app/views/store/index.html.haml' do
-    self.all = read('plugins/index.html.haml')
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    if $rails_version =~ /^3\./
-      sub!(/(\s*- cache.*?do)(.*)/m) {$2.gsub(/^  /,'')}
-      sub!(/(\s*- cache.*?do)(.*)/m) {$2.gsub(/^  /,'')}
-    end
-  end
-  get '/'
-end
-
-if $rails_version =~ /^3\.0/
-  section '27.1.4', 'JQuery' do
-    edit 'Gemfile', 'plugins' do
-      msub /haml.*\n()/, <<-EOF.unindent(8), :highlight
-        gem 'jquery-rails', '~> 0.2.2'
-      EOF
-    end
-    bundle 'install'
-    generate 'jquery:install --ui --force'
-    edit 'app/views/line_items/create.js.rjs' do
-      clear_all_marks
-    end
-    cmd 'rm app/views/line_items/create.js.rjs'
-    edit 'app/views/line_items/create.js.erb' do
-      self.all = read('plugins/create.js.erb')
-    end
-    edit 'app/views/layouts/application.html.erb', 'banner' do
-      msub /()\s+<div/, "\n<!-- #START:banner -->\n<!-- ... -->"
-      msub /<\/div>\n()/, "<!-- ... -->\n<!-- END:banner -->\n"
-      edit 'javascript_tag', :highlight do
-        msub /"(.*)"/, "$('.locale input').hide()"
+      it "has one line item" do
+        expect(cart.line_items.size).to eq(1)
+      end
+      it "has a line item with a quantity of 2" do
+        expect(cart.line_items.first.quantity).to eq(2)
+      end
+      it "has a total price of twice the product's price" do
+        expect(cart.total_price).to eq(book_one.price * 2)
       end
     end
-    test
-    edit 'test/*/line_items_controller_test.rb', 'ajax' do
-      clear_all_marks
-      dcl "should create line_item via ajax", :mark => 'ajax' do
-        edit ':replace_html', :highlight do
-          msub /assert_select_(rjs .*) do/, "jquery :html, '#cart'"
-        end
-      end
-    end
-    test
-    edit 'config/asset_packages.yml' do
-      if include? 'dragdrop'
-        msub /\s+- (dragdrop)\n/, 'jquery'
-        msub /\s+- (effects)\n/, 'jquery-ui'
-        msub /(\s+- controls)\n/, ''
-        msub /(\s+- prototype)\n/, ''
-      else
-        msub /().*prototype\n/, "  - jquery\n"
-        msub /\s+- (prototype)\n/, 'jquery-ui'
-      end
-    end
-    rake 'asset:packager:build_all'
-    db :seed
+  # END_HIGHLIGHT
+#END:dupes
   end
-end
-
-section 27.3, 'Pagination' do
-  if $rails_version =~ /^3\./
-    desc 'Add in the will_paginate gem'
-  else
-    desc 'Add in the kaminari gem'
-  end
-  edit 'Gemfile', 'plugins' do
-    msub /haml.*\n()/, <<-EOF.unindent(6)
-      gem 'will_paginate', '~> 3.0'
-    EOF
-    unless $rails_version =~ /^3\./
-      sub! /'will_paginate.*'/, "'kaminari', '~> 1.0'" 
-    end
+  }
+  msub /^end()/, %{
+#END:examples}
   end
 
-  `rake environment RAILS_ENV=test db:migrate` if $rails_version =~ /^3\.0/
-  if File.exist? 'test/unit'
-    `ruby -I test test/unit/order_test.rb 2> /dev/null > /dev/null`
-  elsif $rails_version =~ /^[34]/
-    `rake test test/models/order_test.rb 2> /dev/null > /dev/null`
-  else
-    `rails test test/models/order_test.rb 2> /dev/null > /dev/null`
-  end
-  unless $?.success?
-    test "test/*/order_test.rb"
-    edit 'Gemfile' do
-      msub /()gem '(will_paginate|kaminari)'/, '# '
-    end
-    next
-  end
-
-  restart_server
-  
-  desc 'Load in a few orders'
-  cmd 'mkdir script' unless File.exist? 'script'
-  edit "script/load_orders.rb" do
-    self.all = <<-'EOF'.unindent(6)
-      Order.transaction do
-        (1..100).each do |i|
-          Order.create(:name => "Customer #{i}", :address => "#{i} Main Street",
-            :email => "customer-#{i}@example.com", :pay_type => "Check")
-        end
-      end
-    EOF
-    gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
-  end
-
-  runner "script/load_orders.rb"
-
-  desc 'Modify the controller to do pagination'
-  edit 'app/controllers/orders_controller.rb', 'index' do
-    dcl 'index', :mark do
-      # msub /^()/, "require 'will_paginate'\n", :highlight
-      edit 'Order.all', :highlight
-      if $rails_version =~ /^3\./
-        msub /Order\.(all)/, 
-          "paginate :page=>params[:page], :order=>'created_at desc',\n" + 
-          '      :per_page=>10'
-      else
-        msub /Order\.(all)/, 
-          "order('created_at desc').page(params[:page])"
-      end
-    end
-    gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
-  end
-
-  desc 'Add some navigational aids'
-  edit 'app/views/orders/index.html.erb' do
-    self << <<-EOF.unindent(6)
-      <!-- START_HIGHLIGHT -->
-      <p><%= will_paginate @orders %></p>
-      <!-- END_HIGHLIGHT -->
-    EOF
-    gsub! 'will_','' unless $rails_version =~ /^3\./
-    if $rails_version !~ /^3\.[01]/
-      if self =~ /,( ):?data/
-        msub /,( ):?data/, "\n              "
-      else
-        msub /,( ):?method/, "\n              "
-      end
-    end
-  end
-
-  desc 'Do a login'
-  post '/login',
-    'name' => 'dave',
-    'password' => 'secret'
-
-  desc 'Show the orders'
-  get '/orders'
-
-  publish_code_snapshot :w
+  publish_code_snapshot nil, :rspec
 end
 
 required = %w(will_paginate nokogiri htmlentities)
