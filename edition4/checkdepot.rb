@@ -386,7 +386,7 @@ class DepotTest < Gorp::TestCase
       if $rails_version =~ /^4/
         assert_test_summary :tests => 51, :assertions => 164
       else
-        assert_test_summary :tests => 51, :assertions => 147
+        assert_test_summary :tests => 48, :assertions => 97
       end
     end
   end
@@ -403,7 +403,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 56, :assertions => 170
     else
-      assert_test_summary :tests => 56, :assertions => 153
+      assert_test_summary :tests => 53, :assertions => 103
     end
   end
 
@@ -418,7 +418,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 56, :assertions => 170
     else
-      assert_test_summary :tests => 56, :assertions => 153
+      assert_test_summary :tests => 53, :assertions => 103
     end
   end
 
@@ -503,7 +503,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 57, :assertions => 172
     else
-      assert_test_summary :tests => 57, :assertions => 154
+      assert_test_summary :tests => 54, :assertions => 104
     end
   end
 
@@ -548,63 +548,5 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /"12,345,678"/
     assert_select '.stdout', /"12_345_678"/
     assert_select '.stdout', /"16.67"/
-  end
-
-  section 26.1, 'rack' do
-    assert_select 'p', '26.0'
-    assert_select 'h2', /^Seven Mobile Apps in Seven Weeks$/
-  end
-
-  section 26.2, 'rake' do
-    assert_select '.stderr', /^mkdir -p .*db\/backup$/
-    assert_select '.stderr', 
-      /^sqlite3 .*?db\/production\.db \.dump (>|&gt;) .*\/production.backup$/
-  end
-
-  section 27.1, 'Active Merchant' do
-    ticket 477,
-      :list => 'activemerchant',
-      :title =>  "prepping for Rails 4.0",
-      :match => /cannot load such file -- active_support\/core_ext\/object\/conversions/
-    assert_select '.stdout', 'Is 4111111111111111 valid?  false'
-  end
-
-  if File.exist? 'public/images'
-    section '26.1.2', 'Asset Packager' do
-      assert_select '.stdout', 'config/asset_packages.yml example file created!'
-      assert_select '.stdout', '  - depot'
-      assert_select '.stdout', 
-        /Created .*\/public\/javascripts\/base_packaged\.js/
-    end
-  end
-
-  section 27.2, 'HAML' do
-    ticket 895,
-      :list => 'haml',
-      :title =>  "Erubis deprecated in Rails 5.1",
-      :match => /DEPRECATION WARNING: ActionView::Template::Handlers::Erubis is deprecated/
-
-    assert_select 'h1', 'Your Pragmatic Catalog'
-    assert_select 'span.price', /\$45.00/
-  end
-
-  if File.exist? 'public/images'
-    section '26.1.4', 'JQuery' do
-      assert_select '.logger', /force\s+public\/javascripts\/rails\.js/
-      assert_select '.stdout', /No RJS statement/
-      assert_select '.stdout', /4\d tests, 7\d assertions, 0 failures, 0 errors/
-    end
-  end
-
-  section 27.3, "Iteration G3: Pagination" do
-    next if Gorp::Config[:skip_pagination]
-
-    ticket 774,
-      :list => 'kaminari',
-      :title =>  "non sanitized request parameter",
-      :match => /Generating a URL from non sanitized request parameters is insecure!/
-    assert_select 'td', 'Customer 100'
-    # assert_select "a[href='http://localhost:#{$PORT}/orders?page=4' or href='http://localhost:#{$PORT}/en/orders?page=4']"
-    assert_select "a", href: %r{http://localhost:#{$PORT}(/en)?/orders?page=4}
   end
 end
