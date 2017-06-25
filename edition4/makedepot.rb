@@ -4859,26 +4859,9 @@ section 22.1, 'Views' do
   publish_code_snapshot :u
 end
 
-section 22.2, 'Form Helpers' do
-  rails 'views'
-  generate 'model model input:string address:text color:string ' +
-    'ketchup:boolean mustard:boolean mayonnaise:boolean start:date ' +
-    'alarm:time'
-  generate 'controller Form input'
-  db :migrate
-  restart_server
+section 25.1, 'RSpec' do
 
-  edit 'app/views/form/input.html.erb' do
-    self.all = read('form/input.html.erb')
-  end
-  get '/form/input'
-
-  publish_code_snapshot nil, :views
-end
-
-section 25.1, 'Customizing and Extending Rails' do
-
-  edit 'Gemfile', 'capistrano' do
+  edit 'Gemfile', 'rspec' do
     msub /()group :development, :test do/, %{
 # START:rspec-rails
 }
@@ -4965,6 +4948,114 @@ EOF
 
   publish_code_snapshot nil, :rspec
 end
+
+section 25.2, 'Slim' do
+  edit 'Gemfile', 'slim' do
+    clear_all_marks
+    msub /(gem 'foreman')/, %{
+# START:slim
+gem 'foreman'
+# START_HIGHLIGHT
+gem 'slim-rails'
+# END_HIGHLIGHT
+# END:slim
+}
+  end
+  bundle 'install'
+
+  cmd "rm app/views/store/index.html.erb"
+  edit "app/views/store/index.slim" do
+    self << %{
+p#notice = notice
+
+h1 = t('.title_html')
+
+- cache @products do
+  - @products.each do |product|
+    - cache product do
+      .entry
+        = image_tag(product.image_url)
+        h3 = product.title
+        = sanitize(product.description)
+        .price_line 
+          span.price = number_to_currency(product.price)
+          = button_to t('.add_html'),
+              line_items_path(product_id: product, locale: I18n.locale),
+              remote: true
+}
+  end
+
+  publish_code_snapshot nil, :slim
+end
+
+section 25.3, "CSS with Webpack" do
+  cmd "mkdir app/javascript/packs/css"
+  cmd "mv app/assets/stylesheets/application.scss app/javascript/packs"
+  cmd "mv app/assets/stylesheets/*.scss app/javascript/packs/css"
+  files = Dir["app/javascript/packs/css/*.scss"].to_a.map { |file|
+    basename = File.basename(file)
+    "@import \"css/#{basename}\";"
+  }.join("\n")
+  edit "app/javascript/packs/application.scss" do
+    msub /()body/, %{
+// START:import
+// START_HIGHLIGHT
+#{files}
+// END_HIGHLIGHT
+// END:import
+}
+  end
+  edit "app/views/layouts/application.html.erb" do
+    msub /(<%= stylesheet_link_tag.*$)/,""
+    msub /(^.*'data-turbolinks-track': .*$)/, %{
+    <!-- START:stylesheet_pack_tag -->
+    <!-- START_HIGHLIGHT -->
+    <%= stylesheet_pack_tag "application" %>
+    <!-- END_HIGHLIGHT -->
+    <!-- END:stylesheet_pack_tag -->
+    }
+  end
+  cmd "yarn add postcss-cssnext"
+  edit ".postcssrc.yml" do
+    msub /autoprefixer: {}()/, %{
+  postcss-cssnext: {}
+    }
+  end
+  edit "app/javascript/packs/css/store.scss" do
+    msub /().store {/,%{
+// START:postcss
+}
+    msub /(border-bottom: 3px dotted #77d;)/, %{
+      // START_HIGHLIGHT
+    border-bottom: 3px dotted gray(50%);
+      // END_HIGHLIGHT
+}
+    msub /()\/\* An entry in the store catalog \*\//, %{
+    // END:postcss
+}
+  end
+  restart_server
+  publish_code_snapshot nil, :'webpack-css'
+end
+
+# This seems to make a new rails app and blow away the depot app, so moving this here
+section 22.2, 'Form Helpers' do
+  rails 'views'
+  generate 'model model input:string address:text color:string ' +
+    'ketchup:boolean mustard:boolean mayonnaise:boolean start:date ' +
+    'alarm:time'
+  generate 'controller Form input'
+  db :migrate
+  restart_server
+
+  edit 'app/views/form/input.html.erb' do
+    self.all = read('form/input.html.erb')
+  end
+  get '/form/input'
+
+  publish_code_snapshot nil, :views
+end
+
 
 required = %w(will_paginate nokogiri htmlentities)
 required.push 'rails' if $rails == 'rails'
