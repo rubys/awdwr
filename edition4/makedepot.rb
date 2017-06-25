@@ -1770,6 +1770,9 @@ section 11.1, 'Iteration F1: Moving the Cart' do
       msub /\A()/,   "          <% if @cart %>\n", :highlight
       msub /\n()\Z/, "          <% end %>\n",     :highlight
     end
+    gsub! '<!-- START_HIGHLIGHT -->', '      <!-- START_HIGHLIGHT -->'
+    gsub! '<!-- END_HIGHLIGHT -->', '      <!-- END_HIGHLIGHT -->'
+    sub! '<!-- END:hidden_div -->', '    <!-- END:hidden_div -->'
   end
 
   if $rails_version =~ /^[34]/
