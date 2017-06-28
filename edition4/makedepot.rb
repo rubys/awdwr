@@ -4858,6 +4858,24 @@ section 22.1, 'Views' do
   publish_code_snapshot :u
 end
 
+section 22.2, 'Form Helpers' do
+  rails 'views'
+  generate 'model model input:string address:text color:string ' +
+    'ketchup:boolean mustard:boolean mayonnaise:boolean start:date ' +
+    'alarm:time'
+  generate 'controller Form input'
+  db :migrate
+  restart_server
+
+  edit 'app/views/form/input.html.erb' do
+    self.all = read('form/input.html.erb')
+  end
+  get '/form/input'
+
+  publish_code_snapshot nil, :views
+end
+
+
 section 25.1, 'RSpec' do
 
   edit 'Gemfile', 'rspec' do
@@ -4945,7 +4963,7 @@ EOF
 #END:examples}
   end
 
-  publish_code_snapshot nil, :rspec
+  publish_code_snapshot :xa
 end
 
 section 25.2, 'Slim' do
@@ -4984,7 +5002,7 @@ h1 = t('.title_html')
 }
   end
 
-  publish_code_snapshot nil, :slim
+  publish_code_snapshot :xb
 end
 
 section 25.3, "CSS with Webpack" do
@@ -5034,25 +5052,7 @@ section 25.3, "CSS with Webpack" do
 }
   end
   restart_server
-  publish_code_snapshot nil, :'webpack-css'
-end
-
-# This seems to make a new rails app and blow away the depot app, so moving this here
-section 22.2, 'Form Helpers' do
-  rails 'views'
-  generate 'model model input:string address:text color:string ' +
-    'ketchup:boolean mustard:boolean mayonnaise:boolean start:date ' +
-    'alarm:time'
-  generate 'controller Form input'
-  db :migrate
-  restart_server
-
-  edit 'app/views/form/input.html.erb' do
-    self.all = read('form/input.html.erb')
-  end
-  get '/form/input'
-
-  publish_code_snapshot nil, :views
+  publish_code_snapshot :xc
 end
 
 
