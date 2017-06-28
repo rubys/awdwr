@@ -4877,6 +4877,7 @@ end
 
 
 section 25.1, 'RSpec' do
+  Dir.chdir(File.join($WORK, 'depot'))
 
   edit 'Gemfile', 'rspec' do
     msub /()group :development, :test do/, %{

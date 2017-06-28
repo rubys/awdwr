@@ -186,6 +186,8 @@ unless $rails_version =~ /^3\./
 end
 
 unless $rails_version =~ /^[34]|^5\.0/
+  gem 'rspec-rails'
+  gem 'slim-rails'
   gem 'foreman'
   gem 'i18n-js'
 end
