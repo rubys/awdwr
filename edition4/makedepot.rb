@@ -1926,18 +1926,10 @@ gem 'jquery-ui-rails'
 
       raise "can't find jquery-ui/effect-blind" unless effect
 
-      if self =~ /jquery_ujs/
-        msub /()\/\/= require jquery_ujs/, <<-EOF.unindent(10)
-          //#START_HIGHLIGHT
-          //= require #{effect}
-          //#END_HIGHLIGHT
-        EOF
-      else
-        msub /\/\/= require jquery\n()/, <<-EOF.unindent(10)
-          //#START_HIGHLIGHT
-          //= require #{effect}
-          //#END_HIGHLIGHT
-        EOF
+      edit 'require jquery' do
+        sub! /\A/, "//#START_HIGHLIGHT\n"
+        sub! /\z/, "\n//= require #{effect}"
+        sub! /\z/, "\n//#END_HIGHLIGHT"
       end
     end
   end
