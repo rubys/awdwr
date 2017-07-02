@@ -2129,7 +2129,7 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   edit 'app/views/carts/_cart.html.erb' do
     clear_highlights
     msub /().*Empty cart.*\n.*>/, <<-'EOF'.unindent(6), :highlight
-      <%= button_to "Checkout", new_order_path, :method => :get %>
+      <%= button_to 'Checkout', new_order_path, :method => :get %>
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
@@ -4315,7 +4315,7 @@ section 16.2, 'Task K2: translating the store front' do
     gsub! 'Your Cart', "<%= t('.title') %>"
     sub! /(t\('\..*'\).*)/, "\\1\n<!-- END_HIGHLIGHT -->"
 
-    gsub! '"Checkout"', "t('.checkout')"
+    gsub! "'Checkout'", "t('.checkout')"
     msub /new_order_path(,)/, "(locale: I18n.locale),\n   "
     sub! /(I18n.locale.*)/, "\\1\n# END_HIGHLIGHT"
 
