@@ -3331,6 +3331,7 @@ section 14.1, 'Iteration I1: Email Notifications' do
   end
 
   test 'test/mailers/order*_test.rb'
+  publish_code_snapshot :qa
 end
 
 section 14.2, 'Iteration I2: Connecting to a Slow Payment Processor with Active Job' do
@@ -3492,7 +3493,7 @@ class OrdersTest < ApplicationSystemTestCase
 # START:check_mail
 }
   end
-  publish_code_snapshot :qa
+  publish_code_snapshot :qb
 end
 
 section 14.3, 'Playtime' do
