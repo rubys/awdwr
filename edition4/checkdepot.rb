@@ -268,12 +268,12 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 31, :assertions => 78
     else
-      assert_test_summary :tests => 31, :assertions => 66 
+      assert_test_summary :tests => 31, :assertions => 67
     end
   end
 
   section 11.4, "Iteration F4: Hide an Empty Cart" do
-    assert_select '#cart[style="display: none"]'
+    assert_select '#cart'
     assert_select '.total_cell', '$142.00'
   end
 
@@ -344,14 +344,14 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 39, :assertions => 94
     else
-      assert_test_summary :tests => 39, :assertions => 78
+      assert_test_summary :tests => 39, :assertions => 79
     end
   end
 
   unless $rails_version =~ /^4|^5\.0/
     section 13.2, "Iteration H2: System testing" do
       assert_test_summary :tests => 1, :assertions => 2
-      assert_test_summary :tests => 39, :assertions => 78
+      assert_test_summary :tests => 39, :assertions => 79
     end
   end
 
@@ -366,7 +366,8 @@ class DepotTest < Gorp::TestCase
   end
 
   section 14.2, 'Iteration I2: Connecting to a Slow Payment Processor with Active Job' do
-     # TODO
+    # TODO
+    assert_test_summary :tests => 41, :assertions => 89
   end
 
   section 15.1, "Iteration J1: Adding Users" do
@@ -386,7 +387,7 @@ class DepotTest < Gorp::TestCase
       if $rails_version =~ /^4/
         assert_test_summary :tests => 51, :assertions => 164
       else
-        assert_test_summary :tests => 48, :assertions => 97
+        assert_test_summary :tests => 48, :assertions => 98
       end
     end
   end
@@ -403,7 +404,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 56, :assertions => 170
     else
-      assert_test_summary :tests => 53, :assertions => 103
+      assert_test_summary :tests => 53, :assertions => 104
     end
   end
 
@@ -418,7 +419,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 56, :assertions => 170
     else
-      assert_test_summary :tests => 53, :assertions => 103
+      assert_test_summary :tests => 53, :assertions => 104
     end
   end
 
@@ -441,7 +442,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 45, :assertions => 87
     else
-      assert_test_summary :tests => 45, :assertions => 66
+      assert_test_summary :tests => 45, :assertions => 67
     end
 
     assert_select '.stdout', /login"(>|&gt;)redirected/
@@ -503,7 +504,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 57, :assertions => 172
     else
-      assert_test_summary :tests => 54, :assertions => 104
+      assert_test_summary :tests => 54, :assertions => 105
     end
   end
 
