@@ -1804,38 +1804,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
     msub /format.html.*store_index_url.*\n()/, "        format.js\n", :highlight
   end
 
-  desc 'Make the jquery library available to the application'
-  edit 'Gemfile', 'jquery' do
-    clear_all_marks
-
-    self.sub!(/\n*\Z/, "\n\n\n")
-    msub /\n()\Z/, <<-EOF, :mark => 'jquery'
-gem 'jquery-rails'
-    EOF
-    self.sub!(/\n+\Z/, "\n")
-  end
-
-  desc 'Install the gem'
-  bundle 'install'
-
-  desc 'Pull in jquery'
-  edit 'app/assets/javascripts/application.js' do
-    # reflow comments
-    gsub! /^\/\/ [^\n]{76}.*?\n\/\/\n/m do |paragraph|
-      paragraph.gsub(/^\/\//,' ').gsub(/\s+/,' ').strip.
-        gsub(/(.{1,76})(\s+|$)/, "\\1\n").gsub(/^/,'// ') + "//\n"
-    end
-
-    msub /\/\/= require rails-ujs\n()/, <<-EOF
-//#START_HIGHLIGHT
-//= require jquery
-//#END_HIGHLIGHT
-    EOF
-  end
-
-  restart_server
-
-  desc 'Use JavaScript to replace the cart with a new rendering'
+  desc 'Use Coffeescript to replace the cart with a new rendering'
   if File.exist? 'public/images'
     edit 'app/views/line_items/create.js.rjs' do |data|
       data.all =  <<-EOF.unindent(8)
@@ -1843,9 +1812,10 @@ gem 'jquery-rails'
       EOF
     end
   else
-    edit 'app/views/line_items/create.js.erb' do |data|
+    edit 'app/views/line_items/create.js.coffee' do |data|
       data.all =  <<-EOF.unindent(8)
-        $('#cart').html("<%=j render(@cart) %>");
+        cart = document.getElementById("cart")
+        cart.innerHTML = "<%= j render(@cart) %>"
       EOF
     end
   end
@@ -1870,7 +1840,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
   edit 'app/views/line_items/_line_item.html.erb' do
     msub /(<tr>\n)/, <<-EOF.unindent(6), :highlight
       <% if line_item == @current_item %>
-      <tr id="current_item">
+      <tr class="line-item-highlight">
       <% else %>
       <tr>
       <% end %>
@@ -1887,53 +1857,24 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
       EOF
     end
   else
-    edit 'app/views/line_items/create.js.erb' do |data|
+    edit 'app/assets/stylesheets/line_items.scss' do |data|
       msub /.*()/m, "\n" + <<-EOF.unindent(8), :highlight
-        $('#current_item').css({'background-color':'#88ff88'}).
-          animate({'background-color':'#114411'}, 1000);
+        @keyframes line-item-highlight {
+          0% {
+            background: #88ff88;
+          }
+          100% {
+            background: none;
+          }
+        }
+
+        .line-item-highlight {
+          animation: line-item-highlight 1s;
+        }
       EOF
     end
-
-    desc 'Make the jquery-ui libraries available to the application'
-    edit 'Gemfile', 'jquery-ui' do
-      clear_all_marks
-        self.sub!(/\n*\Z/, "\n\n\n")
-        msub /\n()\Z/, <<-EOF, :mark => 'jquery-ui'
-gem 'jquery-ui-rails'
-        EOF
-        self.sub!(/\n+\Z/, "\n")
-    end
-
-    desc 'Install the gem'
-    bundle 'install'
-
-    restart_server
-
-    desc 'Pull in the blind effect from the jquery-ui libraries'
-    edit 'app/assets/javascripts/application.js' do
-      clear_highlights
-      spec = Gem::Specification.find_by_name('jquery-ui-rails')
-      if spec
-        assets = "#{spec.gem_dir}/app/assets/javascripts"
-        if File.exist?("#{assets}/jquery-ui/effects/effect-blind.js")
-          effect = 'jquery-ui/effects/effect-blind'
-        elsif File.exist?("#{assets}/jquery-ui/effect-blind.js")
-          effect = 'jquery-ui/effect-blind'
-        elsif File.exist?("#{assets}/jquery.ui.effect-blind.js")
-          effect = 'jquery.ui.effect-blind'
-        end
-      end
-
-      raise "can't find jquery-ui/effect-blind" unless effect
-
-      edit 'require jquery' do
-        sub! /\A/, "//#START_HIGHLIGHT\n"
-        sub! /\z/, "\n//= require #{effect}"
-        sub! /\z/, "\n//#END_HIGHLIGHT"
-      end
-    end
+    # TODO: Blind effect
   end
-  publish_code_snapshot :m
 
   desc 'Add an XHR test.'
   edit 'test/*/line_items_controller_test.rb', 'ajax' do
@@ -1945,9 +1886,7 @@ gem 'jquery-ui-rails'
         end 
     
         assert_response :success
-        assert_select_rjs :replace_html, 'cart' do
-          assert_select 'tr#current_item td', /Programming Ruby 1.9/
-        end
+        assert_match /<tr class=\\\\\"line-item-highlight/, @response.body
       end
     EOF
 
@@ -1965,6 +1904,7 @@ gem 'jquery-ui-rails'
   end
 
   test
+  publish_code_snapshot :m
 
 end
 
@@ -1986,50 +1926,44 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
       EOF
     end
   else
-    edit 'app/views/line_items/create.js.erb' do
-      clear_highlights
-      msub /().*render/, <<-EOF.unindent(8) + "\n", :highlight
-        if ($('#cart tr').length == 1) { $('#cart').show('blind', 1000); }
-      EOF
-    end
   end
 
-  desc 'Look at the app/helpers director'
+  desc 'Look at the app/helpers directory'
   cmd 'ls -p app'
   cmd 'ls -p app/helpers'
 
-  desc 'Call a hidden_div_if helper'
-  edit 'app/views/layouts/application.html.erb', 'hidden_div' do
-    msub /<div id="cart">.*?(<\/div>)/m, '<% end %>' +
-      "\n    <!-- END:hidden_div -->"
-    sub! /^\s*<% if @cart %>\n/, ''
-    sub! /^<!-- START_HIGHLIGHT -->\n/, ''
-    msub /(<div id="cart">)/,
-      "<!-- START:hidden_div -->\n        " +
-      "<% if @cart %>\n<!-- START_HIGHLIGHT -->\n          " +
-      "<%= hidden_div_if(@cart.line_items.empty?, :id => 'cart') do %>"
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  desc 'Call a render_if helper'
+  edit 'app/views/layouts/application.html.erb' do
+    clear_highlights
+    msub /^(\s*<% if @cart %>\n)/,''
+    msub /^(\s*<% end %>\n)/,''
+    msub /^(\s*<%= render @cart %>\n)/,%{
+          <!-- START_HIGHLIGHT -->
+          <%= render_if @cart && @cart.line_items.any?, @cart %>
+          <!-- END_HIGHLIGHT -->
+}
   end
 
   desc 'Implement helper'
   edit 'app/helpers/application_helper.rb' do
     msub /()^end/, <<-EOF.unindent(4), :highlight
-      def hidden_div_if(condition, attributes = {}, &block)
+      def render_if(condition, record)
         if condition
-          attributes["style"] = "display: none"
+          render record
         end
-        content_tag("div", attributes, &block)
       end
     EOF
   end
 
-  desc 'Remove notice'
-  edit 'app/controllers/carts_controller.rb', 'destroy' do
-    clear_highlights
-    dcl 'destroy' do
-      sub! /,\s+:?notice:?\s?=?>? 'Your cart is currently empty'/, ''
-      edit 'format.html', :highlight
-    end
+  desc "hide notice when adding to cart"
+  edit "app/views/line_items/create.js.coffee" do |data|
+    data << %{
+# START_HIGHLIGHT
+notice = document.getElementById("notice")
+if notice
+  notice.style.display = "none"
+# END_HIGHLIGHT
+}
   end
 
   desc 'Demonstrate emptying and recreating the cart'
@@ -2084,7 +2018,7 @@ else
     desc 'Update price when notified of price changes'
     edit 'app/assets/javascripts/channels/products.coffee' do
       edit 'incoming data', :highlight do
-        gsub! /#.*/, '$(".store #main").html(data.html)'
+        gsub! /#.*/, 'document.getElementById("main").innerHTML = data.html'
       end
     end
 
@@ -2497,12 +2431,6 @@ section 12.1, 'Iteration H1: Capturing an Order' do
       EOF
     end
   else
-    edit 'app/views/line_items/create.js.erb' do
-      clear_highlights
-      msub /()/, <<-EOF.unindent(8) + "\n", :highlight
-        $('#notice').hide();
-      EOF
-    end
   end
 end
 
@@ -3493,6 +3421,8 @@ class OrdersTest < ApplicationSystemTestCase
 # START:check_mail
 }
   end
+  cmd 'rake test:system'
+  cmd 'rake test'
   publish_code_snapshot :qb
 end
 
