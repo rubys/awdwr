@@ -7,32 +7,33 @@
   <!-- END_HIGHLIGHT -->
     <%= csrf_meta_tags %>
 
-    <%= stylesheet_link_tag    'application', media: 'all',
-    'data-turbolinks-track': 'reload' %>
-    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= stylesheet_link_tag 'application', media: 'all',
+                            'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application',
+                               'data-turbolinks-track': 'reload' %>
   </head>
 
   <!-- END:head -->
-  <body class="<%= controller.controller_name %>">
+  <body>
   <!-- START_HIGHLIGHT -->
-    <div id="banner">
+    <header class="main">
       <%= image_tag 'logo.svg', alt: 'The Pragmatic Bookshelf' %>
-      <span class="title"><%= @page_title %></span>
-    </div>
-    <div id="columns">
-      <div id="side">
+      <h1><%= @page_title %></h1>
+    </header>
+    <section class="content">
+      <nav class="side_nav">
         <ul>
-          <li><a href="http://www....">Home</a></li>
-          <li><a href="http://www..../faq">Questions</a></li>
-          <li><a href="http://www..../news">News</a></li>
-          <li><a href="http://www..../contact">Contact</a></li>
+          <li><a href="/">Home</a></li>
+          <li><a href="/questions">Questions</a></li>
+          <li><a href="/news">News</a></li>
+          <li><a href="/contact">Contact</a></li>
         </ul>
-      </div>
-      <div id="main">
+      </nav>
   <!-- END_HIGHLIGHT -->
+			<main class='<%= controller.controller_name %>'>
         <%= yield %>
+      </main>
   <!-- START_HIGHLIGHT -->
-      </div>
     </div>
   <!-- END_HIGHLIGHT -->
   </body>

@@ -1,29 +1,26 @@
-<p id="notice"><%= notice %></p>
-
-<!-- START_HIGHLIGHT -->
-<h2>Your Cart</h2>
-<table>
-<!-- END_HIGHLIGHT -->
-  <% @cart.line_items.each do |item| %>
-<!-- START_HIGHLIGHT -->
-    <tr>
-      <td><%= item.quantity %>&times;</td>
-      <td><%= item.product.title %></td>
-      <td class="item_price"><%= number_to_currency(item.total_price) %></td>
-    </tr>
-<!-- END_HIGHLIGHT -->
+<article>
+  <% if notice %>
+    <aside id="notice"><%= notice %></aside>
   <% end %>
 
-<!-- START_HIGHLIGHT -->
-  <tr class="total_line">
-    <td colspan="2">Total</td>
-    <td class="total_cell"><%= number_to_currency(@cart.total_price) %></td>
-  </tr>
-<!-- END_HIGHLIGHT -->
+  <h2>Your Cart</h2>
+  <table>
+    <% @cart.line_items.each do |line_item| %>
+      <tr>
+        <td class="quantity"><%= line_item.quantity %></td>
+        <td><%= line_item.product.title %></td>
+        <td class="price"><%= number_to_currency(line_item.total_price) %></td>
+      </tr>
+    <% end %>
+    <tfoot>
+      <tr>
+        <th colspan="2">Total:</td>
+        <td class="price"><%= number_to_currency(@cart.total_price) %></td>
+      </tr>
+    </tfoot>
+  </table>
+  <%= button_to 'Empty cart', @cart,
+                method: :delete,
+                data: { confirm: 'Are you sure?' } %>
 
-<!-- START_HIGHLIGHT -->
-</table>
-<!-- END_HIGHLIGHT -->
-
-<%= button_to 'Empty cart', @cart, :method => :delete,
-    :data => { :confirm => 'Are you sure?' } %>
+</article>

@@ -1,14 +1,20 @@
-<p id="notice"><%= notice %></p>
+<% if notice %>
+  <aside id="notice"><%= notice %></aside>
+<% end %>
 
 <h1>Your Pragmatic Catalog</h1>
 
-<% @products.each do |product| %>
-  <div class="entry">
-    <%= image_tag(product.image_url) %>
-    <h3><%= product.title %></h3>
-    <%= sanitize(product.description) %>
-    <div class="price_line">
-      <span class="price"><%= product.price %></span>
-    </div>
-  </div>
-<% end %>
+<ul class="catalog">
+  <% @products.each do |product| %>
+    <li>
+      <%= image_tag(product.image_url) %>
+      <h2><%= product.title %></h2>
+      <p>
+        <%= sanitize(product.description) %>
+      </p>
+      <div class="price">
+        <%= product.price %>
+      </div>
+    </li>
+  <% end %>
+</ul>

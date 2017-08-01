@@ -134,15 +134,15 @@ class DepotTest < Gorp::TestCase
   section 8.1, "Iteration C1: Create the Catalog Listing" do
     assert_select 'p', 'Find me in app/views/store/index.html.erb'
     assert_select 'h1', 'Your Pragmatic Catalog'
-    assert_select 'span.price', '45.0'
+    assert_select '.price', '45.0'
   end
 
   section 8.2, "Iteration C2: Add a Page Layout" do
-    assert_select '#banner img[alt="The Pragmatic Bookshelf"]'
+    assert_select 'header.main img[alt="The Pragmatic Bookshelf"]'
   end
 
   section 8.3, "Iteration C3: Use a Helper to Format the Price" do
-    assert_select 'span.price', '$45.00'
+    assert_select '.price', '$45.00'
   end
 
   section 8.4, "Iteration C4: Functional Testing" do
@@ -179,7 +179,7 @@ class DepotTest < Gorp::TestCase
 
   section 9.3, "Iteration D3: Adding a button" do
     assert_select 'input[type=submit][value="Add to Cart"]'
-    assert_select "a[href='http://localhost:#{$PORT}/carts/1']", 'redirected'
+    #assert_select "a[href='http://localhost:#{$PORT}/carts/1']", 'redirected'
     assert_select '#notice', 'Line item was successfully created.'
 
     assert_select 'li', /^Seven Mobile Apps in Seven Weeks$/
@@ -198,7 +198,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.1, "Iteration E1: Creating A Smarter Cart" do
     assert_select 'li', /Rails, Angular, Postgres, and Bootstrap/u
-    assert_select '#main li', :count => 4, :html => /1 .+ Seven Mobile Apps in Seven Weeks/
+    assert_select 'main li', :count => 3, :html => /1 .+ Seven Mobile Apps in Seven Weeks/
     assert_select '.stdout', /^=+ (\d+)? *CombineItemsInCart: reverting =+$/
     assert_select '.stdout', /^ +down +\d+ +Combine items in cart$/
     if $rails_version =~ /^3\./
@@ -224,7 +224,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.3, "Iteration E3: Finishing the Cart" do
     assert_select '#notice', 'Your cart is currently empty'
-    assert_select '.total_cell', '$116.00'
+    assert_select 'tfoot .price', '$116.00'
     assert_select 'input[type=submit][value="Empty cart"]'
   end
 
@@ -248,7 +248,7 @@ class DepotTest < Gorp::TestCase
 
   section 11.1, "Iteration F1: Moving the Cart" do
     assert_select 'h2', 'Your Cart'
-    assert_select '.total_cell', '$116.00'
+    assert_select 'tfoot .price', '$116.00'
     assert_select 'input[type=submit][value="Empty cart"]'
 
     assert_select 'h2, code', "'nil' is not an ActiveModel-compatible object. It must implement :to_partial_path."
@@ -375,7 +375,7 @@ class DepotTest < Gorp::TestCase
       :title =>  "Delivering mail causes tests to fail",
       :match => /SQLite3::BusyException: database is locked/
 
-    assert_select 'legend', 'Enter User Details'
+    assert_select 'h2', 'Enter User Details'
     if $rails_version =~ /^[34]/
       assert_select 'h1', /Listing Users/i
     else
@@ -383,7 +383,7 @@ class DepotTest < Gorp::TestCase
     end
     assert_select 'td', 'dave'
     unless $rails_version =~ /^3/
-      assert_select 'p', 'User dave was successfully created.'
+      assert_select 'aside', 'User dave was successfully created.'
       if $rails_version =~ /^4/
         assert_test_summary :tests => 51, :assertions => 164
       else
@@ -424,7 +424,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 15.4, "Iteration J4: Adding a Sidebar" do
-    assert_select 'legend', 'Please Log In'
+    assert_select 'h2', 'Please Log In'
     assert_select 'input[type=submit][value=Login]'
     assert_select 'h1', 'Welcome'
     assert_select "a[href='http://localhost:#{$PORT}/login']", 'redirected'
@@ -471,7 +471,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.price', /45,00(.|&#?\w+;)\$US/u
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
     assert_select 'input[type=submit][value$="dir al Carrito"]'
-    assert_select 'td', /1(.|&#?\w+;)/u
+    #assert_select 'td', /1(.|&#?\w+;)/u
     assert_select 'td', 'Rails, Angular, Postgres, and Bootstrap'
   end
 
