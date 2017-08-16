@@ -45,7 +45,7 @@ section 2, 'Instant Gratification' do
   rails 'demo1', :work
 
   restart_server
-  get "/"#, screenshot: { filename: "hello_rails.png", dimensions: [ (640 *2), (480*2) ] }
+  get "/", screenshot: { filename: "demo2_1_hello_rails.pdf", dimensions: [ 300, 300 ] }
 
   desc 'See what files were created'
   cmd 'ls -p'
@@ -59,7 +59,7 @@ section 2, 'Instant Gratification' do
   restart_server
 
   desc 'Attempt to fetch the file - note that it is missing'
-  get '/say/hello'#, screenshot: { filename: "hello_missing.png", dimensions: [320,200] }
+  get '/say/hello', screenshot: { filename: "demo2_2_hello_missing.pdf", dimensions: [320,200] }
 
   desc 'Replace file with a simple hello world'
   edit 'app/views/say/hello.html.erb' do
@@ -69,7 +69,7 @@ section 2, 'Instant Gratification' do
   end
 
   desc 'This time it works!'
-  get '/say/hello'#, screenshot: { filename: "hello_works.png", dimensions: [320,200] }
+  get '/say/hello', screenshot: { filename: "demo2_3_hello_works.pdf", dimensions: [320,200] }
   publish_code_snapshot :work, :demo1
 
   desc 'Add a simple expression'
@@ -81,7 +81,7 @@ section 2, 'Instant Gratification' do
       </p>
     EOF
   end
-  get '/say/hello'
+  get '/say/hello', screenshot: { filename: "demo2_4_hello_time.pdf", dimensions: [ 320, 200 ] }
   publish_code_snapshot :work, :demo2
 
   desc 'Evaluate the expression in the controller.'
@@ -115,7 +115,7 @@ section 2, 'Instant Gratification' do
       </p>
     EOF
   end
-  get '/say/goodbye'
+  get '/say/goodbye', screenshot: { filename: "demo4_1_goodbye.pdf", dimensions: [ 320, 200 ] }
   publish_code_snapshot :work, :demo4
 
   desc 'Add a link from the hello page to the goodbye page'
@@ -128,7 +128,7 @@ section 2, 'Instant Gratification' do
       </p>
     EOF
   end
-  get '/say/hello'
+  get '/say/hello', screenshot: { filename: "demo5_1_goodbye_link.pdf", dimensions: [ 320, 200 ] }
 
   desc 'Add a link back to the hello page'
   edit 'app/views/say/goodbye.html.erb' do
@@ -144,10 +144,10 @@ section 2, 'Instant Gratification' do
   edit 'app/controllers/say_controller.rb' do
    sub! 'Time.now', 'Time.know'
   end
-  get '/say/hello'
+  get '/say/hello', screenshot: { filename: "demo5_2_typo.pdf", dimensions: [ 320, 200 ] }
 
   desc 'Intentionally introduce a typo in a URL'
-  get '/say/hullo'
+  get '/say/hullo', screenshot: { filename: "demo5_2_route_typo.pdf", dimensions: [ 320, 200 ] }
 
   publish_code_snapshot :work, :demo5
 
@@ -230,7 +230,8 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   restart_server
 
   desc 'Get an (empty) list of products'
-  get '/products'
+  get '/products', screenshot: { filename: "a_1_products.pdf", dimensions: [ 320,200] }
+  get '/products/new', screenshot: { filename: "a_2_new_product.pdf", dimensions: [ 320,400] }
 
   desc 'Show (and modify) one of the templates produced'
   edit 'app/views/products/_form.html.erb' do
@@ -241,25 +242,38 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   end
 
   desc 'Create a product'
+  new_product_title = 'Seven Mobile Apps in Seven Weeks'
+  new_product_description = %{
+<p>
+  <em>Native Apps, Multiple Platforms</em>
+  Answer the question “Can we build this for ALL the
+  devices?” with a resounding YES. This book will help you
+  get there with a real-world introduction to seven
+  platforms, whether you’re new to mobile or an experienced
+  developer needing to expand your options. Plus, you’ll
+  find out which cross-platform solution makes the most
+  sense for your needs.
+</p>
+}
+  new_product_price = "29.00"
+  new_product_image_url = "7apps.jpg"
+  get '/products/new', screenshot: {
+    filename: "a_3_new_product_filled_in.pdf",
+    form_data: {
+      'product[title]' => new_product_title,
+      'product[description]' => new_product_description,
+      'product[price]' => new_product_price,
+      'product[image_url]' => new_product_image_url
+    }
+  }
   post '/products/new',
-    'product[title]' => 'Seven Mobile Apps in Seven Weeks',
-    'product[description]' => <<-EOF.unindent(6),
-      <p>
-        <em>Native Apps, Multiple Platforms</em>
-        Answer the question “Can we build this for ALL the
-        devices?” with a resounding YES. This book will help you
-        get there with a real-world introduction to seven
-        platforms, whether you’re new to mobile or an experienced
-        developer needing to expand your options. Plus, you’ll
-        find out which cross-platform solution makes the most
-        sense for your needs.
-      </p>
-    EOF
-    'product[price]' => '29.00',
-    'product[image_url]' => '7apps.jpg'
+    'product[title]' => new_product_title,
+    'product[description]' => new_product_description,
+    'product[price]' => new_product_price,
+    'product[image_url]' => new_product_image_url
 
   desc 'Verify that the product has been added'
-  get '/products'
+  get '/products', screenshot: { filename: "a_4_added_product.pdf", dimensions: [ 720,380] }
 
   desc "And, just to verify that we haven't broken anything"
   test
@@ -288,7 +302,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     desc 'Add some style'
     edit "app/assets/stylesheets/products*.scss" do
       msub /(\s*)\Z/, "\n\n"
-      msub /\n\n()\Z/, read('products.css.scss'), :highlight
+      msub /\n\n()\Z/, read('products.css.scss')
     end
   end
 
@@ -303,9 +317,13 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   desc 'Link to the stylesheet in the layout'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
-    edit '<body>', :highlight
-    msub /<body()>/, " class='<%= controller.controller_name %>'"
-
+    msub /^(    <%= yield %>)/,%{
+    <!-- START_HIGHLIGHT -->
+    <main class='<%= controller.controller_name %>'>
+      <%= yield %>
+    </main>
+    <!-- END_HIGHLIGHT -->
+}
     if self =~ /, ['"]data-turbolinks-track['"]/
       msub /,( )['"]data-turbolinks-track['"]/, "\n    "
     end
@@ -321,7 +339,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   end
 
   desc 'See the finished result'
-  get '/products'
+  get '/products', screenshot: { filename: "a_5_styled_products.pdf", dimensions: [ 800,400] }
 end
 
 section 6.3, 'Playtime' do
@@ -392,10 +410,11 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
 
   desc 'Demonstrate failures.'
   post '/products/new',
-    'product[price]' => '0.0'
+    { 'product[price]' => '0.0' },
+    screenshot: { filename: "b_1_validation_errors.pdf", dimensions: [ 640, 720 ], submit_form: true }
 
   desc 'Demonstrate more failures.'
-  post '/products/new',
+  post '/products/new', {
     'product[title]' => 'Pragmatic Unit Testing',
     'product[description]' => <<-EOF.unindent(6),
       A true masterwork.  Comparable to Kafka at
@@ -405,7 +424,8 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
     EOF
     'product[image_url]' => 
       (File.exist?('public/images') ? '/images/utj.jpg' : 'utj.jpg'),
-    'product[price]' => 'wibble'
+    'product[price]' => 'wibble' },
+    screenshot: { filename: "b_2_price_validation_errors.pdf", dimensions: [ 640, 720 ], submit_form: true }
 
   edit 'app/models/product.rb' do |data|
     data.sub! /\s:allow_blank.*,/, ''
@@ -586,7 +606,7 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   end
 
   desc 'Demonstrate that everything is wired together'
-  get '/'
+  get '/', screenshot: { filename: "d_1_new_root.pdf", dimensions: [ 400, 200 ] }
 
   desc 'In the controller, get a list of products from the model'
   edit 'app/controllers/store_controller.rb' do
@@ -604,12 +624,12 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
     desc 'Add some basic style'
     edit "app/assets/stylesheets/store*.scss" do
       msub /(\s*)\Z/, "\n\n"
-      msub /\n\n()\Z/, read('store.css.scss'), :highlight
+      msub /\n\n()\Z/, read('store.css.scss')
     end
   end
 
   desc 'Show our first (ugly) catalog page'
-  get '/'
+  get '/', screenshot: { filename: "d_2_catalog.pdf", dimensions: [ 1024, 600 ] }
   publish_code_snapshot :d
 end
 
@@ -629,16 +649,6 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
   desc 'Modify the stylesheet'
   if DEPOT_CSS =~ /scss/
-    if
-      File.exist? 'app/assets/stylesheets/scaffolds.scss' and
-      File.read('app/assets/stylesheets/scaffolds.scss').include? '33px'
-    then
-      additional_css = <<-EOF.gsub(/^\s+/, '') + "\n"
-        body, body > p, body > ol, body > ul, body > td {margin: 8px !important}
-      EOF
-    else
-      additional_css = ''
-    end
     
     desc 'Rename the application stylesheet so that we can use SCSS'
     cmd "mv app/assets/stylesheets/application.css #{DEPOT_CSS}"
@@ -652,86 +662,72 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
       end
 
       msub /(\s*)\Z/, "\n\n"
-      msub /\n\n()\Z/, additional_css + <<-EOF.unindent(8), :highlight
-        /* START:desktop */
-        #banner {
-          position: relative;
-          min-height: 40px;
-          background: #9c9;
-          padding: 10px;
-          border-bottom: 2px solid;
-          font: small-caps 40px/40px "Times New Roman", serif;
-          color: #282;
-          text-align: center;
+      msub /\n\n()\Z/, <<-EOF
+body {
+  margin: 0;
+  padding: 0;
+}
+header.main {
+  text-align: center; // center on mobile
+  @media (min-width: 30em) {
+    text-align: left; // left align on desktop
+  }
+  background: #282;
+  margin: 0;
+  h1 {
+    display: none;
+  }
+}
+.content {
+  margin: 0;
+  padding: 0;
 
-          img {
-            position: absolute;
-            top: 0; 
-            left: 0;
-            width: 192px;
-          }
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: column; // mobile is horizontally laid out
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+
+  @media (min-width: 30em) {
+    flex-direction: row;  // desktop is vertically laid out
+    -webkit-box-orient: horizontal;
+  }
+
+  nav {
+    padding-bottom: 1em;
+    background: #141;
+    text-align: center;  // mobile has centered nav
+    @media (min-width: 30em) {
+      text-align: left; // desktop nav is left-aligned
+      padding: 1em;     // and needs more padding
+    }
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      @media (min-width: 30em) {
+        padding-right: 1em; // give desktop some extra space
+      }
+      li {
+        margin: 0;
+        padding: 0.5em;
+        text-transform: uppercase;
+        letter-spacing: 0.354em;
+        a {
+          color: #bfb;
+          text-decoration: none;
         }
-
-        #notice {
-          color: #000 !important;
-          border: 2px solid red;
-          padding: 1em;
-          margin-bottom: 2em;
-          background-color: #f0f0f0;
-          font: bold smaller sans-serif;
+        a:hover {
+          background: none;
+          color: white;
         }
-
-        #notice:empty {
-          display: none;
-        }
-
-        #columns {
-          background: #141;
-          display: flex;
-
-          #main {
-            padding: 1em;
-            background: white;
-            flex: 1;
-          }
-
-          #side {
-            padding: 1em 2em;
-            background: #141;
-
-            ul {
-              padding: 0;
-
-              li {
-                list-style: none;
-
-                a {
-                  color: #bfb;
-                  font-size: small;
-                }
-              }
-            }
-          }
-        }
-        /* END:desktop */
-
-        /* START:mobile */
-        @media all and (max-width: 800px) {
-          #columns {
-            flex-direction: column-reverse;
-          }
-        }
-
-        @media all and (max-width: 500px) {
-          #banner {
-            height: 1em;
-          }
-
-          #banner .title {
-            display: none;
-          }
-        }
-        /* END:mobile */
+      }
+    }
+  }
+  main {
+    padding: 0.5em;
+  }
+}
       EOF
     end
   else
@@ -792,7 +788,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
   end
 
   desc 'Show the results.'
-  get '/'
+  get '/', screenshot: { filename: "e_1_catalog_with_nav.pdf", dimensions: [ 1024, 600 ] }
 end
 
 section 8.3, 'Iteration C3: Use a Helper to Format the Price' do
@@ -808,7 +804,7 @@ section 8.3, 'Iteration C3: Use a Helper to Format the Price' do
   end
 
   desc 'Show the results.'
-  get '/'
+  get '/', screenshot: { filename: "e_2_prices_fixed.pdf", dimensions: [ 1024, 300 ] }
 end
 
 section 8.4, 'Iteration C4: Functional Testing' do
@@ -825,9 +821,9 @@ section 8.4, 'Iteration C4: Functional Testing' do
     clear_highlights
     dcl 'should get index' do
       msub /^()\s+end/, <<-'EOF'.unindent(4), :highlight
-        assert_select '#columns #side a', :minimum => 4
-        assert_select '#main .entry', 3
-        assert_select 'h3', 'Programming Ruby 1.9'
+        assert_select 'nav.side_nav a', :minimum => 4 
+        assert_select 'main ul.catalog li', 3
+        assert_select 'h2', 'Programming Ruby 1.9'
         assert_select '.price', /\$[,\d]+\.\d\d/
       EOF
     end
@@ -861,16 +857,7 @@ section 8.5, 'Iteration C5 - Caching' do
   unless $rails_version =~ /^3\./
     desc 'cache sections'
     edit 'app/views/store/index.html.erb' do
-      # adjust indentation
-      gsub!(/<% @products.each.*/m) { |each| each.gsub! /^/, '  ' }
-      gsub!(/<div.*<\/div>/m) { |div| div.gsub! /^/, '  ' }
-
-      msub /()  <% @products.each do \|product\| %>\n/,
-        "<% cache @products do %>\n", :highlight
-      msub /<% @products.each do \|product\| %>\n()/, 
-        "    <% cache product do %>\n", :highlight
-      msub /<\/div>\n  <% end %>\n()/,  "<% end %>\n", :highlight
-      msub /<\/div>\n()  <% end %>\n/,  "    <% end %>\n", :highlight
+      self.all = read('store/cached-index.html.erb')
     end
   end
   edit "test/fixtures/products.yml" do
@@ -1063,7 +1050,7 @@ section 9.3, 'Iteration D3: Adding a button' do
   edit 'app/views/store/index.html.erb' do
     clear_all_marks
     msub /number_to_currency.*\n()/, '    ' + <<-EOF, :highlight
-      <%= button_to 'Add to Cart', line_items_path(:product_id => product) %>
+        <%= button_to 'Add to Cart', line_items_path(:product_id => product) %>
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
@@ -1071,12 +1058,23 @@ section 9.3, 'Iteration D3: Adding a button' do
   desc 'Add a bit of style to make it show all on one line'
   if DEPOT_CSS =~ /scss/
     edit 'app/assets/stylesheets/store*.scss', 'inline' do
-      edit /^ +p, div.price_line \{.*?\n()    \}\n/m, :mark => 'inline'
-      msub /^ +p, div.price_line \{.*?\n()    \}\n/m, "\n" + <<-EOF.unindent(2)
+      edit /^      .price \{.*?\n()    \}\n/m, :mark => 'inline'
+      msub /^      .price \{.*?\n()    \}\n/m, "\n" + <<-EOF.unindent(2)
         /* START_HIGHLIGHT */
         form, div {
           display: inline;
         }
+        input[type="submit"] {
+          background-color: #282;
+          border-radius: 0.354em;
+          border: solid thin #141;
+          color: white;
+          font-size: 1em;
+          padding: 0.354em 1em;
+        }
+        input[type="submit"]:hover {
+          background-color: #141;
+        } 
         /* END_HIGHLIGHT */
       EOF
     end
@@ -1093,7 +1091,7 @@ section 9.3, 'Iteration D3: Adding a button' do
   end
 
   desc "See the button on the page"
-  get '/'
+  get '/', screenshot: { filename: "f_1_added_button.pdf", dimensions: [ 1024, 300 ] }
 
   desc 'Update the LineItem.new call to use set_cart and the ' +
        'product id. Additionally change the logic so that redirection upon ' +
@@ -1139,12 +1137,15 @@ section 9.3, 'Iteration D3: Adding a button' do
   end
 
   desc "Try it once, and see that the output isn't very useful yet."
-  post '/', 'product_id' => 3
+  post '/', { 'product_id' => 3 },
+    screenshot: { filename: "f_2_boring_cart.pdf", dimensions: [ 640, 200 ], form_data: {}, submit_form: 1 }
 
   desc 'Update the template that shows the Cart.'
   edit 'app/views/carts/show.html.erb' do
     self.all = <<-EOF.unindent(6)
-      <p id="notice"><%= notice %></p>
+      <% if notice %>
+        <aside id="notice"><%= notice %></aside>
+      <% end %>
 
       <h2>Your Pragmatic Cart</h2>
       <ul>    
@@ -1155,8 +1156,27 @@ section 9.3, 'Iteration D3: Adding a button' do
     EOF
   end
 
+  desc "Style the flash"
+  edit 'app/assets/stylesheets/application.scss' do
+    msub /()^.content/,%{
+// START:notice
+.notice, #notice {
+  background: #ffb;
+  border-radius: 0.5em;
+  border: solid 0.177em #882;
+  color: #882;
+  font-weight: bold;
+  margin-bottom: 1em;
+  padding: 1em 1.414em;
+  text-align: center;
+}
+// END:notice
+}
+  end
+
   desc "Try it once again, and see that the products in the cart."
-  post '/', 'product_id' => 3
+  post '/', { 'product_id' => 3 },
+    screenshot: { filename: "f_3_better_cart.pdf", dimensions: [ 640, 200 ], form_data: {}, submit_form: 1 }
   publish_code_snapshot :f
 end
 
@@ -1203,6 +1223,12 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   overview <<-EOF
     Change the cart to track the quantity of each product.
   EOF
+
+  desc 'Add a few products to the order.'
+  post '/', {'product_id' => 2}
+  post '/', {'product_id' => 2}
+  post '/', {'product_id' => 3}
+
 
   desc "Add a quantity column to the line_item table in the database."
   generate 'migration add_quantity_to_line_items quantity:integer'
@@ -1277,7 +1303,9 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   db :migrate
 
   desc "Verify that the entries have been combined."
-  get '/carts/1'
+  %w(1 2 3).each do |cart_id|
+    get "/carts/#{cart_id}", screenshot: { filename: "g_1_cart_#{cart_id}_quantities.pdf", dimensions: [ 640, 200 ] }
+  end
 
   desc 'Fill in the self.down method'
   migration = Dir['db/migrate/*combine_items_in_cart.rb'].first
@@ -1289,7 +1317,9 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   cmd "mv #{migration} #{migration.sub('.rb', '.bak')}"
 
   desc 'Every item should (once again) only have a quantity of one.'
-  get '/carts/1'
+  %w(1 2 3).each do |cart_id|
+    get "/carts/#{cart_id}", screenshot: { filename: "g_2_cart_#{cart_id}_no_quantities.pdf", dimensions: [ 640, 200 ] }
+  end
 
   desc 'Recombine the item data.'
   cmd "mv #{migration.sub('.rb', '.bak')} #{migration}"
@@ -1316,7 +1346,8 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   end
 
   desc 'Try something malicious.'
-  get '/carts/wibble'
+  get '/carts/wibble',
+    screenshot: { filename: "g_3_cart_error.pdf", dimensions: [ 640, 800 ] }
 end
 
 section 10.2, 'Iteration E2: Handling Errors' do
@@ -1356,7 +1387,8 @@ section 10.2, 'Iteration E2: Handling Errors' do
   end
 
   desc 'Reproduce the error.'
-  get '/carts/wibble'
+  get '/carts/wibble',
+    screenshot: { filename: "g_4_cart_error_fixed.pdf", dimensions: [ 1024, 300 ] }
 
   desc 'Inspect the log.'
   cmd 'tail -25 log/development.log', :highlight => ['Attempt to access']
@@ -1403,9 +1435,11 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   edit 'app/views/carts/show.html.erb' do
     clear_highlights
     msub /(\s*)\Z/, "\n\n"
-    msub /\n\n()\Z/, <<-EOF.unindent(6), :highlight
+    msub /\n\n()\Z/, <<-EOF.unindent(6)
+    <!-- START_HIGHLIGHT -->
       <%= button_to 'Empty cart', @cart, :method => :delete,
           :data => { :confirm => 'Are you sure?' } %>
+    <!-- END_HIGHLIGHT -->
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
@@ -1436,7 +1470,9 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   end
 
   desc 'Try it out.'
-  post '/carts/1', '_method'=>'delete'
+  post '/carts/1', {'_method'=>'delete'},
+    screenshot: { filename: "g_5_empty_cart.pdf", dimensions: [ 1024, 300 ], submit_form: true }
+
   publish_code_snapshot :h
 
   desc 'Remove scaffolding generated flash notice for line item create.'
@@ -1483,17 +1519,48 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   if DEPOT_CSS =~ /scss/
     edit 'app/assets/stylesheets/carts*.scss' do
       msub /(\s*)\Z/, "\n\n"
-      msub /\n\n()\Z/, <<-EOF.unindent(8), :highlight
-        .carts {
-          .item_price, .total_line {
-            text-align: right;
-          }
-
-          .total_line .total_cell {
-            font-weight: bold;
-            border-top: 1px solid #595;
-          }
-        }
+      msub /\n\n()\Z/, <<-EOF
+.carts {
+  table {
+    border-collapse: collapse;
+  }
+  td {
+    padding: 0.5em;
+  }
+  td.quantity {
+    white-space: nowrap;
+  }
+  td.quantity::after {
+    content: " ×";
+  }
+  td.price {
+    font-weight: bold;
+    text-align: right;
+  }
+  tfoot {
+    th, td.price {
+      font-weight: bold;
+      padding-top: 1em;
+    }
+    th {
+      text-align: right;
+    }
+    td.price {
+      border-top: solid thin;
+    }
+  }
+  input[type="submit"] {
+    background-color: #881;
+    border-radius: 0.354em;
+    border: solid thin #441;
+    color: white;
+    font-size: 1em;
+    padding: 0.354em 1em;
+  }
+  input[type="submit"]:hover {
+    background-color: #992;
+  }
+}
       EOF
     end
   else
@@ -1517,6 +1584,9 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
         /* END:cartmain */
       EOF
     end
+  end
+  %w(1 2 3).each do |cart_id|
+    get "/carts/#{cart_id}", screenshot: { filename: "h_1_cart_#{cart_id}_styled.pdf", dimensions: [ 640, 200 ] }
   end
 
   desc 'Add a product to the cart, and see the total.'
@@ -1627,20 +1697,23 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   desc 'Create a "partial" view, for just one line item'
   edit 'app/views/line_items/_line_item.html.erb' do |data|
     data.gsub! /.*_HIGHLIGHT.*\n/, ''
-    data[/()/,1] = <<-EOF.unindent(6)
-      <tr>
-        <td><%= line_item.quantity %>&times;</td>
-        <td><%= line_item.product.title %></td>
-        <td class="item_price"><%= number_to_currency(line_item.total_price) %></td>
-      </tr>
-    EOF
+    data[/()/,1] = <<-EOF
+<tr>
+  <td class="quantity"><%= line_item.quantity %></td>
+  <td><%= line_item.product.title %></td>
+  <td class="price"><%= number_to_currency(line_item.total_price) %></td>
+</tr>
+EOF
   end
 
   desc 'Replace that portion of the view with a callout to the partial'
-  edit 'app/views/carts/show.html.erb' do |data|
+  edit 'app/views/carts/show.html.erb' do
     clear_highlights
-    data.msub /^(  <% @cart.line_items.each do .* end %>\n)/m, 
-      "  <%= render(@cart.line_items) %>\n", :highlight
+    msub /^(    <% @cart.line_items.each do .* end %>\n)/m, %{
+    <!-- START_HIGHLIGHT -->
+    <%= render(@cart.line_items) %>
+    <!-- END_HIGHLIGHT -->
+}
   end
 
   desc 'Make a copy as a partial for the cart controller'
@@ -1655,8 +1728,8 @@ section 11.1, 'Iteration F1: Moving the Cart' do
       edit '@cart', :highlight
       sub! '@cart', 'cart'
     end
-    sub! /,\n<!-- END_HIGHLIGHT -->/, ",\n# END_HIGHLIGHT"
-    sub! /#START_HIGHLIGHT\n<%=/, "<!-- START_HIGHLIGHT -->\n<%="
+    sub! /#START_HIGHLIGHT/, "<!-- START_HIGHLIGHT -->"
+#    sub! /#END_HIGHLIGHT/, "<!-- END_HIGHLIGHT -->"
   end
 
   publish_code_snapshot :j
@@ -1669,10 +1742,10 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   desc 'Reference the partial from the layout.'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
-    msub /<div id="side">\n()/, <<-'EOF'.gsub(/^/, '  ') + "\n", :highlight
-      <div id="cart">
-        <%= render @cart %>
-      </div>
+    msub /<nav class="side_nav">\n()/, <<-EOF, :highlight
+        <div id="cart" class="carts">
+          <%= render @cart %>
+        </div>
     EOF
     gsub! /(<!-- <label id="[.\w]+"\/> -->)/, ''
     gsub! /(# <label id="[.\w]+"\/>)/, ''
@@ -1692,36 +1765,26 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
   desc 'Add a small bit of style.'
   if DEPOT_CSS =~ /scss/
-    edit 'app/assets/stylesheets/carts*.scss' do |data|
+    edit 'app/assets/stylesheets/application.scss' do
       clear_highlights
-      edit '.carts', :highlight
-      msub /.carts()/, ', #side #cart'
-    end
-
-    edit DEPOT_CSS, 'side' do
-      clear_highlights
-      edit /^  #side.*?\n  \}/m, :mark => 'side' do
-        msub /^()    ul \{$/, <<-EOF.unindent(6) + "\n", :highlight
-          form, div {
-            display: inline;
-          }  
- 
-          input {
-            font-size: small;
-          }
-
-          #cart {
-            font-size: smaller;
-            color:     white;
-
-            table {
-              border-top:    1px dotted #595;
-              border-bottom: 1px dotted #595;
-              margin-bottom: 10px;
-            }
-          }
-        EOF
-      end
+      msub /()^    ul {/,%{
+        // START:side
+    #cart {
+      article {
+        h2 {
+          margin-top: 0;
+        }
+        background: white;
+        border-radius: 0.5em;
+        margin: 1em;
+        padding: 1.414em;
+        @media (min-width: 30em) {
+          margin: 0; // desktop doesn't need this margin
+        }
+      }
+    }
+        // END:side
+}
     end
   else
     edit DEPOT_CSS, 'cartside' do |data|
@@ -1750,7 +1813,8 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   end
 
   desc 'Purchase another product.'
-  post '/', 'product_id' => 3
+  post '/', { 'product_id' => 3 },
+    screenshot: { filename: "j_1_side_cart.pdf", dimensions: [ 1024, 300 ], form_data: {}, submit_form: 1 }
 
   publish_code_snapshot :k
 
@@ -1758,21 +1822,35 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   test
 
   desc 'Verify that the products page is indeed broken'
-  get '/products'
+  get '/products',
+    screenshot: { filename: "k_1_products_page_broken.pdf", dimensions: [ 1024, 300 ]}
 
-  desc 'Check for nil'
-  edit "app/views/layouts/application.html.erb", 'side' do
+  desc 'Clear highlights'
+  edit "app/views/layouts/application.html.erb" do
     clear_highlights
-    msub /\n()\s+<div id="side">/, "      <!-- START:side -->\n"
-    msub /\n()\s+<div id="main">/, "      <!-- END:side -->\n"
-    edit /^ +<%= render @cart %>\s*\n/m do
-      gsub!(/^/, '  ')
-      msub /\A()/,   "          <% if @cart %>\n", :highlight
-      msub /\n()\Z/, "          <% end %>\n",     :highlight
-    end
-    gsub! '<!-- START_HIGHLIGHT -->', '      <!-- START_HIGHLIGHT -->'
-    gsub! '<!-- END_HIGHLIGHT -->', '      <!-- END_HIGHLIGHT -->'
-    sub! '<!-- END:hidden_div -->', '    <!-- END:hidden_div -->'
+  end
+  desc 'Start side'
+  edit "app/views/layouts/application.html.erb" do
+    msub /()<nav/, "<!-- START:side -->\n      "
+  end
+
+  desc 'End side'
+  edit "app/views/layouts/application.html.erb" do
+    msub /()<main/, "<!-- END:side -->\n      "
+  end
+  desc 'Add if statement'
+  edit "app/views/layouts/application.html.erb" do
+    msub /()\s+<div id=\"cart\"/, %{
+        <!-- START_HIGHLIGHT -->
+        <% if @cart %>
+}
+  end
+  desc 'Add end statement'
+  edit "app/views/layouts/application.html.erb" do
+    msub /\s+<\/div>()/, %{
+        <% end %>
+        <!-- END_HIGHLIGHT -->
+}
   end
 
   if $rails_version =~ /^[34]/
@@ -1794,7 +1872,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
   edit 'app/views/store/index.html.erb' do
     clear_all_marks
     edit '<%= button_to', :highlight
-    msub /<%= button_to.*() %>/, ",\n            :remote => true"
+    msub /<%= button_to.*() %>/, ",\n              :remote => true"
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
@@ -1861,7 +1939,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
       msub /.*()/m, "\n" + <<-EOF.unindent(8), :highlight
         @keyframes line-item-highlight {
           0% {
-            background: #88ff88;
+            background: #8f8;
           }
           100% {
             background: none;
@@ -1925,7 +2003,6 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
         end
       EOF
     end
-  else
   end
 
   desc 'Look at the app/helpers directory'
@@ -2018,7 +2095,7 @@ else
     desc 'Update price when notified of price changes'
     edit 'app/assets/javascripts/channels/products.coffee' do
       edit 'incoming data', :highlight do
-        gsub! /#.*/, 'document.getElementById("main").innerHTML = data.html'
+        gsub! /#.*/, 'document.getElementsByTagName("main")[0].innerHTML = data.html'
       end
     end
 
@@ -2062,10 +2139,56 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   desc 'Add a Checkout button to the cart'
   edit 'app/views/carts/_cart.html.erb' do
     clear_highlights
-    msub /().*Empty cart.*\n.*>/, <<-'EOF'.unindent(6), :highlight
-      <%= button_to 'Checkout', new_order_path, :method => :get %>
-    EOF
+    msub /().*Empty cart/, %{
+  <!-- START_HIGHLIGHT -->
+  <div class="actions">
+  <!-- END_HIGHLIGHT -->
+}
+    msub /()<\/article>/,%{
+  <!-- START_HIGHLIGHT -->
+  <%= button_to 'Checkout', new_order_path,
+                method: :get,
+                class: "checkout"%>
+  </div>
+  <!-- END_HIGHLIGHT -->
+}
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  end
+
+  desc "Style the new button"
+  edit "app/assets/stylesheets/carts.scss" do
+    msub /^(  input\[type=\"submit.*$)/m, %{
+  // START_HIGHLIGHT
+  .actions {
+    text-align: right;
+    form {
+      display: inline;
+  // END_HIGHLIGHT
+      input[type="submit"] {
+        background-color: #881;
+        border-radius: 0.354em;
+        border: solid thin #441;
+        color: white;
+        font-size: 1em;
+        padding: 0.354em 1em;
+      }
+      input[type="submit"]:hover {
+        background-color: #992;
+      }
+  // START_HIGHLIGHT
+      input[type="submit"].checkout {
+        background-color: #bfb;
+        color: black;
+        font-weight: bold;
+      }
+      input[type="submit"].checkout:hover {
+        background-color: #efe;
+      }
+    }
+  }
+  // END_HIGHLIGHT
+\}
+}
   end
 
   desc 'Return a notice when checking out an empty cart'
@@ -2197,46 +2320,83 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   if DEPOT_CSS =~ /scss/
     edit DEPOT_CSS, 'form' do
       msub /(\s*)\Z/, "\n\n"
-      msub /\n\n()\Z/, <<-EOF.unindent(8), :mark => 'form'
-        .depot_form {
-          fieldset {
-            background: #efe;
-
-            legend {
-              color: #dfd;
-              background: #141;
-              font-family: sans-serif;
-              padding: 0.2em 1em;
-            }
-
-            div {
-              margin-bottom: 0.3em;
-            }
-          }
-
-          form {
-            label {
-              width: 10em;
-              float: left;
-              text-align: right;
-              padding-top: 0.2em;
-              margin-right: 0.1em;
-              display: block;
-            }
-
-            select, textarea, input {
-              margin-left: 0.5em;
-            }
-
-            .actions {
-              margin-left: 10em;
-            }
-
-            br {
-              display: none;
-            }
-          }
-        }
+      msub /\n\n()\Z/, <<-EOF, :mark => 'form'
+.depot_form {
+  padding: 0 1em;
+  h1 {
+    font-size: 1.99em;
+    line-height: 1.41em;
+    margin-bottom: 0.5em;
+    padding: 0;
+  }
+  .field, .actions {
+    margin-bottom: 0.5em;
+    padding: 0;
+  }
+  .actions {
+    text-align: right;
+    padding: 1em 0;
+  }
+  input, textarea, select, option {
+    border: solid thin #888;
+    box-sizing: border-box;
+    font-size: 1em;
+    padding: 0.5em;
+    width: 100%;
+  }
+  label {
+    padding: 0.5em 0;
+  }
+  input[type="submit"] {
+    background-color: #bfb;
+    border-radius: 0.354em;
+    border: solid thin #888;
+    color: black;
+    font-size: 1.41em;
+    font-weight: bold;
+    padding: 0.354em 1em;
+  }
+  input[type="submit"]:hover {
+    background-color: #9d9;
+  }
+  // Also, clean up the error styling
+  #error_explanation {
+    background-color: white;
+    border-radius: 1em;
+    border: solid thin red;
+    margin-bottom: 0.5em;
+    padding: 0.5em;
+    width: 100%;
+    h2 {
+      background: none;
+      color: red;
+      font-size: 1.41em;
+      line-height: 1.41em;
+      padding: 1em;
+    }
+    ul {
+      margin-top: 0;
+      li {
+        color: red;
+        font-size: 1em;
+      }
+    }
+  }
+  .field_with_errors {
+    background: none;
+    color: red;
+    width: 100%;
+    label {
+      font-weight: bold;
+    }
+    label::before {
+      content: "! ";
+    }
+    input,textarea {
+      background: pink;
+    }
+  }
+}
       EOF
     end
   else
@@ -2280,6 +2440,16 @@ section 12.1, 'Iteration H1: Capturing an Order' do
       EOF
     end
   end
+
+  post '/', {'product_id' => 2}
+  get '/', screenshot: {
+    filename: "o_1_checkout_form.pdf",
+    dimensions: [ 1024, 300 ],
+    workflow: [
+      "line_items?product_id=2",
+      "orders/new",
+    ]
+  }
 
   desc 'Validate that required fields are present'
   edit 'app/models/order.rb', 'validate' do |data|
@@ -2407,7 +2577,17 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   end
 
   desc 'take a look at the validation errors'
-  post '/orders/new', 'order[name]' => ''
+  post '/orders/new', { "order[name]" => "" }
+
+  get '/', screenshot: {
+    filename: "o_2_checkout_errors.pdf",
+    dimensions: [ 1024, 300 ],
+    workflow: [
+      "line_items?product_id=2",
+      "orders/new",
+      "/orders",
+    ]
+  }
 
   desc 'process an order'
   post '/orders/new',
@@ -2821,6 +3001,7 @@ section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
     sub! /^\/\/.*$/,''
     sub! /^\/\/.*$/,''
   end
+  bundle 'install'
   edit 'app/views/orders/new.html.erb' do
     clear_all_marks
     clear_highlights
@@ -2830,6 +3011,18 @@ section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
 <!-- END_HIGHLIGHT -->
 }
   end
+
+  restart_server
+
+  get '/', screenshot: {
+    filename: "pa_1_js_error.pdf",
+    dimensions: [ 1024, 300 ],
+    workflow: [
+      "line_items?product_id=2",
+      "orders/new",
+    ]
+  }
+
   edit 'Gemfile', 'foreman' do
     self << "\n# START: foreman\n"
     self << "gem 'foreman'\n"
@@ -2841,7 +3034,18 @@ section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
     self << "webpack: bin/webpack-dev-server\n"
   end
 
+  puts `ps`
+  cmd "bin/webpack"
   restart_server
+
+  get '/', screenshot: {
+    filename: "pa_1_js_fixed.pdf",
+    dimensions: [ 1024, 800 ],
+    workflow: [
+      "line_items?product_id=2",
+      "orders/new",
+    ]
+  }
 
   post '/', 'product_id' => 2
   post '/orders/new',
@@ -3088,7 +3292,7 @@ section 13.2, 'Iteration H2: System testing' do
       test "check routing number" do
         visit store_index_url
 
-        first('.entry').click_on 'Add to Cart'
+        first('.catalog li').click_on 'Add to Cart'
 
         click_on 'Checkout'
 
@@ -3251,7 +3455,7 @@ section 14.1, 'Iteration I1: Email Notifications' do
     msub /assert_match (".*?), mail/, '/1 x Programming Ruby 1.9/'
     msub /assert_match ".*?,( )mail/, "\n      "
     msub /assert_match (".*?),\s+mail/, 
-      '/<td>1&times;<\/td>\s*<td>Programming Ruby 1.9<\/td>/'
+      '/<td[^>]*>1<\/td>\s*<td>Programming Ruby 1.9<\/td>/'
   end
 
   if $rails_version =~ /^3/ or $rails_version =~ /^4\.0/
@@ -3305,7 +3509,7 @@ EOF
     msub /^()end/, <<EOF
 
 # START_HIGHLIGHT
-  def make_payment(pay_type_params)
+  def charge!(pay_type_params)
     payment_details = {}
     payment_method = nil
 
@@ -3458,6 +3662,19 @@ section 15.1, 'Iteration J1: Adding Users' do
   desc 'Run the migration'
   db :migrate
 
+  desc 'wrap the flash in an if statement'
+  edit "app/views/users/index.html.erb" do
+    msub /(<p id="notice.*$)/,%{
+<!-- START:notice -->
+<!-- START_HIGHLIGHT -->
+<% if notice %>
+  <aside class="notice"><%= notice %></aside>
+<% end %>
+<!-- END_HIGHLIGHT -->
+<!-- END:notice -->
+    }
+  end
+
   desc 'Add validation, has_secure_password'
   edit "app/models/user.rb" do
     if File.exist? 'public/images'
@@ -3501,7 +3718,9 @@ section 15.1, 'Iteration J1: Adding Users' do
     desc 'Add Notice'
     edit 'app/views/users/index.html.erb' do
       msub /<\/h1>\n()/, <<-EOF.unindent(8), :highlight
-        <p id="notice"><%= notice %></p>
+        <% if notice %>
+          <aside class="notice"><%= notice %></aside>
+        <% end %>
       EOF
       if File.exist? 'public/images'
         msub /(.*<th>Hashed password.*\n)/, ''
@@ -3537,8 +3756,7 @@ section 15.1, 'Iteration J1: Adding Users' do
 
     msub /^()  <div class="field">/, <<-EOF.unindent(4)
       <!-- START_HIGHLIGHT -->
-      <fieldset>
-      <legend>Enter User Details</legend>
+      <h2>Enter User Details</h2>
 
       <!-- END_HIGHLIGHT -->
     EOF
@@ -3560,16 +3778,13 @@ section 15.1, 'Iteration J1: Adding Users' do
     edit 'label :password_', :highlight do
       msub /:password_confirmation()/, ", 'Confirm:'"
     end
-    edit 'field :password_', :highlight do
-      msub /() %>/, ', size: 40'
-    end
-
-    msub /^()<% end %>/, <<-EOF.unindent(4)
-      <!-- START_HIGHLIGHT -->
-
-      </fieldset>
-      <!-- END_HIGHLIGHT -->
-    EOF
+    msub /^(\s*<%= form.password_field :password_confirmation.*%>)/,%{
+    <!-- START_HIGLIGHT -->
+    <%= form.password_field :password_confirmation,
+                            id: :user_password_confirmation,
+                            size: 40 %>
+    <!-- END_HIGLIGHT -->
+    }
 
     msub /\n()\Z/, <<-EOF.unindent(6)
       <!-- START_HIGHLIGHT -->
@@ -3580,6 +3795,11 @@ section 15.1, 'Iteration J1: Adding Users' do
 
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
+
+  get '/users/new', screenshot: {
+    filename: "r_1_new_user.pdf",
+    dimensions: [ 1024, 300 ]
+  }
 
   desc 'Demonstrate creating a new user'
   get '/users'
@@ -3766,9 +3986,8 @@ section 15.2, 'Iteration J2: Authenticating Users' do
   end
 
   desc 'Do a login'
-  post '/login',
-    'name' => 'dave',
-    'password' => 'secret'
+  post '/login', {'name' => 'dave', 'password' => 'secret'},
+    screenshot: { filename: "r_2_login.pdf", dimensions: [ 1024, 200 ], submit_form: true }
 
   unless $rails_version =~ /^[34]/
     edit "test/*/admin_controller_test.rb" do |data|
@@ -3958,17 +4177,48 @@ section 15.4, 'Iteration J4: Adding a Sidebar' do
   desc 'Add admin links and a button to Logout'
   edit "app/views/layouts/application.html.erb" do |data|
     data.clear_highlights
-    data.msub /<div id="side">.*?() *<\/div>/m, "\n" + <<-EOF.gsub(/^/, '  '), :highlight
+    data.msub /<nav class="side_nav">.*?() *<\/nav>/m, "\n" + <<-EOF.gsub(/^/, '  '), :highlight
       <% if session[:user_id] %>
-        <ul>
-          <li><%= link_to 'Orders',   orders_path   %></li>
-          <li><%= link_to 'Products', products_path %></li>
-          <li><%= link_to 'Users',    users_path    %></li>
-        </ul>
-        <%= button_to 'Logout', logout_path, :method => :delete   %>
+        <nav class="logged_in_nav">
+          <ul>
+            <li><%= link_to 'Orders',   orders_path   %></li>
+            <li><%= link_to 'Products', products_path %></li>
+            <li><%= link_to 'Users',    users_path    %></li>
+            <li><%= button_to 'Logout', logout_path, :method => :delete   %></li>
+          </ul>
+        </nav>
       <% end %>
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  end
+
+  desc "Add some styles"
+  edit "app/assets/stylesheets/application.scss" do
+    msub /\s*END:side.*$()/, %{
+
+// START: logged_in_nav
+nav.logged_in_nav {
+  border-top: solid thin #bfb;
+  padding: 0.354em 0;
+  margin-top: 0.354em;
+  input[type="submit"] {
+    // Make the logout button look like a
+    // link, so it matches the nav style
+    background: none;
+    border: none;
+    color: #bfb;
+    font-size: 1em;
+    letter-spacing: 0.354em;
+    margin: 0;
+    padding: 0;
+    text-transform: uppercase;
+  }
+  input[type="submit"]:hover {
+    color: white;
+  }
+}
+// END: logged_in_nav
+}
   end
 
   desc 'Log out'
@@ -3989,7 +4239,14 @@ section 15.4, 'Iteration J4: Adding a Sidebar' do
   get '/products'
 
   desc 'Demonstrate logged in users can see the users'
-  get '/users'
+  get '/users', screenshot: { 
+    filename: "r_3_user_list.pdf",
+    dimensions: [ 1024, 300 ],
+    workflow: [
+      "/login?name=dave&password=secret",
+      "GET:/users"
+    ]
+  }
 
   desc 'Show that the tests fail (good!)'
   test
@@ -4054,7 +4311,7 @@ section 15.5, 'Playtime' do
           logout
           get products_url
           follow_redirect!
-          assert_select 'legend', 'Please Log In'
+          assert_select 'h2', 'Please Log In'
         end
       EOF
     end
@@ -4103,8 +4360,9 @@ section 15.5, 'Playtime' do
 end
 
 section 16.1, 'Task K1: Selecting the locale' do
-  
   desc 'Define the default and available languages.'
+  FileUtils.mkdir_p "depot/config/initializers"
+  FileUtils.touch "depot/config/initializers/i18n.rb"
   edit "config/initializers/i18n.rb" do |data|
     data.all = read('i18n/initializer.rb')
   end
@@ -4140,7 +4398,7 @@ section 16.1, 'Task K1: Selecting the locale' do
 
   unless $rails_version =~ /^3\./
     desc 'inspect the results'
-    get '/rails/info/routes'
+    get '/rails/info/routes', screenshot: { filename: "s_1_routes.pdf", dimensions: [ 1024, 800 ], }
   end
 
   desc "Default locale parameter, and set locale based on locale parameter."
@@ -4189,8 +4447,8 @@ section 16.1, 'Task K1: Selecting the locale' do
   end
 
   desc "Verify that the routes work."
-  get '/en'
-  get '/es'
+  get '/en', screenshot: { filename: "s_2_en.pdf", dimensions: [ 1024, 800 ], }
+  get '/es', screenshot: { filename: "s_3_es_error.pdf", dimensions: [ 1024, 800 ], }
 end
 
 section 16.2, 'Task K2: translating the store front' do
@@ -4217,7 +4475,7 @@ section 16.2, 'Task K2: translating the store front' do
   restart_server
 
   desc 'See results'
-  get '/es'
+  get '/es', screenshot: { filename: "s_4_es_works.pdf", dimensions: [ 1024, 800 ], }
 
   desc 'Replace translatable text with calls out to translation functions.'
   edit 'app/views/store/index.html.erb' do
@@ -4237,7 +4495,7 @@ section 16.2, 'Task K2: translating the store front' do
   edit('config/locales/es.yml', 'main') {} 
 
   desc 'See results'
-  get '/es'
+  get '/es', screenshot: { filename: "s_5_more_es.pdf", dimensions: [ 1024, 800 ], }
 
   desc 'Replace translatable text with calls out to translation functions.'
   edit 'app/views/carts/_cart.html.erb' do
@@ -4265,7 +4523,7 @@ section 16.2, 'Task K2: translating the store front' do
   desc 'Handle remote calls too'
   edit 'app/views/store/index.html.erb', 'price_line' do
     clear_all_marks
-    edit /^\s+<div class="price_line">.*?<\/div>\n/m, :mark => 'price_line'
+    edit /^\s+<div class="price">.*?<\/div>\n/m, :mark => 'price_line'
     msub /,( )line_items_path/, "\n            "
     msub /line_items_path\(.*?()\)/, ", locale: I18n.locale"
     edit 'line_items_path', :highlight
@@ -4276,6 +4534,13 @@ section 16.2, 'Task K2: translating the store front' do
 
   desc 'Add to Cart'
   post '/es', 'product_id' => 2
+  get '/es', screenshot: {
+    filename: "t_1_cart_translated.pdf",
+    dimensions: [ 1024, 800 ],
+    workflow: [
+      "line_items?product_id=2",
+    ]
+  }
 end
 
 section 16.3, 'Task K3: Translating Checkout' do
@@ -4348,10 +4613,10 @@ section 16.3, 'Task K3: Translating Checkout' do
 }
   end
   edit "app/views/layouts/application.html.erb" do
-    msub /()<%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>/, %{
+    msub /()<%= javascript_include_tag 'application'/, %{
     <!-- START:i18n-js -->
     }
-    msub /<%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>()/, %{
+    msub /()\s+<\/head>/,%{
     <!-- START_HIGHLIGHT -->
     <script type="text/javascript">
       I18n.defaultLocale = "<%= I18n.default_locale %>";
@@ -4359,6 +4624,7 @@ section 16.3, 'Task K3: Translating Checkout' do
     </script>
     <!-- END_HIGHLIGHT -->
     <!-- END:i18n-js -->
+
 }
 
   end
@@ -4422,16 +4688,26 @@ EOF
 EOF
   end
 
-  restart_server
-
   desc 'Define some translations for the new order.'
   edit('config/locales/en.yml', 'checkout') {}
   edit('config/locales/es.yml', 'checkout') {}
 
+
   publish_code_snapshot :t
-  
+
+  cmd 'bin/webpack'
+  restart_server
+
   desc 'Add to cart'
   post '/es', 'product_id' => 2
+  get '/es', screenshot: {
+    filename: "u_1_checkout_translated.pdf",
+    dimensions: [ 1024, 300 ],
+    workflow: [
+      "line_items?product_id=2",
+      "/es/orders/new",
+    ]
+  }
 
   desc 'Show mixed validation errors'
   post '/es/orders/new', 'order[name]' => '', 'submit' => 'Realizar Pedido'
@@ -4459,6 +4735,19 @@ EOF
     gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
   end
 
+  cmd 'bin/webpack'
+  restart_server
+
+  get '/es', screenshot: {
+    filename: "u_3_checkout_errors_better.pdf",
+    dimensions: [ 1024, 300 ],
+    workflow: [
+      "line_items?product_id=2",
+      "/es/orders/new",
+      "/orders",
+    ]
+  }
+
   desc 'Translate the model names to human names.'
   edit 'config/locales/es.yml', 'model' do
     msub /activerecord:\n#END:errors\n()#END:model/, <<-EOF.unindent(2)
@@ -4478,6 +4767,18 @@ EOF
     restart_server
   end
 
+  cmd 'bin/webpack'
+  restart_server
+
+  get '/es', screenshot: {
+    filename: "u_4_checkout_errors_fixed.pdf",
+    dimensions: [ 1024, 300 ],
+    workflow: [
+      "line_items?product_id=3",
+      "es/orders/new",
+      "/orders",
+    ]
+  }
   desc 'Show validation errors'
   post '/es/orders/new', 'order[name]' => '', 'submit' => 'Realizar Pedido'
 
@@ -4516,6 +4817,35 @@ EOF
     'order[address]' => '123 Main St., Anytown USA',
     'order[email]' => 'juser@hotmail.com',
     'order[pay_type]' => 'Check'
+
+  cmd 'bin/webpack'
+  restart_server
+
+  get '/es', screenshot: {
+    filename: "u_5_gracias.pdf",
+    dimensions: [ 1024, 300 ],
+    workflow: [
+      "line_items?product_id=2",
+      "orders/new",
+      "/orders?order[name]=Pat&order[address]=123+Main+St&order[email]=pat@example.com&order[pay_type]=Check",
+    ]
+  }
+
+  edit "config/locales/es.yml" do
+    msub /^  (activerecord:)/,"xactiverecord:"
+  end
+  get '/es', screenshot: {
+    filename: "u_2_checkout_errors.pdf",
+    dimensions: [ 1024, 300 ],
+    workflow: [
+      "line_items?product_id=2",
+      "orders/new",
+      "/orders",
+    ]
+  }
+  edit "config/locales/es.yml" do
+    msub /^  (xactiverecord:)/,"activerecord:"
+  end
 end
 
 section 16.4, 'Task K4: Add a locale switcher.' do
@@ -4526,7 +4856,7 @@ section 16.4, 'Task K4: Add a locale switcher.' do
       /* START:i18n */
       .locale {
         float: right;
-        margin: -0.25em 0.1em;
+        margin: 1em;
       }
       /* END:i18n */
     EOF
@@ -4549,23 +4879,34 @@ section 16.4, 'Task K4: Add a locale switcher.' do
     end
   end
 
+  desc "Create the CS for hiding the button"
+  edit "app/assets/javascripts/locale_switcher.coffee" do |data|
+    data.all = %{document.addEventListener 'turbolinks:load', ->
+  document.getElementById('submit_locale_change').style.display='none'}
+  end
+
   edit 'app/views/layouts/application.html.erb', 'i18n' do
     clear_highlights
-    edit /^\s+<div id="banner">.*?<\/div>\n/m, :mark => 'i18n'
+    edit /^\s+<header class="main">.*?<\/header>\n/m, :mark => 'i18n'
     msub /\n()\s+<%= image_tag/, <<-EOF, :highlight
-      <%= form_tag store_index_path, :class => 'locale' do %>
-        <%= select_tag 'set_locale', 
-          options_for_select(LANGUAGES, I18n.locale.to_s),
-          :onchange => 'this.form.submit()' %>
-        <%= submit_tag 'submit' %>
-        <%= javascript_tag "$('.locale input').hide()" %>
-      <% end %>
+      <aside>
+        <%= form_tag store_index_path, :class => 'locale' do %>
+          <%= select_tag 'set_locale', 
+            options_for_select(LANGUAGES, I18n.locale.to_s),
+            :onchange => 'this.form.submit()' %>
+          <%= submit_tag 'submit', id: "submit_locale_change" %>
+        <% end %>
+      </aside>
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   desc "Try out the form"
   post '/en', 'set_locale' => 'es'
+  get '/es', screenshot: {
+    filename: "u_6_locale_switcher.pdf",
+    dimensions: [ 1024, 300 ]
+  }
   test
 end
 
@@ -4907,22 +5248,24 @@ gem 'slim-rails'
   cmd "rm app/views/store/index.html.erb"
   edit "app/views/store/index.slim" do
     self << %{
-p#notice = notice
+- if notice
+  aside#notice = notice
 
 h1 = t('.title_html')
 
-- cache @products do
-  - @products.each do |product|
-    - cache product do
-      .entry
-        = image_tag(product.image_url)
-        h3 = product.title
-        = sanitize(product.description)
-        .price_line 
-          span.price = number_to_currency(product.price)
-          = button_to t('.add_html'),
-              line_items_path(product_id: product, locale: I18n.locale),
-              remote: true
+ul.catalog
+  - cache @products do
+    - @products.each do |product|
+      - cache product do
+        li
+          = image_tag(product.image_url)
+          h2 = product.title
+          p = sanitize(product.description)
+          .price
+            = number_to_currency(product.price)
+            = button_to t('.add_html'),
+                line_items_path(product_id: product, locale: I18n.locale),
+                remote: true
 }
   end
 
@@ -4966,12 +5309,12 @@ section 25.3, "CSS with Webpack" do
     msub /().store {/,%{
 // START:postcss
 }
-    msub /(border-bottom: 3px dotted #77d;)/, %{
+    msub /(border-top: solid 0.250em;)/, %{
       // START_HIGHLIGHT
-    border-bottom: 3px dotted gray(50%);
+    border-top: solid 0.250em gray(50%);
       // END_HIGHLIGHT
 }
-    msub /()\/\* An entry in the store catalog \*\//, %{
+    msub /()^    li/,%{
     // END:postcss
 }
   end

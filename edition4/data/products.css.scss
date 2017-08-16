@@ -1,47 +1,61 @@
+// Place all the styles related to the Products controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+/* START_HIGHLIGHT */
 .products {
+  margin: 0;
+  padding: 0.5em;
+  a {
+    padding: 0.354em 0.5em;
+    border-radius: 0.354em;
+  }
   table {
     border-collapse: collapse;
   }
-
-  table tr td {
-    padding: 5px;
-    vertical-align: top;
+  td {
+    padding: 0.5em;
+    margin: 0;
   }
 
-  .list_image {
-    width:  60px;
-    height: 70px;
+  tr.list_line_odd {
+    background-color: #effeef;
   }
 
-  .list_description {
-    width: 60%;
+  td.image {
+    // Hide this on mobile devices
+    display: none;
 
-    dl {
-      margin: 0;
-    }
-
-    dt {
-      color:        #244;
-      font-weight:  bold;
-      font-size:    larger;
-    }
-
-    dd {
-      margin: 0;
+    // Assume anything bigger than 30em
+    // is a non-mobile device and can 
+    // fit the image.
+    @media (min-width: 30em) {
+      display: block;
+      img {
+        height: 11.3em;
+      }
     }
   }
 
-  .list_actions {
-    font-size:    x-small;
-    text-align:   right;
-    padding-left: 1em;
+  td.description {
+    h1 {
+      font-size: 1.4em;
+    }
   }
 
-  .list_line_even {
-    background:   #e0f8f8;
+  td.actions {
+    ul {
+      padding: 0;
+      list-style: none;
+      li {
+        padding: 0.5em 0.5em;
+      }
+    }
   }
 
-  .list_line_odd {
-    background:   #f8b0f8;
+  tfoot {
+    td {
+      padding: 0.5em 0;
+    }
   }
 }

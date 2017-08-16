@@ -1,45 +1,32 @@
 .store {
-  h1 {
+  max-width: 80em;
+  ul.catalog {
+    border-top: solid 0.250em;
+    list-style: none;
+    padding: 0;
     margin: 0;
-    padding-bottom: 0.5em;
-    font:  150% sans-serif;
-    color: #226;
-    border-bottom: 3px dotted #77d;
-  }
+    li {
+      padding: 1em;
+      margin: 0;
+      border-bottom: solid thin #ddd;
 
-  /* An entry in the store catalog */
-  .entry {
-    overflow: auto;
-    margin-top: 1em;
-    border-bottom: 1px dotted #77d;
-    min-height: 100px;
-
-    img {
-      width: 80px;
-      margin-right: 5px;
-      margin-bottom: 5px;
-      position: absolute;
-    }
-
-    h3 {
-      font-size: 120%;
-      font-family: sans-serif;
-      margin-left: 100px;
-      margin-top: 0;
-      margin-bottom: 2px;
-      color: #227;
-    }
-
-    p, div.price_line {
-      margin-left: 100px;
-      margin-top: 0.5em; 
-      margin-bottom: 0.8em; 
-    }
-
-    .price {
-      color: #44a;
-      font-weight: bold;
-      margin-right: 3em;
+      // This makes sure our <li> has enough height
+      // to hold the entire image, since it's floated
+      &::after {
+        clear: both;
+        content: " ";
+        display: block;
+      }
+      img {
+        float: left;
+        padding: 1em;
+        margin-right: 1em;
+        margin-bottom: 1em;
+        box-shadow: 0.176em 0.176em 0.354em 0px rgba(0,0,0,0.75);
+      }
+      .price {
+        font-size: 1.414em;
+      }
     }
   }
 }
