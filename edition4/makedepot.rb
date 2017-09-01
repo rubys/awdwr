@@ -392,7 +392,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
         validates :title, :description, :image_url, :presence => true
       #END:val1
       #START:val2
-        validates :price, :numericality => {:greater_than_or_equal_to => 0.01}
+        validates :price, :numericality => { :greater_than_or_equal_to => 0.01 }
       #END:val2
       # #START:val3
         validates :title, :uniqueness => true
@@ -2991,7 +2991,7 @@ section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
     Demonstrate how Webpacker works and why it exists by using React.
   EOF
   edit 'Gemfile' do
-    self << "gem 'webpacker', '~> 2.0'"
+    self << "gem 'webpacker', '~> 3.0'"
   end
   bundle 'install'
   cmd 'echo Y | rails webpacker:install'
@@ -3012,30 +3012,6 @@ section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
 }
   end
 
-  restart_server
-
-  get '/', screenshot: {
-    filename: "pa_1_js_error.pdf",
-    dimensions: [ 1024, 300 ],
-    workflow: [
-      "line_items?product_id=2",
-      "orders/new",
-    ]
-  }
-
-  edit 'Gemfile', 'foreman' do
-    self << "\n# START: foreman\n"
-    self << "gem 'foreman'\n"
-    self << "# END: foreman\n"
-  end
-  bundle 'install'
-  edit 'Procfile' do
-    self << "web:     bin/rails server\n"
-    self << "webpack: bin/webpack-dev-server\n"
-  end
-
-  puts `ps`
-  cmd "bin/webpack"
   restart_server
 
   get '/', screenshot: {
@@ -5234,12 +5210,13 @@ end
 section 25.2, 'Slim' do
   edit 'Gemfile', 'slim' do
     clear_all_marks
-    msub /(gem 'foreman')/, %{
+    msub /()gem 'webpacker'/, %{
 # START:slim
-gem 'foreman'
 # START_HIGHLIGHT
 gem 'slim-rails'
 # END_HIGHLIGHT
+}
+    msub /gem 'webpacker'.*()/, %{
 # END:slim
 }
   end
