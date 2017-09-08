@@ -113,7 +113,7 @@ class DepotTest < Gorp::TestCase
       title: "Type::Decimal casting raises exceptions on ruby 2.4",
       match: /invalid value for BigDecimal\(\): "wibble"/
 
-    assert_select 'h2', /4 errors\s+prohibited this product from being saved/
+    assert_select 'h2', /3 errors\s+prohibited this product from being saved/
     assert_select 'li', "Image url can't be blank"
     assert_select 'li', 'Price is not a number'
     assert_select '.field_with_errors input[id=product_price]'

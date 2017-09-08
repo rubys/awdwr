@@ -391,9 +391,6 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
       #START:val1
         validates :title, :description, :image_url, :presence => true
       #END:val1
-      #START:val2
-        validates :price, :numericality => { :greater_than_or_equal_to => 0.01 }
-      #END:val2
       # #START:val3
         validates :title, :uniqueness => true
       #END:val3
@@ -407,11 +404,20 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
-
   desc 'Demonstrate failures.'
   post '/products/new',
     { 'product[price]' => '0.0' },
     screenshot: { filename: "b_1_validation_errors.pdf", dimensions: [ 640, 720 ], submit_form: true }
+
+  desc 'Add price validations'
+  edit 'app/models/product.rb' do
+    msub /#END:validation()/,%{
+  #START:val2
+  validates :price, numericality: { greater_than_or_equal_to: 0.01 }
+  #END:val2
+}
+  end
+
 
   desc 'Demonstrate more failures.'
   post '/products/new', {
@@ -438,43 +444,57 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
   desc 'Solution is simple, provide valid data.'
   edit 'test/*/products_controller_test.rb', 'valid' do
     msub /()require/, "#START:valid\n"
-    msub /class.*\n()/, <<-EOF.unindent(6)
-      #END:valid
-    EOF
 
-    edit /^\s+setup do.*end/m, :mark => 'valid' do
-      msub /^()\s+end/, <<-EOF.unindent(4), :highlight
-        @update = {
-          :title       => 'Lorem Ipsum',
-          :description => 'Wibbles are fun!',
-          :image_url   => 'lorem.jpg',
-          :price       => 19.95
+    msub /@product = products\(:one\)()/,%{
+    # START_HIGHLIGHT
+    @title = "The Great Book \#{rand(1000)}"
+    # END_HIGHLIGHT
+}
+    msub /()test "should get index" do/,%{
+# END:valid
+  }
+
+
+    msub /()test "should create product" do/,%{
+# START:should_create_product
+  }
+
+    msub /()test "should show product" do/,%{
+# END:should_create_product
+  }
+
+    msub /(post products_url.*$)/,%{
+    post products_url, params: { 
+        product: { 
+          description: @product.description, 
+          image_url: @product.image_url, 
+          price: @product.price, 
+          # START_HIGHLIGHT
+          title: @title,
+          # END_HIGHLIGHT
         }
-      EOF
+      }
+    }
 
-      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    end
-    
-    %w(update create).each do |test|
-      dcl "should #{test} product", :mark => 'valid' do
-        if match /attributes/
-          edit 'attributes', :highlight do
-            sub! /@product.attributes/, "@update"
-          end
-        elsif match /products?_url/
-          edit /^\s+(put|post|patch) products?_url.*\n/, :highlight do
-            msub /product: (\{.*?\})/, "@update"
-          end
-        else
-          edit /^\s+(put|post|patch) :.*\n/, :highlight do
-            sub! /\{.*\}/, "@update"
-          end
-        end
-        self.all <<= "\n  # ...\n"
-      end
-    end
+    msub /()test "should update product" do/,%{
+# START:should_update_product
+  }
 
-    msub /(\nend)/, "\n#START:valid\nend\n#END:valid"
+    msub /(patch product_url.*$)/,%{
+    patch product_url(@product), params: { 
+        product: { 
+          description: @product.description, 
+          image_url: @product.image_url, 
+          price: @product.price, 
+          # START_HIGHLIGHT
+          title: @title,
+          # END_HIGHLIGHT
+        }
+      }
+    }
+    msub /()test "should destroy product" do/,%{
+# END:should_update_product
+  }
   end
 
   desc 'Onto the next failure...'
@@ -1736,7 +1756,7 @@ EOF
 
   desc 'Keep things DRY'
   edit 'app/views/carts/show.html.erb' do
-    msub /(<h2.*)/m, "<%= render @cart %>\n", :highlight
+    msub /(<article.*)/m, "<%= render @cart %>\n", :highlight
   end
 
   desc 'Reference the partial from the layout.'
