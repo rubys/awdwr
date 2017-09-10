@@ -3775,11 +3775,11 @@ section 15.1, 'Iteration J1: Adding Users' do
       msub /:password_confirmation()/, ", 'Confirm:'"
     end
     msub /^(\s*<%= form.password_field :password_confirmation.*%>)/,%{
-    <!-- START_HIGLIGHT -->
+    <!-- START_HIGHLIGHT -->
     <%= form.password_field :password_confirmation,
                             id: :user_password_confirmation,
                             size: 40 %>
-    <!-- END_HIGLIGHT -->
+    <!-- END_HIGHLIGHT -->
     }
 
     msub /\n()\Z/, <<-EOF.unindent(6)
@@ -4112,6 +4112,8 @@ section 15.3, 'Iteration J3: Limiting Access' do
     if auth[controller]
       desc "whitelist #{controller.sub(/s$/,'')} operations"
       edit "app/controllers/#{controller}_controller.rb", 'setup' do |data|
+        clear_all_marks
+        clear_highlights
         data.edit /class.*\n/, :mark => 'setup' do
           msub /class.*\n()/, <<-EOF.unindent(10), :highlight
             skip_before_action :authorize, :only => #{auth[controller].inspect}
