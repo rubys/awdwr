@@ -29,8 +29,8 @@ if [[ ! -e ~/git/gorp ]]; then
 fi
 
 # install gems
-if [[ ! -e  Gemfile.lock ]]; then
-  bundle update
+if [[ ! -e  $/git/awdwr/Gemfile.lock ]]; then
+  (cd ~/git/awdwr; bundle update)
 fi
 
 # configure a dummy git user

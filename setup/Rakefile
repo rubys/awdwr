@@ -51,7 +51,7 @@ namespace :awdwr do
     if `docker container ls`.include? 'awdwr-main'
       system "docker exec -it awdwr-main bash"
     else
-      sh 'docker run --rm --name awdwr-main --network=host ' +
+      sh 'docker run -p 6000:6000 --rm --name awdwr-main ' +
         '-it awdwr-main /bin/bash'
     end
   end

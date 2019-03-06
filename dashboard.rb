@@ -382,4 +382,5 @@ _json do
   _active active + log
 end
 __END__
+ENV['SCRIPT_FILENAME'] ||= __FILE__
 $dashboard = File.join(File.dirname(ENV['SCRIPT_FILENAME']), 'dashboard.yml')
