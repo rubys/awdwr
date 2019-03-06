@@ -1,0 +1,12 @@
+# link awdwr into the git directory
+if [[ ! -e ~/git/awdwr ]]; then
+  mkdir -p ~/git
+  ln -s `pwd` ~/git/awdwr
+fi
+
+# start mysql
+if mysql-ctl status 2>&1 | grep -q stopped ; then
+  sudo mysql-ctl start
+fi
+
+source './common-setup'

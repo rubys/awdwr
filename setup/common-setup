@@ -1,25 +1,3 @@
-#!/bin/bash
-
-# allocate swapfile (see: https://github.com/rails/rails-dev-box/pull/108)
-if [[ ! -e /swapfile ]] && [[ ! -e /.dockerenv ]]; then
-  sudo fallocate -l 2G /swapfile
-  sudo chmod 600 /swapfile
-  sudo mkswap /swapfile
-  sudo swapon /swapfile
-  sudo sh -c "echo '/swapfile none swap defaults 0 0' >> /etc/fstab"
-fi
-
-# git directory
-mkdir -p ~/git
-cd ~/git
-
-# clone awdwr into the git directory
-if [[ ! -e ~/git/awdwr ]]; then
-  git clone https://github.com/rubys/awdwr.git
-fi
-
-cd awdwr
-
 bash_reload=false
 
 # testrails alias
@@ -40,18 +18,6 @@ if ! grep -q 'alias depot=' ~/.bashrc ; then
   bash_reload=true
 fi
 
-# dashboard port
-if ! grep -q 'export PORT=' ~/.bashrc ; then
-  echo "export PORT=3000" >> ~/.bashrc
-  bash_reload=true
-fi
-
-# dashboard ip
-if ! grep -q 'export IP=' ~/.bashrc ; then
-  echo "export IP=0.0.0.0" >> ~/.bashrc
-  bash_reload=true
-fi
-
 # reload bash if needed
 if [ "$bash_reload" = true ] ; then
   source ~/.bashrc
@@ -59,8 +25,7 @@ fi
 
 # run setup
 if [[ ! -e ~/git/gorp ]]; then
-  ruby setup.rb
-  source ~/.bash_profile
+  (cd ~/git/awdwr; ruby setup.rb)
 fi
 
 # install gems

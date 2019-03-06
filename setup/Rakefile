@@ -1,0 +1,76 @@
+namespace :mysql do
+  task :setup do
+    next if `docker container ls`.include? 'awdwr-mysql'
+    sh "docker run --network host --name awdwr-mysql " +
+      "-e MYSQL_ROOT_PASSWORD=root -d mysql/mysql-server"
+
+    # wait for container to initialize
+    240.times do
+      sleep 0.5
+      status = `docker container ls`[/\((.*?)\).*awdwr-mysql/, 1]
+      break if status == 'healthy'
+      putc '.'
+    end
+    puts
+
+    # grant permissions
+    cmd = '|docker exec -i awdwr-mysql mysql --user=root --password=root'
+    open(cmd, 'w') do |f|
+      f.write "CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';\n"
+      f.write "GRANT ALL PRIVILEGES ON depot_production.* TO " +
+        "'username'@'localhost';\n"
+      f.write "show grants for 'username'@'localhost';\n"
+    end
+  end
+
+  task :clobber do
+    next unless `docker container ls`.include? 'awdwr-mysql'
+    system "docker stop awdwr-mysql"
+    system "docker container rm awdwr-mysql"
+  end
+
+  task :logs do
+    system "docker logs awdwr-mysql"
+  end
+
+  task :ssh => :setup do
+    system "docker exec -it awdwr-mysql mysql --user=root --password=root"
+  end
+end
+
+namespace :awdwr do
+  task :build => 'mysql:setup' do
+    sh 'docker build -t awdwr-main --network=host .'
+  end
+
+  task :ssh do
+    unless `docker image ls`.include? 'awdwr-main'
+      Rake::Task["awdwr:build"].execute
+    end
+
+    if `docker container ls`.include? 'awdwr-main'
+      system "docker exec -it awdwr-main bash"
+    else
+      sh 'docker run --rm --name awdwr-main --network=host ' +
+        '-it awdwr-main /bin/bash'
+    end
+  end
+
+  task :clobber do
+    next unless `docker image ls`.include? 'awdwr-main'
+    system "docker image rm awdwr-main"
+  end
+end
+
+task :clean do
+  sh 'docker container prune --force'
+  sh 'docker image prune --force'
+end
+
+task :clobber do
+  Rake::Task["awdwr:clobber"].execute
+  Rake::Task["mysql:clobber"].execute
+  Rake::Task["clean"].execute
+end
+
+task :default => 'awdwr:build'

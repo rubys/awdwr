@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# allocate swapfile (see: https://github.com/rails/rails-dev-box/pull/108)
+if [[ ! -e /swapfile ]] ; then
+  sudo fallocate -l 2G /swapfile
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+  sudo sh -c "echo '/swapfile none swap defaults 0 0' >> /etc/fstab"
+fi
+
+source './docker-setup'

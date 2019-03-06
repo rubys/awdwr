@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# git directory
+mkdir -p ~/git
+cd ~/git
+
+# rvm
+if ! grep -q 'rvm' ~/.bashrc ; then
+  echo "source  /usr/local/rvm/scripts/rvm" >> ~/.bashrc
+fi
+
+# clone awdwr into the git directory
+if [[ ! -e ~/git/awdwr ]]; then
+  git clone https://github.com/rubys/awdwr.git
+fi
+
+cd -
+
+source './common-setup'
