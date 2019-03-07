@@ -1,11 +1,12 @@
 #!/usr/bin/ruby
 
-require 'rubygems'
 require 'wunderbar/job-control'
 require 'time'
 require 'yaml'
 
-$home = $HOME.sub(/\/?$/, '/')
+$HOME ||= ENV['HOME']
+
+$home = $HOME.sub(/\/?$/, '/').untaint
 home_re = /(\$HOME|\~)\//
 
 $dashboard = File.join(File.dirname(__FILE__), 'dashboard.yml')
@@ -336,9 +337,9 @@ _html do
         _input :name=>'args'
         _input :type=>'submit', :value=>'submit'
 
-        if File.exist? "#$HOME/.awdwr"
+        if File.exist? "#$home/.awdwr"
           _h2 'Overrides'
-          _pre File.read("#$HOME/.awdwr")
+          _pre File.read("#$home/.awdwr")
         end
       end
 
@@ -381,6 +382,11 @@ _json do
   _config config
   _active active + log
 end
+
+Dir["#{__dir__}/*.js"].each do |file|
+  _file "/#{File.basename(file)}", content: File.read(file)
+end
+
 __END__
 ENV['SCRIPT_FILENAME'] ||= __FILE__
 $dashboard = File.join(File.dirname(ENV['SCRIPT_FILENAME']), 'dashboard.yml')
