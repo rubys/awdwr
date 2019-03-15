@@ -1,20 +1,26 @@
 bash_reload=false
 
+if [[ "$HOME" = "/home/awdwr" ]]; then
+  awdwr='/home/awdwr/git/awdwr'
+else
+  awdwr=$HOME
+fi
+
 # testrails alias
 if ! grep -q 'alias testrails=' ~/.bashrc ; then
-  echo "alias testrails='ruby `pwd`/testrails.rb'" >> ~/.bashrc
+  echo "alias testrails='ruby $awdwr/testrails.rb'" >> ~/.bashrc
   bash_reload=true
 fi
 
 # work alias
 if ! grep -q 'alias work=' ~/.bashrc ; then
-  echo "alias work='source `pwd`/vagrant/bin/work'" >> ~/.bashrc
+  echo "alias work='source $awdwr/vagrant/bin/work'" >> ~/.bashrc
   bash_reload=true
 fi
 
 # depot alias
 if ! grep -q 'alias depot=' ~/.bashrc ; then
-  echo "alias depot='bash `pwd`/vagrant/bin/depot'" >> ~/.bashrc
+  echo "alias depot='bash $awdwr/vagrant/bin/depot'" >> ~/.bashrc
   bash_reload=true
 fi
 

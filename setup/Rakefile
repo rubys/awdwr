@@ -1,6 +1,6 @@
 namespace :mysql do
   task :setup do
-    next if `docker container ls`.include? 'awdwr-mysql'
+    next if `docker container ls -a`.include? 'awdwr-mysql'
     sh "docker run --network host --name awdwr-mysql " +
       "-e MYSQL_ROOT_PASSWORD=root -d mysql/mysql-server"
 
@@ -23,7 +23,7 @@ namespace :mysql do
     end
   end
 
-  task :clobber do
+  task :clobber => :stop do
     next unless `docker container ls`.include? 'awdwr-mysql'
     system "docker stop awdwr-mysql"
     system "docker container rm awdwr-mysql"
@@ -35,6 +35,20 @@ namespace :mysql do
 
   task :ssh => :setup do
     system "docker exec -it awdwr-mysql mysql --user=root --password=root"
+  end
+
+  task :start => :setup
+
+  task :restart => :start do
+    next if `docker ps`.include? 'awdwr-mysql'
+    container=`docker ps -q -a --filter name=awdwr-mysql`.chomp
+    system "docker start #{container}" unless container.empty?
+  end
+
+  task :stop do
+    next unless `docker ps`.include? 'awdwr-mysql'
+    container=`docker ps -q --filter name=awdwr-mysql`.chomp
+    system "docker stop #{container}" unless container.empty?
   end
 end
 
@@ -54,6 +68,12 @@ namespace :awdwr do
       sh 'docker run -p 6000:6000 --rm --name awdwr-main ' +
         '-it awdwr-main /bin/bash'
     end
+  end
+
+  task :kill do
+    next unless `docker ps`.include? 'awdwr-main'
+    container=`docker ps -q --filter name=awdwr-main`.chomp
+    system "docker container kill #{container}" unless container.empty?
   end
 
   task :clobber do

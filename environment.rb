@@ -80,6 +80,7 @@ module AWDWR
     end
 
     # grab app dependencies
+    template += '.tt' if not File.exist? template
     if File.exist? template
       gemfile = File.read(template)
       if File.exist? base # Rails 3.1

@@ -7,7 +7,7 @@ default:
   output:  []
   message: []
   rvm:
-    bin:   ruby-2.4.1
+    bin:   ruby-2.6.1
 
 226:
   output:  2.2.6
@@ -22,8 +22,20 @@ default:
     bin:   ruby-2.3.3
 
 250:
-  output:  2.5.0
-  message: 'Ruby 2.5.0'
+  output:  2.5.5
+  message: 'Ruby 2.5.5'
+  rvm:
+    bin:   ruby-2.5.5
+
+261:
+  output:  2.6.1
+  message: 'Ruby 2.6.1'
+  rvm:
+    bin:   ruby-2.6.1
+
+270:
+  output:  2.7.0
+  message: 'Ruby 2.7.0'
   rvm:
     src:   trunk
     bin:   ruby-head-n*
@@ -52,6 +64,9 @@ default:
   output:  '5.0'
   branch:  5-0-stable
   message: '5-0-stable'
+
+60:
+  branch:  master
 
 3:
   source:  /home/rubys/git/awdwr/edition3
