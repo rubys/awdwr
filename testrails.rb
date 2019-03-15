@@ -333,8 +333,8 @@ if File.exist? File.join(WORK, 'Gemfile')
 
   ENV.delete 'BUNDLE_GEMFILE'
   ENV.delete 'BUNDLE_BIN_PATH'
-  ENV.delete 'GEM_HOME'
-  ENV.delete 'GEM_PATH'
+  # ENV.delete 'GEM_HOME'
+  # ENV.delete 'GEM_PATH'
   ENV.delete 'RUBYLIB'
   ENV.delete 'RUBYOPT'
 else
