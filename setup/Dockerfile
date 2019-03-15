@@ -16,6 +16,7 @@ RUN apt-get install -y \
   git vim ruby \
   libgmp3-dev \
   libmysqlclient-dev \
+  libxslt-dev libxml2-dev \
   libpq-dev \
   zlib1g-dev
 
