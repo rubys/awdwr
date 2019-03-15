@@ -10,7 +10,7 @@ prereqs = {
   nodejs: 'nodejs'
 }
 
-prereq[mysql].sub(/\s*mysql-server/, '') if File.exist? '/.dockerenv'
+prereqs[:mysql].sub! /\s*mysql-server/, '' if File.exist? '/.dockerenv'
 
 # accept node as an alias for nodejs; not absolutely required on Mac OS/X
 prereqs.delete :nodejs unless `which node`.empty?
