@@ -327,6 +327,7 @@ if File.exist? File.join(WORK, 'Gemfile')
   end
 
   install = <<-EOF
+    gem update --system
     gem list -i ^bundler$ > /dev/null && gem update bundler || gem #{install} bundler
     (cd #{File.realpath WORK}; rm -rf Gemfile.lock vendor; bundle install)
   EOF
