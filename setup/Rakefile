@@ -76,7 +76,7 @@ namespace :awdwr do
     system "docker container kill #{container}" unless container.empty?
   end
 
-  task :clobber do
+  task :clobber => :kill do
     next unless `docker image ls`.include? 'awdwr-main'
     system "docker image rm awdwr-main"
   end

@@ -13,7 +13,7 @@ RUN apt-get update -y && \
     locale-gen $LANG
 
 RUN apt-get install -y \
-  git vim ruby \
+  git vim ruby lsof \
   libgmp3-dev \
   libmysqlclient-dev \
   libxslt-dev libxml2-dev \
