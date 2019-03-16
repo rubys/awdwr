@@ -62,11 +62,26 @@ namespace :awdwr do
       Rake::Task["awdwr:build"].execute
     end
 
-    if `docker container ls`.include? 'awdwr-main'
+    if `docker ps -a`.include? 'awdwr-main'
+      if `docker ps -q --filter name=awdwr-main`.chomp.empty?
+        container=`docker ps -aq --filter name=awdwr-main`.chomp
+        system "docker start #{container}"
+      end
+
       system "docker exec -it awdwr-main bash"
     else
-      sh 'docker run -p 6000:6000 --rm --name awdwr-main ' +
-        '-it awdwr-main /bin/bash'
+      awdwr = File.expand_path("..", __dir__)
+      sh "docker run -p 3333:3333 -v #{awdwr}:/srv/awdwr:delegated " +
+        '--name awdwr-main -it awdwr-main /bin/bash'
+    end
+  end
+
+  task :test => :build do
+    if `docker container ls`.include? 'awdwr-main'
+      system 'docker exec -it awdwr-main bash --login -i -c testrails'
+    else
+      sh 'docker run -p 6000:6000 --name awdwr-main ' +
+        '-it awdwr-main /bin/bash --login -i -c testrails'
     end
   end
 
@@ -76,7 +91,12 @@ namespace :awdwr do
     system "docker container kill #{container}" unless container.empty?
   end
 
-  task :clobber => :kill do
+  task :clean => :kill do
+    container=`docker ps -aq --filter name=awdwr-main`.chomp
+    system "docker container rm #{container}" unless container.empty?
+  end
+
+  task :clobber => :clean do
     next unless `docker image ls`.include? 'awdwr-main'
     system "docker image rm awdwr-main"
   end

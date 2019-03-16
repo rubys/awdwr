@@ -89,7 +89,7 @@ module Dashboard
     checkfile = checkdir.sub(/\/$/,'.html')
     if File.directory?(checkdir) and File.exist?(checkfile)
       if File.stat(checkdir).mtime >= File.stat(checkfile).mtime
-        link.sub! ".html", '/'
+        link.sub! ".html", '/index.html'
       end
     end
 

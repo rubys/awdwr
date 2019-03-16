@@ -6,7 +6,7 @@ testrails:
  
 book:
 - '4':
-    web:  AWDwR4
+    web:  edition4
     env:
     - rails: '6.0'
       ruby:  '2.6.1'

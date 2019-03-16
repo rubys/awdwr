@@ -9,6 +9,13 @@ if ! grep -q 'rvm' ~/.bashrc ; then
   echo "source  /usr/local/rvm/scripts/rvm" >> ~/.bashrc
 fi
 
+# sync aliases
+if ! grep -q 'alias sync-' ~/.bashrc ; then
+  echo "alias sync-in='rsync -av --delete --exclude AWDwR4 --exclude edition4/work* --exclude edition4/snapshot --exclude edition3/work* edition3/snapshot /srv/awdwr/ /home/awdwr/git/awdwr/'" >> ~/.bashrc
+  echo "alias sync-out='rsync -av /home/awdwr/git/awdwr/ /srv/awdwr'" >> ~/.bashrc
+  bash_reload=true
+fi
+
 # clone awdwr into the git directory
 if [[ ! -e ~/git/awdwr ]]; then
   git clone https://github.com/rubys/awdwr.git

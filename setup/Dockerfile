@@ -8,12 +8,15 @@ RUN apt-get update -y && \
     apt-get install -y curl sudo software-properties-common &&\
     (curl -sL https://deb.nodesource.com/setup_11.x | \
        sudo -E bash -) && \
+    (curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -) &&\
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | \
+      sudo tee /etc/apt/sources.list.d/yarn.list &&\
     apt-get update -y && \
-    apt-get install -y nodejs locales && \
+    apt-get install -y nodejs locales yarn && \
     locale-gen $LANG
 
 RUN apt-get install -y \
-  git vim ruby lsof \
+  git vim ruby lsof rsync tzdata \
   libgmp3-dev \
   libmysqlclient-dev \
   libxslt-dev libxml2-dev \
@@ -41,4 +44,4 @@ RUN /bin/bash -l -c "rvm install 2.6.1" &&\
 
 ADD docker-setup common-setup /home/awdwr/
 RUN /bin/bash -l -c "source docker-setup"
-EXPOSE 3000
+EXPOSE 3333

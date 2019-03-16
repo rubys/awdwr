@@ -660,8 +660,10 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
   desc 'Modify the application layout'
   edit 'app/views/layouts/application.html.erb' do
+    pack = self[/<%= javascript_pack_tag.*?%>/m]
     clear_highlights
     self.all = read('store/application.html.erb')
+    self[/<%= javascript_include_tag.*?%>/m] = pack if pack
     gsub! '"application"', '"depot"' if File.exist? 'public/images'
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
     gsub! 'csrf_meta_tags', 'csrf_meta_tag' if $rails_version =~ /^3\.0/

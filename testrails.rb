@@ -254,8 +254,20 @@ if PROFILE.source.include? 'svn'
   system 'svn up'
 else
   print 'awdwr: '
-  system 'git checkout -q master'
-  system 'git pull origin'
+
+  path = Dir.pwd
+  while path.length>1 and not File.exist?(path + '/.git')
+    path = File.expand_path('..', path)
+  end
+
+  if File.exist?('/.dockerenv') and Dir.exist?('/srv/awdwr/')
+    system 'rsync -av --delete --exclude AWDwR4 --exclude edition4/work* ' +
+      '--exclude edition4/snapshot --exclude edition3/work* ' +
+      "--exclude edition3/snapshot /srv/awdwr/ #{path}/"
+  else
+    system 'git checkout -q master'
+    system 'git pull origin'
+  end
 end
 
 # capture the old status
