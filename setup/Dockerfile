@@ -44,4 +44,4 @@ RUN /bin/bash -l -c "rvm install 2.6.1" &&\
 
 ADD docker-setup common-setup /home/awdwr/
 RUN /bin/bash -l -c "source docker-setup"
-EXPOSE 3333
+EXPOSE 3333 3334

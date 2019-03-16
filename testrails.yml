@@ -55,15 +55,20 @@ default:
   branch:  4-2-stable
   message: '4-2-stable'
 
+50:
+  output:  '5.0'
+  branch:  5-0-stable
+  message: '5-0-stable'
+
 51:
   output:  '5.1'
   branch:  5-1-stable
   message: '5-1-stable'
 
-50:
-  output:  '5.0'
-  branch:  5-0-stable
-  message: '5-0-stable'
+52:
+  output:  '5.2'
+  branch:  5-2-stable
+  message: '5-2-stable'
 
 60:
   branch:  master
