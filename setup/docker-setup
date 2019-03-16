@@ -11,7 +11,7 @@ fi
 
 # sync aliases
 if ! grep -q 'alias sync-' ~/.bashrc ; then
-  echo "alias sync-in='rsync -av --delete --exclude AWDwR4 --exclude edition4/work* --exclude edition4/snapshot --exclude edition3/work* edition3/snapshot /srv/awdwr/ /home/awdwr/git/awdwr/'" >> ~/.bashrc
+  echo "alias sync-in='rsync -av --delete --exclude AWDwR4 --exclude \"edition4/work*\" --exclude edition4/snapshot --exclude \"edition3/work*\" --exclude edition3/snapshot /srv/awdwr/ /home/awdwr/git/awdwr/'" >> ~/.bashrc
   echo "alias sync-out='rsync -av /home/awdwr/git/awdwr/ /srv/awdwr'" >> ~/.bashrc
   bash_reload=true
 fi
