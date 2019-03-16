@@ -27,12 +27,6 @@ default:
   rvm:
     bin:   ruby-2.5.5
 
-261:
-  output:  2.6.1
-  message: 'Ruby 2.6.1'
-  rvm:
-    bin:   ruby-2.6.1
-
 270:
   output:  2.7.0
   message: 'Ruby 2.7.0'
