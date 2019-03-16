@@ -276,6 +276,10 @@ module AWDWR
       gems.delete('delayed_job_active_record')
     end
 
+    if File.read("#{rails}/RAILS_VERSION") =~ /^[6]\./
+      gems['jbuilder'][:github] = 'rails/jbuilder'
+    end
+
     # load updates from configuration file
     if 
       File.exist? File.expand_path('~/.awdwr') and
