@@ -21,6 +21,12 @@ default:
   rvm:
     bin:   ruby-2.3.3
 
+245:
+  output:  2.4.5
+  message: 'Ruby 2.4.5'
+  rvm:
+    bin:   ruby-2.4.5
+
 250:
   output:  2.5.5
   message: 'Ruby 2.5.5'
