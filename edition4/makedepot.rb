@@ -3012,11 +3012,15 @@ section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
   overview <<-EOF
     Demonstrate how Webpacker works and why it exists by using React.
   EOF
-  edit 'Gemfile' do
-    self << "gem 'webpacker', '~> 3.0'"
+
+  if $rails_version =~ /^4|^5\.0/
+    edit 'Gemfile' do
+      self << "gem 'webpacker', '~> 3.0'"
+    end
+    bundle 'install'
+    cmd 'echo Y | rails webpacker:install'
   end
-  bundle 'install'
-  cmd 'echo Y | rails webpacker:install'
+
   cmd 'rails webpacker:install:react'
   edit 'app/javascript/packs/hello_react.jsx' do
     sub! /^\/\/.*$/,''
