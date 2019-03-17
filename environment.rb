@@ -276,6 +276,7 @@ module AWDWR
       gems.delete('delayed_job_active_record')
     end
 
+    # TEMP hack to work around https://github.com/rails/rails/issues/35505
     if File.read("#{rails}/RAILS_VERSION") =~ /^[6]\./
       gems['jbuilder'][:github] = 'rails/jbuilder'
     end
