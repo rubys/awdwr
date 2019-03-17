@@ -16,11 +16,19 @@ if ! grep -q 'alias sync-' ~/.bashrc ; then
   bash_reload=true
 fi
 
-# clone awdwr into the git directory
+# clone awdwr into the git directory; create work directory
 if [[ ! -e ~/git/awdwr ]]; then
   git clone https://github.com/rubys/awdwr.git
+  mkdir -p awdwr/edition4/work
 fi
 
 cd -
 
+# install shotgun
+if ! [ -x "$(command -v shotgun)" ]; then
+  gem install shotgun
+fi
+
+# common setup
+export MYSQL_HOST=awdwr-mysql
 source './common-setup'

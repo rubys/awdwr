@@ -37,7 +37,7 @@ unless RUBY_PLATFORM.include? 'darwin'
 end
 
 # set up mysql
-mysql_root = '-u root'
+mysql_root = (File.exist?('/.dockerenv') ? '' : '-u root')
 if ENV['MYSQL_ROOT_PASSWD']
   mysql_root += " -p#{ENV['MYSQL_ROOT_PASSWD']}"
 elsif system("mysql -u root -proot < /dev/null 2>&0")

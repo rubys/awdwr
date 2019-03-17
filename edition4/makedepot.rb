@@ -5363,8 +5363,8 @@ begin
     end
   else
     require 'mysql2'
-    client = Mysql2::Client.new :host=>'localhost',
-      :username=>'username', :password => 'password'
+    client = Mysql2::Client.new host: ENV['MYSQL_HOST'] || 'localhost',
+      username: 'username', password: 'password'
     begin
       dbs = client.query('show databases').map {|row| row['Database']}
       unless dbs.include? 'depot_production'

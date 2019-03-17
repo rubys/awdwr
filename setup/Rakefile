@@ -1,7 +1,28 @@
+#
+# Quick start:
+#   rake awdwr:dashboard -- installs, configures, and starts a dashboard
+#   rake awdwr:shell     -- shells into the main (dashboard) container
+#   rake clobber         -- removes all containers, images, etc
+#
+# Containers:
+#   awdwr-mysql: a mysql server
+#   awdwr-main:  runs the dashboard and can be shelled into
+#
+# Ports:
+#   3333: dashboard, visit http://localhost:3333/ to see the dashboard
+#   3334: rails server (maps to port 3000 on the container)
+#
+# Networks:
+#   awdwr: used to connect the main dashboard container to mysql
+#
+# Volumes:
+#   awdwr-main: testrails "edition4" work directory
+#
+
 namespace :mysql do
-  task :setup do
+  task :setup => 'awdwr:network' do
     next if `docker container ls -a`.include? 'awdwr-mysql'
-    sh "docker run --network host --name awdwr-mysql " +
+    sh "docker run --network awdwr --name awdwr-mysql " +
       "-e MYSQL_ROOT_PASSWORD=root -d mysql/mysql-server"
 
     # wait for container to initialize
@@ -16,15 +37,16 @@ namespace :mysql do
     # grant permissions
     cmd = '|docker exec -i awdwr-mysql mysql --user=root --password=root'
     open(cmd, 'w') do |f|
-      f.write "CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';\n"
-      f.write "GRANT ALL PRIVILEGES ON depot_production.* TO " +
-        "'username'@'localhost';\n"
-      f.write "show grants for 'username'@'localhost';\n"
+      f.write "CREATE USER 'username' IDENTIFIED BY 'password';\n"
+      f.write "GRANT ALL PRIVILEGES ON depot_production.* TO 'username';\n"
+      f.write "SHOW GRANTS FOR 'username';\n"
+      f.write "CREATE USER 'awdwr';\n"
+      f.write "GRANT ALL PRIVILEGES ON depot_production.* TO 'awdwr';\n"
     end
   end
 
   task :clobber => :stop do
-    next unless `docker container ls`.include? 'awdwr-mysql'
+    next unless `docker container ls -a`.include? 'awdwr-mysql'
     system "docker stop awdwr-mysql"
     system "docker container rm awdwr-mysql"
   end
@@ -33,7 +55,11 @@ namespace :mysql do
     system "docker logs awdwr-mysql"
   end
 
-  task :ssh => :setup do
+  task :shell => :setup do
+    system "docker exec -it awdwr-mysql /bin/bash"
+  end
+
+  task :client => :setup do
     system "docker exec -it awdwr-mysql mysql --user=root --password=root"
   end
 
@@ -53,25 +79,46 @@ namespace :mysql do
 end
 
 namespace :awdwr do
-  task :build => 'mysql:setup' do
-    sh 'docker build -t awdwr-main --network=host .'
+  task :network do
+    next if `docker network ls`.include? 'awdwr'
+    system 'docker network create awdwr'
   end
 
-  task :dashboard do
+  task :build => ['mysql:setup', :network] do
+    sh 'docker build --tag awdwr-main --network awdwr .'
+  end
+
+  task :volume do
+    next if `docker volume ls`.include? 'awdwr-main'
+    system "docker volume create awdwr-main"
+  end
+
+  task :dashboard => [:volume, :network] do
     unless `docker image ls`.include? 'awdwr-main'
       Rake::Task["awdwr:build"].execute
     end
 
     unless `docker ps -a`.include? 'awdwr-main'
       awdwr = File.expand_path("..", __dir__)
-      sh "docker run -p 3333:3333 -p 3334:3000 " +
-        "-v #{awdwr}:/srv/awdwr:delegated " +
-        '--name awdwr-main -w /home/awdwr/git/awdwr -d awdwr-main ' +
-        '/bin/bash --login -c "rackup -p 3333 -o 0.0.0.0 dashboard.ru"' 
+      sh %W(
+        docker run --name awdwr-main
+        --publish 3333:3333 --publish 3334:3000
+        --volume #{awdwr}:/srv/awdwr:delegated
+        --mount source=awdwr-main,target=/home/awdwr/git/awdwr/edition4/work
+        --workdir /home/awdwr/git/awdwr
+        --network awdwr
+        --env MYSQL_HOST=awdwr-mysql
+        --detach awdwr-main
+        /bin/bash --login -c "shotgun -p 3333 -o 0.0.0.0 dashboard.ru"
+      ).join(' ')
     end
   end
 
-  task :ssh do
+  task :logs do
+    system "docker logs awdwr-main"
+  end
+
+  task :shell do
     unless `docker ps -a`.include? 'awdwr-main'
       Rake::Task["awdwr:dashboard"].execute
     end
@@ -100,8 +147,17 @@ namespace :awdwr do
   end
 
   task :clobber => :clean do
-    next unless `docker image ls`.include? 'awdwr-main'
-    system "docker image rm awdwr-main"
+    if `docker image ls`.include? 'awdwr-main'
+      system "docker image rm awdwr-main"
+    end
+
+    if `docker network ls`.include? 'awdwr'
+      system "docker network rm awdwr"
+    end
+
+    if `docker volume ls`.include? 'awdwr-main'
+      system "docker volume rm awdwr-main"
+    end
   end
 end
 
