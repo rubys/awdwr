@@ -85,9 +85,8 @@ if `which rbenv`.empty?
     system 'bash -c "curl -L https://get.rvm.io | bash -s stable"'
     exit -1 unless File.exist? rvm_path
     cmd = "source #{rvm_path}/scripts/rvm; rvm default system; " +
-      "rvm --autolibs=enable requirements ruby-2.0.0"
+      "rvm --autolibs=enable requirements ruby-2.6.1"
     system 'bash -c ' + cmd.inspect
-    exit 0
   end
 end
 
