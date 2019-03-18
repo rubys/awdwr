@@ -276,6 +276,8 @@ module AWDWR
       gems.delete('delayed_job_active_record')
     end
 
+    gems.delete 'stopgap_13632' if RUBY_VERSION >= '2.3'
+
     # TEMP hack to work around https://github.com/rails/rails/issues/35505
     if File.read("#{rails}/RAILS_VERSION") =~ /^[6]\./
       gems['jbuilder'][:github] = 'rails/jbuilder'
