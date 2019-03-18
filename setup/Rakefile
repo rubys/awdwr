@@ -88,6 +88,8 @@ namespace :awdwr do
     sh 'docker build --tag awdwr-main --network awdwr .'
   end
 
+  task :rebuild => [:clean, :build, :dashboard, 'rake:clean']
+
   task :volume do
     next if `docker volume ls`.include? 'awdwr-main'
     system "docker volume create awdwr-main"
@@ -144,13 +146,13 @@ namespace :awdwr do
   task :clean => :kill do
     container=`docker ps -aq --filter name=awdwr-main`.chomp
     system "docker container rm #{container}" unless container.empty?
-  end
 
-  task :clobber => :clean do
     if `docker image ls`.include? 'awdwr-main'
       system "docker image rm awdwr-main"
     end
+  end
 
+  task :clobber => :clean do
     if `docker network ls`.include? 'awdwr'
       system "docker network rm awdwr"
     end
