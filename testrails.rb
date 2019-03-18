@@ -329,19 +329,22 @@ clerk.prune(PROFILE.ruby['bin'], 3, Time.now - 7 * 86400)
 log "Updating gems"
 
 if File.exist? File.join(WORK, 'Gemfile')
-  install, bundler  = 'install', 'bundler'
+  install, bundler, bver  = 'install', 'bundler', ''
   gemspec = File.join(HOME, 'git', 'rails', 'rails.gemspec')
   if File.exist?(gemspec)
     if not File.readlines(gemspec).grep(/bundler.*\.pre\./).empty?
       install = 'install --pre' 
       bundler = 'bundler.*pre'
+    elsif not File.readlines(gemspec).grep(/bundler.*\<\s*2/).empty?
+      bver = `gem list -e bundler`.scan(/[(, ](1[.\d]+)/).flatten.max ||
+        '1.17.2'
     end
   end
 
   install = <<-EOF
     gem update --system
-    gem list -i ^bundler$ > /dev/null && gem update bundler || gem #{install} bundler
-    (cd #{File.realpath WORK}; rm -rf Gemfile.lock vendor; bundle install)
+    gem list -i ^bundler$ > /dev/null && gem update bundler || gem #{install} bundler #{bver ? "-v #{bver}" : ''}
+    (cd #{File.realpath WORK}; rm -rf Gemfile.lock vendor; bundle #{bver ? "_#{bver}_" : ''} install)
   EOF
 
   ENV.delete 'BUNDLE_GEMFILE'

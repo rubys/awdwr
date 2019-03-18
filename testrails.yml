@@ -7,19 +7,19 @@ default:
   output:  []
   message: []
   rvm:
-    bin:   ruby-2.6.1
+    bin:   ruby-2.6.2
 
-226:
-  output:  2.2.6
-  message: 'Ruby 2.2.6'
+220:
+  output:  2.2.10
+  message: 'Ruby 2.2.10'
   rvm:
-    bin:   ruby-2.2.6
+    bin:   ruby-2.2.10
 
-233:
-  output:  2.3.3
-  message: 'Ruby 2.3.3'
+238:
+  output:  2.3.8
+  message: 'Ruby 2.3.8'
   rvm:
-    bin:   ruby-2.3.3
+    bin:   ruby-2.3.8
 
 245:
   output:  2.4.5

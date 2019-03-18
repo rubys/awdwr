@@ -179,8 +179,12 @@ module AWDWR
         hash[:version] = []
         hash[:version] << eval($1) while opts.sub!(/^,\s*(".*?")/, '') 
         hash[:version] << eval($1) while opts.sub!(/^,\s*('.*?')/, '') 
-        while opts.sub!(/(\w+)\s*=?>?:?\s*(.*?)(,\s*|$)/, '')  do
-          hash[$1.to_sym] = eval($2)
+        while opts.sub!(/([a-zA-Z]\w+)\s*=?>?:?\s*(.*?)(,\s*|$)/, '')  do
+          if $1 == 'RUBY_VERSION'
+            (hash[:version] << eval("#$1 #$2")).compact!
+          else
+            hash[$1.to_sym] = eval($2.start_with?('.') ? "0#$2" : $2)
+          end
         end
         opts.sub! /,\s*/, ''
       end
@@ -274,6 +278,10 @@ module AWDWR
     # https://github.com/collectiveidea/delayed_job_active_record/issues/137
     unless File.read("#{rails}/RAILS_VERSION") =~ /^[34]\.|^5\.0/
       gems.delete('delayed_job_active_record')
+    end
+
+    if File.read("#{rails}/RAILS_VERSION") =~ /^[345]/
+      gems['web-console'].delete(:github) if gems['web-console']
     end
 
     gems.delete 'stopgap_13632' if RUBY_VERSION >= '2.3'
