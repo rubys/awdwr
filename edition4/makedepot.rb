@@ -1325,7 +1325,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   db :migrate
 
   desc "Verify that the entries have been combined."
-  %w(1 2 3).each do |cart_id|
+  %w(1).each do |cart_id|
     get "/carts/#{cart_id}", screenshot: { filename: "g_1_cart_#{cart_id}_quantities.pdf", dimensions: [ 640, 200 ] }
   end
 
@@ -1339,7 +1339,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   cmd "mv #{migration} #{migration.sub('.rb', '.bak')}"
 
   desc 'Every item should (once again) only have a quantity of one.'
-  %w(1 2 3).each do |cart_id|
+  %w(1).each do |cart_id|
     get "/carts/#{cart_id}", screenshot: { filename: "g_2_cart_#{cart_id}_no_quantities.pdf", dimensions: [ 640, 200 ] }
   end
 

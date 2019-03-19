@@ -201,7 +201,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.1, "Iteration E1: Creating A Smarter Cart" do
     assert_select 'li', /Rails, Angular, Postgres, and Bootstrap/u
-    assert_select 'main li', :count => 3, :html => /1 .+ Seven Mobile Apps in Seven Weeks/
+    assert_select 'main li', :count => 6, :html => /1 .+ Seven Mobile Apps in Seven Weeks/
     assert_select '.stdout', /^=+ (\d+)? *CombineItemsInCart: reverting =+$/
     assert_select '.stdout', /^ +down +\d+ +Combine items in cart$/
     if $rails_version =~ /^3\./
