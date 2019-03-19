@@ -1912,7 +1912,8 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
       EOF
     end
   else
-    edit 'app/views/line_items/create.js.coffee' do |data|
+    ext = ($rails_version =~ /^[45]/ ? 'coffee' : 'erb')
+    edit "app/views/line_items/create.js.#{ext}" do |data|
       data.all =  <<-EOF.unindent(8)
         cart = document.getElementById("cart")
         cart.innerHTML = "<%= j render(@cart) %>"
