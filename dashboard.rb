@@ -170,9 +170,10 @@ _html do
       _ '#executing {display: none}' if active.empty?
     end
 
-    _script :src => 'jquery.min.js'
-    _script :src => 'jquery-ui.min.js'
-    _script :src => 'jquery.tablesorter.min.js'
+    root = env['REQUEST_URI'].split('/').map{'..'}.join('/').sub(/\.*$/, '')
+    _script :src => root + 'jquery.min.js'
+    _script :src => root + 'jquery-ui.min.js'
+    _script :src => root + 'jquery.tablesorter.min.js'
 
     _script %{
       setTimeout(update, 1000);
