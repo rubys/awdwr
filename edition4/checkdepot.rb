@@ -277,7 +277,7 @@ class DepotTest < Gorp::TestCase
 
   section 11.4, "Iteration F4: Hide an Empty Cart" do
     assert_select '#cart'
-    assert_select '.total_cell', '$142.00'
+    assert_select '.price', '$142.00'
   end
 
   section 12.1, "Iteration G1: Capturing an Order" do

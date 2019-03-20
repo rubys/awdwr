@@ -2839,7 +2839,7 @@ section 12.4, 'Iteration G2: Downloading an eBook' do
       msub /#cart()/, ', #order'
     end
 
-    msub /^() +table/, <<-EOF + "\n", :highlight
+    msub /^() +main/, <<-EOF + "\n", :highlight
       a, a:hover {
         color: white;
         background-color: #141;
