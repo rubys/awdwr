@@ -35,6 +35,9 @@ RUN apt-get install -y \
   libpq-dev \
   zlib1g-dev
 
+RUN /bin/bash -l -c "rvm install 2.6.2" &&\
+  /bin/bash -l -c "rvm use 2.6.2"
+
 WORKDIR /home/awdwr
 ENV HOME /home/awdwr
 ENV USER awdwr
