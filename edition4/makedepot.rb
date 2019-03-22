@@ -3014,7 +3014,7 @@ section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
     Demonstrate how Webpacker works and why it exists by using React.
   EOF
 
-  if $rails_version =~ /^4|^5\.0/
+  if $rails_version =~ /^5/
     edit 'Gemfile' do
       self << "gem 'webpacker', '~> 3.0'"
     end
@@ -3289,7 +3289,7 @@ export default PurchaseOrderPayType
 end
 
 section 13.2, 'Iteration H2: System testing' do
-  unless $rails_version =~ /^[345]/
+  unless $rails_version =~ /^5.1/
     edit 'test/system/products_test.rb' do
       sub! ':one', ':ruby'
       sub! 'Product was successfully created', 'Title has already been taken'
@@ -3333,9 +3333,7 @@ section 13.2, 'Iteration H2: System testing' do
     EOF
   end
 
-  if $rails_version =~ /^5/
-    cmd 'RAILS_ENV=test bin/webpack'
-  end
+  cmd 'RAILS_ENV=test bin/webpack' if $rails_version =~ /^5\.1/
 
   cmd 'rake test:system'
   cmd 'rake test'
@@ -4724,7 +4722,7 @@ EOF
 
   publish_code_snapshot :t
 
-  cmd 'bin/webpack'
+  cmd 'bin/webpack' if $rails_version =~ /^5\.1/
   restart_server
 
   desc 'Add to cart'
@@ -4764,7 +4762,7 @@ EOF
     gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
   end
 
-  cmd 'bin/webpack'
+  cmd 'bin/webpack' if $rails_version =~ /^5\.1/
   restart_server
 
   get '/es', screenshot: {
@@ -4796,7 +4794,7 @@ EOF
     restart_server
   end
 
-  cmd 'bin/webpack'
+  cmd 'bin/webpack' if $rails_version =~ /^5\.1/
   restart_server
 
   get '/es', screenshot: {
@@ -4847,7 +4845,7 @@ EOF
     'order[email]' => 'juser@hotmail.com',
     'order[pay_type]' => 'Check'
 
-  cmd 'bin/webpack'
+  cmd 'bin/webpack' if $rails_version =~ /^5\.1/
   restart_server
 
   get '/es', screenshot: {
