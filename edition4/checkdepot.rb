@@ -176,7 +176,7 @@ class DepotTest < Gorp::TestCase
     elsif $rails_version =~ /^4/
       assert_test_summary :tests => 23, :assertions => 47
     else
-      assert_test_summary :tests => 23, :assertions => 34
+      assert_test_summary :tests => 23, :assertions => '3[34]'
     end
   end
 
@@ -353,7 +353,11 @@ class DepotTest < Gorp::TestCase
 
   unless $rails_version =~ /^4|^5\.0/
     section 13.2, "Iteration H2: System testing" do
-      assert_test_summary :tests => 1, :assertions => 2
+      if $rails_version =~ /^5/
+        assert_test_summary :tests => 1, :assertions => 2
+      else
+        assert_test_summary :tests => 7, :assertions => 8
+      end
       assert_test_summary :tests => 39, :assertions => 79
     end
   end

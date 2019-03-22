@@ -3091,7 +3091,7 @@ class PayTypeSelector extends React.Component \{
     return (
       <div className="field">
         <label htmlFor="order_pay_type">Pay type</label>
-        <select id="pay_type" name="order[pay_type]">
+        <select id="order_pay_type" name="order[pay_type]">
           <option value="">Select a payment method</option>
           <option value="Check">Check</option>
           <option value="Credit card">Credit card</option>
@@ -3154,7 +3154,7 @@ class PayTypeSelector extends React.Component \{
       <div>
         <div className="field">
           <label htmlFor="order_pay_type">Pay type</label>
-          <select id="pay_type" onChange={this.onPayTypeSelected} 
+          <select id="order_pay_type" onChange={this.onPayTypeSelected} 
             name="order[pay_type]">
             <option value="">Select a payment method</option>
             <option value="Check">Check</option>
@@ -3289,13 +3289,34 @@ export default PurchaseOrderPayType
 end
 
 section 13.2, 'Iteration H2: System testing' do
+  unless $rails_version =~ /^[345]/
+    edit 'test/system/products_test.rb' do
+      sub! ':one', ':ruby'
+      sub! 'Product was successfully created', 'Title has already been taken'
+    end
+    cmd 'rm test/system/carts_test.rb'
+    cmd 'rm test/system/line_items_test.rb'
+
+    edit 'test/system/orders_test.rb' do
+      dcl 'creating a Order' do
+        sub! /.*/m, ''
+      end
+
+      dcl 'updating a Order' do
+        sub! /.*/m, ''
+      end
+
+      gsub! /\n\n+/, "\n\n"
+    end
+  end
+
   edit 'test/system/orders_test.rb' do
     gsub! /^  #.*\n/, ''
     msub /^()end/, <<-EOF.unindent(4), :highlight
       test "check routing number" do
         visit store_index_url
 
-        first('.catalog li').click_on 'Add to Cart'
+        click_on 'Add to Cart', match: :first
 
         click_on 'Checkout'
 
@@ -3305,14 +3326,17 @@ section 13.2, 'Iteration H2: System testing' do
 
         assert_no_selector "#order_routing_number"
 
-        select 'Check', from: 'pay_type'
+        select 'Check', from: 'Pay type'
 
         assert_selector "#order_routing_number"
       end 
     EOF
   end
 
-  cmd 'RAILS_ENV=test bin/webpack'
+  if $rails_version =~ /^5/
+    cmd 'RAILS_ENV=test bin/webpack'
+  end
+
   cmd 'rake test:system'
   cmd 'rake test'
 end
