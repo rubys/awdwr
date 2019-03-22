@@ -363,6 +363,7 @@ end
 
 # dynamic status updates
 _json do
+  Dashboard.env = env
   active, log = Dashboard.status
 
   config={}
