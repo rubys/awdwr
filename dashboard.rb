@@ -54,6 +54,15 @@ $jobs = config['book'].map do |editions|
 end.flatten
 
 module Dashboard
+  def self.env=(env)
+    @@env = env
+  end
+
+  def self.root
+    @root ||= @@env['REQUEST_URI'].split('/').map{'..'}.join('/').
+      sub(/\.*$/, '')
+  end
+
   def self.status
     # determine if any processes are active
     active = `ps xo start,args`.
@@ -97,12 +106,13 @@ module Dashboard
       link= "#{link.sub('.html','/')}makedepot.log"
     end
 
-    "#{job['web']}/#{link}"
+    "#{root}#{job['web']}/#{link}"
   end
 end
 
 # main output
 _html do
+  Dashboard.env = env
 
   # submit a new run in the background
   if _.post?
@@ -170,10 +180,9 @@ _html do
       _ '#executing {display: none}' if active.empty?
     end
 
-    root = env['REQUEST_URI'].split('/').map{'..'}.join('/').sub(/\.*$/, '')
-    _script :src => root + 'jquery.min.js'
-    _script :src => root + 'jquery-ui.min.js'
-    _script :src => root + 'jquery.tablesorter.min.js'
+    _script :src => Dashboard.root + 'jquery.min.js'
+    _script :src => Dashboard.root + 'jquery-ui.min.js'
+    _script :src => Dashboard.root + 'jquery.tablesorter.min.js'
 
     _script %{
       setTimeout(update, 1000);
