@@ -870,7 +870,7 @@ section 8.5, 'Iteration C5 - Caching' do
       edit ced, 'perform_caching' do
         clear_all_marks
         edit 'perform_caching', :mark => 'perform_caching' do
-          msub /perform_caching = (false)/, 'true'
+          msub /perform_caching = (false|true)/, 'true'
         end
       end
     end
@@ -1915,7 +1915,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
     ext = ($rails_version =~ /^[45]/ ? 'coffee' : 'erb')
     edit "app/views/line_items/create.js.#{ext}" do |data|
       data.all =  <<-EOF.unindent(8)
-        cart = document.getElementById("cart")
+        #{ext == 'erb' ? '' : 'let '}cart = document.getElementById("cart")
         cart.innerHTML = "<%= j render(@cart) %>"
       EOF
     end
@@ -2056,14 +2056,25 @@ section 11.4, 'Iteration F4: Hide an Empty Cart' do
   end
 
   desc "hide notice when adding to cart"
-  edit "app/views/line_items/create.js.coffee" do |data|
-    data << %{
+  if $rails_version =~ /^[45]/
+    edit "app/views/line_items/create.js.coffee" do |data|
+      data << %{
 # START_HIGHLIGHT
 notice = document.getElementById("notice")
 if notice
   notice.style.display = "none"
 # END_HIGHLIGHT
 }
+    end
+  else
+    edit "app/views/line_items/create.js.erb" do |data|
+      data << %{
+// START_HIGHLIGHT
+let notice = document.getElementById("notice")
+if (notice) notice.style.display = "none"
+// END_HIGHLIGHT
+}
+    end
   end
 
   desc 'Demonstrate emptying and recreating the cart'
@@ -2116,10 +2127,17 @@ else
     end
 
     desc 'Update price when notified of price changes'
-    edit 'app/assets/javascripts/channels/products.coffee' do
+    if $rails_version =~ /^[345]/
+      file = 'app/assets/javascripts/channels/products.coffee'
+    else
+      file = 'app/javascript/channels/products_channel.js'
+    end
+    edit file do
       edit 'incoming data', :highlight do
-        gsub! /#.*/, 'document.getElementsByTagName("main")[0].innerHTML = data.html'
+        gsub! %r{(#|//).*}, 
+          'document.getElementsByTagName("main")[0].innerHTML = data.html'
       end
+      gsub! /^#/, '//' if file.end_with? '.js'
     end
 
     desc 'send updates when price changes'
@@ -4180,7 +4198,10 @@ section 15.3, 'Iteration J3: Limiting Access' do
       msub /()\Z/, <<-EOF.unindent(8), mark: 'more'
         class ActionDispatch::IntegrationTest
           def login_as(user)
-            post login_url, params: { name: user.name, password: 'secret' }
+            visit login_url
+            fill_in :name, with: user.name
+            fill_in :password, with: 'secret'
+            click_on 'Login'
           end
 
           def logout
@@ -5341,12 +5362,14 @@ section 25.3, "CSS with Webpack" do
     <!-- END:stylesheet_pack_tag -->
     }
   end
+
   cmd "yarn add postcss-cssnext"
+
   edit ".postcssrc.yml" do
-    msub /autoprefixer: {}()/, %{
-  postcss-cssnext: {}
-    }
+    self << "plugins:\n" unless self.include? 'plugins:'
+    self << "  postcss-cssnext: {}\n"
   end
+
   edit "app/javascript/packs/css/store.scss" do
     msub /().store {/,%{
 // START:postcss
@@ -5465,82 +5488,5 @@ $cleanup = Proc.new do
     system "rm -rf #{$WORK}/data"
     system "cp -rp #{$DATA} #{$WORK}"
     system "cp -rp #{$WORK}/depot/public/assets #{$WORK}/data"
-  end
-end
-
-unless $PUB or $rails_version =~ /^3\./
-  section 27.4, 'Devise' do
-    edit 'Gemfile', 'devise' do
-      msub /activemerchant.*\n()/, <<-EOF.unindent(8), :mark => 'devise'
-        gem 'devise', '~> 3.0.0.rc'
-     EOF
-    end
-    bundle 'install'
-
-    desc 'install devise'
-    generate 'devise:install'
-
-    unless File.exist? 'config/initializers/devise.rb'
-      edit 'Gemfile', 'plugins' do
-        msub /()gem 'devise'/, '# '
-      end
-      next
-    end
-
-    desc 'define default url options for development and production'
-    edit 'config/environments/development.rb', 'default_url_options' do
-      msub /^()end/, "\n" + <<-EOF.unindent(6), :mark => 'default_url_options'
-        # define default url options for devise
-        config.action_mailer.default_url_options = { :host => 'localhost:#$PORT' }
-      EOF
-    end
-
-    edit 'config/environments/production.rb', 'default_url_options' do
-      msub /^()end/, "\n" + <<-EOF.unindent(6), :mark => 'default_url_options'
-        # define default url options for devise
-        config.action_mailer.default_url_options = { :host => 'depot.pragprog.com' }
-      EOF
-    end
-
-    desc 'add flash messages to the layout'
-    edit 'app/views/layouts/application.html.erb', 'main' do
-      clear_all_marks
-      gsub! /(\n\s+)(<%= yield %>)/, 
-        '\1<p id="notice"><%= notice %></p>' +
-        '\1<p id="alert"><%= alert %></p>' +
-        "\n\\1\\2"
-      edit /^ +<p id="notice">.*?\n\n/m, :highlight
-      edit /^ +<div id="main">.*?<\/div>\n/m, :mark => 'main'
-    end
-
-    desc 'remove flash messages from the views'
-    edit 'app/views/store/index.html.*' do
-      gsub! /^- if notice.*?\n\n/m, ''
-      gsub! /<% if notice %>.*?\n\n/m, ''
-      gsub! /<p id="notice">.*?\n\n/m, ''
-    end
-
-    edit 'app/views/sessions/new.html.erb' do
-      gsub! /^ +<% if flash.*?\n\n/m, ''
-    end
-
-    edit 'app/views/users/index.html.erb' do
-      clear_all_marks
-      gsub! /^<% if notice.*?\n\n/m, "\n"
-      gsub! /<p id="notice">.*?\n\n/m, ''
-    end
-    
-    Dir['app/views/*/show.html.erb'].each do |view|
-      edit view do
-        clear_all_marks
-        gsub! /^<p id="notice">.*\n\n/, ''
-      end
-    end
-
-    desc 'generate a devise model for administrators'
-    generate 'devise Admin'
-
-    desc 'Apply the migration'
-    db :migrate
   end
 end
