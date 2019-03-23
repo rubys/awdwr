@@ -4644,8 +4644,8 @@ section 16.3, 'Task K3: Translating Checkout' do
     edit 'app/javascript/packs/application.js' do
       self << "\n\n" + <<-EOF
 // START:i18n-js
-require('i18n');
-require('i18n/translations');
+window.I18n = require("../../../public/javascripts/i18n")
+require("../../../public/javascripts/translations")
 // END:i18n-js
 EOF
     end
