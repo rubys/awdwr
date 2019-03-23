@@ -137,7 +137,7 @@ class DepotTest < Gorp::TestCase
   section 8.1, "Iteration C1: Create the Catalog Listing" do
     assert_select 'p', 'Find me in app/views/store/index.html.erb'
     assert_select 'h1', 'Your Pragmatic Catalog'
-    assert_select '.price', '45.0'
+    assert_select '.price', '20.0'
   end
 
   section 8.2, "Iteration C2: Add a Page Layout" do
@@ -145,7 +145,7 @@ class DepotTest < Gorp::TestCase
   end
 
   section 8.3, "Iteration C3: Use a Helper to Format the Price" do
-    assert_select '.price', '$45.00'
+    assert_select '.price', '$20.00'
   end
 
   section 8.4, "Iteration C4: Functional Testing" do
@@ -185,7 +185,7 @@ class DepotTest < Gorp::TestCase
     #assert_select "a[href='http://localhost:#{$PORT}/carts/1']", 'redirected'
     assert_select '#notice', 'Line item was successfully created.'
 
-    assert_select 'li', /^Seven Mobile Apps in Seven Weeks$/
+    assert_select 'li', /^Build Chatbot Interactions$/
   end
 
   section 9.4, "Playtime" do
@@ -200,8 +200,8 @@ class DepotTest < Gorp::TestCase
   end
 
   section 10.1, "Iteration E1: Creating A Smarter Cart" do
-    assert_select 'li', /Rails, Angular, Postgres, and Bootstrap/u
-    assert_select 'main li', :count => 6, :html => /1 .+ Seven Mobile Apps in Seven Weeks/
+    assert_select 'li', /Docker for Rails Developers/u
+    assert_select 'main li', :count => 6, :html => /1 .+ Build Chatbot Interactions/
     assert_select '.stdout', /^=+ (\d+)? *CombineItemsInCart: reverting =+$/
     assert_select '.stdout', /^ +down +\d+ +Combine items in cart$/
     if $rails_version =~ /^3\./
@@ -227,7 +227,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.3, "Iteration E3: Finishing the Cart" do
     assert_select '#notice', 'Your cart is currently empty'
-    assert_select 'tfoot .price', '$116.00'
+    assert_select 'tfoot .price', '$96.00'
     assert_select 'input[type=submit][value="Empty cart"]'
   end
 
@@ -277,7 +277,7 @@ class DepotTest < Gorp::TestCase
 
   section 11.4, "Iteration F4: Hide an Empty Cart" do
     assert_select '#cart'
-    assert_select '.price', '$142.00'
+    assert_select '.price', '$116.00'
   end
 
   section 12.1, "Iteration G1: Capturing an Order" do
@@ -299,8 +299,8 @@ class DepotTest < Gorp::TestCase
     # atom
     assert_select '.stdout', /(<|&lt;)summary type="xhtml"(>|&gt;)/,
       'Missing <summary type="xhtml">'
-    assert_select '.stdout', /(<|&lt;)td(>|&gt;)Rails, Angular, Postgres, and Bootstrap(<|&lt;)\/td(>|&gt;)/,
-      'Missing <td>Rails, Angular, Postgres, and Bootstrap</td>'
+    assert_select '.stdout', /(<|&lt;)td(>|&gt;)Docker for Rails Developers(<|&lt;)\/td(>|&gt;)/,
+      'Missing <td>Docker for Rails Developers</td>'
 
     # caching
     assert_select '.stdout', /304 Not Modified/
@@ -333,8 +333,8 @@ class DepotTest < Gorp::TestCase
       'Missing <a href="mailto:customer@example.com">'
 
     # json
-    assert_select '.stdout', /[{,] ?"title": ?"Rails, Angular, Postgres, and Bootstrap"[,}]/,
-      'Missing "title": "CoffeeScript"'
+    assert_select '.stdout', /[{,] ?"title": ?"Docker for Rails Developers"[,}]/,
+      'Missing "title": "Docker for Rails Developers"'
 
     # custom xml
     assert_select '.stdout', /(<|&lt;)order_list for_product=.*(>|&gt;)/,
@@ -475,11 +475,11 @@ class DepotTest < Gorp::TestCase
       :title => "Can't set locale to something other than the default",
       :match =>  /"es" is not a valid locale/
 
-    assert_select '.price', /45,00(.|&#?\w+;)\$US/u
+    assert_select '.price', /20,00(.|&#?\w+;)\$US/u
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
     assert_select 'input[type=submit][value$="dir al Carrito"]'
     #assert_select 'td', /1(.|&#?\w+;)/u
-    assert_select 'td', 'Rails, Angular, Postgres, and Bootstrap'
+    assert_select 'td', 'Docker for Rails Developers'
   end
 
   section 16.3, "Task J3: Translating Checkout" do
@@ -547,7 +547,7 @@ class DepotTest < Gorp::TestCase
 #     :title =>  "Live streaming doesn't work with basic authentication or builder",
 #     :match => /<pre class="stdin">curl.*<\/pre>\s+<pre class="stdin">/
 
-    assert_select '.stdout', /(<|&lt;)price currency="USD"(>|&gt;)26.0(<|&lt;)\/price(>|&gt;)/
+    assert_select '.stdout', /(<|&lt;)price currency="USD"(>|&gt;)38.0(<|&lt;)\/price(>|&gt;)/
     assert_select '.stdout', /"1 minute"/
     assert_select '.stdout', /"half a minute"/
     assert_select '.stdout', /"CAN\$235"/
