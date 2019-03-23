@@ -515,6 +515,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
+  if $rails_version =~ /^(3|4|5)/
   section 17, "Deployment" do
     ticket 8837,
       :title =>  'Bring back "database already exists" messages when running rake tasks',
@@ -534,6 +535,7 @@ class DepotTest < Gorp::TestCase
     end
     assert_select '.stdout', 'Capified'
     assert_select '.stdout', /depot\/log\/production.log/
+  end
   end
 
   section 19, "Finding Your Way Around" do
