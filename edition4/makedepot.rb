@@ -4630,17 +4630,29 @@ section 16.3, 'Task K3: Translating Checkout' do
 
   restart_server
 
-  edit 'app/assets/javascripts/application.js' do
-    clear_highlights
-    msub /^()\/\/= require_tree ./, %{
+  if $rails_version =~ /^[345]/
+    edit 'app/assets/javascripts/application.js' do
+      clear_highlights
+      msub /^()\/\/= require_tree ./, %{
 // START:i18n-js
 //= require i18n
 //= require i18n/translations
 // END:i18n-js
 }
+    end
+  else
+    edit 'app/javascript/packs/application.js' do
+      self << "\n\n" + <<-EOF
+// START:i18n-js
+require('i18n');
+require('i18n/translations');
+// END:i18n-js
+EOF
+    end
   end
+
   edit "app/views/layouts/application.html.erb" do
-    msub /()<%= javascript_include_tag 'application'/, %{
+    msub /()<%= javascript_(include|pack)_tag 'application'/, %{
     <!-- START:i18n-js -->
     }
     msub /()\s+<\/head>/,%{
@@ -4937,6 +4949,7 @@ section 16.4, 'Task K4: Add a locale switcher.' do
   test
 end
 
+if $rails_version =~ /^[345]/
 section 17, 'Deployment' do
   Dir.chdir(File.join($WORK, 'depot'))
 
@@ -5068,6 +5081,7 @@ section 17, 'Deployment' do
     console "Depot::Application.configure { paths['log'].first }", 'production'
   end
   cmd 'git status'
+end
 end
 
 section 18, 'Retrospective' do
