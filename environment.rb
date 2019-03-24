@@ -284,7 +284,10 @@ module AWDWR
       gems['web-console'].delete(:github) if gems['web-console']
     end
 
-    gems.delete 'stopgap_13632' if RUBY_VERSION >= '2.3'
+    gems.delete 'stopgap_13632' if ruby >= '2.3'
+
+    # include irb in gemfile if bundled with Ruby
+    gems['irb'] = {require: false} if ruby >= '2.6'
 
     # TEMP hack to work around https://github.com/rails/rails/issues/35505
     if File.read("#{rails}/RAILS_VERSION") =~ /^[6]\./

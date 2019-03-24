@@ -1915,7 +1915,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
     ext = ($rails_version =~ /^[45]/ ? 'coffee' : 'erb')
     edit "app/views/line_items/create.js.#{ext}" do |data|
       data.all =  <<-EOF.unindent(8)
-        #{ext == 'erb' ? '' : 'let '}cart = document.getElementById("cart")
+        #{ext == 'erb' ? 'let ' : ''}cart = document.getElementById("cart")
         cart.innerHTML = "<%= j render(@cart) %>"
       EOF
     end
@@ -4198,10 +4198,14 @@ section 15.3, 'Iteration J3: Limiting Access' do
       msub /()\Z/, <<-EOF.unindent(8), mark: 'more'
         class ActionDispatch::IntegrationTest
           def login_as(user)
-            visit login_url
-            fill_in :name, with: user.name
-            fill_in :password, with: 'secret'
-            click_on 'Login'
+            if respond_to? :visit
+              visit login_url
+              fill_in :name, with: user.name
+              fill_in :password, with: 'secret'
+              click_on 'Login'
+            else
+              post login_url, params: { name: user.name, password: 'secret' }
+            end
           end
 
           def logout
