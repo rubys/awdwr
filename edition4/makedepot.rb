@@ -4944,9 +4944,16 @@ section 16.4, 'Task K4: Add a locale switcher.' do
   end
 
   desc "Create the CS for hiding the button"
-  edit "app/assets/javascripts/locale_switcher.coffee" do |data|
-    data.all = %{document.addEventListener 'turbolinks:load', ->
+  if $rails_version =~ /^[345]/
+     edit "app/assets/javascripts/locale_switcher.coffee" do |data|
+       data.all = %{document.addEventListener 'turbolinks:load', ->
   document.getElementById('submit_locale_change').style.display='none'}
+     end
+   else
+     edit "app/javascript/packs/locale_switcher.js" do |data|
+       data.all = %{document.addEventListener('turbolinks:load', () =>
+  document.getElementById('submit_locale_change').style.display='none')}
+     end
   end
 
   edit 'app/views/layouts/application.html.erb', 'i18n' do
