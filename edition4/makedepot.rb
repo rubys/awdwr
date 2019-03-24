@@ -15,8 +15,11 @@ end
 if $rails_version =~ /^[34]/
   $title = 'Agile Web Development with Rails, Edition 4'
   DEPOT_CSS = "app/assets/stylesheets/application.css.scss"
-else
+elsif $rails_version =~ /^[5]/
   $title = 'Agile Web Development with Rails, Edition 5'
+  DEPOT_CSS = "app/assets/stylesheets/application.scss"
+else
+  $title = 'Agile Web Development with Rails, Edition 6'
   DEPOT_CSS = "app/assets/stylesheets/application.scss"
 end
 
@@ -5186,12 +5189,16 @@ section 22.1, 'Views' do
     end
   end
   cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products.xml"
+  edit('Gemfile') {self << "gem 'irb', require: false\n"}
+  cmd 'bundle install --local'
   if $rails_version =~ /^3\./
     irb 'helpers/date3.rb'
   else
     irb 'helpers/date4.rb'
   end
   irb 'helpers/number.rb'
+  edit('Gemfile') {gsub! /.*'irb'.*\n/, ''}
+  cmd 'bundle install --local'
   publish_code_snapshot :u
 end
 
