@@ -4984,7 +4984,94 @@ section 16.4, 'Task K4: Add a locale switcher.' do
   test
 end
 
+section 17.1, "Receiving Support Emails with Action Mailbox" do
+  desc 'install action mailbox'
+  cmd 'bin/rails action_mailbox:install'
+
+  desc 'add migrations it created'
+  db :migrate
+
+  desc 'Configure active storage'
+  edit 'config/environments/development.rb' do
+    msub /(^end)/, "\n#START:active-storage\n#START_HIGHLIGHT\n  config.active_storage.service = :local\n#END_HIGHLIGHT\nend\n#END:active-storage"
+  end
+  edit 'config/environments/test.rb' do
+    msub /(^end)/, "\n#START:active-storage\n#START_HIGHLIGHT\n  config.active_storage.service = :test\n#END_HIGHLIGHT\nend\n#END:active-storage"
+  end
+  edit 'config/storage.yml' do
+    self.all = read('config/storage.yml')
+  end
+
+  edit 'app/mailboxes/application_mailbox.rb' do
+    msub /^()end/,"\n#START_HIGHLIGHT\n  routing \"support@example.com\" => :support\n#END_HIGHLIGHT\n"
+  end
+
+  cmd 'bin/rails g mailbox support'
+
+  edit 'app/mailboxes/support_mailbox.rb' do
+    msub /def process()/,%{
+    # START_HIGHLIGHT
+    puts "From : #\{mail.from_address\}"
+    puts "Subject: #\{mail.subject\}"
+    puts "Body : #\{mail.body\}"
+    puts "END SupportMailbox#process:"
+    # END_HIGHLIGHT}
+  end
+
+  publish_code_snapshot :ta
+end
+
+section 17.2, "Storing Support Requests from Our Mailbox" do
+
+  desc "Generate the SupportRequest model"
+  cmd "bin/rails g model support_request"
+
+  desc "Create SupportRequest migration"
+  edit Dir['db/migrate/*create_support_requests.rb'].first do
+    msub /create_table :support_requests do \|t\|(.*)t.timestamps/m,%{
+    # START_HIGHLIGHT
+      t.string :email, comment: "Email of the submitter"
+      t.string :subject, comment: "Subject of their support email"
+      t.text :body, comment: "Body of their support email"
+      t.references :order, 
+                    foreign_key: true,
+                    comment: "their most recent order, if applicable"
+    # END_HIGHLIGHT
+      }
+  end
+  db :migrate
+
+  desc "Add association to SupportRequest"
+  edit "app/models/support_request.rb" do
+    msub /^()end/,%{
+  #START_HIGHLIGHT
+  belongs_to :order, optional: true
+  #END_HIGHLIGHT
+}
+  end
+
+  desc "Implement support mailbox for real"
+  edit 'app/mailboxes/support_mailbox.rb' do
+    msub /def process(.*end)/m,%{
+    # START_HIGHLIGHT
+    recent_order = Order.where(email: mail.from_address.to_s).
+                         order('created_at desc').
+                         first
+    SupportRequest.create!(
+      email: mail.from_address.to_s,
+      subject: mail.subject,
+      body: mail.body.to_s,
+      order: recent_order
+    )
+    # END_HIGHLIGHT
+  end}
+  end
+
+  restart_server
+end
+
 if $rails_version =~ /^[345]/
+  if false
 section 17, 'Deployment' do
   Dir.chdir(File.join($WORK, 'depot'))
 
@@ -5117,6 +5204,7 @@ section 17, 'Deployment' do
   end
   cmd 'git status'
 end
+  end
 end
 
 section 18, 'Retrospective' do
