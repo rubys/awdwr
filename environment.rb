@@ -175,6 +175,7 @@ module AWDWR
     gems = Hash[gems]
     gems.each do |gem, opts|
       hash = {}
+
       if opts and not opts.include? ':mswin'
         hash[:version] = []
         hash[:version] << eval($1) while opts.sub!(/^,\s*(".*?")/, '') 
@@ -188,7 +189,14 @@ module AWDWR
         end
         opts.sub! /,\s*/, ''
       end
+
       gems[gem] = hash
+
+      if opts and opts.include? 'platforms'
+        unless opts.include? ':mri' or opts.include? ':ruby'
+          gems.delete(gem)
+        end
+      end
     end
 
     # merge in lib, branches, repository information
