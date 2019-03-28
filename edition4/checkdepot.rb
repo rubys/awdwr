@@ -355,8 +355,10 @@ class DepotTest < Gorp::TestCase
     section 13.2, "Iteration H2: System testing" do
       if $rails_version =~ /^5.1/
         assert_test_summary :tests => 1, :assertions => 2
-      else
+      elsif $rails_version =~ /^5/
         assert_test_summary :tests => 7, :assertions => 8
+      else
+        assert_test_summary :tests => 7, :assertions => 7
       end
       assert_test_summary :tests => 39, :assertions => 79
     end
