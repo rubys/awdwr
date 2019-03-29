@@ -5052,7 +5052,7 @@ section 17.2, "Storing Support Requests from Our Mailbox" do
 
   desc "Implement support mailbox for real"
   edit 'app/mailboxes/support_mailbox.rb' do
-    msub /def process(.*end)/m,%{
+    msub /def process(.*  end)/m,%{
     # START_HIGHLIGHT
     recent_order = Order.where(email: mail.from_address.to_s).
                          order('created_at desc').
@@ -5068,6 +5068,188 @@ section 17.2, "Storing Support Requests from Our Mailbox" do
   end
 
   restart_server
+
+  # Note - this file does not always get generated
+  #        since the bundle running `depot` requires rspec
+  #        and this bleeds into Rails creating rspec files
+  desc "Add a test for our mailbox"
+  edit 'test/mailboxes/support_mailbox_test.rb' do
+    self.all = read('test/support_mailbox_test.rb')
+  end
+
+  desc "Add some more order test fixtres"
+  edit "test/fixtures/orders.yml" do
+    clear_highlights
+    msub /()two:/,%{
+#START_HIGHLIGHT
+another_one:
+  name: Dave Thomas
+  address: 123 Any St
+  email: dave@example.org
+  pay_type: Check
+  created_at: <%= 2.days.ago %>
+
+other_customer:
+  name: Chris Jones
+  address: 456 Somewhere Ln
+  email: chris@nowhere.net
+  pay_type: Check
+#END_HIGHLIGHT
+}
+  end
+
+  desc "Run the tests"
+  cmd "bin/rails test test/mailboxes/support_mailbox_test.rb"
+end
+
+section 17.3, "Responding with Rich Text" do
+
+  edit "config/routes.rb" do
+    clear_highlights
+    msub /()  resources :users/,%{
+  # START_HIGLIGHT
+  resources :support_requests, only: [ :index, :update ]
+  # END_HIGLIGHT
+}
+  end
+
+  desc "Create support request controller"
+  edit "app/controllers/support_requests_controller.rb" do
+    self.all = %{# START:index
+# START_HIGHLIGHT
+class SupportRequestsController < ApplicationController
+  def index
+    @support_requests = SupportRequest.all
+  end
+
+# END:index
+  def update
+  end
+# START:index
+end
+# END_HIGHLIGHT
+# END:index
+}
+  end
+
+  cmd "mkdir app/views/support_requests"
+
+  desc "Create support request view"
+  edit "app/views/support_requests/index.html.erb" do
+    self.all = read("views/support_requests_index.html.erb")
+  end
+
+  restart_server
+  publish_code_snapshot :tb
+
+  desc "add rich text response to support request"
+  edit "app/models/support_request.rb" do
+    clear_highlights
+    msub /()end/,%{
+    has_rich_text :response
+}
+  end
+
+  desc "install action text"
+  cmd "bin/rails action_text:install"
+
+  desc "Run webpack"
+  cmd "bin/webpack"
+
+  desc "migrate action text tables"
+  db :migrate
+
+  desc "add edit form to support request view"
+  edit "app/views/support_requests/index.html.erb" do
+    clear_highlights
+    msub /^      #{Regexp.escape("<% end %>")}()/,%{
+      <!-- START_HIGHLIGHT -->
+      <% if support_request.response.blank? %>
+        <%= form_with(model: support_request,
+                      local: true,
+                      class: "depot_form") do |form| %>
+          <div class="field">
+            <%= form.label :response, "Write Response" %>
+            <%= form.rich_text_area :response, id: :support_request_response %>
+          </div>
+          <div class="actions">
+            <%= form.submit "Send Response" %>
+          </div>
+        <% end %>
+      <% else %>
+        <h4>Our response:</h4>
+        <p>
+          <blockquote>
+            <%= support_request.response %>
+          </blockquote>
+        </p>
+      <% end %>
+     <!-- END_HIGHLIGHT -->
+}
+  end
+
+  desc "Add update method to controller" do
+    clear_highlights
+    self.all = %{# START:update
+class SupportRequestsController < ApplicationController
+  def index
+    @support_requests = SupportRequest.all
+  end
+
+# START_HIGHLIGHT
+  def update
+    support_request = SupportRequest.find(params[:id])
+    support_request.update(response: params.require(:support_request)[:response])
+# END:update
+    SupportRequestMailer.respond(support_request).deliver_now
+# START:update
+    redirect_to support_requests_path
+  end
+# END_HIGHLIGHT
+end
+# END:update
+}
+  end
+
+  restart_server
+
+  desc "Generate mailer"
+  cmd "bin/rails g mailer support_request respond"
+
+  edit "app/mailers/support_request_mailer.rb" do
+    msub /(def respond.*  end)/m,%{
+  # START_HIGHLIGHT
+  default from: "support@example.com"
+
+  def respond(support_request)
+    @support_request = support_request
+    mail to: @support_request.email, subject: "Re: #\{@support_request.subject\}"
+  end
+  # END_HIGHLIGHT
+}
+  end
+
+  desc "Create HTML view"
+  edit "app/views/support_request_mailer/respond.html.erb" do
+    self.all = %{
+<%= @support_request.response %>
+<hr>
+<blockquote>
+  <%= @support_request.body %>
+</blockquote>
+}
+  end
+
+  desc "Create Text view"
+  edit "app/views/support_request_mailer/respond.text.erb" do
+    self.all = %{
+<%= @support_request.response.to_plain_text %>
+
+---
+
+<%= @support_request.body %>
+}
+  end
 end
 
 if $rails_version =~ /^[345]/
