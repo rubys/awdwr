@@ -5073,6 +5073,8 @@ section 17.2, "Storing Support Requests from Our Mailbox" do
   #        since the bundle running `depot` requires rspec
   #        and this bleeds into Rails creating rspec files
   desc "Add a test for our mailbox"
+  cmd "mkdir -p test/mailboxes"
+  cmd "touch test/mailboxes/support_mailbox_test.rb"
   edit 'test/mailboxes/support_mailbox_test.rb' do
     self.all = read('test/support_mailbox_test.rb')
   end
