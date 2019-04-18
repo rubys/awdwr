@@ -4,3 +4,5 @@ snapshot/
 dashboard.html
 edition4/.DS_Store
 Gemfile.lock
+yarn.lock
+node_modules/

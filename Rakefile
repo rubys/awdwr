@@ -3,6 +3,7 @@ task :default => [:test]
 task :setup do
   ruby 'setup.rb'
   sh 'bundle update'
+  sh 'yarn install'
 end
 
 task :dashboard do
