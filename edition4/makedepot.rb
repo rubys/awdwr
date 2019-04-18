@@ -51,7 +51,11 @@ section 2, 'Instant Gratification' do
   rails 'demo1', :work
 
   restart_server
-  get "/", screenshot: { filename: "demo2_1_hello_rails.pdf", dimensions: [ 300, 300 ] }
+  get "/", screenshot: { 
+    filename: "demo2_1_hello_rails.pdf", 
+    dimensions: [ 700, 700 ],
+    scale: 0.4
+  }
 
   desc 'See what files were created'
   cmd 'ls -p'
@@ -248,28 +252,27 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   end
 
   desc 'Create a product'
-  new_product_title = 'Seven Mobile Apps in Seven Weeks'
+  new_product_title = 'Docker for Rails Developers'
   new_product_description = %{
 <p>
-  <em>Native Apps, Multiple Platforms</em>
-  Answer the question “Can we build this for ALL the
-  devices?” with a resounding YES. This book will help you
-  get there with a real-world introduction to seven
-  platforms, whether you’re new to mobile or an experienced
-  developer needing to expand your options. Plus, you’ll
-  find out which cross-platform solution makes the most
-  sense for your needs.
+  <em>Build, Ship, and Run Your Applications
+  Everywhere</em> Docker does for DevOps what Rails did
+  for web development—it gives you a new set of
+  superpowers. Gone are “works on my machine” woes and
+  lengthy setup tasks, replaced instead by a simple,
+  consistent, Docker-based development environment that
+  will have your team up and running in seconds.
 </p>
 }
-  new_product_price = "29.00"
-  new_product_image_url = "7apps.jpg"
+  new_product_price = "38.00"
+  new_product_image_url = "ridocker.jpg"
   get '/products/new', screenshot: {
     filename: "a_3_new_product_filled_in.pdf",
     form_data: {
-      'product[title]' => new_product_title,
-      'product[description]' => new_product_description,
-      'product[price]' => new_product_price,
-      'product[image_url]' => new_product_image_url
+      '#product_title' => new_product_title,
+      '#product_description' => new_product_description,
+      '#product_price' => new_product_price,
+      '#product_image_url' => new_product_image_url
     }
   }
   post '/products/new',

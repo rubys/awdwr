@@ -11,9 +11,9 @@ const fs = require('fs');
 
 // extract instructions from the argument passed
 const params = JSON.parse(process.argv[2]);
+console.error(JSON.stringify(params, null, 2));
 
 // form_data is not supported yet
-if (params.form_data) process.exit(0);
 
 // if an exception is raised asynchronously, shut down
 process.on('unhandledRejection', (reason, promise) => {
@@ -27,6 +27,13 @@ puppeteer.launch().then(async browser => {
 
   // fetch the page in question
   await page.goto(params.uri, {waitUntil: 'networkidle0'});
+
+  // fill in forms
+  if (params.form_data) {
+    for (const [selector, text] of Object.entries(params.form_data)) {
+      await page.type(selector, text);
+    }
+  }
 
   // produce the PDF
   const pdf = await page.pdf({ ...params.dimensions, pageRanges: '1'});
