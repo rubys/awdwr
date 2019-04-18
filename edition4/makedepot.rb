@@ -31,7 +31,12 @@ $checker = 'checkdepot'
 begin
   require './pub_gorp'
 rescue LoadError => ex
+  STDERR.puts ex
+  exit
   def publish_code_snapshot *args
+  end
+
+  def publish_screenshot *args
   end
 end
 

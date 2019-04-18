@@ -344,7 +344,7 @@ if File.exist? File.join(WORK, 'Gemfile')
   install = <<-EOF
     gem update --system
     gem list -i ^bundler$ > /dev/null && gem update bundler || gem #{install} bundler #{bver ? "-v #{bver}" : ''}
-    (cd #{File.realpath WORK}; rm -rf Gemfile.lock vendor; bundle #{bver ? "_#{bver}_" : ''} install)
+    (cd #{File.realpath WORK}; rm -rf Gemfile.lock vendor; bundle #{bver && !bver.empty? ? "_#{bver}_" : ''} install)
   EOF
 
   ENV.delete 'BUNDLE_GEMFILE'
