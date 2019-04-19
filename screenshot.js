@@ -35,6 +35,19 @@ puppeteer.launch().then(async browser => {
     }
   }
 
+  // optionally submit form
+  if (params.submit_form) {
+    if (typeof params.submit_form == "number") {
+      let element = (await page.$$("*[type=submit]"))[params.submit_form];
+      await element.click();
+    } else {
+      await Promise.all([
+        page.waitForNavigation({ waitUntil: 'networkidle0' }),
+        page.click("*[type=submit]")
+      ]);
+   }
+  }
+
   // produce the PDF
   const pdf = await page.pdf({ ...params.dimensions, pageRanges: '1'});
 
