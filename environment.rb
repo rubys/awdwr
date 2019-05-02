@@ -297,9 +297,12 @@ module AWDWR
     # include irb in gemfile if bundled with Ruby
     gems['irb'] = {require: false} if ruby >= '2.6'
 
-    # TEMP hack to work around https://github.com/rails/rails/issues/35505
     if File.read("#{rails}/RAILS_VERSION") =~ /^[6]\./
+      # TEMP hack to work around https://github.com/rails/rails/issues/35505
       gems['jbuilder'][:github] = 'rails/jbuilder'
+
+      # Pick up the beta version
+      gems['sass-rails'][:github] = 'rails/sass-rails'
     end
 
     # load updates from configuration file

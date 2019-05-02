@@ -182,7 +182,12 @@ end
 unless $rails_version =~ /^3\./
   gem 'sass'
   gem 'puma'
-  gem 'devise', ('~> 3.5' if $rails_version =~ /^4\./)
+
+  unless $rails_version =~ /^6\./
+    # Skip devise on Rails 6 - undefined method `alias_method_chain' for 
+    # ActionDispatch::Routing::RouteSet:Class
+    gem 'devise', ('~> 3.5' if $rails_version =~ /^4\./)
+  end
 end
 
 unless $rails_version =~ /^[34]|^5\.0/
