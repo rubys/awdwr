@@ -1924,7 +1924,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
     ext = ($rails_version =~ /^[45]/ ? 'coffee' : 'erb')
     edit "app/views/line_items/create.js.#{ext}" do |data|
       data.all =  <<-EOF.unindent(8)
-        #{ext == 'erb' ? 'let ' : ''}cart = document.getElementById("cart")
+        #{ext == 'erb' ? 'var ' : ''}cart = document.getElementById("cart")
         cart.innerHTML = "<%= j render(@cart) %>"
       EOF
     end
@@ -2079,7 +2079,7 @@ if notice
     edit "app/views/line_items/create.js.erb" do |data|
       data << %{
 // START_HIGHLIGHT
-let notice = document.getElementById("notice")
+var notice = document.getElementById("notice")
 if (notice) notice.style.display = "none"
 // END_HIGHLIGHT
 }
