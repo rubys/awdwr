@@ -9,7 +9,7 @@ book:
     web:  edition4
     env:
     - rails: '6.0'
-      ruby:  '2.6.2'
+      ruby:  '2.6.3'
     - rails: '5.2'
       ruby:  '2.4.5'
     - rails: '5.1'
