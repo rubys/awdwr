@@ -316,6 +316,12 @@ module AWDWR
       gems.merge! Gorp::Config['gems', {}]
     end
 
+    # breaks rails 6
+    if gems['webpacker']
+      gems['webpacker'].delete(:github)
+      gems['webpacker'].delete(:require)
+    end
+
     gems
   end
 end
