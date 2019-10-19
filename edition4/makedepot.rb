@@ -302,6 +302,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   else
     desc 'Copy some images'
     cmd "cp -vp #{$DATA}/assets/* app/assets/images/"
+    cmd "cp -vp #{$DATA}/assets/.htaccess app/assets/images/"
 
     if $rails_version =~ /^4\.2/
       desc 'Workaround for sprockets-rails issue 321'
@@ -405,7 +406,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
       #END:val3
       #START:val4
         validates :image_url, :allow_blank => true, :format => {
-          :with    => %r{\.(gif|jpg|png)\Z}i,
+          :with    => %r{\.(gif|jpg|png)\z}i,
           :message => 'must be a URL for GIF, JPG or PNG image.'
         }
       #END:val4
@@ -835,7 +836,7 @@ section 8.3, 'Iteration C3: Use a Helper to Format the Price' do
   end
 
   desc 'Show the results.'
-  get '/', screenshot: { filename: "e_2_prices_fixed.pdf", dimensions: [ 1024, 300 ] }
+  get '/', screenshot: { filename: "e_2_prices_fixed.pdf", dimensions: [ 1024, 420 ] }
 end
 
 section 8.4, 'Iteration C4: Functional Testing' do
@@ -1427,8 +1428,11 @@ section 10.2, 'Iteration E2: Handling Errors' do
   unless $rails_version =~ /^3\./
     desc 'Limit access to product_id'
     edit 'app/controllers/line_items_controller.rb', 'line_item_params' do
-      edit /^ *# Never.*?end\n/m, :mark => 'line_item_params'
-      dcl 'line_item_params'  do
+      if self.include? 'Never'
+        edit /^ *# Never.*?end\n/m, :mark => 'line_item_params'
+      end
+
+      dcl 'line_item_params', mark: 'line_item_params' do
         edit 'permit', :highlight do
           msub /require\(:line_item\)(.*)/, '.permit(:product_id)'
         end
@@ -1569,14 +1573,14 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
     text-align: right;
   }
   tfoot {
-    th, td.price {
+    th, th.price {
       font-weight: bold;
       padding-top: 1em;
     }
     th {
       text-align: right;
     }
-    td.price {
+    th.price {
       border-top: solid thin;
     }
   }
@@ -1924,7 +1928,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
     ext = ($rails_version =~ /^[45]/ ? 'coffee' : 'erb')
     edit "app/views/line_items/create.js.#{ext}" do |data|
       data.all =  <<-EOF.unindent(8)
-        #{ext == 'erb' ? 'let ' : ''}cart = document.getElementById("cart")
+        cart = document.getElementById("cart")
         cart.innerHTML = "<%= j render(@cart) %>"
       EOF
     end
@@ -2078,10 +2082,8 @@ if notice
   else
     edit "app/views/line_items/create.js.erb" do |data|
       data << %{
-// START_HIGHLIGHT
-let notice = document.getElementById("notice")
+notice = document.getElementById("notice")
 if (notice) notice.style.display = "none"
-// END_HIGHLIGHT
 }
     end
   end
@@ -2181,7 +2183,20 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   end
 
   desc 'Create a migration to add an order_id column to line_items'
-  generate 'migration add_order_id_to_line_item order_id:integer'
+  generate 'migration add_order_to_line_item order:references'
+
+  desc 'allow nulls'
+  edit 'db/migrate/*_add_order_to_line_item.rb' do
+    if self.include? 'null: false'
+      edit 'null: false', :highlight do
+        sub! 'null: false', 'null: true'
+      end
+    end
+
+    msub /add_\w+ :line_items.*\n()/, <<-EOF.unindent(2), :highlight
+      change_column :line_items, :cart_id, :integer, null: true
+    EOF
+  end
 
   desc 'Apply both migrations'
   db :migrate

@@ -76,7 +76,7 @@ class DepotTest < Gorp::TestCase
     end
 
     assert_select 'th', 'Image url'
-    assert_select 'input#product_title[value="Seven Mobile Apps in Seven Weeks"]'
+    assert_select 'input#product_title[value="Docker for Rails Developers"]'
     assert_select "a[href='http://localhost:#{$PORT}/products/1']", 'redirected'
     if $rails_version =~ /^3/
       assert_test_summary :tests => '[01]', :assertions => '[01]'
@@ -356,9 +356,9 @@ class DepotTest < Gorp::TestCase
       if $rails_version =~ /^5.1/
         assert_test_summary :tests => 1, :assertions => 2
       elsif $rails_version =~ /^5/
-        assert_test_summary :tests => 7, :assertions => 8
-      else
         assert_test_summary :tests => 7, :assertions => 7
+      else
+        assert_test_summary :tests => 7, :assertions => 8
       end
       assert_test_summary :tests => 39, :assertions => 79
     end
@@ -541,7 +541,11 @@ class DepotTest < Gorp::TestCase
   end
 
   section 19, "Finding Your Way Around" do
-    assert_select '.stdout', /Current version: \d{8}000009/
+    if $rails_version =~ /^[345]/
+      assert_select '.stdout', /Current version: \d{8}000009/
+    else
+      assert_select '.stdout', /Current version: \d{8}000013/
+    end
   end
 
   section 22.1, "Views" do
