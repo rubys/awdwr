@@ -62,7 +62,7 @@ class RBenv < Clerk
 
   # install (if necessary) the latest patch level of a release and return it
   def install_latest(pattern)
-    bin = pattern.sub('ruby-',' ')
+    bin = pattern.sub('ruby-',' ').strip
     release = `rbenv install --list | grep #{bin.sub(/\*$/,'\d').inspect}`.
       lines.sort(&RELEASE_COMPARE).last.strip
     unless `rbenv versions --bare`.lines.map(&:strip).include? release
