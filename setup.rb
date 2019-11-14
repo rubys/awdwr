@@ -7,7 +7,8 @@ prereqs = {
   curl: 'curl',
   git: 'git',
   mysql: 'libmysqlclient-dev mysql-server',
-  nodejs: 'nodejs'
+  nodejs: 'nodejs',
+  bison: 'bison libffi-dev libgdbm-dev libyaml-dev pkg-config libreadline-dev libssl-dev'
 }
 
 prereqs[:mysql].sub! '-server', '-client' if File.exist? '/.dockerenv'
@@ -44,14 +45,19 @@ elsif system("mysql -u root -proot < /dev/null 2>&0")
   mysql_root += ' -proot'
 end
 open("|mysql #{mysql_root}",'w') do |file|
-  file.write "GRANT ALL PRIVILEGES ON depot_production.* TO " +
-    "'username'@'localhost' IDENTIFIED BY 'password';"
+  file.write <<-EOF
+    CREATE USER IF NOT EXISTS 'username'@'localhost' IDENTIFIED BY 'password';
+    GRANT ALL PRIVILEGES ON depot_production.* TO 'username'@'localhost';
+  EOF
 end
 
 # set up postgres
 unless `which psql`.empty?
   open('|psql postgres','w') do |file|
-    file.write "alter user username password 'password';"
+    file.write <<-EOF
+      DROP ROLE IF EXISTS username;
+      CREATE ROLE username LOGIN PASSWORD 'password';
+    EOF
   end
 end
 
@@ -73,6 +79,14 @@ Dir.chdir git_path do
 end
 
 if `which rbenv`.empty?
+  unless `gpg -k`.include? 'mpapis'
+    system 'command curl -sSL https://rvm.io/mpapis.asc | gpg --import -'
+  end
+
+  unless `gpg -k`.include? 'Piotr'
+    system 'command curl -sSL https://rvm.io/pkuczynski.asc | gpg --import -'
+  end
+
   rvm_path = File.expand_path(ENV['rvm_path'] || '~/.rvm')
   if not File.exist? rvm_path
     # download key
