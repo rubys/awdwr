@@ -8,6 +8,7 @@ prereqs = {
   git: 'git',
   mysql: 'libmysqlclient-dev mysql-server',
   nodejs: 'nodejs',
+  chromedriver: 'chromium-chromedriver',
   bison: 'bison libffi-dev libgdbm-dev libyaml-dev pkg-config libreadline-dev libssl-dev'
 }
 
