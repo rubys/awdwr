@@ -113,4 +113,12 @@ if `which bundler`.empty?
   end
 end
 
+if `git config --get user.email`.empty?
+  system 'git config --global user.email "depot@example.com"'
+end
+
+if `git config --get user.name`.empty?
+  system 'git config --global user.name "Sam Ruby"'
+end
+
 FileUtils.mkdir_p File.expand_path('~/logs')

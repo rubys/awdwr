@@ -3332,6 +3332,13 @@ end
 
 section 13.2, 'Iteration H2: System testing' do
   unless $rails_version =~ /^5.1/
+    if ENV['USER'] == 'vagrant'
+      edit 'test/application_system_test_case.rb' do
+        edit 'driven_by', :highlight
+        sub! ':chrome', ':headless_chrome'
+      end
+    end
+
     edit 'test/system/products_test.rb' do
       sub! ':one', ':ruby'
       sub! 'Product was successfully created', 'Title has already been taken'
