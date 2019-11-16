@@ -2145,8 +2145,10 @@ else
     end
     edit file do
       edit 'incoming data', :highlight do
-        gsub! %r{(#|//).*}, 
-          'document.getElementsByTagName("main")[0].innerHTML = data.html'
+        gsub! %r{(#|//).*}, %{    const storeElement = document.querySelector("main.store")
+    if (storeElement) {
+      storeElement.innerHTML = data.html
+    }}
       end
       gsub! /^#/, '//' if file.end_with? '.js'
     end
@@ -2155,12 +2157,16 @@ else
     edit 'app/controllers/products_controller.rb', 'update' do
       dcl 'update', :mark do
         msub /\n()\s*else/, "\n" + <<-EOF.unindent(2), :highlight
-          @products = Product.all
+          @products = Product.all.order(:title)
           ActionCable.server.broadcast 'products',
             html: render_to_string('store/index', layout: false)
         EOF
       end
     end
+
+    ### NOT sure how to update the index method to use order(:title) here
+    ### so rather than put in some broken code, leaving this note
+
 
     desc 'Run tests'
     test
