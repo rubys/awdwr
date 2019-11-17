@@ -3348,7 +3348,10 @@ section 13.2, 'Iteration H2: System testing' do
 
     edit 'test/system/products_test.rb' do
       sub! ':one', ':ruby'
-      sub! 'Product was successfully created', 'Title has already been taken'
+      # These aren't 100% correct, but close enough I think?
+      sub! 'test "updating a Product" do', "#START:fix-system-test\n  test \"updating a Product\" do"
+      sub! 'test "destroying a Product" do', "#END:fix-system-test\n\ntest \"destroying a Product\" do"
+      sub! 'click_on "Update Product"', "#START_HIGHLIGHT\n    fill_in \"Title\", with: \"Karel The Robot in a Nutshell\"# END_HIGHLIGHT\n    click_on \"Update Product\""
     end
     cmd 'rm test/system/carts_test.rb'
     cmd 'rm test/system/line_items_test.rb'
