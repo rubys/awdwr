@@ -82,3 +82,12 @@ Sample configuration data:
 Sample output:
 
   http://intertwingly.net/projects/dashboard.html
+
+=======
+
+Workarounds:
+
+* For M1 macs:
+        bundle config build.eventmachine --with-cppflags=-I$(brew --prefix openssl)/include
+* For Rails 7 alpha:
+        touch ~/git/mysql2/lib/mysql2/mysql2.rb

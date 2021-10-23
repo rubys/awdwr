@@ -32,15 +32,23 @@ post '/' do
   eval DASHBOARD.sub(/^_json.*/m, '').sub('_.post?', 'true')
 end
 
-get %r{^/AWDwR4/(.*)/$} do |path|
+get %r{/edition4/(.*)/} do |path|
   send_file "edition4/#{path}/index.html"
 end
 
-get %r{^/AWDwR4/(.*)} do |path|
+get %r{/edition4/(.*)} do |path|
   send_file "edition4/#{path}"
 end
 
-get %r{^/([-\w.]+.js)} do |path|
+get %r{/AWDwR4/(.*)/} do |path|
+  send_file "edition4/#{path}/index.html"
+end
+
+get %r{/AWDwR4/(.*)} do |path|
+  send_file "edition4/#{path}"
+end
+
+get %r{/([-\w.]+.js)} do |path|
   send_file "vagrant/www/#{path}"
 end
 
@@ -68,7 +76,7 @@ get '/logs' do
   end
 end
 
-get %r{^/logs/(\w[-\w]+\.\w+)$} do |log|
+get %r{/logs/(\w[-\w]+\.\w+)} do |log|
   content_type "text/plain"
   send_file "#{logdir}/#{log.untaint}"
 end
