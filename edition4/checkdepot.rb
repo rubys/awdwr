@@ -54,7 +54,11 @@ class DepotTest < Gorp::TestCase
       assert_select 'p', /^It is now \d+-\d\d-\d\d \d\d:\d\d:\d\d [+-]\d+/
     end
 
-    assert_select 'h2', /undefined method `know' for Time:Class/
+    if $rails_version =~ /^[3-6]/
+      assert_select 'h2', /undefined method `know' for Time:Class/
+    else
+      assert_select 'div.message', /undefined method `know' for Time:Class/
+    end
     assert_select 'h2', 'No route matches [GET] "/say/hullo"'
   end
 

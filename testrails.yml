@@ -2,73 +2,40 @@ default:
   script:  makedepot.rb
 
   destdir: AWDwR4
-  branch:  v6.0.1 # v6.0.0 # 6-0-stable # master
+  branch:  main # v6.0.1 # v6.0.0 # 6-0-stable
   source:  ~/git/awdwr/edition4
   output:  []
   message: []
   rvm:
-    bin:   ruby-2.6.5
-
-220:
-  output:  2.2.10
-  message: 'Ruby 2.2.10'
-  rvm:
-    bin:   ruby-2.2.10
-
-238:
-  output:  2.3.8
-  message: 'Ruby 2.3.8'
-  rvm:
-    bin:   ruby-2.3.8
-
-245:
-  output:  2.4.5
-  message: 'Ruby 2.4.5'
-  rvm:
-    bin:   ruby-2.4.5
-
-250:
-  output:  2.5.5
-  message: 'Ruby 2.5.5'
-  rvm:
-    bin:   ruby-2.5.5
+    bin:   ruby-3.0.0
 
 270:
   output:  2.7.0
   message: 'Ruby 2.7.0'
   rvm:
+    bin:   ruby-2.7.0
+
+300:
+  message: 'Ruby 3.0.0'
+  rvm:
+    bin:   ruby-3.0.0
+
+310:
+  output:  3.1.0
+  message: 'Ruby 3.1.0'
+  rvm:
     src:   trunk
     bin:   ruby-head-n*
 
-40:
-  output:  '4.0'
-  branch:  4-0-stable
-  message: '4-0-stable'
+60:
+  output:  '6.0'
+  branch:  6-0-stable
+  message: '6-0-stable'
 
-41:
-  output:  '4.1'
-  branch:  4-1-stable
-  message: '4-1-stable'
-
-42:
-  output:  '4.2'
-  branch:  4-2-stable
-  message: '4-2-stable'
-
-50:
-  output:  '5.0'
-  branch:  5-0-stable
-  message: '5-0-stable'
-
-51:
-  output:  '5.1'
-  branch:  5-1-stable
-  message: '5-1-stable'
-
-52:
-  output:  '5.2'
-  branch:  5-2-stable
-  message: '5-2-stable'
+61:
+  output:  '6.1'
+  branch:  6-1-stable
+  message: '6-1-stable'
 
 3:
   source:  /home/rubys/git/awdwr/edition3
