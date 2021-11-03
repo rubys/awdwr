@@ -72,7 +72,7 @@ if ARGV.delete('noupdate')
   updated = true
 else
   updated = Dir.chdir($rails) do
-    system 'git checkout -q origin/master'
+    system 'git checkout -q origin/main'
     system "git checkout #{BRANCH}"
     system "git checkout #{COMMIT.split('/').last}" if COMMIT
     before = `git log -1 --pretty=format:%H`
@@ -183,7 +183,7 @@ unless $rails_version =~ /^3\./
   gem 'sass'
   gem 'puma'
 
-  unless $rails_version =~ /^6\./
+  unless $rails_version =~ /^[67]\./
     # Skip devise on Rails 6 - undefined method `alias_method_chain' for 
     # ActionDispatch::Routing::RouteSet:Class
     gem 'devise', ('~> 3.5' if $rails_version =~ /^4\./)

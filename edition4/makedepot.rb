@@ -18,9 +18,12 @@ if $rails_version =~ /^[34]/
 elsif $rails_version =~ /^[5]/
   $title = 'Agile Web Development with Rails, Edition 5'
   DEPOT_CSS = "app/assets/stylesheets/application.scss"
-else
+elsif $rails_version =~ /^[6]/
   $title = 'Agile Web Development with Rails, Edition 6'
   DEPOT_CSS = "app/assets/stylesheets/application.scss"
+else
+  $title = 'Agile Web Development with Rails, Edition 7'
+  DEPOT_CSS = "app/assets/stylesheets/application.css"
 end
 
 $autorestart = 'depot'
@@ -171,7 +174,11 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
 
   desc 'Create the application.'
   ENV.delete('BUNDLE_GEMFILE')
-  rails 'depot', :a
+  if $rails_version =~ /^7/
+    rails 'depot', :a, ' --css tailwind' # soon to be defaults?
+  else
+    rails 'depot', :a
+  end
 
   if Gorp::Config[:protect_from_forgery] == false
     if File.read('app/controllers/application_controller.rb').include? \
@@ -216,8 +223,10 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
     end
   end
 
-  edit 'app/views/products/index.html.erb' do
-    msub /,( ):?method/, "\n            "
+  if File.read('app/views/products/index.html.erb').include? 'method'
+    edit 'app/views/products/index.html.erb' do
+      msub /,( ):?method/, "\n            "
+    end
   end
 
   desc 'Add precision and scale to the price'
@@ -309,10 +318,12 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
       restart_server 
     end
 
-    desc 'Add some style'
-    edit "app/assets/stylesheets/products*.scss" do
-      msub /(\s*)\Z/, "\n\n"
-      msub /\n\n()\Z/, read('products.css.scss')
+    if $rails_version =~ /^[1-6]\./
+      desc 'Add some style'
+      edit "app/assets/stylesheets/products*.scss" do
+        msub /(\s*)\Z/, "\n\n"
+        msub /\n\n()\Z/, read('products.css.scss')
+      end
     end
   end
 
@@ -5811,6 +5822,10 @@ $cleanup = Proc.new do
     end
     system "rm -rf #{$WORK}/data"
     system "cp -rp #{$DATA} #{$WORK}"
-    system "cp -rp #{$WORK}/depot/public/assets #{$WORK}/data"
+    if $rails_version =~ /^[456]/
+      system "cp -rp #{$WORK}/depot/public/assets #{$WORK}/data"
+    else
+      system "cp -rp #{$WORK}/depot/app/assets #{$WORK}/data"
+    end
   end
 end

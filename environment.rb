@@ -269,6 +269,8 @@ module AWDWR
           gems['mysql2'][:version] << '< 0.4'
         end
       end
+
+      gems['mysql2'].delete :github
     end
 
     # branch was renamed
