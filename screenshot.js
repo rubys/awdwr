@@ -11,7 +11,8 @@ const fs = require('fs');
 
 // extract instructions from the argument passed
 const params = JSON.parse(process.argv[2]);
-console.error(JSON.stringify(params, null, 2));
+let date = new Date();
+console.error(`[${date.toLocaleString('sv')}] SNAP  ${params.filename}`);
 
 // form_data is not supported yet
 
