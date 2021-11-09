@@ -15,18 +15,18 @@ DASHBOARD = File.read(File.expand_path('../dashboard.rb', __FILE__)).untaint
 config = YAML.load_file(File.expand_path('../dashboard.yml', __FILE__))
 logdir = File.expand_path(config['log']).untaint
 
-get '/' do
+get '/dashboard' do
   STDERR.puts 'main'
   # FileUtils.touch File.expand_path('../tmp/restart.txt', __FILE__).untaint
   eval DASHBOARD.sub(/^_json.*/m, '').sub('_.post?', 'false')
 end
 
-post '/' do
+post '/dashboard' do
   pass unless request.accept.find {|x| x.to_s == 'application/json'}
   eval DASHBOARD.sub(/^_html.*\n_json/m, '_json').sub(/^__END__.*/m, '')
 end
 
-post '/' do
+post '/dashboard' do
   eval DASHBOARD.sub(/^_json.*/m, '').sub('_.post?', 'true')
 end
 

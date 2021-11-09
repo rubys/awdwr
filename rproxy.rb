@@ -14,6 +14,10 @@ reverse_proxy = Rack::ReverseProxy.new do
   reverse_proxy '/', 'http://localhost:3000/'
 end
 
+get '/favicon.ico' do
+  status 404
+end
+
 get %r{/.*} do
   reverse_proxy.call(env)
 end
