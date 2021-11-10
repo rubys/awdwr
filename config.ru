@@ -5,4 +5,12 @@
 
 require_relative './dash-app.rb'
 
+get '/' do
+  call env.merge('PATH_INFO' => '/dashboard')
+end
+
+post '/' do
+  call env.merge('PATH_INFO' => '/dashboard')
+end
+
 run Sinatra::Application
