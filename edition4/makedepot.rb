@@ -249,14 +249,22 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   restart_server
 
   desc 'Get an (empty) list of products'
-  get '/products', screenshot: { filename: "a_1_products.pdf", dimensions: [ 320,200] }
-  get '/products/new', screenshot: { filename: "a_2_new_product.pdf", dimensions: [ 320,400] }
+  get '/products', screenshot: { filename: "a_1_products.pdf" }
+  get '/products/new', screenshot: { filename: "a_2_new_product.pdf" }
 
   desc 'Show (and modify) one of the templates produced'
   edit 'app/views/products/_form.html.erb' do
     msub /<%= pluralize.*%>( )/, "\n      "
-    edit 'text_area :description', :highlight do
-      msub /() %>/, ', rows: 10, cols: 60'
+    if self.include? 'class:'
+      edit 'text_area :description', :highlight do
+        msub /(, rows: \d+)/, ', rows: 10, cols: 60'
+      end
+      gsub! /^(\s*)(.*?,) (class:.*)/, "\\1\\2\n\\1  \\3"
+      gsub! /^(\s*)(<.*?) (class=.{40}.*)/, "\\1\\2\n\\1  \\3"
+    else
+      edit 'text_area :description', :highlight do
+        msub /() %>/, ', rows: 10, cols: 60'
+      end
     end
   end
 
@@ -291,7 +299,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
     'product[image_url]' => new_product_image_url
 
   desc 'Verify that the product has been added'
-  get '/products', screenshot: { filename: "a_4_added_product.pdf", dimensions: [ 720,380] }
+  get '/products', screenshot: { filename: "a_4_added_product.pdf" }
 
   desc "And, just to verify that we haven't broken anything"
   test
@@ -360,7 +368,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   end
 
   desc 'See the finished result'
-  get '/products', screenshot: { filename: "a_5_styled_products.pdf", dimensions: [ 800,400] }
+  get '/products', screenshot: { filename: "a_5_styled_products.pdf" }
 end
 
 section 6.3, 'Playtime' do
@@ -428,7 +436,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
   desc 'Demonstrate failures.'
   post '/products/new',
     { 'product[price]' => '0.0' },
-    screenshot: { filename: "b_1_validation_errors.pdf", dimensions: [ 640, 720 ], submit_form: true }
+    screenshot: { filename: "b_1_validation_errors.pdf", submit_form: true }
 
   desc 'Add price validations'
   edit 'app/models/product.rb' do
@@ -452,7 +460,7 @@ section 7.1, 'Iteration B1: Validation and Unit Testing' do
     'product[image_url]' => 
       (File.exist?('public/images') ? '/images/utj.jpg' : 'utj.jpg'),
     'product[price]' => 'wibble' },
-    screenshot: { filename: "b_2_price_validation_errors.pdf", dimensions: [ 640, 720 ], submit_form: true }
+    screenshot: { filename: "b_2_price_validation_errors.pdf", submit_form: true }
 
   edit 'app/models/product.rb' do |data|
     data.sub! /\s:allow_blank.*,/, ''

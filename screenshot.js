@@ -49,6 +49,22 @@ puppeteer.launch().then(async browser => {
    }
   }
 
+  // remove top margins from tailwindcss pages, extract main rectangle
+  let rectangle = await page.$eval('main', main => {
+    main.classList.remove("mt-28")
+    return main.getClientRects()[0].toJSON()
+  });
+
+  // default height to size of main rectangle
+  if (!params.dimensions) {
+    params.dimensions = {height: rectangle.height};
+  }
+
+  // resize page
+  await page.addStyleTag({
+    content: '@page { size: auto; }',
+  })
+
   // produce the PDF
   const pdf = await page.pdf({ ...params.dimensions, pageRanges: '1'});
 
