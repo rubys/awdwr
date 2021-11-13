@@ -255,12 +255,29 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   desc 'Show (and modify) one of the templates produced'
   edit 'app/views/products/_form.html.erb' do
     msub /<%= pluralize.*%>( )/, "\n      "
+
     if self.include? 'class:'
       edit 'text_area :description', :highlight do
-        msub /(, rows: \d+)/, ', rows: 10, cols: 60'
+        msub /(, rows: \d+)/, ', rows: 10'
       end
-      gsub! /^(\s*)(.*?,) (class:.*)/, "\\1\\2\n\\1  \\3"
-      gsub! /^(\s*)(<.*?) (class=.{40}.*)/, "\\1\\2\n\\1  \\3"
+
+      full = self.dup
+
+      gsub! /^(\s*)(<%=.*?) (class: ".{40}.*)/ do |element|
+        element.sub /class: "(.*?)"/ do
+          'class: "' + $1.split(' ')[0..2].join(' ') + '…"'
+        end
+      end
+
+      gsub! /^(\s*)(<\w.*?) (class=.{40}.*)/, "\\1\\2\n\\1  \\3"
+
+      edit 'text_area :description' do
+        sub! ' rounded-md', ''
+      end
+
+      IO.write 'app/views/products/_form.html.erb.pub', self
+
+      self.replace full
     else
       edit 'text_area :description', :highlight do
         msub /() %>/, ', rows: 10, cols: 60'
@@ -405,7 +422,18 @@ section 6.3, 'Playtime' do
   edit "test/fixtures/products.yml" do
     msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
   end
-  publish_code_snapshot :a
+
+  if File.exist? 'app/views/products/_form.html.erb.pub'
+    FileUtils.mv 'app/views/products/_form.html.erb',
+      'app/views/products/_form.html.erb.full'
+    FileUtils.mv 'app/views/products/_form.html.erb.pub',
+      'app/views/products/_form.html.erb'
+    publish_code_snapshot :a
+    FileUtils.mv 'app/views/products/_form.html.erb.full',
+      'app/views/products/_form.html.erb'
+  else
+    publish_code_snapshot :a
+  end
 end
 
 section 7.1, 'Iteration B1: Validation and Unit Testing' do
