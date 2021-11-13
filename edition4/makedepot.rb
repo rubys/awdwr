@@ -360,28 +360,34 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   end
   db :seed
 
-  desc 'Link to the stylesheet in the layout'
-  edit 'app/views/layouts/application.html.erb' do
-    clear_highlights
-    msub /^(    <%= yield %>)/,%{
-    <!-- START_HIGHLIGHT -->
-    <main class='<%= controller.controller_name %>'>
-      <%= yield %>
-    </main>
-    <!-- END_HIGHLIGHT -->
-}
-    if self =~ /, ['"]data-turbolinks-track['"]/
-      msub /,( )['"]data-turbolinks-track['"]/, "\n    "
+  if $rails_version =~ /^[3-6]/
+    desc 'Link to the stylesheet in the layout'
+    edit 'app/views/layouts/application.html.erb' do
+      clear_highlights
+      msub /^(    <%= yield %>)/,%{
+      <!-- START_HIGHLIGHT -->
+      <main class='<%= controller.controller_name %>'>
+	<%= yield %>
+      </main>
+      <!-- END_HIGHLIGHT -->
+  }
+      if self =~ /, ['"]data-turbolinks-track['"]/
+	msub /,( )['"]data-turbolinks-track['"]/, "\n    "
+      end
     end
-  end
 
-  desc 'Replace the scaffold generated view with some custom HTML'
-  edit 'app/views/products/index.html.erb' do
-    self.all = read('products/index.html.erb')
-    if DEPOT_CSS =~ /scss/
-      sub!(/<div.*?>\n(.*?)<\/div>\n/m) { $1.gsub /^  /,'' }
+    desc 'Replace the scaffold generated view with some custom HTML'
+    edit 'app/views/products/index.html.erb' do
+      self.all = read('products/index.html.erb')
+      if DEPOT_CSS =~ /scss/
+	sub!(/<div.*?>\n(.*?)<\/div>\n/m) { $1.gsub /^  /,'' }
+      end
+      gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
     end
-    gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
+  else
+    edit 'app/views/products/index.html.erb' do
+      self.all = read('products/index.tw.erb')
+    end
   end
 
   desc 'See the finished result'

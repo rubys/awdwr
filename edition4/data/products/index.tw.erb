@@ -1,0 +1,70 @@
+<div class="w-full">
+  <% if notice.present? %>
+    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium
+              rounded-lg inline-block" id="notice">
+      <%= notice %>
+    </p>
+  <% end %>
+
+  <div class="flex justify-between items-center pb-8">
+    <h1 class="mx-auto text-lg font-bold text-4xl">Products</h1>
+  </div>
+
+  <table id="products" class="mx-auto">
+    <tfoot>
+      <tr>
+        <td>
+          <div class="mt-8">
+            <%= link_to 'New product', 
+                        new_product_path,
+                        class: "inline rounded-lg py-3 px-5 bg-blue-600
+                                text-white block font-medium" %>
+          </div>
+        </td>
+      </tr>
+    </tfoot>
+
+    <tbody>
+      <% @products.each do |product| %>
+        <tr class="<%= cycle('bg-green-50', 'bg-white') %>">
+
+          <td class="px-2 py-3">
+            <%= image_tag(product.image_url) %>
+          </td>
+
+          <td>
+            <h1 class="text-xl font-bold mb-3"><%= product.title %></h1>
+            <p>
+              <%= truncate(strip_tags(product.description),
+                           length: 80) %>
+            </p>
+          </td>
+
+          <td class="px-3">
+            <ul>
+              <li>
+                <%= link_to 'Show', 
+                             product,
+                             class: 'hover:underline' %>
+              </li>
+
+              <li>
+                <%= link_to 'Edit',
+                             edit_product_path(product),
+                             class: 'hover:underline' %>
+              </li>
+
+              <li>
+                <%= link_to 'Destroy',
+                             product,
+                             class: 'hover:underline',
+                             method: :delete,
+                             data: { confirm: 'Are you sure?' } %>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
