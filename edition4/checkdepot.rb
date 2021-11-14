@@ -79,7 +79,12 @@ class DepotTest < Gorp::TestCase
       end
     end
 
-    assert_select 'th', 'Image url'
+    if $rails_version =~ /^[3-6]/
+      assert_select 'th', 'Image url'
+    else
+      assert_select 'label', 'Image url'
+    end
+
     assert_select 'input#product_title[value="Docker for Rails Developers"]'
     assert_select "a[href='http://localhost:#{$PORT}/products/1']", 'redirected'
     if $rails_version =~ /^3/
@@ -100,7 +105,11 @@ class DepotTest < Gorp::TestCase
 #       match: /Workaround for sprockets-rails issue 321/
     end
 
-    assert_select '.list_line_even'
+    if $rails_version =~ /^[3-6]/
+      assert_select '.list_line_even'
+    else
+      assert_select '.bg-green-50'
+    end
   end
 
   section 6.3, "Playtime" do

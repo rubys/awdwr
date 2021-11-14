@@ -31,8 +31,13 @@ puppeteer.launch().then(async browser => {
 
   // fill in forms
   if (params.form_data) {
-    for (const [selector, text] of Object.entries(params.form_data)) {
+    for (let [selector, text] of Object.entries(params.form_data)) {
+      if (selector.match(/^#.*\]/)) {
+       selector = selector.replace(/\[(\w+)\]$/, '_$1')
+      }
+
       await page.type(selector, text);
+
     }
   }
 
@@ -43,7 +48,8 @@ puppeteer.launch().then(async browser => {
       await element.click();
     } else {
       await Promise.all([
-        page.waitForNavigation({ waitUntil: 'networkidle0' }),
+        // page.waitForNavigation({ waitUntil: 'networkidle0' }),
+        page.waitForResponse(response => response.status() === 200),
         page.click("*[type=submit]")
       ]);
    }
@@ -66,7 +72,11 @@ puppeteer.launch().then(async browser => {
   })
 
   // produce the PDF
-  const pdf = await page.pdf({ ...params.dimensions, pageRanges: '1'});
+  const pdf = await page.pdf({
+    ...params.dimensions, 
+    printBackground: true,
+    pageRanges: '1'
+  });
 
   // replace the content of the output file if anything changes EXCEPT
   // for PDF date metadata.

@@ -309,6 +309,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
       '#product_image_url' => new_product_image_url
     }
   }
+
   post '/products/new',
     'product[title]' => new_product_title,
     'product[description]' => new_product_description,
@@ -689,7 +690,7 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   end
 
   desc 'Demonstrate that everything is wired together'
-  get '/', screenshot: { filename: "d_1_new_root.pdf", dimensions: [ 400, 200 ] }
+  get '/', screenshot: { filename: "d_1_new_root.pdf" }
 
   desc 'In the controller, get a list of products from the model'
   edit 'app/controllers/store_controller.rb' do
@@ -703,7 +704,7 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
     self.all = read('store/index.html.erb')
   end
 
-  unless File.exist? 'public/images'
+  unless File.exist? 'public/images' or $rails_version !~ /^[3-6]/
     desc 'Add some basic style'
     edit "app/assets/stylesheets/store*.scss" do
       msub /(\s*)\Z/, "\n\n"
@@ -712,7 +713,7 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   end
 
   desc 'Show our first (ugly) catalog page'
-  get '/', screenshot: { filename: "d_2_catalog.pdf", dimensions: [ 1024, 600 ] }
+  get '/', screenshot: { filename: "d_2_catalog.pdf" }
   publish_code_snapshot :d
 end
 
@@ -5864,10 +5865,6 @@ $cleanup = Proc.new do
     end
     system "rm -rf #{$WORK}/data"
     system "cp -rp #{$DATA} #{$WORK}"
-    if $rails_version =~ /^[456]/
-      system "cp -rp #{$WORK}/depot/public/assets #{$WORK}/data"
-    else
-      system "cp -rp #{$WORK}/depot/app/assets #{$WORK}/data"
-    end
+    system "cp -rp #{$WORK}/depot/public/assets #{$WORK}/data"
   end
 end
