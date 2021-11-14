@@ -150,15 +150,24 @@ class DepotTest < Gorp::TestCase
   section 8.1, "Iteration C1: Create the Catalog Listing" do
     assert_select 'p', 'Find me in app/views/store/index.html.erb'
     assert_select 'h1', 'Your Pragmatic Catalog'
-    assert_select '.price', '20.0'
+
+    if $rails_version =~ /^[3-6]/
+      assert_select '.price', '20.0'
+    else
+      assert_select 'div', '20.0'
+    end
   end
 
   section 8.2, "Iteration C2: Add a Page Layout" do
-    assert_select 'header.main img[alt="The Pragmatic Bookshelf"]'
+    assert_select 'header img[alt="The Pragmatic Bookshelf"]'
   end
 
   section 8.3, "Iteration C3: Use a Helper to Format the Price" do
-    assert_select '.price', '$20.00'
+    if $rails_version =~ /^[3-6]/
+      assert_select '.price', '$20.00'
+    else
+      assert_select 'div', '$20.00'
+    end
   end
 
   section 8.4, "Iteration C4: Functional Testing" do

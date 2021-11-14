@@ -701,7 +701,11 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
 
   desc 'In the view, display a list of products'
   edit 'app/views/store/index.html.erb' do
-    self.all = read('store/index.html.erb')
+    if $rails_version =~ /^[3-6]/
+      self.all = read('store/index.html.erb')
+    else
+      self.all = read('store/index.tw.erb')
+    end
   end
 
   unless File.exist? 'public/images' or $rails_version !~ /^[3-6]/
@@ -724,13 +728,17 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
 
   desc 'Modify the application layout'
   edit 'app/views/layouts/application.html.erb' do
-    pack = self[/<%= javascript_pack_tag.*?%>/m]
-    clear_highlights
-    self.all = read('store/application.html.erb')
-    self[/<%= javascript_include_tag.*?%>/m] = pack if pack
-    gsub! '"application"', '"depot"' if File.exist? 'public/images'
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    gsub! 'csrf_meta_tags', 'csrf_meta_tag' if $rails_version =~ /^3\.0/
+    if $rails_version =~ /^[3-6]/
+      pack = self[/<%= javascript_pack_tag.*?%>/m]
+      clear_highlights
+      self.all = read('store/application.html.erb')
+      self[/<%= javascript_include_tag.*?%>/m] = pack if pack
+      gsub! '"application"', '"depot"' if File.exist? 'public/images'
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+      gsub! 'csrf_meta_tags', 'csrf_meta_tag' if $rails_version =~ /^3\.0/
+    else
+      self.all = read('store/application.tw.erb')
+    end
   end
 
   desc 'Modify the stylesheet'
@@ -816,7 +824,7 @@ header.main {
 }
       EOF
     end
-  else
+  elsif $rails_version =~ /^[3-6]/
     edit DEPOT_CSS, 'mainlayout' do
       msub /().*An entry in the store catalog/, <<-EOF.unindent(8) + "\n"
         /* START:mainlayout */
