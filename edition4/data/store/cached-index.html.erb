@@ -18,11 +18,11 @@
           <p>
             <%= sanitize(product.description) %>
           </p>
-          <!-- START:currency -->
           <div class="price">
+          <!-- START:currency -->
             <%= number_to_currency(product.price) %>
-          </div>
           <!-- END:currency -->
+          </div>
         </li>
         <!-- START_HIGHLIGHT -->
       <% end %>

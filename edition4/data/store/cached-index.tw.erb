@@ -1,0 +1,43 @@
+<div>
+<% if notice.present? %>
+  <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg
+            inline-block" id="notice">
+    <%= notice %>
+  </p>
+<% end %>
+
+<h1 class="font-bold text-xl mb-6 pb-2 border-b-2">Your Pragmatic Catalog</h1>
+
+<ul class="catalog">
+  <!-- START_HIGHLIGHT -->
+  <% cache @products do %>
+    <!-- END_HIGHLIGHT -->
+    <% @products.each do |product| %>
+      <!-- START_HIGHLIGHT -->
+      <% cache product do %>
+      <!-- END_HIGHLIGHT -->
+	<li class='flex mb-6'>
+	  <%= image_tag(product.image_url, class: 'object-none shadow mr-6') %>
+
+	  <div>
+	    <h2 class="font-bold text-lg mb-3"><%= product.title %></h2>
+
+	    <p>
+	      <%= sanitize(product.description) %>
+	    </p>
+
+	    <div class="mt-3">
+              <!-- START:currency -->
+              <%= number_to_currency(product.price) %>
+              <!-- END:currency -->
+	    </div>
+	  </div>
+	</li>
+        <!-- START_HIGHLIGHT -->
+      <% end %>
+      <!-- END_HIGHLIGHT -->
+    <% end %>
+    <!-- START_HIGHLIGHT -->
+  <% end %>
+  <!-- END_HIGHLIGHT -->
+</ul>

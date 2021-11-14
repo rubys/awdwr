@@ -32,7 +32,7 @@ $checker = 'checkdepot'
 
 
 begin
-  require './pub_gorp'
+  require File.expand_path('pub_gorp.rb', __dir__)
 rescue LoadError => ex
   def publish_code_snapshot *args
   end
@@ -915,10 +915,10 @@ section 8.4, 'Iteration C4: Functional Testing' do
     clear_highlights
     dcl 'should get index' do
       msub /^()\s+end/, <<-'EOF'.unindent(4), :highlight
-        assert_select 'nav.side_nav a', :minimum => 4 
+        assert_select 'nav a', minimum: 4 
         assert_select 'main ul.catalog li', 3
         assert_select 'h2', 'Programming Ruby 1.9'
-        assert_select '.price', /\$[,\d]+\.\d\d/
+        assert_select 'div', /\$[,\d]+\.\d\d/
       EOF
     end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -951,9 +951,14 @@ section 8.5, 'Iteration C5 - Caching' do
   unless $rails_version =~ /^3\./
     desc 'cache sections'
     edit 'app/views/store/index.html.erb' do
-      self.all = read('store/cached-index.html.erb')
+      if $rails_version =~ /^[3-6]/
+        self.all = read('store/cached-index.html.erb')
+      else
+        self.all = read('store/cached-index.tw.erb')
+      end
     end
   end
+
   edit "test/fixtures/products.yml" do
     clear_all_marks
     clear_highlights
