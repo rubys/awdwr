@@ -85,9 +85,48 @@ Sample output:
 
 =======
 
-Workarounds:
+M1 mac setup:
 
-* For M1 macs:
-        bundle config build.eventmachine --with-cppflags=-I$(brew --prefix openssl)/include
-* For Rails 7 alpha:
-        touch ~/git/mysql2/lib/mysql2/mysql2.rb
+```
+brew install svn
+
+brew install mysql
+brew services restart mysql
+
+brew install chromedriver
+# install google chrome
+# add to .zshrc:
+# export PUPPETEER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+brew install gpg
+
+brew install postgresql
+
+brew install zstd
+
+brew install openjdk@11
+sudo ln -sfn /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
+
+brew install node
+
+brew install imagemagick
+
+mkdir -p ~/git
+cd ~/git
+git clone git@github.com:rubys/awdwr.git
+cd awdwr
+ruby setup.rb
+npm install
+
+sudo launchctl load -w /System/Library/LaunchDaemons/org.apache.httpd.plist
+```
+
+Later, in work directory:
+
+```
+bundle config --local build.mysql2 "--with-ldflags=-L/opt/homebrew/Cellar/zstd/1.5.0/lib"
+
+bundle config build.eventmachine --with-cppflags=-I$(brew --prefix openssl)/include
+
+bundle install
+```
