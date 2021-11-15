@@ -1575,7 +1575,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
     msub /(\s*)\Z/, "\n\n"
     msub /\n\n()\Z/, <<-EOF.unindent(6)
     <!-- START_HIGHLIGHT -->
-      <%= button_to 'Empty cart', @cart, :method => :delete,
+      <%= button_to 'Empty Cart', @cart, :method => :delete,
           :data => { :confirm => 'Are you sure?' } %>
     <!-- END_HIGHLIGHT -->
     EOF
@@ -2313,7 +2313,7 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   desc 'Add a Checkout button to the cart'
   edit 'app/views/carts/_cart.html.erb' do
     clear_highlights
-    msub /().*Empty cart/, %{
+    msub /().*Empty Cart/, %{
   <!-- START_HIGHLIGHT -->
   <div class="actions">
   <!-- END_HIGHLIGHT -->
@@ -4700,7 +4700,7 @@ section 16.2, 'Task K2: translating the store front' do
     msub /new_order_path(,)/, "(locale: I18n.locale),\n   "
     sub! /(I18n.locale.*)/, "\\1\n# END_HIGHLIGHT"
 
-    gsub! "'Empty cart'", "t('.empty')"
+    gsub! "'Empty Cart'", "t('.empty')"
     gsub! /(t\('\.empty'\).*)/, "\\1\n# END_HIGHLIGHT"
 
     gsub! /(.*t\('\..*'\))/, "<!-- START_HIGHLIGHT -->\n\\1"

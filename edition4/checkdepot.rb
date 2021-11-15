@@ -228,13 +228,15 @@ class DepotTest < Gorp::TestCase
 
   section 10.1, "Iteration E1: Creating A Smarter Cart" do
     assert_select 'li', /Docker for Rails Developers/u
-    assert_select 'main li', :count => 6, :html => /1 .+ Build Chatbot Interactions/
+    assert_select 'main li', count: 5, html: /1 .+ Build Chatbot Interactions/
     assert_select '.stdout', /^=+ (\d+)? *CombineItemsInCart: reverting =+$/
     assert_select '.stdout', /^ +down +\d+ +Combine items in cart$/
     if $rails_version =~ /^3\./
       assert_select 'pre', /Couldn't find Cart with ID=wibble/i
-    else
+    elsif $rails_version =~ /^[4-6]/
       assert_select 'h2', /Couldn't find Cart with '?id'?=wibble/i
+    else
+      assert_select 'div.message', /Couldn't find Cart with '?id'?=wibble/i
     end
   end
 
@@ -255,7 +257,12 @@ class DepotTest < Gorp::TestCase
   section 10.3, "Iteration E3: Finishing the Cart" do
     assert_select '#notice', 'Your cart is currently empty'
     assert_select 'tfoot .price', '$96.00'
-    assert_select 'input[type=submit][value="Empty cart"]'
+
+    if $rails_version =~ /^[3-6]/
+      assert_select 'input[type=submit][value="Add to Cart"]'
+    else
+      assert_select 'button[type=submit]', "Empty Cart"
+    end
   end
 
   section 10.4, "Playtime" do
