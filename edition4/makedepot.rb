@@ -368,12 +368,12 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
       msub /^(    <%= yield %>)/,%{
       <!-- START_HIGHLIGHT -->
       <main class='<%= controller.controller_name %>'>
-	<%= yield %>
+        <%= yield %>
       </main>
       <!-- END_HIGHLIGHT -->
   }
       if self =~ /, ['"]data-turbolinks-track['"]/
-	msub /,( )['"]data-turbolinks-track['"]/, "\n    "
+        msub /,( )['"]data-turbolinks-track['"]/, "\n    "
       end
     end
 
@@ -381,7 +381,7 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
     edit 'app/views/products/index.html.erb' do
       self.all = read('products/index.html.erb')
       if DEPOT_CSS =~ /scss/
-	sub!(/<div.*?>\n(.*?)<\/div>\n/m) { $1.gsub /^  /,'' }
+        sub!(/<div.*?>\n(.*?)<\/div>\n/m) { $1.gsub /^  /,'' }
       end
       gsub! /:(\w+) =>/, '\1:' unless RUBY_VERSION =~ /^1\.8/
     end
@@ -1148,9 +1148,20 @@ section 9.3, 'Iteration D3: Adding a button' do
        'the product id.'
   edit 'app/views/store/index.html.erb' do
     clear_all_marks
-    msub /number_to_currency.*\n()/, '    ' + <<-EOF, :highlight
-        <%= button_to 'Add to Cart', line_items_path(:product_id => product) %>
-    EOF
+    if $rails_version =~ /^[3-6]/
+      msub /number_to_currency.*\n()/, '  ' + <<-EOF, :highlight
+          <%= button_to 'Add to Cart', line_items_path(:product_id => product) %>
+      EOF
+    else
+      msub /number_to_currency.*\n()/, '    ' + <<-EOF
+          <!-- START_HIGHLIGHT -->
+          <%= button_to 'Add to Cart',
+              line_items_path(:product_id => product),
+              form_class: 'inline',
+              class: 'ml-4 rounded-lg text-white py-1 px-2 bg-green-600' %>
+          <!-- END_HIGHLIGHT -->
+      EOF
+    end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
@@ -1190,7 +1201,7 @@ section 9.3, 'Iteration D3: Adding a button' do
   end
 
   desc "See the button on the page"
-  get '/', screenshot: { filename: "f_1_added_button.pdf", dimensions: [ 1024, 300 ] }
+  get '/', screenshot: { filename: "f_1_added_button.pdf", dimensions: [ 1024, 470 ] }
 
   desc 'Update the LineItem.new call to use set_cart and the ' +
        'product id. Additionally change the logic so that redirection upon ' +
@@ -1237,27 +1248,29 @@ section 9.3, 'Iteration D3: Adding a button' do
 
   desc "Try it once, and see that the output isn't very useful yet."
   post '/', { 'product_id' => 3 },
-    screenshot: { filename: "f_2_boring_cart.pdf", dimensions: [ 640, 200 ], form_data: {}, submit_form: 1 }
+    screenshot: { filename: "f_2_boring_cart.pdf", dimensions: [ 680, 255 ], form_data: {}, submit_form: 1 }
 
-  desc 'Update the template that shows the Cart.'
-  edit 'app/views/carts/show.html.erb' do
-    self.all = <<-EOF.unindent(6)
-      <% if notice %>
-        <aside id="notice"><%= notice %></aside>
-      <% end %>
-
-      <h2>Your Pragmatic Cart</h2>
-      <ul>    
-        <% @cart.line_items.each do |item| %>
-          <li><%= item.product.title %></li>
+  if $rails_version =~ /^[3-6]/
+    desc 'Update the template that shows the Cart.'
+    edit 'app/views/carts/show.html.erb' do
+      self.all = <<-EOF.unindent(6)
+        <% if notice %>
+          <aside id="notice"><%= notice %></aside>
         <% end %>
-      </ul>
-    EOF
-  end
 
-  desc "Style the flash"
-  edit 'app/assets/stylesheets/application.scss' do
-    msub /()^.content/,%{
+        <h2 class="font-bold text-lg mb-3">Your Pragmatic Cart</h2>
+
+        <ul>    
+          <% @cart.line_items.each do |item| %>
+            <li><%= item.product.title %></li>
+          <% end %>
+        </ul>
+      EOF
+    end
+
+    desc "Style the flash"
+    edit 'app/assets/stylesheets/application.scss' do
+      msub /()^.content/,%{
 // START:notice
 .notice, #notice {
   background: #ffb;
@@ -1271,11 +1284,34 @@ section 9.3, 'Iteration D3: Adding a button' do
 }
 // END:notice
 }
+    end
+  else
+    desc 'Update the template that shows the Cart.'
+    edit 'app/views/carts/show.html.erb' do
+      self.all = <<-EOF.unindent(8)
+        <div>
+          <% if notice.present? %>
+            <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium
+                      rounded-lg inline-block" id="notice">
+              <%= notice %>
+            </p>
+          <% end %>
+
+          <h2 class="font-bold text-lg mb-3">Your Pragmatic Cart</h2>
+
+          <ul class="list-disc list-inside">    
+            <% @cart.line_items.each do |item| %>
+              <li><%= item.product.title %></li>
+            <% end %>
+          </ul>
+        </div>
+      EOF
+    end
   end
 
   desc "Try it once again, and see that the products in the cart."
   post '/', { 'product_id' => 3 },
-    screenshot: { filename: "f_3_better_cart.pdf", dimensions: [ 640, 200 ], form_data: {}, submit_form: 1 }
+    screenshot: { filename: "f_3_better_cart.pdf", dimensions: [ 600, 255 ], form_data: {}, submit_form: 1 }
   publish_code_snapshot :f
 end
 

@@ -45,7 +45,10 @@ puppeteer.launch().then(async browser => {
   if (params.submit_form) {
     if (typeof params.submit_form == "number") {
       let element = (await page.$$("*[type=submit]"))[params.submit_form];
-      await element.click();
+      await Promise.all([
+        page.waitForResponse(response => response.status() === 200),
+        element.click()
+      ]);
     } else {
       await Promise.all([
         // page.waitForNavigation({ waitUntil: 'networkidle0' }),

@@ -203,7 +203,12 @@ class DepotTest < Gorp::TestCase
   end
 
   section 9.3, "Iteration D3: Adding a button" do
-    assert_select 'input[type=submit][value="Add to Cart"]'
+    if $rails_version =~ /^[3-6]/
+      assert_select 'input[type=submit][value="Add to Cart"]'
+    else
+      assert_select 'button[type=submit]', "Add to Cart"
+    end
+
     #assert_select "a[href='http://localhost:#{$PORT}/carts/1']", 'redirected'
     assert_select '#notice', 'Line item was successfully created.'
 
