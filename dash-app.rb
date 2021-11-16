@@ -16,7 +16,6 @@ config = YAML.load_file(File.expand_path('../dashboard.yml', __FILE__))
 logdir = File.expand_path(config['log']).untaint
 
 get '/dashboard' do
-  STDERR.puts 'main'
   # FileUtils.touch File.expand_path('../tmp/restart.txt', __FILE__).untaint
   eval DASHBOARD.sub(/^_json.*/m, '').sub('_.post?', 'false')
 end

@@ -110,6 +110,10 @@ module Dashboard
   end
 end
 
+Dir["#{__dir__}/*.js"].each do |file|
+  _file "/#{File.basename(file)}", content: File.read(file)
+end
+
 # main output
 _html do
   Dashboard.env = env
@@ -392,10 +396,6 @@ _json do
   _deploy File.exist? File.join(webdir, 'checkdeploy.html').untaint
   _config config
   _active active + log
-end
-
-Dir["#{__dir__}/*.js"].each do |file|
-  _file "/#{File.basename(file)}", content: File.read(file)
 end
 
 __END__
