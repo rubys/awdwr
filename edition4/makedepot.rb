@@ -1880,7 +1880,7 @@ EOF
   desc 'Reference the partial from the layout.'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
-    msub /<nav class="side_nav">\n()/, <<-EOF, :highlight
+    msub /<nav class=".*?">\n()/, <<-EOF, :highlight
         <div id="cart" class="carts">
           <%= render @cart %>
         </div>
