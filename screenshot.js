@@ -66,13 +66,21 @@ puppeteer.launch().then(async browser => {
 
   // default height to size of main rectangle
   if (!params.dimensions) {
-    params.dimensions = {height: rectangle.height};
+    params.dimensions = {
+      height: Math.round(rectangle.height),
+      width: 800
+    };
   }
 
   // resize page
   await page.addStyleTag({
     content: '@page { size: auto; }',
   })
+
+  await page.setViewport({
+    ...params.dimensions,
+    deviceScaleFactor: 3
+  });
 
   // produce the PDF
   const pdf = await page.pdf({
