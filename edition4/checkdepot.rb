@@ -233,7 +233,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /^ +down +\d+ +Combine items in cart$/
     if $rails_version =~ /^3\./
       assert_select 'pre', /Couldn't find Cart with ID=wibble/i
-    elsif $rails_version =~ /^[4-6]/
+    elsif $rails_version =~ /^([4-5]|6\.0)/
       assert_select 'h2', /Couldn't find Cart with '?id'?=wibble/i
     else
       assert_select 'div.message', /Couldn't find Cart with '?id'?=wibble/i
@@ -259,7 +259,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'tfoot .price', '$96.00'
 
     if $rails_version =~ /^[3-6]/
-      assert_select 'input[type=submit][value="Add to Cart"]'
+      assert_select 'input[type=submit][value="Empty Cart"]'
     else
       assert_select 'button[type=submit]', "Empty Cart"
     end
@@ -286,7 +286,12 @@ class DepotTest < Gorp::TestCase
   section 11.1, "Iteration F1: Moving the Cart" do
     assert_select 'h2', 'Your Cart'
     assert_select 'tfoot .price', '$116.00'
-    assert_select 'input[type=submit][value="Empty cart"]'
+
+    if $rails_version =~ /^[3-6]/
+      assert_select 'input[type=submit][value="Empty Cart"]'
+    else
+      assert_select 'button[type=submit]', "Empty Cart"
+    end
 
     assert_select 'h2, code', "'nil' is not an ActiveModel-compatible object. It must implement :to_partial_path."
 

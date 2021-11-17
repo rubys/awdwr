@@ -1833,15 +1833,14 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   EOF
 
   desc 'Create a "partial" view, for just one line item'
-  edit 'app/views/line_items/_line_item.html.erb' do |data|
-    data.gsub! /.*_HIGHLIGHT.*\n/, ''
-    data[/()/,1] = <<-EOF
-<tr>
-  <td class="quantity"><%= line_item.quantity %></td>
-  <td><%= line_item.product.title %></td>
-  <td class="price"><%= number_to_currency(line_item.total_price) %></td>
-</tr>
-EOF
+  edit 'app/views/line_items/_line_item.html.erb' do
+    self.all = <<-EOF.unindent(6)
+      <tr>
+        <td class="quantity"><%= line_item.quantity %></td>
+        <td><%= line_item.product.title %></td>
+        <td class="price"><%= number_to_currency(line_item.total_price) %></td>
+      </tr>
+    EOF
   end
 
   desc 'Replace that portion of the view with a callout to the partial'
@@ -2712,7 +2711,7 @@ section 12.1, 'Iteration H1: Capturing an Order' do
         #END_HIGHLIGHT
       EOF
       msub /redirect_to[\(\s](@order), :?notice/, 'store_index_url'
-      msub /('Order was successfully created.')/,
+      msub /(["']Order was successfully created.["'])/,
         "\n          'Thank you for your order.'"
       msub /,( ):?location/, "\n          "
       msub /,( ):?status:?\s=?>?\s?:un/, "\n          "
