@@ -1,0 +1,32 @@
+<!--
+launchctl load -w ~/Library/LaunchAgents/awdwr.rproxy.plist
+-->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>awdwr.rproxy</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/rubys/.rvm/gems/ruby-3.0.2/wrappers/rproxy.rb</string>
+  </array>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardErrorPath</key>
+  <string>log/error.log</string>
+
+  <key>StandardOutPath</key>
+  <string>log/access.log</string>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/rubys/git/awdwr</string>
+</dict>
+</plist>

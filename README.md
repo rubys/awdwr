@@ -129,4 +129,8 @@ bundle config --local build.mysql2 "--with-ldflags=-L/opt/homebrew/Cellar/zstd/1
 bundle config build.eventmachine --with-cppflags=-I$(brew --prefix openssl)/include
 
 bundle install
+
+rvm wrapper /Users/rubys/git/awdwr/rproxy.rb
+cp ../awdwr.rproxy.plist ~/Library/LaunchAgents
+launchctl load -w ~/Library/LaunchAgents/awdwr.rproxy.plist
 ```
