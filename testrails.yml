@@ -9,11 +9,17 @@ default:
   rvm:
     bin:   ruby-3.0.2
 
-274:
-  output:  2.7.4
-  message: 'Ruby 2.7.0'
+266:
+  output:  2.6.6
+  message: 'Ruby 2.6.6'
   rvm:
-    bin:   ruby-2.7.0
+    bin:   ruby-2.6.6
+
+272:
+  output:  2.7.2
+  message: 'Ruby 2.7.2'
+  rvm:
+    bin:   ruby-2.7.2
 
 302:
   message: 'Ruby 3.0.2'

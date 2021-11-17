@@ -54,7 +54,7 @@ class DepotTest < Gorp::TestCase
       assert_select 'p', /^It is now \d+-\d\d-\d\d \d\d:\d\d:\d\d [+-]\d+/
     end
 
-    if $rails_version =~ /^[3-6]/
+    if $rails_version =~ /^([3-5]|6\.0)/
       assert_select 'h2', /undefined method `know' for Time:Class/
     else
       assert_select 'div.message', /undefined method `know' for Time:Class/
