@@ -131,12 +131,9 @@ _html do
       testrails += ' --port=3001'
     end
 
-    require 'shellwords'
-    @args = Shellwords.join(@args.split).untaint
-    _.submit "ruby #{testrails.untaint} #{@args} " +
-       "> #{$logdir}/post.out 2> #{$logdir}/post.err "
-
-    sleep 2
+    pid = Process.spawn 'ruby', testrails, *@args.split,
+      out: "#{$logdir}/post.out", err: "#{$logdir}/post.err"
+    Process.detach pid
   end
 
   active, log = Dashboard.status
