@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 'use strict';
+const child_process = require('child_process')
+
+let scale = 2;
 
 //
 // Use puppeteer to convert a web page to PDF.
@@ -25,6 +28,10 @@ process.on('unhandledRejection', (reason, promise) => {
 // convert page to PDF
 puppeteer.launch().then(async browser => {
   const page = await browser.newPage();
+
+  // add cookies
+  if (params.cookies) page.setCookie(...params.cookies);
+  // console.error(params.cookies)
 
   // fetch the page in question
   await page.goto(params.uri, {waitUntil: 'networkidle0'});
@@ -59,16 +66,24 @@ puppeteer.launch().then(async browser => {
   }
 
   // remove top margins from tailwindcss pages, extract main rectangle
-  let rectangle = await page.$eval('main', main => {
-    main.classList.remove("mt-28")
-    return main.getClientRects()[0].toJSON()
+  let rectangle = await page.evaluate(() => {
+    let main = document.querySelector('main');
+    if (main) {
+      main.classList.remove("mt-28");
+      return main.getClientRects()[0].toJSON();
+    } else {
+      return {height: window.innerHeight, width: window.innerWidth};
+    }
   });
 
   // default height to size of main rectangle
-  if (!params.dimensions) {
+  if (params.dimensions) {
+    if (params.dimensions.height) params.dimensions.height *= scale;
+    if (params.dimensions.width) params.dimensions.width *= scale;
+  } else {
     params.dimensions = {
-      height: Math.round(rectangle.height),
-      width: 800
+      height: Math.round(rectangle.height) * scale,
+      width: 800 * scale
     };
   }
 
@@ -79,12 +94,13 @@ puppeteer.launch().then(async browser => {
 
   await page.setViewport({
     ...params.dimensions,
-    deviceScaleFactor: 3
+    deviceScaleFactor: scale
   });
 
   // produce the PDF
   const pdf = await page.pdf({
     ...params.dimensions, 
+    scale,
     printBackground: true,
     pageRanges: '1'
   });
@@ -94,9 +110,16 @@ puppeteer.launch().then(async browser => {
   const dest = path.join(params.output_dir, params.filename);
   const before = fs.existsSync(dest) ?  fs.readFileSync(dest, 'utf8') : '';
   const strip = /^\/\w+Date \(D:[-+\d']+\)/gm
-  if (before.replace(strip, '') !== pdf.toString().replace(strip, '')) {
+  // if (before.replace(strip, '') !== pdf.toString().replace(strip, '')) {
     fs.writeFileSync(dest, pdf, 'utf8');
-  }
+
+    // produce png
+    if (dest.endsWith('.pdf')) {
+      child_process.spawn('convert', ['-units', 'PixelsPerInch', dest,
+        '-density', '300', '-quality', '90', '-colorspace', 'RGB',
+        dest.replace('.pdf', '.png')], {detached: true})
+    }
+  // }
 
   // wait for completion
   await browser.close();

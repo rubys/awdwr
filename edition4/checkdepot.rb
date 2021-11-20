@@ -152,9 +152,9 @@ class DepotTest < Gorp::TestCase
     assert_select 'h1', 'Your Pragmatic Catalog'
 
     if $rails_version =~ /^[3-6]/
-      assert_select '.price', '20.0'
+      assert_select '.price', '19.95'
     else
-      assert_select 'div', '20.0'
+      assert_select 'div', '19.95'
     end
   end
 
@@ -164,9 +164,9 @@ class DepotTest < Gorp::TestCase
 
   section 8.3, "Iteration C3: Use a Helper to Format the Price" do
     if $rails_version =~ /^[3-6]/
-      assert_select '.price', '$20.00'
+      assert_select '.price', '$19.95'
     else
-      assert_select 'div', '$20.00'
+      assert_select 'div', '$19.95'
     end
   end
 
@@ -212,7 +212,7 @@ class DepotTest < Gorp::TestCase
     #assert_select "a[href='http://localhost:#{$PORT}/carts/1']", 'redirected'
     assert_select '#notice', 'Line item was successfully created.'
 
-    assert_select 'li', /^Build Chatbot Interactions$/
+    assert_select 'li', /^Modern CSS with Tailwind/
   end
 
   section 9.4, "Playtime" do
@@ -228,7 +228,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.1, "Iteration E1: Creating A Smarter Cart" do
     assert_select 'li', /Docker for Rails Developers/u
-    assert_select 'main li', count: 6, html: /1 .+ Build Chatbot Interactions/
+    assert_select 'main li', count: 6, html: /1 .+ Design and Build Great Web APIs/
     assert_select '.stdout', /^=+ (\d+)? *CombineItemsInCart: reverting =+$/
     assert_select '.stdout', /^ +down +\d+ +Combine items in cart$/
     if $rails_version =~ /^3\./
@@ -256,7 +256,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.3, "Iteration E3: Finishing the Cart" do
     assert_select '#notice', 'Your cart is currently empty'
-    assert_select 'tfoot .price', '$96.00'
+    assert_select 'tfoot .price', '$64.85'
 
     if $rails_version =~ /^[3-6]/
       assert_select 'input[type=submit][value="Empty Cart"]'

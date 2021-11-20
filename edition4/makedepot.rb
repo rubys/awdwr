@@ -72,7 +72,7 @@ section 2, 'Instant Gratification' do
   restart_server
 
   desc 'Attempt to fetch the file - note that it is missing'
-  get '/say/hello', screenshot: { filename: "demo2_2_hello_missing.pdf", dimensions: [320,200] }
+  get '/say/hello', screenshot: { filename: "demo2_2_hello_missing.pdf", dimensions: [320,120] }
 
   desc 'Replace file with a simple hello world'
   edit 'app/views/say/hello.html.erb' do
@@ -82,7 +82,7 @@ section 2, 'Instant Gratification' do
   end
 
   desc 'This time it works!'
-  get '/say/hello', screenshot: { filename: "demo2_3_hello_works.pdf", dimensions: [320,200] }
+  get '/say/hello', screenshot: { filename: "demo2_3_hello_works.pdf", dimensions: [320,100] }
   publish_code_snapshot :work, :demo1
 
   desc 'Add a simple expression'
@@ -94,7 +94,7 @@ section 2, 'Instant Gratification' do
       </p>
     EOF
   end
-  get '/say/hello', screenshot: { filename: "demo2_4_hello_time.pdf", dimensions: [ 320, 200 ] }
+  get '/say/hello', screenshot: { filename: "demo2_4_hello_time.pdf", dimensions: [ 320, 120 ] }
   publish_code_snapshot :work, :demo2
 
   desc 'Evaluate the expression in the controller.'
@@ -128,7 +128,7 @@ section 2, 'Instant Gratification' do
       </p>
     EOF
   end
-  get '/say/goodbye', screenshot: { filename: "demo4_1_goodbye.pdf", dimensions: [ 320, 200 ] }
+  get '/say/goodbye', screenshot: { filename: "demo4_1_goodbye.pdf", dimensions: [ 320, 120 ] }
   publish_code_snapshot :work, :demo4
 
   desc 'Add a link from the hello page to the goodbye page'
@@ -141,7 +141,7 @@ section 2, 'Instant Gratification' do
       </p>
     EOF
   end
-  get '/say/hello', screenshot: { filename: "demo5_1_goodbye_link.pdf", dimensions: [ 320, 200 ] }
+  get '/say/hello', screenshot: { filename: "demo5_1_goodbye_link.pdf", dimensions: [ 320, 150 ] }
 
   desc 'Add a link back to the hello page'
   edit 'app/views/say/goodbye.html.erb' do
@@ -155,12 +155,16 @@ section 2, 'Instant Gratification' do
 
   desc 'Intentionally introduce a typo in the code'
   edit 'app/controllers/say_controller.rb' do
-   sub! 'Time.now', 'Time.know'
+    clear_highlights
+    sub! 'Time.now', 'Time.know'
   end
-  get '/say/hello', screenshot: { filename: "demo5_2_typo.pdf", dimensions: [ 320, 200 ] }
+  get '/say/hello', screenshot: { filename: "demo5_2_typo.pdf", dimensions: [ 600, 440 ] }
+  edit 'app/controllers/say_controller.rb' do
+    edit 'Time.know', :highlight
+  end
 
   desc 'Intentionally introduce a typo in a URL'
-  get '/say/hullo', screenshot: { filename: "demo5_2_route_typo.pdf", dimensions: [ 320, 200 ] }
+  get '/say/hullo', screenshot: { filename: "demo5_2_route_typo.pdf", dimensions: [ 600, 370 ] }
 
   publish_code_snapshot :work, :demo5
 
@@ -298,7 +302,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   will have your team up and running in seconds.
 </p>
 }
-  new_product_price = "38.00"
+  new_product_price = "19.95"
   new_product_image_url = "ridocker.jpg"
   get '/products/new', screenshot: {
     filename: "a_3_new_product_filled_in.pdf",
@@ -392,7 +396,8 @@ section 6.2, 'Iteration A2: Making Prettier Listings' do
   end
 
   desc 'See the finished result'
-  get '/products', screenshot: { filename: "a_5_styled_products.pdf" }
+  get '/products', screenshot: { filename: "a_5_styled_products.pdf",
+    dimensions: [ 1024, 750 ] }
 end
 
 section 6.3, 'Playtime' do
@@ -681,6 +686,8 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
 
     if self =~ /priority is based upon order of creation: first created/
       msub /creation:( )first created/, "\n  # "
+    elsif self =~ /at the top of this file/
+      msub /at the( )top of this file/, "\n  # "
     end
   end
 
@@ -690,7 +697,7 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
   end
 
   desc 'Demonstrate that everything is wired together'
-  get '/', screenshot: { filename: "d_1_new_root.pdf" }
+  get '/', screenshot: { filename: "d_1_new_root.pdf", dimensions: [500,120] }
 
   desc 'In the controller, get a list of products from the model'
   edit 'app/controllers/store_controller.rb' do
@@ -898,7 +905,7 @@ section 8.3, 'Iteration C3: Use a Helper to Format the Price' do
   end
 
   desc 'Show the results.'
-  get '/', screenshot: { filename: "e_2_prices_fixed.pdf", dimensions: [ 1024, 420 ] }
+  get '/', screenshot: { filename: "e_2_prices_fixed.pdf", dimensions: [ 1024, 600 ] }
 end
 
 section 8.4, 'Iteration C4: Functional Testing' do
@@ -1134,6 +1141,8 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
         sub! 'one', 'two'
       end
     end
+
+    msub /^# Read about fixtures at() https?.{50}/, "\n#", :optional
   end
 
   test :controllers
@@ -1153,12 +1162,13 @@ section 9.3, 'Iteration D3: Adding a button' do
           <%= button_to 'Add to Cart', line_items_path(:product_id => product) %>
       EOF
     else
-      msub /number_to_currency.*\n()/, '    ' + <<-EOF
+      msub /number_to_currency.*\n()/, '        ' + <<-EOF
           <!-- START_HIGHLIGHT -->
           <%= button_to 'Add to Cart',
               line_items_path(:product_id => product),
               form_class: 'inline',
-              class: 'ml-4 rounded-lg text-white py-1 px-2 bg-green-600' %>
+              class: 'ml-4 rounded-lg py-1 px-2
+                      text-white bg-green-600' %>
           <!-- END_HIGHLIGHT -->
       EOF
     end
@@ -1238,8 +1248,7 @@ section 9.3, 'Iteration D3: Adding a button' do
         gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
       end
       msub /,( ):?notice/, "\n          "
-      msub /,( ):?status/, "\n          "
-      msub /,( ):?status/, "\n          "
+      msub /,( ):?status/, "\n          " while match /,( ):?status/
     end
 
     edit 'redirect_to', :highlight
@@ -1247,8 +1256,8 @@ section 9.3, 'Iteration D3: Adding a button' do
   end
 
   desc "Try it once, and see that the output isn't very useful yet."
-  post '/', { 'product_id' => 3 },
-    screenshot: { filename: "f_2_boring_cart.pdf", dimensions: [ 680, 255 ], form_data: {}, submit_form: 1 }
+  post '/', { 'product_id' => 3 } 
+#   screenshot: { filename: "f_2_boring_cart.pdf", dimensions: [ 680, 255 ], form_data: {}, submit_form: 1 }
 
   if $rails_version =~ /^[3-6]/
     desc 'Update the template that shows the Cart.'
@@ -1310,8 +1319,8 @@ section 9.3, 'Iteration D3: Adding a button' do
   end
 
   desc "Try it once again, and see that the products in the cart."
-  post '/', { 'product_id' => 3 },
-    screenshot: { filename: "f_3_better_cart.pdf", dimensions: [ 600, 255 ], form_data: {}, submit_form: 1 }
+  post '/', { 'product_id' => 3 }
+#   screenshot: { filename: "f_3_better_cart.pdf", dimensions: [ 600, 255 ], form_data: {}, submit_form: 1 }
   publish_code_snapshot :f
 end
 
@@ -2662,7 +2671,6 @@ section 12.1, 'Iteration H1: Capturing an Order' do
     msub /^two:.*(cart(_id)?:.*?)\n/m, 'order: one'
     edit 'product: ruby', :highlight
     edit 'order: one', :highlight
-    msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
   end
 
   desc 'Define an optional relationship from the line item to the order'
