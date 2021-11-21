@@ -28,10 +28,12 @@ process.on('unhandledRejection', (reason, promise) => {
 // convert page to PDF
 puppeteer.launch().then(async browser => {
   const page = await browser.newPage();
+  let output = {};
 
   // add cookies
-  if (params.cookies) page.setCookie(...params.cookies);
-  // console.error(params.cookies)
+  if (params.cookies) {
+    await page.setCookie(...params.cookies);
+  }
 
   // fetch the page in question
   await page.goto(params.uri, {waitUntil: 'networkidle0'});
@@ -48,8 +50,6 @@ puppeteer.launch().then(async browser => {
     }
   }
 
-  let output = {};
-
   // optionally submit form
   if (params.submit_form) {
     page.on('response', response => {
@@ -60,7 +60,7 @@ puppeteer.launch().then(async browser => {
     });
 
     if (typeof params.submit_form == "number") {
-      let element = (await page.$$("*[type=submit]"))[params.submit_form];
+      let element = (await page.$$("*[type=submit]"))[params.submit_form-1];
       await Promise.all([
         page.waitForResponse(response => response.status() === 200),
         element.click()
@@ -73,13 +73,6 @@ puppeteer.launch().then(async browser => {
       ]);
    }
 
-   Object.assign(output, await page.evaluate(() => ({
-     body: document.body.innerHTML
-   })));
-
-   output.cookies = await page.cookies();
-
-   console.log(JSON.stringify(output));
   }
 
   // remove top margins from tailwindcss pages, extract main rectangle
@@ -127,7 +120,7 @@ puppeteer.launch().then(async browser => {
   const dest = path.join(params.output_dir, params.filename);
   const before = fs.existsSync(dest) ?  fs.readFileSync(dest, 'utf8') : '';
   const strip = /^\/\w+Date \(D:[-+\d']+\)/gm
-  // if (before.replace(strip, '') !== pdf.toString().replace(strip, '')) {
+  if (before.replace(strip, '') !== pdf.toString().replace(strip, '')) {
     fs.writeFileSync(dest, pdf, 'utf8');
 
     // produce png
@@ -136,7 +129,15 @@ puppeteer.launch().then(async browser => {
         '-density', '300', '-quality', '90', '-colorspace', 'RGB',
         dest.replace('.pdf', '.png')], {detached: true})
     }
-  // }
+  }
+
+  if (output.code) {
+    output.url = page.url();
+    output.body = await page.content();
+    output.cookies = await page.cookies();
+
+    console.log(JSON.stringify(output));
+  }
 
   // wait for completion
   await browser.close();
