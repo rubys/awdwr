@@ -1256,8 +1256,8 @@ section 9.3, 'Iteration D3: Adding a button' do
   end
 
   desc "Try it once, and see that the output isn't very useful yet."
-  post '/', { 'product_id' => 3 } 
-#   screenshot: { filename: "f_2_boring_cart.pdf", dimensions: [ 680, 255 ], form_data: {}, submit_form: 1 }
+  post '/', { 'product_id' => 3 },
+    screenshot: { filename: "f_2_boring_cart.pdf", dimensions: [ 680, 255 ], form_data: {}, submit_form: 1 }
 
   if $rails_version =~ /^[3-6]/
     desc 'Update the template that shows the Cart.'
@@ -1319,8 +1319,8 @@ section 9.3, 'Iteration D3: Adding a button' do
   end
 
   desc "Try it once again, and see that the products in the cart."
-  post '/', { 'product_id' => 3 }
-#   screenshot: { filename: "f_3_better_cart.pdf", dimensions: [ 600, 255 ], form_data: {}, submit_form: 1 }
+  post '/', { 'product_id' => 3 },
+    screenshot: { filename: "f_3_better_cart.pdf", dimensions: [ 600, 255 ], form_data: {}, submit_form: 1 }
   publish_code_snapshot :f
 end
 

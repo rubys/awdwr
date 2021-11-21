@@ -48,8 +48,17 @@ puppeteer.launch().then(async browser => {
     }
   }
 
+  let output = {};
+
   // optionally submit form
   if (params.submit_form) {
+    page.on('response', response => {
+      if (!output.code || output.code >= 300) {
+        output.code = response.status().toString();
+        output.headers = response.headers();
+      }
+    });
+
     if (typeof params.submit_form == "number") {
       let element = (await page.$$("*[type=submit]"))[params.submit_form];
       await Promise.all([
@@ -63,6 +72,14 @@ puppeteer.launch().then(async browser => {
         page.click("*[type=submit]")
       ]);
    }
+
+   Object.assign(output, await page.evaluate(() => ({
+     body: document.body.innerHTML
+   })));
+
+   output.cookies = await page.cookies();
+
+   console.log(JSON.stringify(output));
   }
 
   // remove top margins from tailwindcss pages, extract main rectangle
