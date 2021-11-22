@@ -256,7 +256,7 @@ class DepotTest < Gorp::TestCase
 
   section 10.3, "Iteration E3: Finishing the Cart" do
     assert_select '#notice', 'Your cart is currently empty'
-    assert_select 'tfoot .price', '$64.85'
+    assert_select 'tfoot td', '$64.85'
 
     if $rails_version =~ /^[3-6]/
       assert_select 'input[type=submit][value="Empty Cart"]'

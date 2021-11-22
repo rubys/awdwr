@@ -754,7 +754,7 @@ section 8.2, 'Iteration C2: Add a Page Layout' do
     desc 'Rename the application stylesheet so that we can use SCSS'
     cmd "mv app/assets/stylesheets/application.css #{DEPOT_CSS}"
 
-    desc 'Add our style rules'
+    desc 'Add our style rules' if $rails_version =~ /^[3-6]/
     edit DEPOT_CSS do
       # reflow comments
       gsub! /^ [^\n]{76}.*?\n\s.\n/m do |paragraph|
@@ -1462,7 +1462,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
 
   desc 'Every item should (once again) only have a quantity of one.'
   %w(1).each do |cart_id|
-    get "/carts/#{cart_id}", screenshot: { filename: "g_2_cart_#{cart_id}_no_quantities.pdf", dimensions: [ 640, 200 ] }
+    get "/carts/#{cart_id}", screenshot: { filename: "g_2_cart_#{cart_id}_no_quantities.pdf", dimensions: [ 640, 255 ] }
   end
 
   desc 'Recombine the item data.'
@@ -1535,7 +1535,7 @@ section 10.2, 'Iteration E2: Handling Errors' do
     screenshot: { filename: "g_4_cart_error_fixed.pdf", dimensions: [ 1024, 300 ] }
 
   desc 'Inspect the log.'
-  cmd 'tail -25 log/development.log', :highlight => ['Attempt to access']
+  cmd 'tail -32 log/development.log', :highlight => ['Attempt to access']
 
   unless $rails_version =~ /^3\./
     desc 'Limit access to product_id'
@@ -1633,7 +1633,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
 
   desc 'Update the view to add totals.'
   edit 'app/views/carts/show.html.erb' do
-    self.all = read('cart/show.html.erb')
+    self.all = read('cart/show.tw.erb')
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
@@ -1662,7 +1662,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
     EOF
   end
 
-  desc 'Add some style.'
+  desc 'Add some style.' if $rails_version =~ /^[3-6]/
   if DEPOT_CSS =~ /scss/
     edit 'app/assets/stylesheets/carts*.scss' do
       msub /(\s*)\Z/, "\n\n"
@@ -1710,7 +1710,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
 }
       EOF
     end
-  else
+  elsif $rails_version =~ /^[3-6]/
     edit DEPOT_CSS, 'cartmain' do |data|
       data << "\n" + <<-EOF.unindent(8)
         /* START:cartmain */
@@ -1732,9 +1732,6 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
       EOF
     end
   end
-  %w(1 2 3).each do |cart_id|
-    get "/carts/#{cart_id}", screenshot: { filename: "h_1_cart_#{cart_id}_styled.pdf", dimensions: [ 640, 200 ] }
-  end
 
   desc 'Add a product to the cart, and see the total.'
   post '/', {'product_id' => 2}
@@ -1742,6 +1739,10 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   desc "Add a few more products, and watch the totals climb!"
   post '/', {'product_id' => 2}, {:snapget => false}
   post '/', {'product_id' => 3}, {:snapget => false}
+
+  %w(2).each do |cart_id|
+    get "/carts/#{cart_id}", screenshot: { filename: "h_1_cart_#{cart_id}_styled.pdf", dimensions: [ 640, 250 ] }
+  end
 end
 
 section 10.4, 'Playtime' do

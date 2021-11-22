@@ -1,0 +1,34 @@
+<article>
+  <% if notice.present? %>
+    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium
+              rounded-lg inline-block" id="notice">
+      <%= notice %>
+    </p>
+  <% end %>
+
+  <h2 class="font-bold text-lg mb-3">Your Cart</h2>
+
+  <table class="table-auto">
+    <% @cart.line_items.each do |line_item| %>
+      <tr>
+        <td class="text-right"><%= line_item.quantity %> &times;</td>
+        <td class="pr-2"><%= line_item.product.title %></td>
+        <td class="text-right font-bold">
+          <%= number_to_currency(line_item.total_price) %>
+        </td>
+      </tr>
+    <% end %>
+    <tfoot>
+      <tr>
+        <th class="text-right pr-2" colspan="2">Total:</th>
+        <td class="text-right font-bold border-t-2 border-black">
+          <%= number_to_currency(@cart.total_price) %>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <%= button_to 'Empty Cart', @cart, method: :delete,
+    class: 'ml-4 rounded-lg py-1 px-2 text-white bg-green-600',
+    data: { confirm: 'Are you sure?' } %>
+</article>

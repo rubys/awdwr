@@ -17,8 +17,6 @@ const params = JSON.parse(process.argv[2]);
 let date = new Date();
 console.error(`[${date.toLocaleString('sv')}] SNAP  ${params.filename}`);
 
-// form_data is not supported yet
-
 // if an exception is raised asynchronously, shut down
 process.on('unhandledRejection', (reason, promise) => {
   console.log(reason.stack || reason);
@@ -41,12 +39,13 @@ puppeteer.launch().then(async browser => {
   // fill in forms
   if (params.form_data) {
     for (let [selector, text] of Object.entries(params.form_data)) {
+      if (selector == "#_method") continue;
+
       if (selector.match(/^#.*\]/)) {
        selector = selector.replace(/\[(\w+)\]$/, '_$1')
       }
 
       await page.type(selector, text);
-
     }
   }
 
