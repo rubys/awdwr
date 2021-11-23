@@ -3045,6 +3045,7 @@ end
 end
 
 section 12.5, 'Playtime' do
+  next
   if Gorp::Config[:skip_xml_serialization]
     warn 'xml serialization skipped'
     next
@@ -4855,6 +4856,9 @@ EOF
   end
   edit "app/javascript/PayTypeSelector/index.jsx" do
     clear_highlights
+    gsub! '    return (', "    // START_HIGHLIGHT\n    return ("
+    gsub! '    );',"    );\n// END_HIGHLIGHT"
+
     gsub!  '          <label htmlFor="order_pay_type">Pay type</label>', <<EOF
           <label htmlFor="order_pay_type">
             {I18n.t("orders.form.pay_type")}
@@ -5119,6 +5123,22 @@ section 16.4, 'Task K4: Add a locale switcher.' do
 
   edit 'app/views/layouts/application.html.erb', 'i18n' do
     clear_highlights
+
+    # we need to add javascript_pack_tag("locale_switcher") in here as well
+    # this is probably not the best/right way to do this but hopefully expresses the intent
+    sub! "<%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>", %{
+    <!-- START:locale_switcher -->
+    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    }
+
+    sub! /<\/script>/,%{
+    </script>
+    <!-- START_HIGHLIGHT -->
+    <%= javascript_pack_tag 'locale_switcher', 'data-turbolinks-track': 'reload' %>
+    <!-- END_HIGHLIGHT -->
+    <!-- END:locale_switcher -->
+    }
+
     edit /^\s+<header class="main">.*?<\/header>\n/m, :mark => 'i18n'
     msub /\n()\s+<%= image_tag/, <<-EOF, :highlight
       <aside>
