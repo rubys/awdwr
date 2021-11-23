@@ -3045,6 +3045,7 @@ end
 end
 
 section 12.5, 'Playtime' do
+  next
   if Gorp::Config[:skip_xml_serialization]
     warn 'xml serialization skipped'
     next
@@ -3471,7 +3472,10 @@ section 13.2, 'Iteration H2: System testing' do
 
     edit 'test/system/products_test.rb' do
       sub! ':one', ':ruby'
-      sub! 'Product was successfully created', 'Title has already been taken'
+      # These aren't 100% correct, but close enough I think?
+      sub! 'test "updating a Product" do', "#START:fix-system-test\n  test \"updating a Product\" do"
+      sub! 'test "destroying a Product" do', "#END:fix-system-test\n\ntest \"destroying a Product\" do"
+      sub! 'click_on "Update Product"', "#START_HIGHLIGHT\n    fill_in \"Title\", with: \"Karel The Robot in a Nutshell\"# END_HIGHLIGHT\n    click_on \"Update Product\""
     end
     cmd 'rm test/system/carts_test.rb'
     cmd 'rm test/system/line_items_test.rb'
@@ -4855,6 +4859,9 @@ EOF
   end
   edit "app/javascript/PayTypeSelector/index.jsx" do
     clear_highlights
+    gsub! '    return (', "    // START_HIGHLIGHT\n    return ("
+    gsub! '    );',"    );\n// END_HIGHLIGHT"
+
     gsub!  '          <label htmlFor="order_pay_type">Pay type</label>', <<EOF
           <label htmlFor="order_pay_type">
             {I18n.t("orders.form.pay_type")}
@@ -5119,6 +5126,22 @@ section 16.4, 'Task K4: Add a locale switcher.' do
 
   edit 'app/views/layouts/application.html.erb', 'i18n' do
     clear_highlights
+
+    # we need to add javascript_pack_tag("locale_switcher") in here as well
+    # this is probably not the best/right way to do this but hopefully expresses the intent
+    sub! "<%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>", %{
+    <!-- START:locale_switcher -->
+    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    }
+
+    sub! /<\/script>/,%{
+    </script>
+    <!-- START_HIGHLIGHT -->
+    <%= javascript_pack_tag 'locale_switcher', 'data-turbolinks-track': 'reload' %>
+    <!-- END_HIGHLIGHT -->
+    <!-- END:locale_switcher -->
+    }
+
     edit /^\s+<header class="main">.*?<\/header>\n/m, :mark => 'i18n'
     msub /\n()\s+<%= image_tag/, <<-EOF, :highlight
       <aside>
