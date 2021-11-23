@@ -1146,6 +1146,7 @@ section 9.2, 'Iteration D2: Connecting Products to Carts' do
   end
 
   test :controllers
+  test :controllers if $rails_version =~ /^6/ # intermittently fails
 end
 
 section 9.3, 'Iteration D3: Adding a button' do
@@ -1633,8 +1634,12 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
 
   desc 'Update the view to add totals.'
   edit 'app/views/carts/show.html.erb' do
-    self.all = read('cart/show.tw.erb')
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    if $rails_version =~ /^[3-6]/
+      self.all = read('cart/show.html.erb')
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    else
+      self.all = read('cart/show.tw.erb')
+    end
   end
 
   desc 'Add a method to compute the total price of a single line item.'
@@ -1933,7 +1938,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
         // END:side
 }
     end
-  else
+  elsif $rails_version =~ /^[3-6]/
     edit DEPOT_CSS, 'cartside' do |data|
       data << "\n" + <<-EOF.unindent(6)
         /* START:cartside */
@@ -2082,7 +2087,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
                                           :endcolor => "#114411"
       EOF
     end
-  else
+  elsif $rails_version =~ /^[3-6]/
     edit 'app/assets/stylesheets/line_items.scss' do |data|
       msub /.*()/m, "\n" + <<-EOF.unindent(8), :highlight
         @keyframes line-item-highlight {

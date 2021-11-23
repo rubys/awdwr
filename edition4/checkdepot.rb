@@ -285,7 +285,7 @@ class DepotTest < Gorp::TestCase
 
   section 11.1, "Iteration F1: Moving the Cart" do
     assert_select 'h2', 'Your Cart'
-    assert_select 'tfoot .price', '$116.00'
+    assert_select 'tfoot td', '$89.80'
 
     if $rails_version =~ /^[3-6]/
       assert_select 'input[type=submit][value="Empty Cart"]'
@@ -316,7 +316,7 @@ class DepotTest < Gorp::TestCase
 
   section 11.4, "Iteration F4: Hide an Empty Cart" do
     assert_select '#cart'
-    assert_select '.price', '$116.00'
+    assert_select 'tfoot td', '$89.80'
   end
 
   section 12.1, "Iteration G1: Capturing an Order" do
