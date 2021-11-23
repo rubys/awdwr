@@ -34,7 +34,7 @@ puppeteer.launch().then(async browser => {
   }
 
   // fetch the page in question
-  await page.goto(params.uri, {waitUntil: 'networkidle0'});
+  await page.goto(params.uri, {waitUntil: 'networkidle2'});
 
   // fill in forms
   if (params.form_data) {

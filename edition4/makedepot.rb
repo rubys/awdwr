@@ -679,7 +679,11 @@ section 8.1, 'Iteration C1: Create the Catalog Listing' do
       end
     else
       msub /(\s*)\Z/, "\n\n"
-      msub /, see( )http/, "\n  # "
+      if match ', see http'
+        msub /, see( )http/, "\n  # "
+      else
+        msub /per the DSL in( )http/, "\n  # "
+      end
       msub /^\s+(get 'store\/index')$/, 
         "  root 'store#index', as: 'store_index'", :highlight
     end
@@ -1299,14 +1303,14 @@ section 9.3, 'Iteration D3: Adding a button' do
     desc 'Update the template that shows the Cart.'
     edit 'app/views/carts/show.html.erb' do
       self.all = <<-EOF.unindent(8)
-        <div>
-          <% if notice.present? %>
-            <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium
-                      rounded-lg inline-block" id="notice">
-              <%= notice %>
-            </p>
-          <% end %>
+        <% if notice.present? %>
+          <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium
+                    rounded-lg inline-block" id="notice">
+            <%= notice %>
+          </p>
+        <% end %>
 
+        <article>
           <h2 class="font-bold text-lg mb-3">Your Pragmatic Cart</h2>
 
           <ul class="list-disc list-inside">    
@@ -1314,7 +1318,7 @@ section 9.3, 'Iteration D3: Adding a button' do
               <li><%= item.product.title %></li>
             <% end %>
           </ul>
-        </div>
+        </article>
       EOF
     end
   end
@@ -1849,23 +1853,20 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
   desc 'Create a "partial" view, for just one line item'
   edit 'app/views/line_items/_line_item.html.erb' do
-    self.all = <<-EOF.unindent(6)
-      <tr>
-        <td class="quantity"><%= line_item.quantity %></td>
-        <td><%= line_item.product.title %></td>
-        <td class="price"><%= number_to_currency(line_item.total_price) %></td>
-      </tr>
-    EOF
+    show = File.read('app/views/carts/show.html.erb')
+    tr = show[/^\s*<tr>.*?<\/tr>\n/m]
+    tr.gsub! Regexp.new('^' + tr[/\s*/]), ''
+    self.all = tr
   end
 
   desc 'Replace that portion of the view with a callout to the partial'
   edit 'app/views/carts/show.html.erb' do
     clear_highlights
-    msub /^(    <% @cart.line_items.each do .* end %>\n)/m, %{
+    msub /(\n\s+<% @cart.line_items.each do .* end %>\n)/m, %{
     <!-- START_HIGHLIGHT -->
     <%= render(@cart.line_items) %>
     <!-- END_HIGHLIGHT -->
-}
+} + "\n"
   end
 
   desc 'Make a copy as a partial for the cart controller'
@@ -1874,6 +1875,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   desc 'Modify the copy to reference the (sub)partial and take input from @cart'
   edit 'app/views/carts/_cart.html.erb' do
     clear_highlights
+    sub! /^<% if notice.present\? %>.*?<% end %>\n\n/m, ''
     sub! /^<% if notice %>.*?<% end %>\n\n/m, ''
     sub! /^<p id="notice"><%= notice %><\/p>\n\n/m, ''
     while include? '@cart'
@@ -1882,6 +1884,12 @@ section 11.1, 'Iteration F1: Moving the Cart' do
     end
     sub! /#START_HIGHLIGHT/, "<!-- START_HIGHLIGHT -->"
 #    sub! /#END_HIGHLIGHT/, "<!-- END_HIGHLIGHT -->"
+
+    unless $rails_version =~ /^[3-6]/
+      edit '<article>', :highlight do
+        sub! '>', ' class="bg-white rounded">'
+      end
+    end
   end
 
   publish_code_snapshot :j
@@ -1894,7 +1902,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   desc 'Reference the partial from the layout.'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
-    msub /<nav class=".*?">\n()/, <<-EOF, :highlight
+    msub /<nav class=".*?">\n()/, <<-EOF + "\n", :highlight
         <div id="cart" class="carts">
           <%= render @cart %>
         </div>
