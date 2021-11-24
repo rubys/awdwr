@@ -927,7 +927,7 @@ section 8.4, 'Iteration C4: Functional Testing' do
     dcl 'should get index' do
       msub /^()\s+end/, <<-'EOF'.unindent(4), :highlight
         assert_select 'nav a', minimum: 4 
-        assert_select 'main ul.catalog li', 3
+        assert_select 'main ul li', 3
         assert_select 'h2', 'Programming Ruby 1.9'
         assert_select 'div', /\$[,\d]+\.\d\d/
       EOF
@@ -1310,7 +1310,7 @@ section 9.3, 'Iteration D3: Adding a button' do
           </p>
         <% end %>
 
-        <article>
+        <article id="cart">
           <h2 class="font-bold text-lg mb-3">Your Pragmatic Cart</h2>
 
           <ul class="list-disc list-inside">    
@@ -1676,7 +1676,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
     edit 'app/assets/stylesheets/carts*.scss' do
       msub /(\s*)\Z/, "\n\n"
       msub /\n\n()\Z/, <<-EOF
-.carts {
+.cart {
   table {
     border-collapse: collapse;
   }
@@ -1886,8 +1886,8 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 #    sub! /#END_HIGHLIGHT/, "<!-- END_HIGHLIGHT -->"
 
     unless $rails_version =~ /^[3-6]/
-      edit '<article>', :highlight do
-        sub! '>', ' class="bg-white rounded">'
+      edit '<article id="cart">', :highlight do
+        sub! '>', ' class="bg-white rounded p-2">'
       end
     end
   end
@@ -1902,11 +1902,17 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   desc 'Reference the partial from the layout.'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
-    msub /<nav class=".*?">\n()/, <<-EOF + "\n", :highlight
-        <div id="cart" class="carts">
+    if $rails_version =~ /^[3-6]/
+      msub /<nav class=".*?">\n()/, <<-EOF + "\n", :highlight
+        <div class="cart">
           <%= render @cart %>
         </div>
-    EOF
+      EOF
+    else
+      msub /<nav class=".*?">\n()/, <<-EOF + "\n", :highlight
+        <%= render @cart %>
+      EOF
+    end
     gsub! /(<!-- <label id="[.\w]+"\/> -->)/, ''
     gsub! /(# <label id="[.\w]+"\/>)/, ''
   end
@@ -1929,7 +1935,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
       clear_highlights
       msub /()^    ul {/,%{
         // START:side
-    #cart {
+    .cart {
       article {
         h2 {
           margin-top: 0;
@@ -1952,12 +1958,12 @@ section 11.1, 'Iteration F1: Moving the Cart' do
         /* START:cartside */
         /* Styles for the cart in the sidebar */
         
-        #cart, #cart table {
+        .cart, .cart table {
           font-size: smaller;
           color:     white;
         }
 
-        #cart table {
+        .cart table {
           border-top:    1px dotted #595;
           border-bottom: 1px dotted #595;
           margin-bottom: 10px;
@@ -1974,7 +1980,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
   desc 'Purchase another product.'
   post '/', { 'product_id' => 3 },
-    screenshot: { filename: "j_1_side_cart.pdf", dimensions: [ 1024, 300 ], form_data: {}, submit_form: 1 }
+    screenshot: { filename: "j_1_side_cart.pdf", dimensions: [ 1024, 350 ], form_data: {}, submit_form: 2 }
 
   publish_code_snapshot :k
 
@@ -1983,34 +1989,24 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 
   desc 'Verify that the products page is indeed broken'
   get '/products',
-    screenshot: { filename: "k_1_products_page_broken.pdf", dimensions: [ 1024, 300 ]}
+    screenshot: { filename: "k_1_products_page_broken.pdf", dimensions: [ 800, 300 ]}
 
-  desc 'Clear highlights'
+  desc 'Only show cart if it exists'
   edit "app/views/layouts/application.html.erb" do
     clear_highlights
-  end
-  desc 'Start side'
-  edit "app/views/layouts/application.html.erb" do
-    msub /()<nav/, "<!-- START:side -->\n      "
-  end
+    edit /^\s+<nav.*?<\/nav>/m, mark: 'side'
 
-  desc 'End side'
-  edit "app/views/layouts/application.html.erb" do
-    msub /()<main/, "<!-- END:side -->\n      "
-  end
-  desc 'Add if statement'
-  edit "app/views/layouts/application.html.erb" do
-    msub /()\s+<div id=\"cart\"/, %{
-        <!-- START_HIGHLIGHT -->
-        <% if @cart %>
-}
-  end
-  desc 'Add end statement'
-  edit "app/views/layouts/application.html.erb" do
-    msub /\s+<\/div>()/, %{
-        <% end %>
-        <!-- END_HIGHLIGHT -->
-}
+    if $rails_version =~ /^[3-6]/
+      target = /^\s+<div class="cart".*?<\/div>/m
+    else
+      target = /^\s+<%= render @cart %>/m
+    end
+
+    edit target, :highlight do
+      gsub! /^/, '  '
+      sub! /\A/, "        <% if @cart %>\n"
+      sub! /\z/, "\n        <% end %>"
+    end
   end
 
   if $rails_version =~ /^[34]/
@@ -2028,33 +2024,48 @@ section 11.1, 'Iteration F1: Moving the Cart' do
 end
 
 section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
-  desc 'Add remote: true to the Add to Cart button'
-  edit 'app/views/store/index.html.erb' do
-    clear_all_marks
-    edit '<%= button_to', :highlight
-    msub /<%= button_to.*() %>/, ",\n              :remote => true"
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  if $rails_version =~ /^[3-6]/
+    desc 'Add remote: true to the Add to Cart button'
+    edit 'app/views/store/index.html.erb' do
+      clear_all_marks
+      edit '<%= button_to', :highlight
+      msub /<%= button_to.*() %>/, ",\n              :remote => true"
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
   end
 
-  desc 'Enable a the controller to respond to js requests'
+  desc 'Enable a the controller to respond to turbostream requests'
   edit 'app/controllers/line_items_controller.rb', 'create' do
     clear_highlights
-    msub /format.html.*store_index_url.*\n()/, "        format.js\n", :highlight
+    if $rails_version =~ /^[3-6]/
+      msub /format.html.*store_index_url.*\n()/, 
+        "        format.js\n", :highlight
+    else
+      msub /\n()\s*format.html.*store_index_url.*/, <<-EOF, :highlight
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            :cart,
+            partial: 'carts/cart', locals: { cart: @cart }
+          )
+        end
+      EOF
+    end
   end
 
-  desc 'Use Coffeescript to replace the cart with a new rendering'
   if File.exist? 'public/images'
+    desc 'Use rjs to replace the cart with a new rendering'
     edit 'app/views/line_items/create.js.rjs' do |data|
       data.all =  <<-EOF.unindent(8)
         page.replace_html('cart', render(@cart))
       EOF
     end
-  else
+  elsif $rails_version =~ /^[3-6]/
     ext = ($rails_version =~ /^[45]/ ? 'coffee' : 'erb')
+    desc 'Use Coffeescript to replace the cart with a new rendering'
     edit "app/views/line_items/create.js.#{ext}" do |data|
       data.all =  <<-EOF.unindent(8)
         cart = document.getElementById("cart")
-        cart.innerHTML = "<%= j render(@cart) %>"
+        cart.outerHTML = "<%= j render(@cart) %>"
       EOF
     end
   end
@@ -2063,8 +2074,47 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
 
   test
 
+  unless $rails_version =~ /^[3-6]/
+    desc 'always leave placeholder where cart should be'
+    edit "app/views/layouts/application.html.erb" do
+      sub! "<% if @cart %>\n",
+	"<% if not @cart or @cart.line_items.empty? %>\n" +
+	'          <div id="cart"></div>' +
+	"\n        <% else %>\n"
+    end
+
+    desc 'create a partial for _notice'
+    edit "app/views/store/_notice.html.erb" do
+      index = IO.read('app/views/store/index.html.erb')
+      self.all = index[/<% if notice.present\? %>.*?<% end %>\n/m]
+      msub /()<% end %>/, "<% else %>\n  <div id=\"notice\"></div>\n"
+    end
+
+    desc 'make use of partial'
+    edit "app/views/store/index.html.erb" do
+      clear_all_marks
+      edit /<% if notice.present\? %>.*?<% end %>\n/m, mark: 'render_notice' do
+        self.all = "<%= render 'notice' %>\n"
+      end
+    end
+
+    desc 'create a template that replaces both the notice and cart'
+    edit "app/views/line_items/create.turbo_stream.erb" do
+      self.all = read('line_item/create.turbo_stream.erb')
+    end
+
+    desc 'make use of turbo stream line item create template'
+    edit 'app/controllers/line_items_controller.rb', 'create' do
+      msub /format.turbo_stream( do.*?\n\s+end)/m, ''
+    end
+  end
 end
 
+unless $rails_version =~ /^[3-6]/
+section 11.3, 'Iteration F3: Highlighting Changes' do
+  publish_code_snapshot :m
+end
+else
 section 11.3, 'Iteration F3: Highlighting Changes' do
   desc 'Assign the current item to be the line item in question'
   edit 'app/controllers/line_items_controller.rb', 'create' do
@@ -2144,7 +2194,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
 
   test
   publish_code_snapshot :m
-
+end
 end
 
 section 11.4, 'Iteration F4: Hide an Empty Cart' do
