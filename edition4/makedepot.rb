@@ -2045,7 +2045,8 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
         format.turbo_stream do
           render turbo_stream: turbo_stream.replace(
             :cart,
-            partial: 'carts/cart', locals: { cart: @cart }
+            partial: 'carts/cart',
+            locals: { cart: @cart }
           )
         end
       EOF
@@ -2075,6 +2076,9 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
   test
 
   unless $rails_version =~ /^[3-6]/
+    post '/', { 'product_id' => 3 },
+      screenshot: { filename: "k_2_schrodinger_cart.pdf", dimensions: [ 1024, 350 ], form_data: {}, submit_form: [1, 2] }
+
     desc 'always leave placeholder where cart should be'
     edit "app/views/layouts/application.html.erb" do
       sub! "<% if @cart %>\n",
@@ -2093,7 +2097,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
     desc 'make use of partial'
     edit "app/views/store/index.html.erb" do
       clear_all_marks
-      edit /<% if notice.present\? %>.*?<% end %>\n/m, mark: 'render_notice' do
+      edit /<% if notice.present\? %>.*?<% end %>\n/m, :highlight do
         self.all = "<%= render 'notice' %>\n"
       end
     end

@@ -58,19 +58,30 @@ puppeteer.launch().then(async browser => {
       }
     });
 
-    if (typeof params.submit_form == "number") {
-      let element = (await page.$$("*[type=submit]"))[params.submit_form-1];
-      await Promise.all([
-        page.waitForResponse(response => response.status() === 200),
-        element.click()
-      ]);
-    } else {
-      await Promise.all([
-        // page.waitForNavigation({ waitUntil: 'networkidle0' }),
-        page.waitForResponse(response => response.status() === 200),
-        page.click("*[type=submit]")
-      ]);
-   }
+    let forms = params.submit_form;
+    if (!Array.isArray(forms)) forms = [forms];
+
+    for (let index in forms) {
+      let form = forms[index];
+
+      if (typeof form == "number") {
+	let element = (await page.$$("*[type=submit]"))[form-1];
+	await Promise.all([
+	  page.waitForResponse(response => response.status() === 200),
+	  element.click()
+	]);
+      } else {
+	await Promise.all([
+	  // page.waitForNavigation({ waitUntil: 'networkidle0' }),
+	  page.waitForResponse(response => response.status() === 200),
+	  page.click("*[type=submit]")
+	]);
+     }
+
+     if (index + 1 != forms.length) {
+       await new Promise(r => setTimeout(r, 300));
+     }
+   };
 
   }
 
