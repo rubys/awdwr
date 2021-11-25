@@ -1167,14 +1167,14 @@ section 9.3, 'Iteration D3: Adding a button' do
           <%= button_to 'Add to Cart', line_items_path(:product_id => product) %>
       EOF
     else
-      msub /number_to_currency.*\n()/, '        ' + <<-EOF
-          <!-- START_HIGHLIGHT -->
-          <%= button_to 'Add to Cart',
-              line_items_path(:product_id => product),
-              form_class: 'inline',
-              class: 'ml-4 rounded-lg py-1 px-2
-                      text-white bg-green-600' %>
-          <!-- END_HIGHLIGHT -->
+      msub /number_to_currency.*\n()/, "\n" + <<-EOF.indent(6)
+        <!-- START_HIGHLIGHT -->
+        <%= button_to 'Add to Cart',
+            line_items_path(:product_id => product),
+            form_class: 'inline',
+            class: 'ml-4 rounded-lg py-1 px-2
+                    text-white bg-green-600' %>
+        <!-- END_HIGHLIGHT -->
       EOF
     end
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -1203,7 +1203,7 @@ section 9.3, 'Iteration D3: Adding a button' do
         /* END_HIGHLIGHT */
       EOF
     end
-  else
+  elsif $rails_version =~ /^[3-6]/
     edit DEPOT_CSS, 'inline' do |data|
       data << "\n" + <<-EOF.unindent(8)
         /* START:inline */
