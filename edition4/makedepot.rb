@@ -2180,6 +2180,13 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
   desc 'Add a turbo stream test.'
   edit 'test/*/line_items_controller_test.rb', 'ajax' do
     msub /^()end/, "\n"
+
+    if $rails_version =~ /^[3-6]/
+      match = '<tr class=\\\\+"line-item-highlight'
+    else
+      match = '<tr class="line-item-highlight">'
+    end
+
     msub /^()end/, <<-EOF.unindent(4), :mark => 'turbo_stream'
       test "should create line_item via turbo-stream" do
         assert_difference('LineItem.count') do
@@ -2187,7 +2194,7 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
         end 
     
         assert_response :success
-        assert_match /<tr class="line-item-highlight/, @response.body
+        assert_match /#{match}/, @response.body
       end
     EOF
 
