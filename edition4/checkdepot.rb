@@ -304,7 +304,6 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  if $rails_version =~ /^[3-6]/
   section 11.3, "Iteration F1: Highlighting Changes" do
     if $rails_version =~ /^3/
       assert_test_summary :tests => '\d', :assertions => '\d'
@@ -314,11 +313,12 @@ class DepotTest < Gorp::TestCase
       assert_test_summary :tests => 31, :assertions => 67
     end
   end
-  end
 
+  if $rails_version =~ /^[3-6]/
   section 11.4, "Iteration F4: Hide an Empty Cart" do
     assert_select '#cart'
     assert_select 'tfoot td', '$89.80'
+  end
   end
 
   section 12.1, "Iteration G1: Capturing an Order" do

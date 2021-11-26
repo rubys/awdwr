@@ -2081,10 +2081,18 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
 
     desc 'always leave placeholder where cart should be'
     edit "app/views/layouts/application.html.erb" do
+      clear_highlights
       sub! "<% if @cart %>\n",
-	"<% if not @cart or @cart.line_items.empty? %>\n" +
+        "<!-- START_HIGHLIGHT -->\n" +
+	"        <% if @cart and not @cart.line_items.empty? %>\n" +
+        "<!-- END_HIGHLIGHT -->\n"
+
+      sub! /<% end %>\n/,
+        "<!-- START_HIGHLIGHT -->" +
+	"\n        <% else %>\n" +
 	'          <div id="cart"></div>' +
-	"\n        <% else %>\n"
+	"\n        <% end %>\n" +
+        "<!-- END_HIGHLIGHT -->"
     end
 
     desc 'create a partial for _notice'
@@ -2097,6 +2105,7 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
     desc 'make use of partial'
     edit "app/views/store/index.html.erb" do
       clear_all_marks
+      edit /<div .*?<\/h1>\n/m, mark: 'header'
       edit /<% if notice.present\? %>.*?<% end %>\n/m, :highlight do
         self.all = "<%= render 'notice' %>\n"
       end
@@ -2112,20 +2121,19 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
       msub /format.turbo_stream( do.*?\n\s+end)/m, ''
     end
   end
-end
 
-unless $rails_version =~ /^[3-6]/
-section 11.3, 'Iteration F3: Highlighting Changes' do
   publish_code_snapshot :m
 end
-else
+
 section 11.3, 'Iteration F3: Highlighting Changes' do
+
   desc 'Assign the current item to be the line item in question'
   edit 'app/controllers/line_items_controller.rb', 'create' do
     clear_highlights
+    format = ($rails_version =~ /^[3-6]/ ? 'js' : 'turbo_stream')
     dcl 'create' do
-      msub /format.js()\n/, '   { @current_item = @line_item }'
-      edit 'format.js', :highlight
+      msub /format.#{format}()\n/, ' { @current_item = @line_item }'
+      edit "format.#{format}", :highlight
     end
   end
 
@@ -2149,9 +2157,10 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
                                           :endcolor => "#114411"
       EOF
     end
-  elsif $rails_version =~ /^[3-6]/
-    edit 'app/assets/stylesheets/line_items.scss' do |data|
-      msub /.*()/m, "\n" + <<-EOF.unindent(8), :highlight
+  else
+    ext = File.extname(DEPOT_CSS)
+    edit "app/assets/stylesheets/line_items#{ext}" do |data|
+      msub /.*()/m, "\n" + <<-EOF.unindent(8)
         @keyframes line-item-highlight {
           0% {
             background: #8f8;
@@ -2166,20 +2175,19 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
         }
       EOF
     end
-    # TODO: Blind effect
   end
 
-  desc 'Add an XHR test.'
+  desc 'Add a turbo stream test.'
   edit 'test/*/line_items_controller_test.rb', 'ajax' do
     msub /^()end/, "\n"
-    msub /^()end/, <<-EOF.unindent(4), :mark => 'ajax'
-      test "should create line_item via ajax" do
+    msub /^()end/, <<-EOF.unindent(4), :mark => 'turbo_stream'
+      test "should create line_item via turbo-stream" do
         assert_difference('LineItem.count') do
           xhrpost
         end 
     
         assert_response :success
-        assert_match /<tr class=\\\\\"line-item-highlight/, @response.body
+        assert_match /<tr class="line-item-highlight/, @response.body
       end
     EOF
 
@@ -2188,6 +2196,10 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
     else
       sub! 'xhrpost', 'post line_items_url, params: ' + 
         "{ product_id: products(:ruby).id },\n        xhr: true"
+
+      unless $rails_version =~ /^[56]/
+        sub! 'xhr: true', 'as: :turbo_stream'
+      end
     end
 
     unless File.exist? 'public/images'
@@ -2197,10 +2209,10 @@ section 11.3, 'Iteration F3: Highlighting Changes' do
   end
 
   test
-  publish_code_snapshot :m
-end
+  publish_code_snapshot :n unless $rails_version =~ /^[3-6]/
 end
 
+if $rails_version =~ /^[3-6]/
 section 11.4, 'Iteration F4: Hide an Empty Cart' do
   desc 'Add a blind down visual effect on the first item'
   if File.exist? 'app/views/line_items/create.js.rjs'
@@ -2274,6 +2286,7 @@ if (notice) notice.style.display = "none"
   test
 
   publish_code_snapshot :n
+end
 end
      
 
