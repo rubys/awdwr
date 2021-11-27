@@ -319,6 +319,10 @@ class DepotTest < Gorp::TestCase
     assert_select '#cart'
     assert_select 'tfoot td', '$89.80'
   end
+  else
+  section 11.4, "Iteration F4: Broadcasting Updates" do
+    assert_test_summary :tests => 31, :assertions => 67
+  end
   end
 
   section 12.1, "Iteration G1: Capturing an Order" do

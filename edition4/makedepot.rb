@@ -1665,7 +1665,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
     data[/()^end/,1] = "\n" + <<-EOF.unindent(4)
       #START:total_price
       def total_price
-        line_items.to_a.sum { |item| item.total_price }
+        line_items.sum { |item| item.total_price }
       end
       #END:total_price
     EOF
@@ -1828,6 +1828,7 @@ section 10.4, 'Playtime' do
       msub /add_column.*\n()/, <<-EOF.unindent(4)
         LineItem.all.each do |li|
           li.price = li.product.price
+          li.save!
         end
       EOF
     end
@@ -1836,10 +1837,17 @@ section 10.4, 'Playtime' do
   edit 'app/models/cart.rb' do
     dcl 'add_product' do
       msub /line_items[.]build.*\n()/, <<-EOF.unindent(2)
-        current_item.price = current_item.product.price
+        current_item.price = product.price
       EOF
     end
   end
+  edit 'app/models/line_item.rb' do
+    gsub! 'product.price', 'price'
+  end
+  edit 'test/fixtures/line_items.yml' do
+    gsub! /cart: \w+\n/, "\\0  price: 1\n"
+  end
+  test
 
   cmd 'git commit -a -m "Adding a Cart"'
   cmd 'git tag iteration-d'
@@ -2324,6 +2332,14 @@ else
   section = ($rails_version =~ /^[56]/ ? 11.5 : 11.4)
 
   section section, "Iteration F#{section.to_s[-1]}: Broadcasting Updates" do
+    post '/carts/2', { '_method'=>'delete' }, {:snapget => false}
+    post '/', { 'product_id' => 3 }, {:snapget => false}
+    post '/products/3/edit',
+      { 'product[price]' => 27.95 }, {:snapget => false}
+    get '/', screenshot: { filename: "depot_f_change_price.pdf", dimensions: [1024,500] }
+    post '/products/3/edit',
+      { 'product[price]' => 24.95 }, {:snapget => false }
+
     desc 'create a channel'
     generate 'channel products'
 
@@ -2381,7 +2397,7 @@ else
           msub /\n()\s*else/, "\n" + <<-EOF.unindent(4), :highlight
             @products = Product.all.order(:title)
             ActionCable.server.broadcast 'products',
-              html: render_to_string('store/product', layout: false)
+              { html: render_to_string('store/index', layout: false) }
           EOF
         else
           msub /\n()\s*else/, "\n" + <<-EOF.unindent(4), :highlight
@@ -2443,15 +2459,20 @@ section 12.1, 'Iteration H1: Capturing an Order' do
 }
     msub /()<\/article>/,%{
   <!-- START_HIGHLIGHT -->
-  <%= button_to 'Checkout', new_order_path,
-                method: :get,
-                class: "checkout"%>
+  <%= button_to 'Checkout', new_order_path, method: :get,
+    class: 'ml-4 rounded-lg py-1 px-2 text-white bg-green-600' %>
   </div>
   <!-- END_HIGHLIGHT -->
 }
+
+    if $rails_version =~ /^[3-6]/
+      sub! /class: 'ml.*?'/, "class: 'checkout'"
+    end
+
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
+  if $rails_version =~ /^[3-6]/
   desc "Style the new button"
   edit "app/assets/stylesheets/carts.scss" do
     msub /^(  input\[type=\"submit.*$)/m, %{
@@ -2486,6 +2507,7 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   // END_HIGHLIGHT
 \}
 }
+  end
   end
 
   desc 'Return a notice when checking out an empty cart'
@@ -3108,8 +3130,8 @@ section 12.4, 'Iteration G2: Downloading an eBook' do
   desc 'css tweaks'
   edit DEPOT_CSS, 'side' do
     clear_highlights
-    edit '#cart', :highlight do
-      msub /#cart()/, ', #order'
+    edit '.cart', :highlight do
+      msub /.cart()/, ', #order'
     end
 
     msub /^() +main/, <<-EOF + "\n", :highlight
