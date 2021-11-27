@@ -2084,14 +2084,14 @@ section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
       clear_highlights
       sub! "<% if @cart %>\n",
         "<!-- START_HIGHLIGHT -->\n" +
-	"        <% if @cart and not @cart.line_items.empty? %>\n" +
+        "        <% if @cart and not @cart.line_items.empty? %>\n" +
         "<!-- END_HIGHLIGHT -->\n"
 
       sub! /<% end %>\n/,
         "<!-- START_HIGHLIGHT -->" +
-	"\n        <% else %>\n" +
-	'          <div id="cart"></div>' +
-	"\n        <% end %>\n" +
+        "\n        <% else %>\n" +
+        '          <div id="cart"></div>' +
+        "\n        <% end %>\n" +
         "<!-- END_HIGHLIGHT -->"
     end
 
@@ -2291,8 +2291,6 @@ if (notice) notice.style.display = "none"
   post '/', 'product_id' => 2
 
   test
-
-  publish_code_snapshot :n
 end
 end
      
@@ -2323,8 +2321,9 @@ if $rails_version =~ /^4\./
   end
 
 else
+  section = ($rails_version =~ /^[56]/ ? 11.5 : 11.4)
 
-  section 11.5, 'Iteration F5: Broadcasting Updates' do
+  section section, "Iteration F#{section.to_s[-1]}: Broadcasting Updates" do
     desc 'create a channel'
     generate 'channel products'
 
@@ -2336,43 +2335,71 @@ else
       end
     end
 
-    desc 'Update price when notified of price changes'
-    if $rails_version =~ /^[345]/
-      file = 'app/assets/javascripts/channels/products.coffee'
-    else
-      file = 'app/javascript/channels/products_channel.js'
-    end
-    edit file do
-      edit 'incoming data', :highlight do
-        gsub! %r{(#|//).*}, %{    const storeElement = document.querySelector("main.store")
+    if $rails_version =~ /^[3-6]/
+      desc 'Update price when notified of price changes'
+      if $rails_version =~ /^[345]/
+        file = 'app/assets/javascripts/channels/products.coffee'
+      else
+        file = 'app/javascript/channels/products_channel.js'
+      end
+
+      edit file do
+        edit 'incoming data', :highlight do
+          gsub! %r{(#|//).*}, %{    const storeElement = document.querySelector("main.store")
     if (storeElement) {
       storeElement.innerHTML = data.html
     }}
+        end
+        gsub! /^#/, '//' if file.end_with? '.js'
       end
-      gsub! /^#/, '//' if file.end_with? '.js'
+    else
+      desc 'create a partial for the storefront product display'
+      edit 'app/views/store/_product.html.erb' do
+        index = IO.read('app/views/store/index.html.erb')
+        product = index[/\s+<li.*?<\/li>\n/m].unindent(6)
+        self.all = '<%= turbo_frame_tag(dom_id(product)) do %>' +
+          product + '<% end %>'
+        edit '<%= turbo', :highlight
+        edit '<% end', :highlight
+      end
+
+      desc 'use the partial'
+      edit 'app/views/store/index.html.erb' do
+        clear_highlights
+        msub /()^<ul/, "<%= turbo_stream_from 'products' %>\n\n", :highlight
+
+        edit /^\s+<li.*?<\/li>\n/m, :highlight do
+          self.all = "        <%= render partial: 'product', object: product %>\n"
+        end
+      end
     end
 
     desc 'send updates when price changes'
     edit 'app/controllers/products_controller.rb', 'update' do
       dcl 'update', :mark do
-        msub /\n()\s*else/, "\n" + <<-EOF.unindent(2), :highlight
-          @products = Product.all.order(:title)
-          ActionCable.server.broadcast 'products',
-            html: render_to_string('store/index', layout: false)
-        EOF
+        if $rails_version =~ /^[3-6]/
+          msub /\n()\s*else/, "\n" + <<-EOF.unindent(4), :highlight
+            @products = Product.all.order(:title)
+            ActionCable.server.broadcast 'products',
+              html: render_to_string('store/product', layout: false)
+          EOF
+        else
+          msub /\n()\s*else/, "\n" + <<-EOF.unindent(4), :highlight
+            @product.broadcast_replace_later_to 'products',
+              partial: 'store/product'
+          EOF
+        end
       end
     end
-
-    ### NOT sure how to update the index method to use order(:title) here
-    ### so rather than put in some broken code, leaving this note
-
 
     desc 'Run tests'
     test
 
     desc 'Save our progress'
-    cmd 'git commit -a -m "AJAX"'
+    cmd 'git commit -a -m "Hotwired"'
     cmd 'git tag iteration-f'
+
+    publish_code_snapshot :n
   end
 end
 

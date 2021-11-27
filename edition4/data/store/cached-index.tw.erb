@@ -18,24 +18,24 @@
       <!-- START_HIGHLIGHT -->
       <% cache product do %>
       <!-- END_HIGHLIGHT -->
-	<li class='flex mb-6'>
-	  <%= image_tag(product.image_url,
-            class: 'object-contain w-40 shadow mr-6') %>
+        <li class='flex mb-6'>
+          <%= image_tag(product.image_url,
+            class: 'object-contain w-40 h-48 shadow mr-6') %>
 
-	  <div>
-	    <h2 class="font-bold text-lg mb-3"><%= product.title %></h2>
+          <div>
+            <h2 class="font-bold text-lg mb-3"><%= product.title %></h2>
 
-	    <p>
-	      <%= sanitize(product.description) %>
-	    </p>
+            <p>
+              <%= sanitize(product.description) %>
+            </p>
 
-	    <div class="mt-3">
+            <div class="mt-3">
               <!-- START:currency -->
               <%= number_to_currency(product.price) %>
               <!-- END:currency -->
-	    </div>
-	  </div>
-	</li>
+            </div>
+          </div>
+        </li>
         <!-- START_HIGHLIGHT -->
       <% end %>
       <!-- END_HIGHLIGHT -->
