@@ -2454,18 +2454,19 @@ section 12.1, 'Iteration H1: Capturing an Order' do
     clear_highlights
     msub /().*Empty Cart/, %{
   <!-- START_HIGHLIGHT -->
-  <div class="actions">
+  <div class="flex mt-1">
   <!-- END_HIGHLIGHT -->
 }
     msub /()<\/article>/,%{
   <!-- START_HIGHLIGHT -->
   <%= button_to 'Checkout', new_order_path, method: :get,
-    class: 'ml-4 rounded-lg py-1 px-2 text-white bg-green-600' %>
+    class: 'ml-4 rounded-lg py-1 px-2 text-black bg-green-200' %>
   </div>
   <!-- END_HIGHLIGHT -->
 }
 
     if $rails_version =~ /^[3-6]/
+      sub! /class="flex*?"/, 'class="actions"'
       sub! /class: 'ml.*?'/, "class: 'checkout'"
     end
 
@@ -2570,7 +2571,13 @@ section 12.1, 'Iteration H1: Capturing an Order' do
 
   desc 'Modify the template for new orders'
   edit 'app/views/orders/new.html.erb' do
-    self.all = read('orders/new.html.erb')
+    if $rails_version =~ /^[3-6]/
+      self.all = read('orders/new.html.erb')
+    else
+     edit '<h1', :highlight
+      msub /<h1.*?>(.*?)<\/h1>/, 'Please Enter Your Details'
+      gsub! /\s*<%= link_to .*?%>/, ''
+    end
   end
 
   desc 'Add payment types to the order'
@@ -2596,43 +2603,84 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   end
 
   desc 'Modify the partial used by the template'
-  edit 'app/views/orders/_form.html.erb' do
-    msub /<%= pluralize.*%>( )/, "\n      "
-    edit 'text_field :name', :highlight do
-      msub /() %>/, ', :size => 40'
-    end
-    edit 'text_area :address', :highlight do
-      msub /() %>/, ', :rows => 3, :cols => 40'
-    end
-    edit 'text_field :email', :highlight do
-      msub /(text)_field/, 'email'
-      msub /() %>/, ', :size => 40'
-    end
+  unless $rails_version =~ /^[3-6]/
+    edit 'app/views/orders/_form.html.erb' do
+      edit 'text_field :email', :highlight do
+	msub /(text)_field/, 'email'
+      end
 
-    if $rails_version =~ /^(3|4\.0)/
-      edit 'text_field :pay_type', :highlight # while it still is on one line
-      edit 'text_field :pay_type' do
-        msub /(text_field)/, 'select'
-        msub /() %>/, ", Order::PAYMENT_TYPES,\n" + 
-          (' ' * 18) + ":prompt => 'Select a payment method'"
-      end
-      edit 'submit', :highlight do
-        msub /() %>/, " 'Place Order'"
-      end
-    else
-      edit 'number_field :pay_type', :highlight # while it still is on one line
+      edit 'number_field :pay_type', :highlight
       edit 'number_field :pay_type' do
-        msub /(number_field)/, 'select'
-        msub /:pay_type()/, ", Order.pay_types.keys"
-        msub /() %>/,  ",\n" + (' ' * 18) + 
-          ":prompt => 'Select a payment method'"
+	msub /(number_field)/, 'select'
+	msub /:pay_type()/, ", Order.pay_types.keys"
+	msub /() %>/,  ",\n" + (' ' * 20) + 
+	  "prompt: 'Select a payment method'"
       end
-      edit 'submit', :highlight do
-        msub /() %>/, " 'Place Order'"
+
+      edit 'form.submit', :highlight
+      edit 'form.submit' do
+	msub /form\.submit() /, " 'Place Order', "
+        sub! ' bg-blue-600 text-white', "\n      bg-green-200 text-black"
       end
+
+      gsub! "block shadow rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full", "payment-field"
+
+      edit 'error_explanation' do
+        msub /( )font-medium/, "\n      "
+      end
+
+      msub /<%= pluralize.*%>( )/, "\n      "
+
+      # full = self.dup
+      # gsub! /class: "(\S+) .{10}.*?"/, 'class: "\\1…"'
+      # gsub! /class="(\S+) .{10}.*?"/, 'class="\\1…"'
+      # IO.write 'app/views/orders/_form.html.erb.pub', self
+      # self.replace full
     end
 
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    desc 'tooling workaround'
+    cmd "rails assets:clobber"
+    cmd "rails tmp:cache:clear"
+    restart_server
+  else
+    edit 'app/views/orders/_form.html.erb' do
+      msub /<%= pluralize.*%>( )/, "\n      "
+      edit 'text_field :name', :highlight do
+	msub /() %>/, ', :size => 40'
+      end
+      edit 'text_area :address', :highlight do
+	msub /() %>/, ', :rows => 3, :cols => 40'
+      end
+      edit 'text_field :email', :highlight do
+	msub /(text)_field/, 'email'
+	msub /() %>/, ', :size => 40'
+      end
+
+      if $rails_version =~ /^(3|4\.0)/
+	edit 'text_field :pay_type', :highlight # while it still is on one line
+	edit 'text_field :pay_type' do
+	  msub /(text_field)/, 'select'
+	  msub /() %>/, ", Order::PAYMENT_TYPES,\n" + 
+	    (' ' * 18) + ":prompt => 'Select a payment method'"
+	end
+	edit 'submit', :highlight do
+	  msub /() %>/, " 'Place Order'"
+	end
+      else
+	edit 'number_field :pay_type', :highlight # while it still is on one line
+	edit 'number_field :pay_type' do
+	  msub /(number_field)/, 'select'
+	  msub /:pay_type()/, ", Order.pay_types.keys"
+	  msub /() %>/,  ",\n" + (' ' * 18) + 
+	    ":prompt => 'Select a payment method'"
+	end
+	edit 'submit', :highlight do
+	  msub /() %>/, " 'Place Order'"
+	end
+      end
+
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
   end
 
   desc 'Add some CSS'
@@ -2718,7 +2766,7 @@ section 12.1, 'Iteration H1: Capturing an Order' do
 }
       EOF
     end
-  else
+  elsif $rails_version =~ /^[3-6]/
     edit DEPOT_CSS, 'form' do |data|
       data << "\n" + <<-EOF.unindent(8)
         /* START:form */
@@ -2758,16 +2806,16 @@ section 12.1, 'Iteration H1: Capturing an Order' do
         /* END:form */
       EOF
     end
+  else
+    edit 'app/assets/stylesheets/order.css' do
+      self.all = read('orders/order.css')
+    end
   end
 
   post '/', {'product_id' => 2}
-  get '/', screenshot: {
+  get '/orders/new', screenshot: {
     filename: "o_1_checkout_form.pdf",
-    dimensions: [ 1024, 300 ],
-    workflow: [
-      "line_items?product_id=2",
-      "orders/new",
-    ]
+    dimensions: [ 1250, 650 ]
   }
 
   desc 'Validate that required fields are present'
@@ -2813,7 +2861,7 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   desc 'Define an optional relationship from the line item to the order'
   edit 'app/models/line_item.rb' do
     clear_all_marks
-    edit 'belongs_to', :highlight do
+    edit 'belongs_to :cart', :highlight do
       msub /.*()/, ', optional: true'
     end
     msub /class LineItem.*\n()/, <<-EOF.unindent(4), :highlight
@@ -2863,7 +2911,17 @@ section 12.1, 'Iteration H1: Capturing an Order' do
     end
   end
 
-  publish_code_snapshot :o
+  if File.exist? 'app/views/orders/_form.html.erb.pub'
+    FileUtils.mv 'app/views/orders/_form.html.erb',
+      'app/views/orders/_form.html.erb.full'
+    FileUtils.mv 'app/views/orders/_form.html.erb.pub',
+      'app/views/orders/_form.html.erb'
+    publish_code_snapshot :o
+    FileUtils.mv 'app/views/orders/_form.html.erb.full',
+      'app/views/orders/_form.html.erb'
+  else
+    publish_code_snapshot :o
+  end
 
   desc 'Implement add_line_items_from_cart'
   edit 'app/models/order.rb', 'alifc' do
@@ -2895,24 +2953,39 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   end
 
   desc 'take a look at the validation errors'
-  post '/orders/new', { "order[name]" => "" }
-
-  get '/', screenshot: {
+  post '/orders/new', { "order[name]" => "" },
+  screenshot: {
     filename: "o_2_checkout_errors.pdf",
-    dimensions: [ 1024, 300 ],
-    workflow: [
-      "line_items?product_id=2",
-      "orders/new",
-      "/orders",
-    ]
+    dimensions: [ 1100, 300 ],
+    submit_form: 3
   }
 
+  if ENV['GORP_SCREENSHOTS']
+    desc 'fill an order'
+    post '/orders/new', {
+      'order[name]' => 'Dave Thomas',
+      'order[address]' => '123 Main St',
+      'order[email]' => 'customer@example.com',
+      'order[pay_type]' => 'Check' },
+    screenshot: {
+      filename: "o_3_checkout_form_filled_in.pdf",
+      dimensions: [ 1100, 650 ],
+    }
+
+    post '/', {'product_id' => 2}
+  end
+
   desc 'process an order'
-  post '/orders/new',
+  post '/orders/new', {
     'order[name]' => 'Dave Thomas',
     'order[address]' => '123 Main St',
     'order[email]' => 'customer@example.com',
-    'order[pay_type]' => 'Check'
+    'order[pay_type]' => 'Check' },
+  screenshot: {
+    filename: "o_4_thanks.pdf",
+    dimensions: [ 600, 200 ],
+    submit_form: 3
+  }
 
   desc 'look at the underlying database'
   db "select * from orders"
