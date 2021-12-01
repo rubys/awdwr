@@ -12,8 +12,8 @@ export default class extends Controller {
   showAdditionalFields() {
     let selection = this.selectionTarget.value
 
-    for (let target of this.additionalFieldsTargets) {
-      target.disabled = target.hidden = (target.dataset.value != selection)
+    for (let fields of this.additionalFieldsTargets) {
+      fields.disabled = fields.hidden = (fields.dataset.type != selection)
     }
   }
 // END_HIGHLIGHT

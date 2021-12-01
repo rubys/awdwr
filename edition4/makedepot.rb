@@ -3303,10 +3303,9 @@ section 12.2, 'Iteration G2: Additional Payment Details' do
     clear_highlights
 
     edit /<div class="my-5">\s*<%= form.label :pay_type %>.*?<\/div>\n/m do
-      sub! /^(\s+)class/,
-        "# START_HIGHLIGHT\n\\1'data-action' => " +
-          "'payment#showAdditionalFields',\n" +
+      sub! /^(\s+)class/, "# START_HIGHLIGHT\n" +
           "\\1'data-payment-target' => 'selection',\n" +
+          "\\1'data-action' => 'payment#showAdditionalFields',\n" +
           "# END_HIGHLIGHT\n\\1class"
       gsub! /^/, '  '
       msub /\A()/, "  "
@@ -3334,7 +3333,7 @@ section 12.2, 'Iteration G2: Additional Payment Details' do
       mark: 'DELETEME'
   end
   get '/orders/demo', screenshot: { filename: "depot_pc_pay_types.pdf",
-    dimensions: [ 600, 1150 ] }
+    dimensions: [ 600, 1200 ] }
   cmd 'rm app/views/orders/demo.html.erb'
   cmd 'mv config/routes.rb.save config/routes.rb'
   cmd 'mv app/controllers/orders_controller.rb.save app/controllers/orders_controller.rb'
@@ -3345,7 +3344,86 @@ section 12.2, 'Iteration G2: Additional Payment Details' do
 end
 end
 
-section 12.3, 'Iteration G3: Atom Feeds' do
+unless $rails_version =~ /^(3|4|5\.0)/
+section 12.3, 'Iteration G3: System testing' do
+  unless $rails_version =~ /^5.1/
+    if ENV['USER'] == 'vagrant'
+      edit 'test/application_system_test_case.rb' do
+        edit 'driven_by', :highlight
+        sub! ':chrome', ':headless_chrome'
+      end
+    end
+
+    edit 'test/system/products_test.rb' do
+      sub! ':one', ':ruby'
+      sub! 'Product was successfully created', 'Title has already been taken'
+
+      if $rails_version =~ /^[3-6]/
+      else
+        sub! 'Destroy', 'Delete'
+      end
+    end
+    cmd 'rm test/system/carts_test.rb'
+    cmd 'rm test/system/line_items_test.rb'
+
+    edit 'test/system/orders_test.rb' do
+      if $rails_version =~ /^[3-6]/
+	dcl 'creating a Order' do
+	  sub! /.*/m, ''
+	end
+
+	dcl 'updating a Order' do
+	  sub! /.*/m, ''
+	end
+      else
+	dcl 'should create order' do
+	  sub! /.*/m, ''
+	end
+
+	dcl 'should update Order' do
+	  sub! /.*/m, ''
+	end
+
+	dcl 'should destroy Order' do
+	  sub! /.*/m, ''
+	end
+      end
+
+      gsub! /\n\n+/, "\n\n"
+    end
+  end
+
+  edit 'test/system/orders_test.rb' do
+    gsub! /^  #.*\n/, ''
+    msub /^()end/, <<-EOF.unindent(4), :highlight
+      test "check routing number" do
+        visit store_index_url
+
+        click_on 'Add to Cart', match: :first
+
+        click_on 'Checkout'
+
+        fill_in 'order_name', with: 'Dave Thomas'
+        fill_in 'order_address', with: '123 Main Street'
+        fill_in 'order_email', with: 'dave@example.com'
+
+        assert_no_selector "#order_routing_number"
+
+        select 'Check', from: 'Pay type'
+
+        assert_selector "#order_routing_number"
+      end 
+    EOF
+  end
+
+  cmd 'RAILS_ENV=test bin/webpack' if $rails_version =~ /^5\.1/
+
+  cmd 'rake test:system'
+  cmd 'rake test'
+end
+end
+
+section 12.4, 'Iteration G4: Atom Feeds' do
   overview <<-EOF
     Demonstrate various respond_to/format options, as well as "through"
     relations and basic authentication.
@@ -3714,85 +3792,6 @@ section 12.5, 'Playtime' do
   desc 'Commit'
   cmd 'git commit -a -m "Orders"'
   cmd 'git tag iteration-g'
-end
-
-unless $rails_version =~ /^(3|4|5\.0)/
-section 13.2, 'Iteration G4: System testing' do
-  unless $rails_version =~ /^5.1/
-    if ENV['USER'] == 'vagrant'
-      edit 'test/application_system_test_case.rb' do
-        edit 'driven_by', :highlight
-        sub! ':chrome', ':headless_chrome'
-      end
-    end
-
-    edit 'test/system/products_test.rb' do
-      sub! ':one', ':ruby'
-      sub! 'Product was successfully created', 'Title has already been taken'
-
-      if $rails_version =~ /^[3-6]/
-      else
-        sub! 'Destroy', 'Delete'
-      end
-    end
-    cmd 'rm test/system/carts_test.rb'
-    cmd 'rm test/system/line_items_test.rb'
-
-    edit 'test/system/orders_test.rb' do
-      if $rails_version =~ /^[3-6]/
-	dcl 'creating a Order' do
-	  sub! /.*/m, ''
-	end
-
-	dcl 'updating a Order' do
-	  sub! /.*/m, ''
-	end
-      else
-	dcl 'should create order' do
-	  sub! /.*/m, ''
-	end
-
-	dcl 'should update Order' do
-	  sub! /.*/m, ''
-	end
-
-	dcl 'should destroy Order' do
-	  sub! /.*/m, ''
-	end
-      end
-
-      gsub! /\n\n+/, "\n\n"
-    end
-  end
-
-  edit 'test/system/orders_test.rb' do
-    gsub! /^  #.*\n/, ''
-    msub /^()end/, <<-EOF.unindent(4), :highlight
-      test "check routing number" do
-        visit store_index_url
-
-        click_on 'Add to Cart', match: :first
-
-        click_on 'Checkout'
-
-        fill_in 'order_name', with: 'Dave Thomas'
-        fill_in 'order_address', with: '123 Main Street'
-        fill_in 'order_email', with: 'dave@example.com'
-
-        assert_no_selector "#order_routing_number"
-
-        select 'Check', from: 'Pay type'
-
-        assert_selector "#order_routing_number"
-      end 
-    EOF
-  end
-
-  cmd 'RAILS_ENV=test bin/webpack' if $rails_version =~ /^5\.1/
-
-  cmd 'rake test:system'
-  cmd 'rake test'
-end
 end
 
 section 14.1, 'Iteration I1: Email Notifications' do
