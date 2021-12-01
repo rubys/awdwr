@@ -233,7 +233,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /^ +down +\d+ +Combine items in cart$/
     if $rails_version =~ /^3\./
       assert_select 'pre', /Couldn't find Cart with ID=wibble/i
-    elsif $rails_version =~ /^([4-5]|6\.0)/
+    elsif $rails_version =~ /^[4-5]/
       assert_select 'h2', /Couldn't find Cart with '?id'?=wibble/i
     else
       assert_select 'div.message', /Couldn't find Cart with '?id'?=wibble/i
@@ -336,7 +336,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 12.2, "Iteration G3: Atom Feeds" do
+  section 12.3, "Iteration G3: Atom Feeds" do
     ticket 7910,
       :title =>  "Actions defined using resource get bypass the controller",
       :match => /undefined method `title&amp;#39; for nil:NilClass/
@@ -402,8 +402,10 @@ class DepotTest < Gorp::TestCase
         assert_test_summary :tests => 1, :assertions => 2
       elsif $rails_version =~ /^5/
         assert_test_summary :tests => 7, :assertions => 7
-      else
+      elsif $rails_version =~ /^6/
         assert_test_summary :tests => 7, :assertions => 8
+      else
+        assert_test_summary :tests => 6, :assertions => 7
       end
       assert_test_summary :tests => 39, :assertions => 79
     end

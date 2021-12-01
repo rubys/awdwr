@@ -1,0 +1,53 @@
+    <%= stylesheet_link_tag "inter-font", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+
+<%= form_with(class: "contents") do |form| %>
+  <fieldset class="border-black border-2 p-4 m-4">
+    <div class="my-5">
+      <%= form.label :pay_type %>
+      <%= form.select :pay_type, Order.pay_types.keys,
+                      { prompt: 'Select a payment method' },
+                      'data-action' => 'payment#showAdditionalFields',
+                      class: "payment-field" %>
+    </div>
+  </fieldset>
+
+  <fieldset class="border-black border-2 p-4 m-4">
+    <div class="my-5">
+      <%= form.label :pay_type %>
+      <%= form.select :pay_type, Order.pay_types.keys,
+                      { selected: 'Check' },
+                      'data-action' => 'payment#showAdditionalFields',
+                      class: "payment-field" %>
+    </div>
+
+    <%= render partial: 'check', locals: {form: form} %>
+  </fieldset>
+
+  <fieldset class="border-black border-2 p-4 m-4">
+    <div class="my-5">
+      <%= form.label :pay_type %>
+      <%= form.select :pay_type, Order.pay_types.keys,
+                      { selected: 'Credit card' },
+                      'data-action' => 'payment#showAdditionalFields',
+                      class: "payment-field" %>
+    </div>
+
+    <%= render partial: 'cc', locals: {form: form} %>
+  </fieldset>
+
+  <fieldset class="border-black border-2 p-4 m-4">
+    <div class="my-5">
+      <%= form.label :pay_type %>
+      <%= form.select :pay_type, Order.pay_types.keys,
+                      { selected: 'Purchase order' },
+                      'data-action' => 'payment#showAdditionalFields',
+                      class: "payment-field" %>
+    </div>
+
+    <%= render partial: 'po', locals: {form: form} %>
+  </fieldset>
+<% end %>
+
+</div>

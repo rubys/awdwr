@@ -2031,7 +2031,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   test
 end
 
-section 11.2, 'Iteration F2: Creating an AJAX-Based Cart' do
+section 11.2, 'Iteration F2: Creating a Hotwired Cart' do
   if $rails_version =~ /^[3-6]/
     desc 'Add remote: true to the Add to Cart button'
     edit 'app/views/store/index.html.erb' do
@@ -2419,7 +2419,7 @@ else
   end
 end
 
-section 12.1, 'Iteration H1: Capturing an Order' do
+section 12.1, 'Iteration G1: Capturing an Order' do
   desc 'Create a model to contain orders'
   if $rails_version =~ /^3\.[01]/
     generate :scaffold, :Order,
@@ -2612,9 +2612,8 @@ section 12.1, 'Iteration H1: Capturing an Order' do
       edit 'number_field :pay_type', :highlight
       edit 'number_field :pay_type' do
 	msub /(number_field)/, 'select'
-	msub /:pay_type()/, ", Order.pay_types.keys"
-	msub /() %>/,  ",\n" + (' ' * 20) + 
-	  "prompt: 'Select a payment method'"
+	msub /:pay_type, ()/, "Order.pay_types.keys,\n" +
+          (' ' * 20) + "{ prompt: 'Select a payment method' },\n" + (' ' * 20)
       end
 
       edit 'form.submit', :highlight
@@ -2911,17 +2910,7 @@ section 12.1, 'Iteration H1: Capturing an Order' do
     end
   end
 
-  if File.exist? 'app/views/orders/_form.html.erb.pub'
-    FileUtils.mv 'app/views/orders/_form.html.erb',
-      'app/views/orders/_form.html.erb.full'
-    FileUtils.mv 'app/views/orders/_form.html.erb.pub',
-      'app/views/orders/_form.html.erb'
-    publish_code_snapshot :o
-    FileUtils.mv 'app/views/orders/_form.html.erb.full',
-      'app/views/orders/_form.html.erb'
-  else
-    publish_code_snapshot :o
-  end
+  publish_code_snapshot :o
 
   desc 'Implement add_line_items_from_cart'
   edit 'app/models/order.rb', 'alifc' do
@@ -3005,7 +2994,358 @@ section 12.1, 'Iteration H1: Capturing an Order' do
   end
 end
 
-section 12.2, 'Iteration G2: Atom Feeds' do
+if $rails_version =~ /^(5\.1|6)/
+section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
+  overview <<-EOF
+    Demonstrate how Webpacker works and why it exists by using React.
+  EOF
+
+  if $rails_version =~ /^5/
+    edit 'Gemfile' do
+      self << "gem 'webpacker', '~> 3.0'"
+    end
+    bundle 'install'
+    cmd 'echo Y | rails webpacker:install'
+  end
+
+  cmd 'rails webpacker:install:react'
+  edit 'app/javascript/packs/hello_react.jsx' do
+    sub! /^\/\/.*$/,''
+    sub! /^\/\/.*$/,''
+    sub! /^\/\/.*$/,''
+  end
+  bundle 'install'
+  edit 'app/views/orders/new.html.erb' do
+    clear_all_marks
+    clear_highlights
+    self << %{
+<!-- START_HIGHLIGHT -->
+<%= javascript_pack_tag("hello_react") %>
+<!-- END_HIGHLIGHT -->
+}
+  end
+
+  restart_server
+
+  get '/', screenshot: {
+    filename: "pa_1_js_fixed.pdf",
+    dimensions: [ 1024, 800 ],
+    workflow: [
+      "line_items?product_id=2",
+      "orders/new",
+    ]
+  }
+
+  post '/', 'product_id' => 2
+  post '/orders/new',
+    'order[name]' => 'Dave Thomas',
+    'order[address]' => '123 Main St',
+    'order[email]' => 'customer@example.com',
+    'order[pay_type]' => 'Check'
+  publish_code_snapshot :pa
+
+  edit 'app/views/orders/_form.html.erb' do
+    clear_all_marks
+    clear_highlights
+    edit /<div class="field">.*\n\s+<%= form.label :email %>/ do
+      sub! /<div class="field"/,"<!-- START:pay-type-component -->\n  <div class=\"field\""
+    end
+    sub! /<div class="field">.*\n\s+<%= form.label :pay_type %>.*\n\s+<%= form.select :pay_type.*\n.*\n\s+<\/div>/,
+      "<!-- START_HIGHLIGHT -->\n  <div id='pay-type-component'></div>\n<!-- END_HIGHLIGHT -->"
+    sub! /^<% end %>/,"<% end %>\n<!-- END:pay-type-component -->"
+  end
+  edit 'app/views/orders/new.html.erb' do
+    sub! /<%= javascript_pack_tag\("hello_react"\) %>/, "<%= javascript_pack_tag(\"pay_type\") %>"
+  end
+  edit 'app/javascript/packs/pay_type.jsx' do
+    self << %{import React           from 'react'              // <callout id="co.payment-details.pay_type.import-react"/>
+import ReactDOM        from 'react-dom'           // <callout id="co.payment-details.pay_type.import-react-dom"/>
+import PayTypeSelector from 'PayTypeSelector'     // <callout id="co.payment-details.pay_type.import-PayTypeSelector"/>
+
+document.addEventListener('turbolinks:load', function() {       // <callout id="co.payment-details.pay_type.DOMContentLoaded"/>
+  var element = document.getElementById(\"pay-type-component\"); // <callout id="co.payment-details.pay_type.getElementById"/>
+  ReactDOM.render(<PayTypeSelector />, element);                 // <callout id="co.payment-details.pay_type.jsx"/>
+});
+}
+  end
+  cmd 'mkdir app/javascript/PayTypeSelector'
+  edit 'app/javascript/PayTypeSelector/index.jsx' do
+    self << %{import React from 'react'
+
+class PayTypeSelector extends React.Component \{
+  render() \{
+    return (
+      <div className="field">
+        <label htmlFor="order_pay_type">Pay type</label>
+        <select id="order_pay_type" name="order[pay_type]">
+          <option value="">Select a payment method</option>
+          <option value="Check">Check</option>
+          <option value="Credit card">Credit card</option>
+          <option value="Purchase order">Purchase order</option>
+        </select>
+      </div>
+    );
+  \}
+\}
+export default PayTypeSelector
+}
+  end
+  publish_code_snapshot :pb
+  cmd 'rm app/javascript/PayTypeSelector/index.jsx'
+  edit 'app/javascript/PayTypeSelector/index.jsx' do
+    self << %{//START:import
+import React from 'react'
+
+// START_HIGHLIGHT
+import NoPayType            from './NoPayType';
+import CreditCardPayType    from './CreditCardPayType';
+import CheckPayType         from './CheckPayType';
+import PurchaseOrderPayType from './PurchaseOrderPayType';
+// END_HIGHLIGHT
+// END:import
+
+// START:bind
+class PayTypeSelector extends React.Component \{
+  // START_HIGHLIGHT
+  constructor(props) \{
+    super(props);
+    this.onPayTypeSelected = this.onPayTypeSelected.bind(this);
+    this.state = { selectedPayType: null };
+  \}
+  // END_HIGHLIGHT
+// END:bind
+
+// START:onPayTypeSelected
+  onPayTypeSelected(event) \{
+    // START_HIGHLIGHT
+    this.setState({ selectedPayType: event.target.value });
+    // END_HIGHLIGHT
+  \}
+  // END:onPayTypeSelected
+
+  // START:render
+  render() \{
+    // START_HIGHLIGHT
+    let PayTypeCustomComponent = NoPayType;
+    if (this.state.selectedPayType == "Credit card") {
+      PayTypeCustomComponent = CreditCardPayType;
+    } else if (this.state.selectedPayType == "Check") {
+      PayTypeCustomComponent = CheckPayType;
+    } else if (this.state.selectedPayType == "Purchase order") {
+      PayTypeCustomComponent = PurchaseOrderPayType;
+    }
+    // END_HIGHLIGHT
+    return (
+      // START_HIGHLIGHT
+      <div>
+        <div className="field">
+          <label htmlFor="order_pay_type">Pay type</label>
+          <select id="order_pay_type" onChange={this.onPayTypeSelected} 
+            name="order[pay_type]">
+            <option value="">Select a payment method</option>
+            <option value="Check">Check</option>
+            <option value="Credit card">Credit card</option>
+            <option value="Purchase order">Purchase order</option>
+          </select>
+        </div>
+        <PayTypeCustomComponent />
+      </div>
+      // END_HIGHLIGHT
+    );
+  \}
+  // END:render
+\}
+export default PayTypeSelector
+}
+  end
+  edit 'app/javascript/PayTypeSelector/NoPayType.jsx' do
+    self << %{import React from 'react'
+
+class NoPayType extends React.Component \{
+  render() \{
+    return (<div></div>);
+  \}
+\}
+export default NoPayType
+}
+  end
+  edit 'app/javascript/PayTypeSelector/CreditCardPayType.jsx' do
+    self << %{import React from 'react'
+
+class CreditCardPayType extends React.Component \{
+  render() \{
+    return (
+      <div>
+        <div className="field">
+          <label htmlFor="order_credit_card_number">CC #</label>
+          <input type="password"
+                 name="order[credit_card_number]" 
+                 id="order_credit_card_number" />
+        </div>
+        <div className="field">
+          <label htmlFor="order_expiration_date">Expiry</label>
+          <input type="text"
+                 name="order[expiration_date]" 
+                 id="order_expiration_date"
+                 size="9"
+                 placeholder="e.g. 03/19" />
+        </div>
+      </div>
+    );
+  \}
+\}
+export default CreditCardPayType
+}
+  end
+  edit 'app/javascript/PayTypeSelector/CheckPayType.jsx' do
+    self << %{import React from 'react'
+
+class CheckPayType extends React.Component \{
+  render() \{
+    return (
+      <div>
+        <div className="field">
+          <label htmlFor="order_routing_number">Routing #</label>
+          <input type="password"
+                 name="order[routing_number]" 
+                 id="order_routing_number" />
+        </div>
+        <div className="field">
+          <label htmlFor="order_account_number">Account #</label>
+          <input type="text"
+                 name="order[account_number]" 
+                 id="order_account_number" />
+        </div>
+      </div>
+    );
+  \}
+\}
+export default CheckPayType
+}
+  end
+  edit 'app/javascript/PayTypeSelector/PurchaseOrderPayType.jsx' do
+    self << %{import React from 'react'
+
+class PurchaseOrderPayType extends React.Component \{
+  render() \{
+    return (
+      <div>
+        <div className="field">
+          <label htmlFor="order_po_number">PO #</label>
+          <input type="password"
+                 name="order[po_number]" 
+                 id="order_po_number" />
+        </div>
+      </div>
+    );
+  \}
+\}
+export default PurchaseOrderPayType
+}
+  end
+  edit "app/controllers/orders_controller.rb", 'pay_type_params' do
+    clear_highlights
+    msub /^()end/, %{
+    # START: pay_type_params
+      
+    def pay_type_params
+      if order_params[:pay_type] == "Credit card"
+        params.require(:order).permit(:credit_card_number, :expiration_date)
+      elsif order_params[:pay_type] == "Check"
+        params.require(:order).permit(:routing_number, :account_number)
+      elsif order_params[:pay_type] == "Purchase order"
+        params.require(:order).permit(:po_number)
+      else
+        {}
+      end
+    end
+
+    # END: pay_type_params
+}
+  end
+  edit "config/application.rb" do
+    msub /^()  end/, %{
+    #START:filter_parameters
+    config.filter_parameters += [ :credit_card_number ]
+    #END:filter_parameters
+}
+  end
+
+  publish_code_snapshot :pc
+end
+elsif $rails_version !~ /^[3-6]/
+section 12.2, 'Iteration G2: Additional Payment Details' do
+  generate 'stimulus payment'
+  # cmd "rails stimulus:manifest:update"
+
+  desc 'create stimulus controller'
+  edit 'app/javascript/controllers/payment_controller.js' do
+    replacement = read('orders/payment_controller.js')
+    self[/extends Controller {.*}/m] = 
+      replacement[/extends Controller {.*}/m]
+  end
+
+  desc 'add partials for each payment type'
+  edit 'app/views/orders/_check.html.erb' do
+    self.all = read('orders/_check.html.erb')
+  end
+
+  edit 'app/views/orders/_cc.html.erb' do
+    self.all = read('orders/_cc.html.erb')
+  end
+
+  edit 'app/views/orders/_po.html.erb' do
+    self.all = read('orders/_po.html.erb')
+  end
+
+  desc 'update form to reference controller, partials'
+  edit 'app/views/orders/_form.html.erb' do
+    clear_highlights
+
+    edit /<div class="my-5">\s*<%= form.label :pay_type %>.*?<\/div>\n/m do
+      sub! /^(\s+)class/,
+        "# START_HIGHLIGHT\n\\1'data-action' => " +
+          "'payment#showAdditionalFields',\n" +
+          "\\1'data-payment-target' => 'selection',\n" +
+          "# END_HIGHLIGHT\n\\1class"
+      gsub! /^/, '  '
+      msub /\A()/, "  "
+      msub /\A()/, "  <div data-controller=\"payment\">\n", :highlight
+      msub /()\z/, "\n" + <<-EOF.unindent(6), :highlight
+          <%= render partial: 'check', locals: {form: form} %>
+          <%= render partial: 'cc', locals: {form: form} %>
+          <%= render partial: 'po', locals: {form: form} %>
+        </div>
+      EOF
+    end
+  end
+
+  # show the various forms
+  cmd 'cp config/routes.rb config/routes.rb.save'
+  cmd 'cp app/controllers/orders_controller.rb app/controllers/orders_controller.rb.save'
+  edit 'app/views/orders/demo.html.erb' do
+    self.all = read('orders/demo.html.erb')
+  end
+  edit 'config/routes.rb', 'DELETEME' do
+    msub /do\n()/, "get '/orders/demo', to: 'orders#demo'\n", mark: 'DELETEME'
+  end
+  edit 'app/controllers/orders_controller.rb', 'DELETEME' do
+    msub /class.*\n()/, "def demo; render :demo, layout: false; end\n",
+      mark: 'DELETEME'
+  end
+  get '/orders/demo', screenshot: { filename: "depot_pc_pay_types.pdf",
+    dimensions: [ 600, 1150 ] }
+  cmd 'rm app/views/orders/demo.html.erb'
+  cmd 'mv config/routes.rb.save config/routes.rb'
+  cmd 'mv app/controllers/orders_controller.rb.save app/controllers/orders_controller.rb'
+
+  desc "Add a quantity column to the line_item table in the database."
+  generate 'migration add_payment fields routing_number account_number credit_card_number expiration_date po_number'
+  db :migrate
+end
+end
+
+section 12.3, 'Iteration G3: Atom Feeds' do
   overview <<-EOF
     Demonstrate various respond_to/format options, as well as "through"
     relations and basic authentication.
@@ -3376,287 +3716,8 @@ section 12.5, 'Playtime' do
   cmd 'git tag iteration-g'
 end
 
-unless $rails_version =~ /^4|^5\.0/
-section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
-  overview <<-EOF
-    Demonstrate how Webpacker works and why it exists by using React.
-  EOF
-
-  if $rails_version =~ /^5/
-    edit 'Gemfile' do
-      self << "gem 'webpacker', '~> 3.0'"
-    end
-    bundle 'install'
-    cmd 'echo Y | rails webpacker:install'
-  end
-
-  cmd 'rails webpacker:install:react'
-  edit 'app/javascript/packs/hello_react.jsx' do
-    sub! /^\/\/.*$/,''
-    sub! /^\/\/.*$/,''
-    sub! /^\/\/.*$/,''
-  end
-  bundle 'install'
-  edit 'app/views/orders/new.html.erb' do
-    clear_all_marks
-    clear_highlights
-    self << %{
-<!-- START_HIGHLIGHT -->
-<%= javascript_pack_tag("hello_react") %>
-<!-- END_HIGHLIGHT -->
-}
-  end
-
-  restart_server
-
-  get '/', screenshot: {
-    filename: "pa_1_js_fixed.pdf",
-    dimensions: [ 1024, 800 ],
-    workflow: [
-      "line_items?product_id=2",
-      "orders/new",
-    ]
-  }
-
-  post '/', 'product_id' => 2
-  post '/orders/new',
-    'order[name]' => 'Dave Thomas',
-    'order[address]' => '123 Main St',
-    'order[email]' => 'customer@example.com',
-    'order[pay_type]' => 'Check'
-  publish_code_snapshot :pa
-
-  edit 'app/views/orders/_form.html.erb' do
-    clear_all_marks
-    clear_highlights
-    edit /<div class="field">.*\n\s+<%= form.label :email %>/ do
-      sub! /<div class="field"/,"<!-- START:pay-type-component -->\n  <div class=\"field\""
-    end
-    sub! /<div class="field">.*\n\s+<%= form.label :pay_type %>.*\n\s+<%= form.select :pay_type.*\n.*\n\s+<\/div>/,
-      "<!-- START_HIGHLIGHT -->\n  <div id='pay-type-component'></div>\n<!-- END_HIGHLIGHT -->"
-    sub! /^<% end %>/,"<% end %>\n<!-- END:pay-type-component -->"
-  end
-  edit 'app/views/orders/new.html.erb' do
-    sub! /<%= javascript_pack_tag\("hello_react"\) %>/, "<%= javascript_pack_tag(\"pay_type\") %>"
-  end
-  edit 'app/javascript/packs/pay_type.jsx' do
-    self << %{import React           from 'react'              // <callout id="co.payment-details.pay_type.import-react"/>
-import ReactDOM        from 'react-dom'           // <callout id="co.payment-details.pay_type.import-react-dom"/>
-import PayTypeSelector from 'PayTypeSelector'     // <callout id="co.payment-details.pay_type.import-PayTypeSelector"/>
-
-document.addEventListener('turbolinks:load', function() {       // <callout id="co.payment-details.pay_type.DOMContentLoaded"/>
-  var element = document.getElementById(\"pay-type-component\"); // <callout id="co.payment-details.pay_type.getElementById"/>
-  ReactDOM.render(<PayTypeSelector />, element);                 // <callout id="co.payment-details.pay_type.jsx"/>
-});
-}
-  end
-  cmd 'mkdir app/javascript/PayTypeSelector'
-  edit 'app/javascript/PayTypeSelector/index.jsx' do
-    self << %{import React from 'react'
-
-class PayTypeSelector extends React.Component \{
-  render() \{
-    return (
-      <div className="field">
-        <label htmlFor="order_pay_type">Pay type</label>
-        <select id="order_pay_type" name="order[pay_type]">
-          <option value="">Select a payment method</option>
-          <option value="Check">Check</option>
-          <option value="Credit card">Credit card</option>
-          <option value="Purchase order">Purchase order</option>
-        </select>
-      </div>
-    );
-  \}
-\}
-export default PayTypeSelector
-}
-  end
-  publish_code_snapshot :pb
-  cmd 'rm app/javascript/PayTypeSelector/index.jsx'
-  edit 'app/javascript/PayTypeSelector/index.jsx' do
-    self << %{//START:import
-import React from 'react'
-
-// START_HIGHLIGHT
-import NoPayType            from './NoPayType';
-import CreditCardPayType    from './CreditCardPayType';
-import CheckPayType         from './CheckPayType';
-import PurchaseOrderPayType from './PurchaseOrderPayType';
-// END_HIGHLIGHT
-// END:import
-
-// START:bind
-class PayTypeSelector extends React.Component \{
-  // START_HIGHLIGHT
-  constructor(props) \{
-    super(props);
-    this.onPayTypeSelected = this.onPayTypeSelected.bind(this);
-    this.state = { selectedPayType: null };
-  \}
-  // END_HIGHLIGHT
-// END:bind
-
-// START:onPayTypeSelected
-  onPayTypeSelected(event) \{
-    // START_HIGHLIGHT
-    this.setState({ selectedPayType: event.target.value });
-    // END_HIGHLIGHT
-  \}
-  // END:onPayTypeSelected
-
-  // START:render
-  render() \{
-    // START_HIGHLIGHT
-    let PayTypeCustomComponent = NoPayType;
-    if (this.state.selectedPayType == "Credit card") {
-      PayTypeCustomComponent = CreditCardPayType;
-    } else if (this.state.selectedPayType == "Check") {
-      PayTypeCustomComponent = CheckPayType;
-    } else if (this.state.selectedPayType == "Purchase order") {
-      PayTypeCustomComponent = PurchaseOrderPayType;
-    }
-    // END_HIGHLIGHT
-    return (
-      // START_HIGHLIGHT
-      <div>
-        <div className="field">
-          <label htmlFor="order_pay_type">Pay type</label>
-          <select id="order_pay_type" onChange={this.onPayTypeSelected} 
-            name="order[pay_type]">
-            <option value="">Select a payment method</option>
-            <option value="Check">Check</option>
-            <option value="Credit card">Credit card</option>
-            <option value="Purchase order">Purchase order</option>
-          </select>
-        </div>
-        <PayTypeCustomComponent />
-      </div>
-      // END_HIGHLIGHT
-    );
-  \}
-  // END:render
-\}
-export default PayTypeSelector
-}
-  end
-  edit 'app/javascript/PayTypeSelector/NoPayType.jsx' do
-    self << %{import React from 'react'
-
-class NoPayType extends React.Component \{
-  render() \{
-    return (<div></div>);
-  \}
-\}
-export default NoPayType
-}
-  end
-  edit 'app/javascript/PayTypeSelector/CreditCardPayType.jsx' do
-    self << %{import React from 'react'
-
-class CreditCardPayType extends React.Component \{
-  render() \{
-    return (
-      <div>
-        <div className="field">
-          <label htmlFor="order_credit_card_number">CC #</label>
-          <input type="password"
-                 name="order[credit_card_number]" 
-                 id="order_credit_card_number" />
-        </div>
-        <div className="field">
-          <label htmlFor="order_expiration_date">Expiry</label>
-          <input type="text"
-                 name="order[expiration_date]" 
-                 id="order_expiration_date"
-                 size="9"
-                 placeholder="e.g. 03/19" />
-        </div>
-      </div>
-    );
-  \}
-\}
-export default CreditCardPayType
-}
-  end
-  edit 'app/javascript/PayTypeSelector/CheckPayType.jsx' do
-    self << %{import React from 'react'
-
-class CheckPayType extends React.Component \{
-  render() \{
-    return (
-      <div>
-        <div className="field">
-          <label htmlFor="order_routing_number">Routing #</label>
-          <input type="password"
-                 name="order[routing_number]" 
-                 id="order_routing_number" />
-        </div>
-        <div className="field">
-          <label htmlFor="order_account_number">Account #</label>
-          <input type="text"
-                 name="order[account_number]" 
-                 id="order_account_number" />
-        </div>
-      </div>
-    );
-  \}
-\}
-export default CheckPayType
-}
-  end
-  edit 'app/javascript/PayTypeSelector/PurchaseOrderPayType.jsx' do
-    self << %{import React from 'react'
-
-class PurchaseOrderPayType extends React.Component \{
-  render() \{
-    return (
-      <div>
-        <div className="field">
-          <label htmlFor="order_po_number">PO #</label>
-          <input type="password"
-                 name="order[po_number]" 
-                 id="order_po_number" />
-        </div>
-      </div>
-    );
-  \}
-\}
-export default PurchaseOrderPayType
-}
-  end
-  edit "app/controllers/orders_controller.rb" do
-    clear_highlights
-    msub /^()end/, %{
-    # START: pay_type_params
-      
-    def pay_type_params
-      if order_params[:pay_type] == "Credit card"
-        params.require(:order).permit(:credit_card_number, :expiration_date)
-      elsif order_params[:pay_type] == "Check"
-        params.require(:order).permit(:routing_number, :account_number)
-      elsif order_params[:pay_type] == "Purchase order"
-        params.require(:order).permit(:po_number)
-      else
-        {}
-      end
-    end
-
-    # END: pay_type_params
-}
-  end
-  edit "config/application.rb" do
-    msub /^()  end/, %{
-    #START:filter_parameters
-    config.filter_parameters += [ :credit_card_number ]
-    #END:filter_parameters
-}
-  end
-
-  publish_code_snapshot :pc
-end
-
-section 13.2, 'Iteration H2: System testing' do
+unless $rails_version =~ /^(3|4|5\.0)/
+section 13.2, 'Iteration G4: System testing' do
   unless $rails_version =~ /^5.1/
     if ENV['USER'] == 'vagrant'
       edit 'test/application_system_test_case.rb' do
@@ -3668,17 +3729,36 @@ section 13.2, 'Iteration H2: System testing' do
     edit 'test/system/products_test.rb' do
       sub! ':one', ':ruby'
       sub! 'Product was successfully created', 'Title has already been taken'
+
+      if $rails_version =~ /^[3-6]/
+      else
+        sub! 'Destroy', 'Delete'
+      end
     end
     cmd 'rm test/system/carts_test.rb'
     cmd 'rm test/system/line_items_test.rb'
 
     edit 'test/system/orders_test.rb' do
-      dcl 'creating a Order' do
-        sub! /.*/m, ''
-      end
+      if $rails_version =~ /^[3-6]/
+	dcl 'creating a Order' do
+	  sub! /.*/m, ''
+	end
 
-      dcl 'updating a Order' do
-        sub! /.*/m, ''
+	dcl 'updating a Order' do
+	  sub! /.*/m, ''
+	end
+      else
+	dcl 'should create order' do
+	  sub! /.*/m, ''
+	end
+
+	dcl 'should update Order' do
+	  sub! /.*/m, ''
+	end
+
+	dcl 'should destroy Order' do
+	  sub! /.*/m, ''
+	end
       end
 
       gsub! /\n\n+/, "\n\n"
@@ -3714,7 +3794,6 @@ section 13.2, 'Iteration H2: System testing' do
   cmd 'rake test'
 end
 end
-
 
 section 14.1, 'Iteration I1: Email Notifications' do
   desc 'Create a mailer'
@@ -3854,8 +3933,13 @@ section 14.1, 'Iteration I1: Email Notifications' do
     gsub! 'from@example.com', 'depot@example.com'
     msub /assert_match (".*?), mail/, '/1 x Programming Ruby 1.9/'
     msub /assert_match ".*?,( )mail/, "\n      "
-    msub /assert_match (".*?),\s+mail/, 
-      '/<td[^>]*>1<\/td>\s*<td>Programming Ruby 1.9<\/td>/'
+    if $rails_version =~ /^[3-6]/
+      msub /assert_match (".*?),\s+mail/, 
+        '/<td[^>]*>1<\/td>\s*<td[^>]*>Programming Ruby 1.9<\/td>/'
+    else
+      msub /assert_match (".*?),\s+mail/, 
+        '/<td[^>]*>1<\/td>\s*<td>&times;<\/td>\s*<td[^>]*>Programming Ruby 1.9<\/td>/'
+    end
   end
 
   if $rails_version =~ /^3/ or $rails_version =~ /^4\.0/
@@ -3957,6 +4041,24 @@ EOF
   end
   edit "app/controllers/orders_controller.rb" do
     msub /(        OrderMailer.received\(@order\).deliver_later)/,"        ChargeOrderJob.perform_later(@order,pay_type_params.to_h)"
+    unless $rails_version =~ /^[3-6]/
+      msub /^()end/, <<-EOF.unindent(4)
+	# START: pay_type_params
+	  
+	def pay_type_params
+	  if order_params[:pay_type] == "Credit card"
+	    params.require(:order).permit(:credit_card_number, :expiration_date)
+	  elsif order_params[:pay_type] == "Check"
+	    params.require(:order).permit(:routing_number, :account_number)
+	  elsif order_params[:pay_type] == "Purchase order"
+	    params.require(:order).permit(:po_number)
+	  else
+	    {}
+	  end
+	end
+	# END: pay_type_params
+      EOF
+    end
   end
 
   edit "test/system/orders_test.rb" do
@@ -4024,6 +4126,10 @@ class OrdersTest < ApplicationSystemTestCase
 # END_HIGHLIGHT
 # START:check_mail
 }
+
+    unless $rails_version=~ /^[3-6]/
+      gsub! ' #"', ' number"'
+    end
   end
   cmd 'rake test:system'
   cmd 'rake test'
@@ -4050,7 +4156,7 @@ section 15.1, 'Iteration J1: Adding Users' do
       desc 'uncomment out bcrypt'
       edit 'Gemfile', 'bcrypt' do
         clear_all_marks
-        edit /^.*has_secure_password\n.*\n/, :mark => 'bcrypt'
+        edit /^.*has_secure_password.*\n.*\n/, :mark => 'bcrypt'
         edit /# gem ['"]bcrypt.*\n/, :highlight do
           msub /^(#\s)/, ''
         end
@@ -4062,6 +4168,7 @@ section 15.1, 'Iteration J1: Adding Users' do
   desc 'Run the migration'
   db :migrate
 
+  if $rails_version =~ /^[3-6]/
   desc 'wrap the flash in an if statement'
   edit "app/views/users/index.html.erb" do
     msub /(<p id="notice.*$)/,%{
@@ -4073,6 +4180,7 @@ section 15.1, 'Iteration J1: Adding Users' do
 <!-- END_HIGHLIGHT -->
 <!-- END:notice -->
     }
+  end
   end
 
   desc 'Add validation, has_secure_password'
