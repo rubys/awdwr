@@ -2606,19 +2606,19 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   unless $rails_version =~ /^[3-6]/
     edit 'app/views/orders/_form.html.erb' do
       edit 'text_field :email', :highlight do
-	msub /(text)_field/, 'email'
+        msub /(text)_field/, 'email'
       end
 
       edit 'number_field :pay_type', :highlight
       edit 'number_field :pay_type' do
-	msub /(number_field)/, 'select'
-	msub /:pay_type, ()/, "Order.pay_types.keys,\n" +
+        msub /(number_field)/, 'select'
+        msub /:pay_type, ()/, "Order.pay_types.keys,\n" +
           (' ' * 20) + "{ prompt: 'Select a payment method' },\n" + (' ' * 20)
       end
 
       edit 'form.submit', :highlight
       edit 'form.submit' do
-	msub /form\.submit() /, " 'Place Order', "
+        msub /form\.submit() /, " 'Place Order', "
         sub! ' bg-blue-600 text-white', "\n      bg-green-200 text-black"
       end
 
@@ -2645,37 +2645,37 @@ section 12.1, 'Iteration G1: Capturing an Order' do
     edit 'app/views/orders/_form.html.erb' do
       msub /<%= pluralize.*%>( )/, "\n      "
       edit 'text_field :name', :highlight do
-	msub /() %>/, ', :size => 40'
+        msub /() %>/, ', :size => 40'
       end
       edit 'text_area :address', :highlight do
-	msub /() %>/, ', :rows => 3, :cols => 40'
+        msub /() %>/, ', :rows => 3, :cols => 40'
       end
       edit 'text_field :email', :highlight do
-	msub /(text)_field/, 'email'
-	msub /() %>/, ', :size => 40'
+        msub /(text)_field/, 'email'
+        msub /() %>/, ', :size => 40'
       end
 
       if $rails_version =~ /^(3|4\.0)/
-	edit 'text_field :pay_type', :highlight # while it still is on one line
-	edit 'text_field :pay_type' do
-	  msub /(text_field)/, 'select'
-	  msub /() %>/, ", Order::PAYMENT_TYPES,\n" + 
-	    (' ' * 18) + ":prompt => 'Select a payment method'"
-	end
-	edit 'submit', :highlight do
-	  msub /() %>/, " 'Place Order'"
-	end
+        edit 'text_field :pay_type', :highlight # while it still is on one line
+        edit 'text_field :pay_type' do
+          msub /(text_field)/, 'select'
+          msub /() %>/, ", Order::PAYMENT_TYPES,\n" + 
+            (' ' * 18) + ":prompt => 'Select a payment method'"
+        end
+        edit 'submit', :highlight do
+          msub /() %>/, " 'Place Order'"
+        end
       else
-	edit 'number_field :pay_type', :highlight # while it still is on one line
-	edit 'number_field :pay_type' do
-	  msub /(number_field)/, 'select'
-	  msub /:pay_type()/, ", Order.pay_types.keys"
-	  msub /() %>/,  ",\n" + (' ' * 18) + 
-	    ":prompt => 'Select a payment method'"
-	end
-	edit 'submit', :highlight do
-	  msub /() %>/, " 'Place Order'"
-	end
+        edit 'number_field :pay_type', :highlight # while it still is on one line
+        edit 'number_field :pay_type' do
+          msub /(number_field)/, 'select'
+          msub /:pay_type()/, ", Order.pay_types.keys"
+          msub /() %>/,  ",\n" + (' ' * 18) + 
+            ":prompt => 'Select a payment method'"
+        end
+        edit 'submit', :highlight do
+          msub /() %>/, " 'Place Order'"
+        end
       end
 
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
@@ -3347,79 +3347,71 @@ end
 unless $rails_version =~ /^(3|4|5\.0)/
 section 12.3, 'Iteration G3: System testing' do
   unless $rails_version =~ /^5.1/
-    if ENV['USER'] == 'vagrant'
-      edit 'test/application_system_test_case.rb' do
-        edit 'driven_by', :highlight
-        sub! ':chrome', ':headless_chrome'
-      end
+    # if ENV['USER'] == 'vagrant'
+    edit 'test/application_system_test_case.rb' do
+      edit 'driven_by', :highlight
+      sub! ':chrome', ':headless_chrome'
     end
+
+    cmd 'rm test/system/carts_test.rb'
+    cmd 'rm test/system/line_items_test.rb'
 
     edit 'test/system/products_test.rb' do
       sub! ':one', ':ruby'
       sub! 'Product was successfully created', 'Title has already been taken'
-
-      if $rails_version =~ /^[3-6]/
-      else
-        sub! 'Destroy', 'Delete'
-      end
     end
-    cmd 'rm test/system/carts_test.rb'
-    cmd 'rm test/system/line_items_test.rb'
 
     edit 'test/system/orders_test.rb' do
-      if $rails_version =~ /^[3-6]/
-	dcl 'creating a Order' do
-	  sub! /.*/m, ''
-	end
+      msub /^class.*?\n(.*)end\s*\z/m, <<-EOF.unindent(6), :highlight
+        test "check dynamic fields" do
+          visit store_index_url
 
-	dcl 'updating a Order' do
-	  sub! /.*/m, ''
-	end
-      else
-	dcl 'should create order' do
-	  sub! /.*/m, ''
-	end
+          click_on 'Add to Cart', match: :first
 
-	dcl 'should update Order' do
-	  sub! /.*/m, ''
-	end
+          click_on 'Checkout'
 
-	dcl 'should destroy Order' do
-	  sub! /.*/m, ''
-	end
-      end
+          fill_in 'order_name', with: 'Dave Thomas'
+          fill_in 'order_address', with: '123 Main Street'
+          fill_in 'order_email', with: 'dave@example.com'
 
-      gsub! /\n\n+/, "\n\n"
+          assert has_no_field? 'Routing number'
+          assert has_no_field? 'Account number'
+          assert has_no_field? 'Credit card number'
+          assert has_no_field? 'Expiration date'
+          assert has_no_field? 'Po number'
+
+          select 'Check', from: 'Pay type'
+
+          assert has_field? 'Routing number'
+          assert has_field? 'Account number'
+          assert has_no_field? 'Credit card number'
+          assert has_no_field? 'Expiration date'
+          assert has_no_field? 'Po number'
+
+          select 'Credit card', from: 'Pay type'
+
+          assert has_no_field? 'Routing number'
+          assert has_no_field? 'Account number'
+          assert has_field? 'Credit card number'
+          assert has_field? 'Expiration date'
+          assert has_no_field? 'Po number'
+
+          select 'Purchase order', from: 'Pay type'
+
+          assert has_no_field? 'Routing number'
+          assert has_no_field? 'Account number'
+          assert has_no_field? 'Credit card number'
+          assert has_no_field? 'Expiration date'
+          assert has_field? 'Po number'
+        end
+      EOF
     end
-  end
-
-  edit 'test/system/orders_test.rb' do
-    gsub! /^  #.*\n/, ''
-    msub /^()end/, <<-EOF.unindent(4), :highlight
-      test "check routing number" do
-        visit store_index_url
-
-        click_on 'Add to Cart', match: :first
-
-        click_on 'Checkout'
-
-        fill_in 'order_name', with: 'Dave Thomas'
-        fill_in 'order_address', with: '123 Main Street'
-        fill_in 'order_email', with: 'dave@example.com'
-
-        assert_no_selector "#order_routing_number"
-
-        select 'Check', from: 'Pay type'
-
-        assert_selector "#order_routing_number"
-      end 
-    EOF
   end
 
   cmd 'RAILS_ENV=test bin/webpack' if $rails_version =~ /^5\.1/
 
-  cmd 'rake test:system'
-  cmd 'rake test'
+  test :system
+  test
 end
 end
 
@@ -3548,7 +3540,7 @@ section 12.4, 'Iteration G4: Atom Feeds' do
   publish_code_snapshot :p
 end
 
-unless $PUB or $rails_version =~ /^3\./
+if $rails_version =~ /^3\./
 section 12.4, 'Iteration G2: Downloading an eBook' do
   overview <<-EOF
     demonstrate streaming with ActionController::Live
@@ -3608,7 +3600,7 @@ section 12.4, 'Iteration G2: Downloading an eBook' do
   desc 'render order in the side bar'
   edit 'app/views/layouts/application.html.erb' do
     clear_all_marks
-    msub /()\n +<ul>/, "\n" + <<-EOF, :highlight
+    msub /()\n +<ul[> ]/, "\n" + <<-EOF, :highlight
       <%= render Order.find(session[:order_id]) if session[:order_id] -%>
     EOF
   end
@@ -3618,6 +3610,7 @@ section 12.4, 'Iteration G2: Downloading an eBook' do
     self.all = read('orders/_order.html.erb')
   end
 
+  if $rails_version =~ /^[3-6]/
   desc 'css tweaks'
   edit DEPOT_CSS, 'side' do
     clear_highlights
@@ -3631,6 +3624,7 @@ section 12.4, 'Iteration G2: Downloading an eBook' do
         background-color: #141;
       }
     EOF
+  end
   end
 
   desc 'place an order'
@@ -4042,20 +4036,20 @@ EOF
     msub /(        OrderMailer.received\(@order\).deliver_later)/,"        ChargeOrderJob.perform_later(@order,pay_type_params.to_h)"
     unless $rails_version =~ /^[3-6]/
       msub /^()end/, <<-EOF.unindent(4)
-	# START: pay_type_params
-	  
-	def pay_type_params
-	  if order_params[:pay_type] == "Credit card"
-	    params.require(:order).permit(:credit_card_number, :expiration_date)
-	  elsif order_params[:pay_type] == "Check"
-	    params.require(:order).permit(:routing_number, :account_number)
-	  elsif order_params[:pay_type] == "Purchase order"
-	    params.require(:order).permit(:po_number)
-	  else
-	    {}
-	  end
-	end
-	# END: pay_type_params
+        # START: pay_type_params
+          
+        def pay_type_params
+          if order_params[:pay_type] == "Credit card"
+            params.require(:order).permit(:credit_card_number, :expiration_date)
+          elsif order_params[:pay_type] == "Check"
+            params.require(:order).permit(:routing_number, :account_number)
+          elsif order_params[:pay_type] == "Purchase order"
+            params.require(:order).permit(:po_number)
+          else
+            {}
+          end
+        end
+        # END: pay_type_params
       EOF
     end
   end

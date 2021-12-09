@@ -345,7 +345,7 @@ class DepotTest < Gorp::TestCase
       elsif $rails_version =~ /^6/
         assert_test_summary :tests => 7, :assertions => 8
       else
-        assert_test_summary :tests => 6, :assertions => 7
+        assert_test_summary :tests => 5, :assertions => 24
       end
       assert_test_summary :tests => 39, :assertions => 79
     end
@@ -367,7 +367,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /Etag:/i
   end
 
-  unless $PUB
+  if $rails_version =~ /^3/
   section 12.4, 'Iteration G3: Downloading an eBook' do
     ticket 23483,
       :title =>  "ActionController::Live locks database",
