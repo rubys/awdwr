@@ -1623,7 +1623,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
 
   desc 'Try it out.'
   post '/carts/1', {'_method'=>'delete'},
-    screenshot: { filename: "g_5_empty_cart.pdf", dimensions: [ 1024, 300 ], submit_form: true }
+    screenshot: { filename: "g_5_empty_cart.pdf", dimensions: [ 600, 200 ], submit_form: true }
 
   publish_code_snapshot :h
 
