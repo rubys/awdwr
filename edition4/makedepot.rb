@@ -56,7 +56,7 @@ section 2, 'Instant Gratification' do
   restart_server
   get "/", screenshot: { 
     filename: "demo2_1_hello_rails.pdf", 
-    dimensions: [ 700, 700 ],
+    dimensions: [ 800, 400 ],
     scale: 0.4
   }
 
@@ -1301,31 +1301,26 @@ section 9.3, 'Iteration D3: Adding a button' do
     end
   else
     desc 'Update the template that shows the Cart.'
-    edit 'app/views/carts/show.html.erb' do
+    edit 'app/views/carts/_cart.html.erb' do
       self.all = <<-EOF.unindent(8)
-        <% if notice.present? %>
-          <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium
-                    rounded-lg inline-block" id="notice">
-            <%= notice %>
-          </p>
-        <% end %>
-
-        <article id="cart">
+        <div id="<%= dom_id cart %>">
+          <!-- START_HIGHLIGHT -->
           <h2 class="font-bold text-lg mb-3">Your Pragmatic Cart</h2>
 
           <ul class="list-disc list-inside">    
-            <% @cart.line_items.each do |item| %>
+            <% cart.line_items.each do |item| %>
               <li><%= item.product.title %></li>
             <% end %>
           </ul>
-        </article>
+          <!-- END_HIGHLIGHT -->
+        </div>
       EOF
     end
   end
 
   desc "Try it once again, and see that the products in the cart."
   post '/', { 'product_id' => 3 },
-    screenshot: { filename: "f_3_better_cart.pdf", dimensions: [ 600, 255 ], form_data: {}, submit_form: 1 }
+    screenshot: { filename: "f_3_better_cart.pdf", dimensions: [ 680, 305 ], form_data: {}, submit_form: 1 }
   publish_code_snapshot :f
 end
 
@@ -1423,7 +1418,9 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
   end
 
   desc 'Update the view to show both columns.'
-  edit 'app/views/carts/show.html.erb' do |data|
+  template = ($rails_version =~ /^[3-6]/ ? 'show' : '_cart')
+  edit "app/views/carts/#{template}.html.erb" do |data|
+    clear_highlights
     data[/<li>(.*?)<\/li>/,1] =
       '<%= item.quantity %> &times; <%= item.product.title %>'
 
@@ -1584,16 +1581,29 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   EOF
 
   desc 'Add button to the view.'
-  edit 'app/views/carts/show.html.erb' do
-    clear_highlights
-    msub /(\s*)\Z/, "\n\n"
-    msub /\n\n()\Z/, <<-EOF.unindent(6)
-    <!-- START_HIGHLIGHT -->
-      <%= button_to 'Empty Cart', @cart, :method => :delete,
-          :data => { :confirm => 'Are you sure?' } %>
-    <!-- END_HIGHLIGHT -->
-    EOF
-    gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+  if $rails_version =~ /^[3-6]/
+    edit 'app/views/carts/show.html.erb' do
+      clear_highlights
+      msub /(\s*)\Z/, "\n\n"
+      msub /\n\n()\Z/, <<-EOF.unindent(8)
+        <!-- START_HIGHLIGHT -->
+        <%= button_to 'Empty Cart', @cart, :method => :delete,
+            :data => { :confirm => 'Are you sure?' } %>
+        <!-- END_HIGHLIGHT -->
+      EOF
+      gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    end
+  else
+    edit 'app/views/carts/_cart.html.erb' do
+      clear_highlights
+      msub /(\s*)\Z/, "\n\n"
+      msub /\n\n()\Z/, <<-EOF.unindent(8)
+        <!-- START_HIGHLIGHT -->
+        <%= button_to 'Empty Cart', cart, method: :delete,
+          class: 'ml-4 rounded-lg py-1 px-2 text-white bg-green-600' %>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    end
   end
 
   desc 'Clear session and change flash notice when cart is destroyed.'
@@ -1637,12 +1647,14 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   end
 
   desc 'Update the view to add totals.'
-  edit 'app/views/carts/show.html.erb' do
-    if $rails_version =~ /^[3-6]/
+  if $rails_version =~ /^[3-6]/
+    edit 'app/views/carts/show.html.erb' do
       self.all = read('cart/show.html.erb')
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
-    else
-      self.all = read('cart/show.tw.erb')
+    end
+  else
+    edit 'app/views/carts/_cart.html.erb' do
+      self.all = read('cart/_cart.tw.erb')
     end
   end
 
@@ -1750,7 +1762,7 @@ section 10.3, 'Iteration E3: Finishing the Cart' do
   post '/', {'product_id' => 3}, {:snapget => false}
 
   %w(2).each do |cart_id|
-    get "/carts/#{cart_id}", screenshot: { filename: "h_1_cart_#{cart_id}_styled.pdf", dimensions: [ 640, 250 ] }
+    get "/carts/#{cart_id}", screenshot: { filename: "h_1_cart_#{cart_id}_styled.pdf", dimensions: [ 640, 260 ] }
   end
 end
 
@@ -1859,52 +1871,68 @@ section 11.1, 'Iteration F1: Moving the Cart' do
     the layout.
   EOF
 
-  desc 'Create a "partial" view, for just one line item'
-  edit 'app/views/line_items/_line_item.html.erb' do
-    show = File.read('app/views/carts/show.html.erb')
-    tr = show[/^\s*<tr>.*?<\/tr>\n/m]
-    tr.gsub! Regexp.new('^' + tr[/\s*/]), ''
-    self.all = tr
-  end
+  if $rails_version =~ /^[3-6]/
+    desc 'Create a "partial" view, for just one line item'
+    edit 'app/views/line_items/_line_item.html.erb' do
+      show = File.read('app/views/carts/show.html.erb')
+      tr = show[/^\s*<tr>.*?<\/tr>\n/m]
+      tr.gsub! Regexp.new('^' + tr[/\s*/]), ''
+      self.all = tr
+    end
 
-  desc 'Replace that portion of the view with a callout to the partial'
-  edit 'app/views/carts/show.html.erb' do
-    clear_highlights
-    msub /(\n\s+<% @cart.line_items.each do .* end %>\n)/m, %{
+    desc 'Replace that portion of the view with a callout to the partial'
+    edit 'app/views/carts/show.html.erb' do
+      clear_highlights
+      msub /(\n\s+<% @cart.line_items.each do .* end %>\n)/m, %{
     <!-- START_HIGHLIGHT -->
     <%= render(@cart.line_items) %>
     <!-- END_HIGHLIGHT -->
-} + "\n"
-  end
-
-  desc 'Make a copy as a partial for the cart controller'
-  cmd 'cp app/views/carts/show.html.erb app/views/carts/_cart.html.erb'
-
-  desc 'Modify the copy to reference the (sub)partial and take input from @cart'
-  edit 'app/views/carts/_cart.html.erb' do
-    clear_highlights
-    sub! /^<% if notice.present\? %>.*?<% end %>\n\n/m, ''
-    sub! /^<% if notice %>.*?<% end %>\n\n/m, ''
-    sub! /^<p id="notice"><%= notice %><\/p>\n\n/m, ''
-    while include? '@cart'
-      edit '@cart', :highlight
-      sub! '@cart', 'cart'
+  } + "\n"
     end
-    sub! /#START_HIGHLIGHT/, "<!-- START_HIGHLIGHT -->"
-#    sub! /#END_HIGHLIGHT/, "<!-- END_HIGHLIGHT -->"
 
-    unless $rails_version =~ /^[3-6]/
-      edit '<article id="cart">', :highlight do
-        sub! '>', ' class="bg-white rounded p-2">'
+    desc 'Make a copy as a partial for the cart controller'
+    cmd 'cp app/views/carts/show.html.erb app/views/carts/_cart.html.erb'
+
+    desc 'Modify the copy to reference the (sub)partial and take input from @cart'
+    edit 'app/views/carts/_cart.html.erb' do
+      clear_highlights
+      sub! /^<% if notice.present\? %>.*?<% end %>\n\n/m, ''
+      sub! /^<% if notice %>.*?<% end %>\n\n/m, ''
+      sub! /^<p id="notice"><%= notice %><\/p>\n\n/m, ''
+      while include? '@cart'
+	edit '@cart', :highlight
+	sub! '@cart', 'cart'
       end
+      sub! /#START_HIGHLIGHT/, "<!-- START_HIGHLIGHT -->"
+  #    sub! /#END_HIGHLIGHT/, "<!-- END_HIGHLIGHT -->"
     end
-  end
 
-  publish_code_snapshot :j
+    publish_code_snapshot :j
 
-  desc 'Keep things DRY'
-  edit 'app/views/carts/show.html.erb' do
-    msub /(<article.*)/m, "<%= render @cart %>\n", :highlight
+    desc 'Keep things DRY'
+    edit 'app/views/carts/show.html.erb' do
+      msub /(<article.*)/m, "<%= render @cart %>\n", :highlight
+    end
+  else
+    desc 'Create a "partial" view, for just one line item'
+    edit 'app/views/line_items/_line_item.html.erb' do
+      cart = File.read('app/views/carts/_cart.html.erb')
+      tr = cart[/^\s*<tr>.*?<\/tr>\n/m]
+      tr.gsub! Regexp.new('^' + tr[/\s*/]), ''
+      self.all = tr
+    end
+
+    desc 'Replace that portion of the view with a callout to the partial'
+    edit 'app/views/carts/_cart.html.erb' do
+      clear_highlights
+      msub /(\n\s+<% cart.line_items.each do .* end %>\n)/m, <<-EOF.unindent(4)
+        <!-- START_HIGHLIGHT -->
+        <%= render(cart.line_items) %>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    end
+
+    publish_code_snapshot :j
   end
 
   desc 'Reference the partial from the layout.'
@@ -1918,7 +1946,9 @@ section 11.1, 'Iteration F1: Moving the Cart' do
       EOF
     else
       msub /<nav class=".*?">\n()/, <<-EOF + "\n", :highlight
-        <%= render @cart %>
+        <div class="bg-white rounded p-2">
+          <%= render @cart %>
+        </div>
       EOF
     end
     gsub! /(<!-- <label id="[.\w]+"\/> -->)/, ''
@@ -2452,18 +2482,19 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   desc 'Add a Checkout button to the cart'
   edit 'app/views/carts/_cart.html.erb' do
     clear_highlights
-    msub /().*Empty Cart/, %{
-  <!-- START_HIGHLIGHT -->
-  <div class="flex mt-1">
-  <!-- END_HIGHLIGHT -->
-}
-    msub /()<\/article>/,%{
-  <!-- START_HIGHLIGHT -->
-  <%= button_to 'Checkout', new_order_path, method: :get,
-    class: 'ml-4 rounded-lg py-1 px-2 text-black bg-green-200' %>
-  </div>
-  <!-- END_HIGHLIGHT -->
-}
+    msub /().*Empty Cart/, <<-EOF.unindent(4)
+      <!-- START_HIGHLIGHT -->
+      <div class="flex mt-1">
+      <!-- END_HIGHLIGHT -->
+    EOF
+
+    msub /()^<\/(?:article|div)>/, <<-EOF.unindent(4)
+      <!-- START_HIGHLIGHT -->
+      <%= button_to 'Checkout', new_order_path, method: :get,
+        class: 'ml-4 rounded-lg py-1 px-2 text-black bg-green-200' %>
+      </div>
+      <!-- END_HIGHLIGHT -->
+    EOF
 
     if $rails_version =~ /^[3-6]/
       sub! /class="flex*?"/, 'class="actions"'
