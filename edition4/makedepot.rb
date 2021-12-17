@@ -1256,8 +1256,10 @@ section 9.3, 'Iteration D3: Adding a button' do
       msub /,( ):?status/, "\n          " while match /,( ):?status/
     end
 
-    edit 'redirect_to', :highlight
-    msub /redirect_to[\(\s]@line_item()/, '.cart'
+    edit 'redirect_to', :highlight do
+      sub! 'line_item_url', 'cart_url'
+      msub /@line_item()/, '.cart'
+    end
   end
 
   desc "Try it once, and see that the output isn't very useful yet."
@@ -1426,6 +1428,11 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
 
     data[/\n().*quantity/,1] = "<!-- START_HIGHLIGHT -->\n"
     data[/quantity.*\n()/,1] = "<!-- END_HIGHLIGHT -->\n"
+
+    if include? 'list-disc'
+      edit 'list-disc', :highlight
+      sub! 'list-disc', 'list-none'
+    end
   end
 
   desc "Look at the cart, and see that's not exactly what we intended"
@@ -1450,7 +1457,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
 
   desc "Verify that the entries have been combined."
   %w(1).each do |cart_id|
-    get "/carts/#{cart_id}", screenshot: { filename: "g_1_cart_#{cart_id}_quantities.pdf", dimensions: [ 640, 200 ] }
+    get "/carts/#{cart_id}", screenshot: { filename: "g_1_cart_#{cart_id}_quantities.pdf", dimensions: [ 680, 255 ] }
   end
 
   desc 'Fill in the self.down method'
@@ -1464,7 +1471,7 @@ section 10.1, 'Iteration E1: Creating a Smarter Cart' do
 
   desc 'Every item should (once again) only have a quantity of one.'
   %w(1).each do |cart_id|
-    get "/carts/#{cart_id}", screenshot: { filename: "g_2_cart_#{cart_id}_no_quantities.pdf", dimensions: [ 640, 255 ] }
+    get "/carts/#{cart_id}", screenshot: { filename: "g_2_cart_#{cart_id}_no_quantities.pdf", dimensions: [ 680, 310 ] }
   end
 
   desc 'Recombine the item data.'
@@ -1925,9 +1932,9 @@ section 11.1, 'Iteration F1: Moving the Cart' do
     desc 'Replace that portion of the view with a callout to the partial'
     edit 'app/views/carts/_cart.html.erb' do
       clear_highlights
-      msub /(\n\s+<% cart.line_items.each do .* end %>\n)/m, <<-EOF.unindent(4)
+      msub /(^\s+<% cart.line_items.each do .* end %>\n)/m, <<-EOF.unindent(4)
         <!-- START_HIGHLIGHT -->
-        <%= render(cart.line_items) %>
+        <%= render cart.line_items %>
         <!-- END_HIGHLIGHT -->
       EOF
     end
@@ -1946,7 +1953,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
       EOF
     else
       msub /<nav class=".*?">\n()/, <<-EOF + "\n", :highlight
-        <div class="bg-white rounded p-2">
+        <div id="cart" class="bg-white rounded p-2">
           <%= render @cart %>
         </div>
       EOF
@@ -2014,6 +2021,7 @@ section 11.1, 'Iteration F1: Moving the Cart' do
   desc 'Change the redirect to be back to the store.'
   edit 'app/controllers/line_items_controller.rb', 'create' do |data|
     data[/(@line_item.cart)/,1] = "store_index_url"
+    data.sub! /cart_url\((.*?)\)/, '\1'
   end
 
   desc 'Purchase another product.'
@@ -2037,13 +2045,14 @@ section 11.1, 'Iteration F1: Moving the Cart' do
     if $rails_version =~ /^[3-6]/
       target = /^\s+<div class="cart".*?<\/div>/m
     else
-      target = /^\s+<%= render @cart %>/m
+      target = /^\s+<div id="cart".*?<\/div>/m
     end
 
     edit target, :highlight do
       gsub! /^/, '  '
-      sub! /\A/, "        <% if @cart %>\n"
-      sub! /\z/, "\n        <% end %>"
+      sub! /\A/, "        <% if @cart and not @cart.line_items.empty? %>\n" +
+        "<!-- END_HIGHLIGHT -->\n"
+      sub! /\z/, "\n<!-- START_HIGHLIGHT -->\n        <% end %>"
     end
   end
 
@@ -2083,7 +2092,7 @@ section 11.2, 'Iteration F2: Creating a Hotwired Cart' do
         format.turbo_stream do
           render turbo_stream: turbo_stream.replace(
             :cart,
-            partial: 'carts/cart',
+            partial: 'layouts/cart',
             locals: { cart: @cart }
           )
         end
@@ -2111,27 +2120,37 @@ section 11.2, 'Iteration F2: Creating a Hotwired Cart' do
 
   publish_code_snapshot :l
 
+  unless $rails_version =~ /^[3-6]/
+    desc 'create a partial for _cart'
+    edit "app/views/layouts/_cart.html.erb" do
+      self.all = <<-EOF.unindent(8)
+        <% if cart and not cart.line_items.empty? %>
+          <div id="cart" class="bg-white rounded p-2">
+            <%= render cart %> 
+          </div>  
+        <% else %> 
+          <div id="cart"></div>
+        <% end %>
+      EOF
+    end
+
+    desc 'make use of partial'
+    edit "app/views/layouts/application.html.erb" do
+      clear_highlights
+      sub! /<% if @cart .*?<% end %>/m, <<-EOF.lstrip
+        <!-- START_HIGHLIGHT -->
+        <%= render partial: 'layouts/cart', locals: {cart: @cart } %>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    end
+  end
+
+
   test
 
   unless $rails_version =~ /^[3-6]/
     post '/', { 'product_id' => 3 },
       screenshot: { filename: "k_2_schrodinger_cart.pdf", dimensions: [ 1024, 350 ], form_data: {}, submit_form: [1, 2] }
-
-    desc 'always leave placeholder where cart should be'
-    edit "app/views/layouts/application.html.erb" do
-      clear_highlights
-      sub! "<% if @cart %>\n",
-        "<!-- START_HIGHLIGHT -->\n" +
-        "        <% if @cart and not @cart.line_items.empty? %>\n" +
-        "<!-- END_HIGHLIGHT -->\n"
-
-      sub! /<% end %>\n/,
-        "<!-- START_HIGHLIGHT -->" +
-        "\n        <% else %>\n" +
-        '          <div id="cart"></div>' +
-        "\n        <% end %>\n" +
-        "<!-- END_HIGHLIGHT -->"
-    end
 
     desc 'create a partial for _notice'
     edit "app/views/store/_notice.html.erb" do
@@ -2482,19 +2501,19 @@ section 12.1, 'Iteration G1: Capturing an Order' do
   desc 'Add a Checkout button to the cart'
   edit 'app/views/carts/_cart.html.erb' do
     clear_highlights
-    msub /().*Empty Cart/, <<-EOF.unindent(4)
-      <!-- START_HIGHLIGHT -->
-      <div class="flex mt-1">
-      <!-- END_HIGHLIGHT -->
-    EOF
-
-    msub /()^<\/(?:article|div)>/, <<-EOF.unindent(4)
-      <!-- START_HIGHLIGHT -->
-      <%= button_to 'Checkout', new_order_path, method: :get,
-        class: 'ml-4 rounded-lg py-1 px-2 text-black bg-green-200' %>
-      </div>
-      <!-- END_HIGHLIGHT -->
-    EOF
+    sub! /^.*Empty Cart.*\n.*\n/ do |button|
+      <<-EOF.unindent(6)
+        <!-- START_HIGHLIGHT -->
+        <div class="flex mt-1">
+        <!-- END_HIGHLIGHT -->
+          #{button.sub(/^\s+/, '').sub("\n", "\n        ")}
+        <!-- START_HIGHLIGHT -->
+          <%= button_to 'Checkout', new_order_path, method: :get,
+            class: 'ml-4 rounded-lg py-1 px-2 text-black bg-green-200' %>
+        </div>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    end
 
     if $rails_version =~ /^[3-6]/
       sub! /class="flex*?"/, 'class="actions"'
@@ -2933,6 +2952,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       msub /Order was successfully created.*\n()/, <<-EOF
         #END_HIGHLIGHT
       EOF
+      sub! /order_url\((.*?)\)/, '\1' # Starting with Rails 7
       msub /redirect_to[\(\s](@order), :?notice/, 'store_index_url'
       msub /(["']Order was successfully created.["'])/,
         "\n          'Thank you for your order.'"
