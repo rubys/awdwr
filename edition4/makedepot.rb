@@ -179,7 +179,7 @@ section 6.1, 'Iteration A1: Creating the Products Maintenance Application' do
   desc 'Create the application.'
   ENV.delete('BUNDLE_GEMFILE')
   if $rails_version =~ /^7/
-    rails 'depot', :a, ' --css tailwind' # soon to be defaults?
+    rails 'depot', :a, ' --css tailwind'
   else
     rails 'depot', :a
   end
@@ -2145,7 +2145,6 @@ section 11.2, 'Iteration F2: Creating a Hotwired Cart' do
     end
   end
 
-
   test
 
   unless $rails_version =~ /^[3-6]/
@@ -2687,10 +2686,10 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       # self.replace full
     end
 
-    desc 'tooling workaround'
-    cmd "rails assets:clobber"
-    cmd "rails tmp:cache:clear"
-    restart_server
+    # desc 'tooling workaround'
+    # cmd "rails assets:clobber"
+    # cmd "rails tmp:cache:clear"
+    # restart_server
   else
     edit 'app/views/orders/_form.html.erb' do
       msub /<%= pluralize.*%>( )/, "\n      "
@@ -2856,9 +2855,21 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       EOF
     end
   else
-    edit 'app/assets/stylesheets/order.css' do
-      self.all = read('orders/order.css')
+    edit 'app/assets/stylesheets/application.tailwind.css' do
+      msub %r((/\*\s+.*?)\n@)m, "/* START_HIGHLIGHT */"
+      msub %r(\n(\s+\*/))m, "/* END_HIGHLIGHT */"
+
+      msub %r{(@layer components.*\n\}\n?)}m, <<-EOF.unindent(8)
+        @layer components {
+          .payment-field { @apply
+             block shadow rounded-md border border-green-400 outline-none
+             px-3 py-2 mt-2 w-full
+          }
+        }
+      EOF
     end
+
+    cmd 'bin/rails tailwindcss:build'
   end
 
   post '/', {'product_id' => 2}
@@ -6281,8 +6292,19 @@ $cleanup = Proc.new do
     else
       cmd "rails assets:precompile"
     end
+
     system "rm -rf #{$WORK}/data"
     system "cp -rp #{$DATA} #{$WORK}"
     system "cp -rp #{$WORK}/depot/public/assets #{$WORK}/data"
+    cmd "rails assets:clobber"
+
+    if File.exist? 'app/assets/stylesheets/application.tailwind.css'
+      cmd "rails tailwindcss:build"
+    end
+
+    if File.exist? 'tmp/pids/server.pid'
+      Process.kill 9, File.read('tmp/pids/server.pid').to_i rescue nil
+      File.unlink('tmp/pids/server.pid')
+    end
   end
 end
