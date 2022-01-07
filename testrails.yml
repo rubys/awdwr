@@ -7,7 +7,7 @@ default:
   output:  []
   message: []
   rvm:
-    bin:   ruby-3.0.3
+    bin:   ruby-3.1.0
 
 266:
   output:  2.6.6
@@ -21,12 +21,12 @@ default:
   rvm:
     bin:   ruby-2.7.2
 
-303:
-  message: 'Ruby 3.0.3'
-  rvm:
-    bin:   ruby-3.0.3
-
 310:
+  message: 'Ruby 3.1.0'
+  rvm:
+    bin:   ruby-3.1.0
+
+320:
   output:  3.1.0
   message: 'Ruby 3.1.0'
   rvm:
