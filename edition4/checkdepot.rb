@@ -411,7 +411,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 14.1, "Iteration I1: Email Notifications" do
+  section 13.1, "Iteration I1: Email Notifications" do
     if $rails_version =~ /^3/
       assert_test_summary :tests => 2, :assertions => '(8|10)'
     elsif $rails_version =~ /^3/
@@ -421,8 +421,9 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 14.2, 'Iteration I2: Connecting to a Slow Payment Processor with Active Job' do
+  section 13.2, 'Iteration I2: Connecting to a Slow Payment Processor with Active Job' do
     # TODO
+    assert_test_summary :tests => 6, :assertions => 35
     assert_test_summary :tests => 41, :assertions => 89
   end
 

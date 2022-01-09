@@ -1907,8 +1907,8 @@ section 11.1, 'Iteration F1: Moving the Cart' do
       sub! /^<% if notice %>.*?<% end %>\n\n/m, ''
       sub! /^<p id="notice"><%= notice %><\/p>\n\n/m, ''
       while include? '@cart'
-	edit '@cart', :highlight
-	sub! '@cart', 'cart'
+        edit '@cart', :highlight
+        sub! '@cart', 'cart'
       end
       sub! /#START_HIGHLIGHT/, "<!-- START_HIGHLIGHT -->"
   #    sub! /#END_HIGHLIGHT/, "<!-- END_HIGHLIGHT -->"
@@ -3057,7 +3057,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
 end
 
 if $rails_version =~ /^(5\.1|6)/
-section 13.1, 'Iteration H1: Webpacker and App-Like JavaScript' do
+section 12.2, 'Iteration H1: Webpacker and App-Like JavaScript' do
   overview <<-EOF
     Demonstrate how Webpacker works and why it exists by using React.
   EOF
@@ -3382,23 +3382,26 @@ section 12.2, 'Iteration G2: Additional Payment Details' do
   end
 
   # show the various forms
-  cmd 'cp config/routes.rb config/routes.rb.save'
-  cmd 'cp app/controllers/orders_controller.rb app/controllers/orders_controller.rb.save'
-  edit 'app/views/orders/demo.html.erb' do
-    self.all = read('orders/demo.html.erb')
+  if ENV['GORP_SCREENSHOTS']
+    cmd 'cp config/routes.rb config/routes.rb.save'
+    cmd 'cp app/controllers/orders_controller.rb app/controllers/orders_controller.rb.save'
+    edit 'app/views/orders/demo.html.erb' do
+      self.all = read('orders/demo.html.erb')
+    end
+    edit 'config/routes.rb', 'DELETEME' do
+      msub /do\n()/, "get '/orders/demo', to: 'orders#demo'\n", mark: 'DELETEME'
+    end
+    edit 'app/controllers/orders_controller.rb', 'DELETEME' do
+      msub /class.*\n()/, "def demo; render :demo, layout: false; end\n",
+        mark: 'DELETEME'
+    end
+    rake 'assets:precompile'
+    get '/orders/demo', screenshot: { filename: "depot_pc_pay_types.pdf",
+      dimensions: [ 600, 1200 ] }
+    cmd 'rm app/views/orders/demo.html.erb'
+    cmd 'mv config/routes.rb.save config/routes.rb'
+    cmd 'mv app/controllers/orders_controller.rb.save app/controllers/orders_controller.rb'
   end
-  edit 'config/routes.rb', 'DELETEME' do
-    msub /do\n()/, "get '/orders/demo', to: 'orders#demo'\n", mark: 'DELETEME'
-  end
-  edit 'app/controllers/orders_controller.rb', 'DELETEME' do
-    msub /class.*\n()/, "def demo; render :demo, layout: false; end\n",
-      mark: 'DELETEME'
-  end
-  get '/orders/demo', screenshot: { filename: "depot_pc_pay_types.pdf",
-    dimensions: [ 600, 1200 ] }
-  cmd 'rm app/views/orders/demo.html.erb'
-  cmd 'mv config/routes.rb.save config/routes.rb'
-  cmd 'mv app/controllers/orders_controller.rb.save app/controllers/orders_controller.rb'
 
   desc "Add a quantity column to the line_item table in the database."
   generate 'migration add_payment fields routing_number account_number credit_card_number expiration_date po_number'
@@ -3431,10 +3434,6 @@ section 12.3, 'Iteration G3: System testing' do
           click_on 'Add to Cart', match: :first
 
           click_on 'Checkout'
-
-          fill_in 'order_name', with: 'Dave Thomas'
-          fill_in 'order_address', with: '123 Main Street'
-          fill_in 'order_email', with: 'dave@example.com'
 
           assert has_no_field? 'Routing number'
           assert has_no_field? 'Account number'
@@ -3850,7 +3849,7 @@ section 12.5, 'Playtime' do
   cmd 'git tag iteration-g'
 end
 
-section 14.1, 'Iteration I1: Email Notifications' do
+section 13.1, 'Iteration I1: Email Notifications' do
   desc 'Create a mailer'
   if $rails_version =~ /^[34]/
     generate 'mailer OrderMailer received shipped'
@@ -3993,7 +3992,7 @@ section 14.1, 'Iteration I1: Email Notifications' do
         '/<td[^>]*>1<\/td>\s*<td[^>]*>Programming Ruby 1.9<\/td>/'
     else
       msub /assert_match (".*?),\s+mail/, 
-        '/<td[^>]*>1<\/td>\s*<td>&times;<\/td>\s*<td[^>]*>Programming Ruby 1.9<\/td>/'
+        '/<td[^>]*>1<\/td>\s*<td>&times;<\/td>\s*<td[^>]*>\s*Programming Ruby 1.9\s*<\/td>/'
     end
   end
 
@@ -4005,7 +4004,7 @@ section 14.1, 'Iteration I1: Email Notifications' do
   publish_code_snapshot :qa
 end
 
-section 14.2, 'Iteration I2: Connecting to a Slow Payment Processor with Active Job' do
+section 13.2, 'Iteration I2: Connecting to a Slow Payment Processor with Active Job' do
   edit 'lib/pago.rb' do
     self <<%{require 'ostruct'
 class Pago
@@ -4117,81 +4116,68 @@ EOF
   end
 
   edit "test/system/orders_test.rb" do
-    msub /(class OrdersTest < ApplicationSystemTestCase)/,%{
-#START:test_helper
-class OrdersTest < ApplicationSystemTestCase
-  # START_HIGHLIGHT
-  include ActiveJob::TestHelper
-  # END_HIGHLIGHT
-#END:test_helper
-    }
+    msub /(class OrdersTest < ApplicationSystemTestCase)/, <<-EOF.unindent(6)
+      #START:test_helper
+      class OrdersTest < ApplicationSystemTestCase
+        # START_HIGHLIGHT
+        include ActiveJob::TestHelper
+        # END_HIGHLIGHT
+      #END:test_helper
+    EOF
   
-    msub /^(  test "check routing number" do)/,%{
-# START:clear
-  test "check routing number" do
+    msub /^()end/, "\n" + <<-EOF.unindent(4), mark: 'order_delivery'
+      test "check order and delivery" do
+        LineItem.delete_all
+        Order.delete_all
 
-    # START_HIGHLIGHT
-    LineItem.delete_all
-    Order.delete_all
-    # END_HIGHLIGHT
+        visit store_index_url
 
-    visit store_index_url
-# END:clear
-}
-  
-    msub /^(    assert_selector "#order_routing_number")/,%{
-# START:fill_in
-    assert_selector "#order_routing_number"
+        click_on 'Add to Cart', match: :first
 
-# START_HIGHLIGHT
-    fill_in "Routing #", with: "123456"
-    fill_in "Account #", with: "987654"
-# END_HIGHLIGHT
-# END:fill_in
+        click_on 'Checkout'
 
-# START:perform_enqueued_jobs
-# START_HIGHLIGHT
-    perform_enqueued_jobs do
-      click_button "Place Order"
-    end
-# END_HIGHLIGHT
-# END:perform_enqueued_jobs
+        fill_in 'Name', with: 'Dave Thomas'
+        fill_in 'Address', with: '123 Main Street'
+        fill_in 'Email', with: 'dave@example.com'
+      
+        select 'Check', from: 'Pay type'
+        fill_in "Routing #", with: "123456"
+        fill_in "Account #", with: "987654"
 
-# START:check_order
-# START_HIGHLIGHT
-    orders = Order.all
-    assert_equal 1, orders.size
+        click_button "Place Order"
+        assert_text 'Thank you for your order'
 
-    order = orders.first
+        perform_enqueued_jobs
+        perform_enqueued_jobs
+        assert_performed_jobs 2
 
-    assert_equal "Dave Thomas",      order.name
-    assert_equal "123 Main Street",  order.address
-    assert_equal "dave@example.com", order.email
-    assert_equal "Check",            order.pay_type
-    assert_equal 1, order.line_items.size
-# END_HIGHLIGHT
-# END:check_order
+        orders = Order.all
+        assert_equal 1, orders.size
 
-# START:check_mail
-# START_HIGHLIGHT
-    mail = ActionMailer::Base.deliveries.last
-    assert_equal ["dave@example.com"],                 mail.to
-    assert_equal 'Sam Ruby <depot@example.com>',       mail[:from].value
-    assert_equal "Pragmatic Store Order Confirmation", mail.subject
-# END_HIGHLIGHT
-# START:check_mail
-}
+        order = orders.first
+        assert_equal "Dave Thomas",      order.name
+        assert_equal "123 Main Street",  order.address
+        assert_equal "dave@example.com", order.email
+        assert_equal "Check",            order.pay_type
+        assert_equal 1, order.line_items.size
+
+        mail = ActionMailer::Base.deliveries.last
+        assert_equal ["dave@example.com"],                 mail.to
+        assert_equal 'Sam Ruby <depot@example.com>',       mail[:from].value
+        assert_equal "Pragmatic Store Order Confirmation", mail.subject
+      end
+    EOF
 
     unless $rails_version=~ /^[3-6]/
       gsub! ' #"', ' number"'
     end
   end
-  cmd 'rake test:system'
-  cmd 'rake test'
+  test :system
+  test
   publish_code_snapshot :qb
 end
 
-section 14.3, 'Playtime' do
+section 13.3, 'Playtime' do
   cmd 'git commit -a -m "formats"'
   cmd 'git tag iteration-h'
 end
