@@ -3991,8 +3991,14 @@ section 13.1, 'Iteration I1: Email Notifications' do
       msub /assert_match (".*?),\s+mail/, 
         '/<td[^>]*>1<\/td>\s*<td[^>]*>Programming Ruby 1.9<\/td>/'
     else
-      msub /assert_match (".*?),\s+mail/, 
-        '/<td[^>]*>1<\/td>\s*<td>&times;<\/td>\s*<td[^>]*>\s*Programming Ruby 1.9\s*<\/td>/'
+      msub /assert_match (".*?,\s+)mail/, <<-EOF.unindent(4).strip + ' '
+        %r(
+          <td[^>]*>1<\\/td>\\s*
+          <td>&times;<\\/td>\\s*
+          <td[^>]*>\\s*Programming\\sRuby\\s1.9\\s*</td>
+        )x,
+      EOF
+      msub /\)x, mail.body.(encoded)/, 'to_s'
     end
   end
 
