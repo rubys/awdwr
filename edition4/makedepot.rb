@@ -4977,7 +4977,7 @@ section 14.5, 'Playtime' do
   cmd "curl --max-time 15 --silent --user dave:secret http://localhost:#$PORT/products/2/who_bought.xml"
 end
 
-section 16.1, 'Task K1: Selecting the locale' do
+section 15.1, 'Task K1: Selecting the locale' do
   desc 'Define the default and available languages.'
   FileUtils.mkdir_p "depot/config/initializers"
   FileUtils.touch "depot/config/initializers/i18n.rb"
@@ -5069,7 +5069,7 @@ section 16.1, 'Task K1: Selecting the locale' do
   get '/es', screenshot: { filename: "s_3_es_error.pdf", dimensions: [ 1024, 800 ], }
 end
 
-section 16.2, 'Task K2: translating the store front' do
+section 15.2, 'Task K2: translating the store front' do
   desc 'Replace translatable text with calls out to translation functions.'
   edit 'app/views/layouts/application.html.erb' do
     clear_highlights
@@ -5098,19 +5098,37 @@ section 16.2, 'Task K2: translating the store front' do
   desc 'Replace translatable text with calls out to translation functions.'
   edit 'app/views/store/index.html.erb' do
     clear_highlights
-    edit '<h1>', :highlight do
+    edit 'Your Pragmatic Catalog', :highlight do
       gsub! 'Your Pragmatic Catalog', "<%= t('.title_html') %>"
     end
-    edit 'button_to' do
-      gsub! "'Add to Cart'", "t('.add_html')"
-      gsub! /\A/, "<!-- START_HIGHLIGHT -->\n"
-      gsub! /\Z/, "\n# END_HIGHLIGHT"
+
+    if $rails_version =~ /^[3-6]/
+      edit 'button_to' do
+        gsub! "'Add to Cart'", "t('.add_html')"
+        gsub! /\A/, "<!-- START_HIGHLIGHT -->\n"
+        gsub! /\Z/, "\n# END_HIGHLIGHT"
+      end
+    end
+  end
+
+  unless $rails_version =~ /^[3-6]/
+    edit 'app/views/store/_product.html.erb' do
+      clear_highlights
+      edit /[ ]*<%= button_to.*?%>/m do
+        gsub! "'Add to Cart'", "t('.add_html')"
+        gsub! /\A/, "<!-- START:button -->\n"
+        gsub! /\Z/, "\n# END:button"
+      end
     end
   end
 
   desc 'Define some translations for the main page.'
-  edit('config/locales/en.yml', 'main') {}
-  edit('config/locales/es.yml', 'main') {} 
+  edit('config/locales/en.yml', 'main') do
+    sub! /^\s+product:\n/, '' if $rails_version =~ /^[3-6]/
+  end
+  edit('config/locales/es.yml', 'main') do
+    sub! /^\s+product:\n/, '' if $rails_version =~ /^[3-6]/
+  end
 
   desc 'See results'
   get '/es', screenshot: { filename: "s_5_more_es.pdf", dimensions: [ 1024, 800 ], }
@@ -5139,10 +5157,11 @@ section 16.2, 'Task K2: translating the store front' do
   publish_code_snapshot :s
 
   desc 'Handle remote calls too'
-  edit 'app/views/store/index.html.erb', 'price_line' do
+  file = ($rails_version =~ /^[3-6]/ ? 'index' : '_product')
+  edit "app/views/store/#{file}.html.erb", 'price_line' do
     clear_all_marks
-    edit /^\s+<div class="price">.*?<\/div>\n/m, :mark => 'price_line'
-    msub /,( )line_items_path/, "\n            "
+    edit /^\s+<div class="[-\w]+">.*?<\/div>\n/m, :mark => 'price_line'
+    msub /,( )line_items_path/, "\n            " if include? ', line_items'
     msub /line_items_path\(.*?()\)/, ", locale: I18n.locale"
     edit 'line_items_path', :highlight
   end
@@ -5161,7 +5180,7 @@ section 16.2, 'Task K2: translating the store front' do
   }
 end
 
-section 16.3, 'Task K3: Translating Checkout' do
+section 15.3, 'Task K3: Translating Checkout' do
   desc 'Edit the new order page'
   edit 'app/views/orders/new.html.erb' do
     clear_highlights
@@ -5202,6 +5221,7 @@ section 16.3, 'Task K3: Translating Checkout' do
     end
   end
 
+  if $rails_version =~ /^6/
   desc 'Install i18n-js'
   edit 'Gemfile', 'i18n-js' do
     self << "# START: i18n-js\n"
@@ -5220,6 +5240,7 @@ section 16.3, 'Task K3: Translating Checkout' do
   end
 
   restart_server
+  end
 
   if $rails_version =~ /^[345]/
     edit 'app/assets/javascripts/application.js' do
@@ -5231,7 +5252,7 @@ section 16.3, 'Task K3: Translating Checkout' do
 // END:i18n-js
 }
     end
-  else
+  elsif $rails_version =~ /^6/
     edit 'app/javascript/packs/application.js' do
       self << "\n\n" + <<-EOF
 // START:i18n-js
@@ -5242,6 +5263,7 @@ EOF
     end
   end
 
+  if $rails_version =~ /^6/
   edit "app/views/layouts/application.html.erb" do
     msub /()<%= javascript_(include|pack)_tag 'application'/, %{
     <!-- START:i18n-js -->
@@ -5256,6 +5278,7 @@ EOF
     <!-- END:i18n-js -->
 
 }
+  end
 
   end
   edit "app/javascript/PayTypeSelector/index.jsx" do
@@ -5347,8 +5370,14 @@ EOF
 
   desc 'Display messages in raw form, and translate error messages'
   edit 'app/views/orders/_form.html.erb' do
-    edit "<%= #{include?('msg') ? 'msg' : 'message'} %>", :highlight do
-      msub /<%=() /, 'raw'
+    if include? 'full_message'
+      edit 'full_message', :highlight do
+        msub /<%=() /, 'raw'
+      end
+    else
+      edit "<%= #{include?('msg') ? 'msg' : 'message'} %>", :highlight do
+        msub /<%=() /, 'raw'
+      end
     end
 
     msub /\A()/, "<!-- START:explanation -->\n"
@@ -5478,7 +5507,7 @@ EOF
   end
 end
 
-section 16.4, 'Task K4: Add a locale switcher.' do
+section 15.4, 'Task K4: Add a locale switcher.' do
   desc 'Add form for setting and showing the site based on the locale.'
   desc 'Use CSS to position the form.'
   edit DEPOT_CSS, 'i18n' do |data|
@@ -5524,7 +5553,7 @@ section 16.4, 'Task K4: Add a locale switcher.' do
 
   edit 'app/views/layouts/application.html.erb', 'i18n' do
     clear_highlights
-    edit /^\s+<header class="main">.*?<\/header>\n/m, :mark => 'i18n'
+    edit /^\s+<header class="[-\w]+">.*?<\/header>\n/m, :mark => 'i18n'
     msub /\n()\s+<%= image_tag/, <<-EOF, :highlight
       <aside>
         <%= form_tag store_index_path, :class => 'locale' do %>

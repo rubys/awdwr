@@ -513,7 +513,7 @@ class DepotTest < Gorp::TestCase
     assert_select '.stdout', /customer@example.com/
   end
 
-  section 16.1, "Task K1: Selecting the Locale" do
+  section 15.1, "Task K1: Selecting the Locale" do
     ticket 16679,
       :title => "Missing partial routes/_route",
       :match => %r{Missing partial routes/_route}
@@ -526,32 +526,41 @@ class DepotTest < Gorp::TestCase
     assert_select '#notice', 'es translation not available'
   end
 
-  section 16.2, "Task K2: Translating the store front" do
+  section 15.2, "Task K2: Translating the store front" do
     ticket 275,
       :list => 'i18n',
       :title => "Can't set locale to something other than the default",
       :match =>  /"es" is not a valid locale/
 
-    assert_select '.price', /20,00(.|&#?\w+;)\$US/u
+    assert_select 'td', /19,95(.|&#?\w+;)\$US/u
     assert_select 'h1', /Su Cat(.|&#?\w+;)logo de Pragmatic/u
-    assert_select 'input[type=submit][value$="dir al Carrito"]'
+    if $rails_version =~ /^[3-6]/
+      assert_select 'input[type=submit][value$="dir al Carrito"]'
+    else
+      assert_select 'button[type=submit]', /dir al Carrito$/
+    end
     #assert_select 'td', /1(.|&#?\w+;)/u
     assert_select 'td', 'Docker for Rails Developers'
   end
 
-  section 16.3, "Task J3: Translating Checkout" do
+  section 15.3, "Task J3: Translating Checkout" do
     ticket 275,
       :list => 'i18n',
       :title => "Can't set locale to something other than the default",
       :match =>  /"es" is not a valid locale/
 
-    assert_select 'input[type=submit][value$=Comprar]'
+    if $rails_version =~ /^[3-6]/
+      assert_select 'input[type=submit][value$=Comprar]'
+    else
+      assert_select 'button[type=submit]', 'Comprar'
+    end
+
     assert_select '#error_explanation',
       /4 errores han impedido que este pedido se guarde/
     assert_select '#notice', 'Gracias por su pedido'
   end
 
-  section 16.4, "Task J4: Add a locale switcher" do
+  section 15.4, "Task J4: Add a locale switcher" do
     ticket 167,
       :list => 'jquery-rails',
       :title =>  "SelectorAssertions moved in Rails 4.2",

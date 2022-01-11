@@ -65,6 +65,7 @@ es:
   store:
     index:
       title_html:  "Su Cat&aacute;logo de Pragmatic"
+    product:
       add_html:    "A&ntilde;adir al Carrito"
 #END:main
 
