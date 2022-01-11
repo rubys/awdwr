@@ -4188,7 +4188,7 @@ section 13.3, 'Playtime' do
   cmd 'git tag iteration-h'
 end
 
-section 15.1, 'Iteration J1: Adding Users' do
+section 14.1, 'Iteration J1: Adding Users' do
   desc 'Scaffold the user model'
   if File.exist? 'public/images'
     generate 'scaffold User name:string hashed_password:string salt:string'
@@ -4203,7 +4203,10 @@ section 15.1, 'Iteration J1: Adding Users' do
       desc 'uncomment out bcrypt'
       edit 'Gemfile', 'bcrypt' do
         clear_all_marks
-        edit /^.*has_secure_password.*\n.*\n/, :mark => 'bcrypt'
+        edit /^.*has_secure_password.*\n.*\n/, mark: 'bcrypt' do
+          sub! ' [', "\n# ["
+        end
+
         edit /# gem ['"]bcrypt.*\n/, :highlight do
           msub /^(#\s)/, ''
         end
@@ -4235,8 +4238,8 @@ section 15.1, 'Iteration J1: Adding Users' do
     if File.exist? 'public/images'
       self.all = read('users/user.rb')
     else
-      msub /class.*\n()/, 
-      "  validates :name, :presence => true, :uniqueness => true\n", :highlight
+      # msub /class.*\n()/, 
+      # "  validates :name, :presence => true, :uniqueness => true\n", :highlight
 
       if $rails_version =~ /^3\./
         msub /class.*\n()/, 
@@ -4251,12 +4254,18 @@ section 15.1, 'Iteration J1: Adding Users' do
   %w(create update).each do |action|
     edit 'app/controllers/users_controller.rb', action do
       dcl action, :mark do
-        edit /.*'.*'.*/, :highlight do
-          gsub!("'",'"').sub!('User ', 'User #{@user.name} ')
+        edit /.*['"].*['"].*/, :highlight do
+          gsub!("'",'"')
+          sub!('User ', 'User #{@user.name} ')
         end
-        msub /redirect_to\(?\s?(@user, ):?notice/, "users_url,\n" + (' ' * 10)
-        sub! ', status: :unprocessable_entity', 
-          ",\n" + (' ' * 10) + 'status: :unprocessable_entity'
+
+        msub /redirect_to\(?\s?(@user, |user_url\(@user\), ):?notice/, 
+          "users_url,\n" + (' ' * 10)
+
+        edit 'render json:' do
+          sub! ', status: :unprocessable_entity', 
+            ",\n" + (' ' * 10) + 'status: :unprocessable_entity'
+        end
       end
     end
   end
@@ -4298,18 +4307,20 @@ section 15.1, 'Iteration J1: Adding Users' do
 
   desc 'Update form used to both create and update users'
   edit "app/views/users/_form.html.erb" do
-    msub /\A()/, <<-EOF.unindent(6)
-      <!-- START_HIGHLIGHT -->
-      <div class="depot_form">
+    if $rails_version =~ /^[3-6]/
+      msub /\A()/, <<-EOF.unindent(8)
+        <!-- START_HIGHLIGHT -->
+        <div class="depot_form">
 
-      <!-- END_HIGHLIGHT -->
-    EOF
+        <!-- END_HIGHLIGHT -->
+      EOF
+    end
 
     edit 'pluralize' do
       msub /%>()/, "\n       "
     end
 
-    msub /^()  <div class="field">/, <<-EOF.unindent(4)
+    msub /^()  <div class="[-\w]+">/, <<-EOF.unindent(4)
       <!-- START_HIGHLIGHT -->
       <h2>Enter User Details</h2>
 
@@ -4319,13 +4330,19 @@ section 15.1, 'Iteration J1: Adding Users' do
     edit 'label :name', :highlight do
       msub /:name()/, ", 'Name:'"
     end
+
     edit 'field :name', :highlight do
-      msub /() %>/, ', size: 40'
+      if include? 'block shadow'
+        gsub! /block shadow .* w-full/, 'payment-field'
+      else
+        msub /() %>/, ', size: 40'
+      end
     end
 
     edit 'label :password ', :highlight do
       msub /:password()/, ", 'Password:'"
     end
+
     edit 'field :password', :highlight do
       msub /() %>/, ', size: 40'
     end
@@ -4333,27 +4350,33 @@ section 15.1, 'Iteration J1: Adding Users' do
     edit 'label :password_', :highlight do
       msub /:password_confirmation()/, ", 'Confirm:'"
     end
-    msub /^(\s*<%= form.password_field :password_confirmation.*%>)/,%{
+
+    msub /^(\s*<%= form.password_field :password_confirmation.*%>)/, %{
     <!-- START_HIGHLIGHT -->
     <%= form.password_field :password_confirmation,
                             id: :user_password_confirmation,
                             size: 40 %>
-    <!-- END_HIGHLIGHT -->
-    }
+    <!-- END_HIGHLIGHT -->}
 
-    msub /\n()\Z/, <<-EOF.unindent(6)
-      <!-- START_HIGHLIGHT -->
+    gsub! 'size: 40', 'class: "payment-field"' unless $rails_version =~ /^[3-6]/
 
-      </div>
-      <!-- END_HIGHLIGHT -->
-    EOF
+    if $rails_version =~ /^[3-6]/
+      msub /\n()\Z/, <<-EOF.unindent(6)
+        <!-- START_HIGHLIGHT -->
+
+        </div>
+        <!-- END_HIGHLIGHT -->
+      EOF
+    else
+      sub! 'text-white iinline-block', 'text-white\n       iinline-block'
+    end
 
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
   get '/users/new', screenshot: {
     filename: "r_1_new_user.pdf",
-    dimensions: [ 1024, 300 ]
+    dimensions: [ 1024, 520 ]
   }
 
   desc 'Demonstrate creating a new user'
@@ -4448,7 +4471,7 @@ section 15.1, 'Iteration J1: Adding Users' do
       end
       edit /two:.*\Z/m do
         edit 'name:', :highlight
-        msub /^  name: (.*)\n/, 'susannah'
+        msub /^  name: (.*)\n/, 'adaobi'
       end
       msub /^# Read about fixtures at() http.{50}/, "\n#", :optional
     end
@@ -4464,7 +4487,7 @@ section 15.1, 'Iteration J1: Adding Users' do
   test
 end
 
-section 15.2, 'Iteration J2: Authenticating Users' do
+section 14.2, 'Iteration J2: Authenticating Users' do
   desc 'Generate empty controllers for sessions and administration'
   generate 'controller Sessions new create destroy'
   generate 'controller Admin index'
@@ -4499,7 +4522,11 @@ section 15.2, 'Iteration J2: Authenticating Users' do
 
   desc 'Create the view using form_for as there is no underlying model'
   edit "app/views/sessions/new.html.erb" do
-    self.all = read('users/login.html.erb')
+    if $rails_version =~ /^[3-6]/
+      self.all = read('users/login.html.erb')
+    else
+      self.all = read('users/login.tw.erb')
+    end
   end
 
   desc 'Create a landing page for the administrator'
@@ -4620,7 +4647,7 @@ section 15.2, 'Iteration J2: Authenticating Users' do
   test
 end
 
-section 15.3, 'Iteration J3: Limiting Access' do
+section 14.3, 'Iteration J3: Limiting Access' do
   desc 'require authorization before every access'
   edit "app/controllers/application_controller.rb", 'auth' do
     clear_highlights
@@ -4736,26 +4763,43 @@ section 15.3, 'Iteration J3: Limiting Access' do
   test
 end
 
-section 15.4, 'Iteration J4: Adding a Sidebar' do
+section 14.4, 'Iteration J4: Adding a Sidebar' do
 
   desc 'Add admin links and a button to Logout'
   edit "app/views/layouts/application.html.erb" do |data|
     data.clear_highlights
-    data.msub /<nav class="side_nav">.*?() *<\/nav>/m, "\n" + <<-EOF.gsub(/^/, '  '), :highlight
-      <% if session[:user_id] %>
-        <nav class="logged_in_nav">
-          <ul>
+    if $rails_version =~ /^[3-6]/
+      data.msub /<nav class=".*?">.*?() *<\/nav>/m, "\n" + <<-EOF, :highlight
+        <% if session[:user_id] %>
+          <nav class="logged_in_nav">
+            <ul>
+              <li><%= link_to 'Orders',   orders_path   %></li>
+              <li><%= link_to 'Products', products_path %></li>
+              <li><%= link_to 'Users',    users_path    %></li>
+              <li><%= button_to 'Logout', logout_path, :method => :delete %></li>
+            </ul>
+          </nav>
+        <% end %>
+      EOF
+    else
+      data.msub /<nav class=".*?">.*?() *<\/nav>/m, "\n" + <<-EOF, :highlight
+        <% if session[:user_id] %>
+          <hr class="my-2">
+
+          <ul class="text-gray-300 leading-8">
             <li><%= link_to 'Orders',   orders_path   %></li>
             <li><%= link_to 'Products', products_path %></li>
             <li><%= link_to 'Users',    users_path    %></li>
-            <li><%= button_to 'Logout', logout_path, :method => :delete   %></li>
+            <li><%= button_to 'Logout', logout_path, method: :delete %></li>
           </ul>
-        </nav>
-      <% end %>
-    EOF
+        <% end %>
+      EOF
+    end
+
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
   end
 
+  if $rails_version =~ /^[3-6]/
   desc "Add some styles"
   edit "app/assets/stylesheets/application.scss" do
     msub /\s*END:side.*$()/, %{
@@ -4784,6 +4828,7 @@ nav.logged_in_nav {
 // END: logged_in_nav
 }
   end
+  end
 
   desc 'Log out'
   post '/admin', 'submit' => 'Logout'
@@ -4809,6 +4854,15 @@ nav.logged_in_nav {
     workflow: [
       "/login?name=dave&password=secret",
       "GET:/users"
+    ]
+  }
+
+  get '/users/1', screenshot: { 
+    filename: "r_4_user_dave.pdf",
+    dimensions: [ 1024, 300 ],
+    workflow: [
+      "/login?name=dave&password=secret",
+      "GET:/users/1"
     ]
   }
 
@@ -4839,7 +4893,7 @@ nav.logged_in_nav {
     dcl 'destroy', mark: 'delete_user' do
       if self =~ /, notice/
         msub /redirect_to users_url,( )notice:/, "\n" + (' ' * 8)
-        msub /notice: ['"](.*)['"]/, '"User #{@user.name} deleted"'
+        msub /notice: (['"].*['"])/, '"User #{@user.name} deleted"'
       else
         msub /@user.destroy()/, "\n    " + 
           'flash[:notice] = "User #{@user.name} deleted"'
@@ -4856,7 +4910,7 @@ nav.logged_in_nav {
   end
 end
 
-section 15.5, 'Playtime' do
+section 14.5, 'Playtime' do
   desc 'Verify that accessing product information requires login'
   edit 'test/*/products_controller_test.rb', 'logout' do
     clear_all_marks
@@ -4901,7 +4955,7 @@ section 15.5, 'Playtime' do
     dcl 'authorize', :mark => 'auth' do
       gsub! /^      /, '        '
       msub /def authorize\n()/, <<-EOF.unindent(2), :highlight
-        if request.format == Mime[:html]
+        if [Mime[:html], Mime[:turbo_stream]].include? request.format
       EOF
       msub /\n()    end/, <<-EOF.unindent(2), :highlight
         else

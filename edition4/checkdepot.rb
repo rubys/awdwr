@@ -427,7 +427,7 @@ class DepotTest < Gorp::TestCase
     assert_test_summary :tests => 41, :assertions => 89
   end
 
-  section 15.1, "Iteration J1: Adding Users" do
+  section 14.1, "Iteration J1: Adding Users" do
     ticket 23989,
       :title =>  "Delivering mail causes tests to fail",
       :match => /SQLite3::BusyException: database is locked/
@@ -438,9 +438,16 @@ class DepotTest < Gorp::TestCase
     else
       assert_select 'h1', 'Users'
     end
-    assert_select 'td', 'dave'
-    unless $rails_version =~ /^3/
+
+    if $rails_version =~ /^[3-6]/
+      assert_select 'td', 'dave'
       assert_select 'aside', 'User dave was successfully created.'
+    else
+      assert_select 'p.my-5', /Name:\s+dave/
+      assert_select 'p#notice', 'User dave was successfully created.'
+    end
+
+    unless $rails_version =~ /^3/
       if $rails_version =~ /^4/
         assert_test_summary :tests => 51, :assertions => 164
       else
@@ -449,7 +456,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 15.2, "Iteration J2: Authenticating Users" do
+  section 14.2, "Iteration J2: Authenticating Users" do
     ticket 167,
       :list => 'jquery-rails',
       :title =>  "SelectorAssertions moved in Rails 4.2",
@@ -465,7 +472,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 15.3, "Iteration J3: Limiting Access" do
+  section 14.3, "Iteration J3: Limiting Access" do
     ticket 167,
       :list => 'jquery-rails',
       :title =>  "SelectorAssertions moved in Rails 4.2",
@@ -480,7 +487,7 @@ class DepotTest < Gorp::TestCase
     end
   end
 
-  section 15.4, "Iteration J4: Adding a Sidebar" do
+  section 14.4, "Iteration J4: Adding a Sidebar" do
     assert_select 'h2', 'Please Log In'
     assert_select 'input[type=submit][value=Login]'
     assert_select 'h1', 'Welcome'
@@ -488,7 +495,7 @@ class DepotTest < Gorp::TestCase
     assert_select 'h1', 'Products'
   end
 
-  section 15.5, "Playtime" do
+  section 14.5, "Playtime" do
     ticket 167,
       :list => 'jquery-rails',
       :title =>  "SelectorAssertions moved in Rails 4.2",
