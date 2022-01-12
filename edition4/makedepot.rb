@@ -5115,9 +5115,13 @@ section 15.2, 'Task K2: translating the store front' do
     edit 'app/views/store/_product.html.erb' do
       clear_highlights
       edit /[ ]*<%= button_to.*?%>/m do
-        gsub! "'Add to Cart'", "t('.add_html')"
+        edit "Add to Cart" do
+          gsub! /\A/, "<!-- START_HIGHLIGHT -->\n"
+          gsub! /\Z/, "\n# END_HIGHLIGHT"
+          gsub! "'Add to Cart'", "t('.add_html')"
+        end
         gsub! /\A/, "<!-- START:button -->\n"
-        gsub! /\Z/, "\n# END:button"
+        gsub! /\Z/, "\n<!-- END:button -->"
       end
     end
   end
@@ -5141,7 +5145,7 @@ section 15.2, 'Task K2: translating the store front' do
     sub! /(t\('\..*'\).*)/, "\\1\n<!-- END_HIGHLIGHT -->"
 
     gsub! "'Checkout'", "t('.checkout')"
-    msub /new_order_path(,)/, "(locale: I18n.locale),\n   "
+    msub /new_order_path(,)/, "(locale: I18n.locale),\n     "
     sub! /(I18n.locale.*)/, "\\1\n# END_HIGHLIGHT"
 
     gsub! "'Empty Cart'", "t('.empty')"
@@ -5191,8 +5195,10 @@ section 15.3, 'Task K3: Translating Checkout' do
   desc 'Edit the form used by the new order page'
   edit 'app/views/orders/_form.html.erb' do
     clear_highlights
-    edit "'Place Order'", :highlight do
+    edit "'Place Order'" do
       gsub! "'Place Order'", "t('.submit')"
+        msub /()$/, "\n<!-- END_HIGHLIGHT -->"
+        msub /^()/, "<!-- START_HIGHLIGHT -->\n"
     end
 
     if $rails_version =~ /^[34]|^5\.0/
