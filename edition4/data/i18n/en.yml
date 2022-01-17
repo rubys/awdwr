@@ -68,9 +68,9 @@ en:
       pay_prompt_html: "Select a payment method"
       submit:       "Place Order"
       pay_types:
-        check:           "Check"
-        credit_card:     "Credit Card"
-        purchase_order:  "Purchase Order"
+        "Check":           "Check"
+        "Credit card":     "Credit Card"
+        "Purchase order":  "Purchase Order"
       check_pay_type:
         routing_number: "Routing #"
         account_number: "Account #"

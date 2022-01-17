@@ -9,7 +9,7 @@
       <%= form.select :pay_type, Order.pay_types.keys,
                       { prompt: 'Select a payment method' },
                       'data-action' => 'payment#showAdditionalFields',
-                      class: "payment-field" %>
+                      class: "input-field" %>
     </div>
   </fieldset>
 
@@ -19,7 +19,7 @@
       <%= form.select :pay_type, Order.pay_types.keys,
                       { selected: 'Check' },
                       'data-action' => 'payment#showAdditionalFields',
-                      class: "payment-field" %>
+                      class: "input-field" %>
     </div>
 
     <%= render partial: 'check', locals: {form: form} %>
@@ -31,7 +31,7 @@
       <%= form.select :pay_type, Order.pay_types.keys,
                       { selected: 'Credit card' },
                       'data-action' => 'payment#showAdditionalFields',
-                      class: "payment-field" %>
+                      class: "input-field" %>
     </div>
 
     <%= render partial: 'cc', locals: {form: form} %>
@@ -43,7 +43,7 @@
       <%= form.select :pay_type, Order.pay_types.keys,
                       { selected: 'Purchase order' },
                       'data-action' => 'payment#showAdditionalFields',
-                      class: "payment-field" %>
+                      class: "input-field" %>
     </div>
 
     <%= render partial: 'po', locals: {form: form} %>

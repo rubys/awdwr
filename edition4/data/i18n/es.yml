@@ -81,9 +81,9 @@ es:
       pay_prompt_html: "Seleccione un método de pago"
       submit:       "Realizar Pedido"
       pay_types:
-        check:           "Cheque"
-        credit_card:     "Tarjeta de Crédito"
-        purchase_order:  "Orden de Compra"
+        "Check":           "Cheque"
+        "Credit card":     "Tarjeta de Crédito"
+        "Purchase order":  "Orden de Compra"
       check_pay_type:
         routing_number: "# de Enrutamiento"
         account_number: "# de Cuenta"

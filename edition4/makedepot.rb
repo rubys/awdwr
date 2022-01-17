@@ -5197,15 +5197,20 @@ section 15.3, 'Task K3: Translating Checkout' do
     clear_highlights
     edit "'Place Order'" do
       gsub! "'Place Order'", "t('.submit')"
-        msub /()$/, "\n<!-- END_HIGHLIGHT -->"
+        msub /,(\s*)class/, "\n      "
+        msub /()$/, "\n#END_HIGHLIGHT"
         msub /^()/, "<!-- START_HIGHLIGHT -->\n"
     end
 
-    if $rails_version =~ /^[34]|^5\.0/
+    if $rails_version !~ /^[6]|^5\.1/
       edit "'Select a payment method'" do
         gsub! "'Select a payment method'", "t('.pay_prompt_html')"
-        msub /()$/, "\n<!-- END_HIGHLIGHT -->"
+        msub /()$/, "\n# END_HIGHLIGHT"
         msub /^()/, "#START_HIGHLIGHT\n"
+      end
+      msub /,( )Order.pay_types.keys/, "\n        "
+      edit "Order.pay_types.keys", :highlight do
+        gsub! 'keys', 'keys.map {|key| [t(".pay_types.#{key}"), key] }'
       end
     end
 
@@ -5286,7 +5291,6 @@ EOF
 }
   end
 
-  end
   edit "app/javascript/PayTypeSelector/index.jsx" do
     clear_highlights
     gsub!  '          <label htmlFor="order_pay_type">Pay type</label>', <<EOF
@@ -5346,11 +5350,47 @@ EOF
           </label>
 EOF
   end
+  else
+    edit 'app/views/orders/_cc.html.erb' do
+      edit ':credit_card_number', :highlight do
+        sub! ':credit_card_number', "t('.cc_number')"
+      end
+      edit ':expiration_date', :highlight do
+        sub! ':expiration_date', "t('.expiration_date')"
+      end
+    end
+
+    edit 'app/views/orders/_check.html.erb' do
+      edit ':routing_number', :highlight do
+        sub! ':routing_number', "t('.routing_number')"
+      end
+      edit ':account_number', :highlight do
+        sub! ':account_number', "t('.account_number')"
+      end
+    end
+
+    edit 'app/views/orders/_po.html.erb' do
+      edit ':po_number', :highlight do
+        sub! ':po_number', "t('.po_number')"
+      end
+    end
+  end
 
   desc 'Define some translations for the new order.'
-  edit('config/locales/en.yml', 'checkout') {}
-  edit('config/locales/es.yml', 'checkout') {}
-
+  %w(en es).each do |lang|
+    edit("config/locales/#{lang}.yml", 'checkout') do
+      if $rails_version =~ /^(6|5\.1)/
+        gsub(/".*":/) {|text| text[1..-3].downcase.gsub(' ', '_') + ':'}
+      else
+        edit /\n\s*check_pay_type:.*\n\n/m do
+          gsub! /^  /, ''
+        end
+        sub! 'check_pay_type', 'check'
+        sub! 'credit_card_pay_type', 'cc'
+        sub! 'purchase_order_pay_type', 'po'
+      end
+    end
+  end
 
   publish_code_snapshot :t
 
