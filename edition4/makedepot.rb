@@ -2671,7 +2671,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
         sub! ' bg-blue-600 text-white', "\n      bg-green-200 text-black"
       end
 
-      gsub! "block shadow rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full", "payment-field"
+      gsub! "block shadow rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full", "input-field"
 
       edit 'error_explanation' do
         msub /( )font-medium/, "\n      "
@@ -2861,7 +2861,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
 
       msub %r{(@layer components.*\n\}\n?)}m, <<-EOF.unindent(8)
         @layer components {
-          .payment-field { @apply
+          .input-field { @apply
              block shadow rounded-md border border-green-400 outline-none
              px-3 py-2 mt-2 w-full
           }
@@ -4333,7 +4333,7 @@ section 14.1, 'Iteration J1: Adding Users' do
 
     edit 'field :name', :highlight do
       if include? 'block shadow'
-        gsub! /block shadow .* w-full/, 'payment-field'
+        gsub! /block shadow .* w-full/, 'input-field'
       else
         msub /() %>/, ', size: 40'
       end
@@ -4358,7 +4358,7 @@ section 14.1, 'Iteration J1: Adding Users' do
                             size: 40 %>
     <!-- END_HIGHLIGHT -->}
 
-    gsub! 'size: 40', 'class: "payment-field"' unless $rails_version =~ /^[3-6]/
+    gsub! 'size: 40', 'class: "input-field"' unless $rails_version =~ /^[3-6]/
 
     if $rails_version =~ /^[3-6]/
       msub /\n()\Z/, <<-EOF.unindent(6)
@@ -5753,8 +5753,10 @@ end
   desc "install action text"
   cmd "bin/rails action_text:install"
 
-  desc "Run webpack"
-  cmd "bin/webpack"
+  if $rails_version =~ /^[5-6]/
+    desc "Run webpack"
+    cmd "bin/webpack"
+  end
 
   desc "migrate action text tables"
   db :migrate

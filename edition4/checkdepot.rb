@@ -608,7 +608,7 @@ class DepotTest < Gorp::TestCase
     if $rails_version =~ /^[345]/
       assert_select '.stdout', /Current version: \d{8}000009/
     else
-      assert_select '.stdout', /Current version: \d{8}000013/
+      assert_select '.stdout', /Current version: \d{8}00001[34]/
     end
   end
 
@@ -617,7 +617,11 @@ class DepotTest < Gorp::TestCase
 #     :title =>  "Live streaming doesn't work with basic authentication or builder",
 #     :match => /<pre class="stdin">curl.*<\/pre>\s+<pre class="stdin">/
 
-    assert_select '.stdout', /(<|&lt;)price currency="USD"(>|&gt;)38.0(<|&lt;)\/price(>|&gt;)/
+    if $rails_version =~ /^[3-5]/
+      assert_select '.stdout', /(<|&lt;)price currency="USD"(>|&gt;)38.0(<|&lt;)\/price(>|&gt;)/
+    else
+      assert_select '.stdout', /(<|&lt;)price currency="USD"(>|&gt;)19.95(<|&lt;)\/price(>|&gt;)/
+    end
     assert_select '.stdout', /"1 minute"/
     assert_select '.stdout', /"half a minute"/
     assert_select '.stdout', /"CAN\$235"/
