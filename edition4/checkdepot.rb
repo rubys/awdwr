@@ -581,6 +581,15 @@ class DepotTest < Gorp::TestCase
     end
   end
 
+  section 16.1, "Task L1: Receiving Support Emails with Action Mailbox" do
+    assert_select "a[href='http://localhost:#{$PORT}/rails/conductor/action_mailbox/inbound_emails/new']"
+    assert_select "input[value='Deliver inbound email']"
+  end
+
+  section 16.2, "Task L2: Storing Support Requests from Our Mailbox" do
+    assert_test_summary :tests => 2, :assertions => 8
+  end
+
   if $rails_version =~ /^(3|4|5)/
   section 17, "Deployment" do
     ticket 8837,

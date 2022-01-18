@@ -5619,7 +5619,7 @@ section 15.4, 'Task K4: Add a locale switcher.' do
   test
 end
 
-section 17.1, "Receiving Support Emails with Action Mailbox" do
+section 16.1, "Receiving Support Emails with Action Mailbox" do
   desc 'install action mailbox'
   cmd 'bin/rails action_mailbox:install'
 
@@ -5653,10 +5653,26 @@ section 17.1, "Receiving Support Emails with Action Mailbox" do
     # END_HIGHLIGHT}
   end
 
+  get '/rails/conductor/action_mailbox/inbound_emails', screenshot: {
+    filename: "depot_ua_conductor1.pdf",
+    dimensions: [ 500, 200 ]
+  }
+
+  get '/rails/conductor/action_mailbox/inbound_emails/new', screenshot: {
+    filename: "xxx_inbound_email_conductor.pdf",
+    dimensions: [ 500, 750 ],
+    form_data: {
+      '#mail_from' => 'test@somewhere.com',
+      '#mail_to' => 'support@example.com',
+      '#mail_subject' => 'I need help!',
+      '#mail_body' => "I can't find my order.  It's #12345"
+    }
+  }
+
   publish_code_snapshot :ta
 end
 
-section 17.2, "Storing Support Requests from Our Mailbox" do
+section 16.2, "Storing Support Requests from Our Mailbox" do
 
   desc "Generate the SupportRequest model"
   cmd "bin/rails g model support_request"
@@ -5704,6 +5720,12 @@ section 17.2, "Storing Support Requests from Our Mailbox" do
 
   restart_server
 
+  post '/rails/conductor/action_mailbox/inbound_emails/new',
+    'mail_from' => 'test@somewhere.com',
+    'mail_to' => 'support@example.com',
+    'mail_subject' => 'I need help!',
+    'mail_body' => "I can't find my order.  It's #12345"
+
   # Note - this file does not always get generated
   #        since the bundle running `depot` requires rspec
   #        and this bleeds into Rails creating rspec files
@@ -5739,7 +5761,7 @@ other_customer:
   cmd "bin/rails test test/mailboxes/support_mailbox_test.rb"
 end
 
-section 17.3, "Responding with Rich Text" do
+section 16.3, "Responding with Rich Text" do
 
   edit "config/routes.rb" do
     clear_highlights
