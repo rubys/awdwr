@@ -5175,12 +5175,19 @@ section 15.2, 'Task K2: translating the store front' do
 
   desc 'Add to Cart'
   post '/es', 'product_id' => 2
+  edit 'config/locales/es.yml' do
+    sub! 'currency:', 'xcurrency:'
+  end
   get '/es', screenshot: {
     filename: "t_1_cart_translated.pdf",
-    dimensions: [ 1024, 800 ],
-    workflow: [
-      "line_items?product_id=2",
-    ]
+    dimensions: [ 1024, 600 ],
+  }
+  edit 'config/locales/es.yml' do
+    sub! 'xcurrency:', 'currency:'
+  end
+  get '/es', screenshot: {
+    filename: "t_2_cart_translated.pdf",
+    dimensions: [ 1024, 600 ],
   }
 end
 
@@ -5402,10 +5409,7 @@ EOF
   get '/es', screenshot: {
     filename: "u_1_checkout_translated.pdf",
     dimensions: [ 1024, 300 ],
-    workflow: [
-      "line_items?product_id=2",
-      "/es/orders/new",
-    ]
+    form_data: {}, submit_form: [1, 2]
   }
 
   desc 'Show mixed validation errors'
@@ -5440,17 +5444,27 @@ EOF
     gsub! /:(\w+)=>/, '\1: \2' unless RUBY_VERSION =~ /^1\.8/ # add a space
   end
 
+  if ENV['GORP_SCREENSHOTS']
+    edit "config/locales/es.yml" do
+      msub /^  (activerecord:)/,"xactiverecord:"
+    end
+    get '/es', screenshot: {
+      filename: "u_2_checkout_errors.pdf",
+      dimensions: [ 1024, 300 ],
+      form_data: {}, submit_form: [2, 3]
+    }
+    edit "config/locales/es.yml" do
+      msub /^  (xactiverecord:)/,"activerecord:"
+    end
+  end
+
   cmd 'bin/webpack' if $rails_version =~ /^5\.1/
   restart_server
 
   get '/es', screenshot: {
     filename: "u_3_checkout_errors_better.pdf",
     dimensions: [ 1024, 300 ],
-    workflow: [
-      "line_items?product_id=2",
-      "/es/orders/new",
-      "/orders",
-    ]
+    form_data: {}, submit_form: [2, 3]
   }
 
   desc 'Translate the model names to human names.'
@@ -5478,11 +5492,7 @@ EOF
   get '/es', screenshot: {
     filename: "u_4_checkout_errors_fixed.pdf",
     dimensions: [ 1024, 300 ],
-    workflow: [
-      "line_items?product_id=3",
-      "es/orders/new",
-      "/orders",
-    ]
+    form_data: {}, submit_form: [2, 3]
   }
   desc 'Show validation errors'
   post '/es/orders/new', 'order[name]' => '', 'submit' => 'Realizar Pedido'
@@ -5517,40 +5527,16 @@ EOF
   edit('config/locales/es.yml', 'flash') {} 
 
   desc 'Place the order'
+
   post '/es/orders/new',
     'order[name]' => 'Joe User',
     'order[address]' => '123 Main St., Anytown USA',
     'order[email]' => 'juser@hotmail.com',
-    'order[pay_type]' => 'Check'
+    'order[pay_type]' => 'Check',
+    screenshot: { filename: "u_5_gracias.pdf", dimensions: [ 1024, 300 ], submit_form: 3 }
 
   cmd 'bin/webpack' if $rails_version =~ /^5\.1/
   restart_server
-
-  get '/es', screenshot: {
-    filename: "u_5_gracias.pdf",
-    dimensions: [ 1024, 300 ],
-    workflow: [
-      "line_items?product_id=2",
-      "orders/new",
-      "/orders?order[name]=Pat&order[address]=123+Main+St&order[email]=pat@example.com&order[pay_type]=Check",
-    ]
-  }
-
-  edit "config/locales/es.yml" do
-    msub /^  (activerecord:)/,"xactiverecord:"
-  end
-  get '/es', screenshot: {
-    filename: "u_2_checkout_errors.pdf",
-    dimensions: [ 1024, 300 ],
-    workflow: [
-      "line_items?product_id=2",
-      "orders/new",
-      "/orders",
-    ]
-  }
-  edit "config/locales/es.yml" do
-    msub /^  (xactiverecord:)/,"activerecord:"
-  end
 end
 
 section 15.4, 'Task K4: Add a locale switcher.' do
@@ -5590,11 +5576,17 @@ section 15.4, 'Task K4: Add a locale switcher.' do
        data.all = %{document.addEventListener 'turbolinks:load', ->
   document.getElementById('submit_locale_change').style.display='none'}
      end
-   else
+   elsif $rails_version =~ /^6/
      edit "app/javascript/packs/locale_switcher.js" do |data|
        data.all = %{document.addEventListener('turbolinks:load', () =>
   document.getElementById('submit_locale_change').style.display='none')}
      end
+  else
+    generate 'stimulus locale'
+
+    edit 'app/javascript/controllers/locale_controller.js' do
+      self.all = read('i18n/locale_controller.js')
+    end
   end
 
   edit 'app/views/layouts/application.html.erb', 'i18n' do
@@ -5611,6 +5603,11 @@ section 15.4, 'Task K4: Add a locale switcher.' do
       </aside>
     EOF
     gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+    
+    unless $rails_version =~ /^[3-6]/
+      sub! '<aside>', '<aside data-controller="locale">'
+      sub! 'id: "submit_locale_change"', "data: {'locale-target' => 'submit'}"
+    end
   end
 
   desc "Try out the form"
