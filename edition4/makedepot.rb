@@ -5849,7 +5849,8 @@ end
 }
   end
 
-  desc "Add update method to controller" do
+  desc "Add update method to controller"
+  edit "app/controllers/support_requests_controller.rb" do
     clear_highlights
     self.all = %{# START:update
 class SupportRequestsController < ApplicationController
@@ -5911,6 +5912,8 @@ end
 <%= @support_request.body %>
 }
   end
+
+  publish_code_snapshot :tc
 end
 
 if $rails_version =~ /^[345]/
