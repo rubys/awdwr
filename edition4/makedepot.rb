@@ -2452,6 +2452,9 @@ else
             @product.broadcast_replace_later_to 'products',
               partial: 'store/product'
           EOF
+
+          gsub! '@product.errors, status:',
+            "@product.errors,\n          status:"
         end
       end
     end
@@ -2968,7 +2971,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       msub /(["']Order was successfully created.["'])/,
         "\n          'Thank you for your order.'"
       msub /,( ):?location/, "\n          "
-      msub /,( ):?status:?\s=?>?\s?:un/, "\n          "
+      msub /json.*,( ):?status:?\s=?>?\s?:un/, "\n          "
     end
   end
 
@@ -5811,6 +5814,7 @@ end
 
   desc "install action text"
   cmd "bin/rails action_text:install"
+  cmd "bundle install"
 
   if $rails_version =~ /^[5-6]/
     desc "Run webpack"
