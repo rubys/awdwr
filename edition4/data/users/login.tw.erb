@@ -1,0 +1,28 @@
+<div class="mx-auto md:w-2/3 w-full">
+  <% if notice.present? %>
+    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium
+              rounded-lg inline-block" id="notice">
+      <%= notice %>
+    </p>
+  <% end %>
+
+  <%= form_tag do %>
+    <h2 class="font-bold text-3xl">Please Log In</h2>
+
+    <div class="my-5">
+      <%= label_tag :name, 'Name:' %>
+      <%= text_field_tag :name, params[:name], class: "payment-field" %>
+    </div>
+
+    <div class="my-5">
+      <%= label_tag :password, 'Password:' %>
+      <%= password_field_tag :password, params[:password],
+        class: "payment-field" %>
+    </div>
+
+    <div class="actions">
+      <%= submit_tag "Login",  class: "rounded-lg py-3 px-5
+        bg-green-600 text-black inline-block font-medium cursor-pointer" %>
+    </div>
+  <% end %>
+</div>

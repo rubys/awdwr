@@ -1226,11 +1226,12 @@ section 9.3, 'Iteration D3: Adding a button' do
     edit /class.*?\n\s*(#.*?)\n/m, :mark => 'current_cart' do
       msub /class.*?\n()/, <<-EOF.unindent(6), :highlight
         include CurrentCart
-        before_action :set_cart, :only => [:create]
+        before_action :set_cart, :only => :create
       EOF
       sub! /\s+include CurrentCart/, '' if $rails_version =~ /^3\./
       gsub! '_action', '_filter' if $rails_version =~ /^3\./
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+      sub!(/(only:) :(\w+)/) {"#$1 %i[ #{$2} ]"} unless RUBY_VERSION =~ /^1/
     end
     edit /^end/, :mark => 'current_cart' do
       msub /^()end/, "  #...\n"
@@ -2574,6 +2575,8 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       sub! /\s+include CurrentCart/, '' if $rails_version =~ /^3\./
       gsub! '_action', '_filter' if $rails_version =~ /^3\./
       gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+      sub!(/(only:) \[(.*?)\]/) {"#$1 %i[ #{$2 .gsub(/[:,]/, '')} ]"} unless RUBY_VERSION =~ /^1/ 
+      sub!(/(only:) :(\w+)/) {"#$1 %i[ #{$2} ]"} unless RUBY_VERSION =~ /^1/
     end
     edit /^end/, :mark => 'current_cart' do
       msub /^()end/, "  #...\n"
@@ -2594,7 +2597,7 @@ section 12.1, 'Iteration G1: Capturing an Order' do
       empty = getnew.dup
       empty.edit 'assert_response' do |assert|
         assert.msub /assert_(response :success)/, 'redirected_to store_index_path'
-        assert << "\n    assert_equal flash[:notice], 'Your cart is empty'"
+        assert << "\n    assert_equal 'Your cart is empty', flash[:notice]"
       end
       empty.sub! 'should get new', 'requires item in cart'
       empty.dcl 'requires item in cart', :highlight
@@ -4379,7 +4382,7 @@ section 14.1, 'Iteration J1: Adding Users' do
 
   get '/users/new', screenshot: {
     filename: "r_1_new_user.pdf",
-    dimensions: [ 1024, 520 ]
+    dimensions: [ 1024, 530 ]
   }
 
   desc 'Demonstrate creating a new user'
@@ -4500,7 +4503,7 @@ section 14.2, 'Iteration J2: Authenticating Users' do
     dcl 'create', :mark => 'login' do
       msub /^()\s*end/, <<-EOF.unindent(4), :highlight
         user = User.find_by_name(params[:name])
-        if user.try(:authenticate, params[:password])
+        if user&.authenticate(params[:password])
           session[:user_id] = user.id
           redirect_to admin_url
         else
@@ -4709,6 +4712,8 @@ section 14.3, 'Iteration J3: Limiting Access' do
           EOF
           gsub! '_action', '_filter' if $rails_version =~ /^3\./
           gsub! /:(\w+) (\s*)=>/, '\1:\2' unless RUBY_VERSION =~ /^1\.8/
+          sub!(/(only:) \[(.*?)\]/) {"#$1 %i[ #{$2 .gsub(/[:,]/, '')} ]"} unless RUBY_VERSION =~ /^1/ 
+          sub!(/(only:) :(\w+)/) {"#$1 %i[ #{$2} ]"} unless RUBY_VERSION =~ /^1/
         end
       end
     end
@@ -5770,9 +5775,10 @@ section 16.3, "Responding with Rich Text" do
     clear_highlights
     msub /()  resources :users/,%{
   # START_HIGLIGHT
-  resources :support_requests, only: [ :index, :update ]
+  resources :support_requests, only: [:index, :update]
   # END_HIGLIGHT
 }
+    sub!(/(only:) \[(.*?)\]/) {"#$1 %i[ #{$2 .gsub(/[:,]/, '')} ]"} unless RUBY_VERSION =~ /^1/ 
   end
 
   desc "Create support request controller"
@@ -6055,6 +6061,56 @@ section 17, 'Deployment' do
   cmd 'git status'
 end
   end
+else
+section 17, 'Deployment' do
+  edit 'docker-compose.yml' do
+    self.all = read('docker/docker-compose.yml')
+  end
+
+  edit 'Dockerfile' do
+    self.all = read('docker/Dockerfile')
+  end
+
+  edit 'config/nginx.conf' do
+    self.all = read('docker/depot.conf')
+  end
+
+  edit 'config/database.yml' do
+    msub /^production:\n(.*)/m, <<-EOF.unindent(4), :highlight
+      database: depot
+      adapter: postgresql
+      encoding: unicode
+      host: db
+      username: postgres
+      password: password
+      pool: 5
+    EOF
+  end
+
+  edit 'db/seeds.rb' do
+    msub /()\Z/, "\n" + <<-EOF.unindent(6), mark: 'user'
+      User.create! name: 'dave',
+	password: Rails.application.credentials.dave_password
+    EOF
+  end
+
+  edit 'Gemfile', 'ruby' do
+    edit 'ruby', :highlight
+    edit /^ruby.*\n/, mark: 'ruby' do
+      msub /^()ruby.*/, "# "
+    end
+  end
+
+  cmd "rm .ruby-version"
+  cmd 'bundle add pg --group production'
+  cmd 'cp .gitignore .dockerignore'
+
+  cmd 'EDITOR="echo dave_password: secret >> " rails credentials:edit'
+
+  # docker compose build
+  # docker compose up -d
+  # docker compose exec web bin/rails db:create db:migrate db:seed 
+end
 end
 
 section 18, 'Retrospective' do
@@ -6064,6 +6120,7 @@ section 18, 'Retrospective' do
   end
   rake 'doc:app'
   rake 'stats'
+  publish_code_snapshot :td
 end
 
 section 19, 'Finding Your Way Around' do
