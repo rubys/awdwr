@@ -3,7 +3,7 @@ Introduction
 
 Agile Web Development with Rails (awdwr) is a test suite for the scenario
 found in the
-[book by the same name](https://pragprog.com/titles/rails4/agile-web-development-with-rails-4th-edition) published by Pragmatic Programmers.  It was originally developed out of self defence to keep up with the rapid pace of change in Rails itself, and has also proven valuable as a [system test](https://github.com/rails/rails/blob/master/RELEASING_RAILS.md#is-sam-ruby-happy--if-not-make-him-happy) for rails itself.
+[book by the same name](https://pragprog.com/titles/rails6) published by Pragmatic Programmers.  It was originally developed out of self defence to keep up with the rapid pace of change in Rails itself, and has also proven valuable as a [system test](https://github.com/rails/rails/blob/master/RELEASING_RAILS.md#is-sam-ruby-happy--if-not-make-him-happy) for rails itself.
 
 This code has been developed over a long period of time, and still has
 accommodations for things like:
@@ -20,7 +20,7 @@ either `rbenv` or `rvm`.  The dashboard can be run as CGI under Apache httpd,
 using Passenger on nginx, or simply with WebBrick.
 
 Instructions are provided separately for usage under [vagrant](vagrant#readme)
-and [cloud9](cloud9.md).  Or install 
+and [cloud9](cloud9.md).  Or install
 [Rails Dev Box](https://github.com/rails/rails-dev-box#readme), ssh into the vagrant machine and run the following command:
 
   eval "$(curl https://raw.githubusercontent.com/rubys/awdwr/master/rdb-setup)"
@@ -33,7 +33,7 @@ Installation
 
 Installation of all necessary dependencies from a fresh install of Ubuntu or
 Mac OS/X:
-  
+
     ruby setup.rb # see comments if dependencies aren't met
 
 Execution instructions:
